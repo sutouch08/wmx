@@ -1,0 +1,106 @@
+<?php
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class PS_Controller extends CI_Controller
+{
+  public $pm;
+  public $home;
+  public $error;
+  public $close_system;
+	public $_user;
+	public $_SuperAdmin = FALSE;
+
+  public function __construct()
+  {
+    parent::__construct();
+
+    //--- check is user has logged in ?
+    $uid = get_cookie('uid');
+
+    if($uid === NULL OR ! $this->user_model->verify_uid($uid))
+    {
+      redirect(base_url().'users/authentication');
+      exit();
+    }
+    else
+    {
+      $this->_user = $this->user_model->get_user_by_uid($uid);
+      $this->_SuperAdmin = $this->_user->id_profile == -987654321 ? TRUE : FALSE;
+
+      // redirect to maintenance page when system close
+      if(is_true(getConfig('CLOSE_SYSTEM')) &&  ! $this->_SuperAdmin)
+      {
+        redirect(base_url().'setting/maintenance');
+        exit();
+      }
+
+      //--- redirect user to change password when password expired
+      if($this->is_expire_password($this->_user->last_pass_change))
+      {
+        redirect(base_url().'change_password');
+        exit();
+      }
+
+      //--- get permission for user
+      $this->pm = get_permission($this->menu_code, $this->_user->uid, $this->_user->id_profile);
+    }
+  }
+
+
+  public function _response($sc = TRUE)
+  {
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
+  public function _json_response($sc = TRUE, $ds = NULL)
+  {
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function deny_page()
+  {
+    return $this->load->view('deny_page');
+  }
+
+
+  public function error_page($err = NULL)
+  {
+		$error = array('error_message' => $err);
+    return $this->load->view('page_error', $error);
+  }
+
+
+	public function page_error($err = NULL)
+  {
+		$error = array('error_message' => $err);
+    return $this->load->view('page_error', $error);
+  }
+
+
+	public function is_expire_password($last_pass_change)
+	{
+		$today = date('Y-m-d');
+		$last_change = empty($last_pass_change) ? date('2021-01-01') : $last_pass_change;
+
+		$expire_days = intval(getConfig('USER_PASSWORD_AGE'));
+
+		$expire_date = date('Y-m-d', strtotime("+{$expire_days} days", strtotime($last_change)));
+
+		if($today > $expire_date)
+		{
+			return true;
+		}
+
+		return FALSE;
+	}
+}
+
+?>
