@@ -1,3 +1,19 @@
+window.addEventListener('load', () => {
+  let uuid = get_uuid();
+
+  if(uuid == "" || uuid == null || uuid == undefined) {
+    uid = generateUID();
+
+		localStorage.setItem('wms_uuid', uid);
+  }
+});
+
+
+function get_uuid() {
+	return localStorage.getItem('wms_uuid');
+}
+
+
 function showError(response) {
   load_out();
 
@@ -91,6 +107,19 @@ function isDate(txtDate) {
 }
 
 
+function getCurrentDate() {
+  let date = new Date();
+  let dd = date.getDate();
+  let mm = date.getMonth()+1;
+  let yy = date.getFullYear();
+
+  dd = dd < 10 ? "0"+dd : dd;
+  mm = mm < 10 ? "0"+mm : mm;
+
+  return `${dd}-${mm}-${yy}`;
+}
+
+
 function removeCommas(str) {
   while (str.search(",") >= 0) {
     str = (str + "").replace(',', '');
@@ -131,6 +160,19 @@ function render_append(source, data, output) {
 	var template = Handlebars.compile(source);
 	var html = template(data);
 	output.append(html);
+}
+
+
+function render_after(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertAfter(output);
+}
+
+function render_before(source, data, output) {
+	var template = Handlebars.compile(source);
+	var html = template(data);
+	$(html).insertBefore(output);
 }
 
 

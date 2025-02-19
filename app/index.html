@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title>STTC Web App</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
+    <meta name="theme-color" content="salmon" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="shortcut icon" href="assets/img/favicon.png">
+    <link rel="apple-touch-icon" href="icon/icon.png">
+    <link rel="stylesheet" href="assets/css/bootstrap.css" />
+    <link rel="stylesheet" href="assets/css/font-awesome.css" />
+    <link rel="stylesheet" href="assets/css/ace-fonts.css" />
+    <link rel="stylesheet" href="assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+    <link rel="stylesheet" href="assets/css/ace-skins.css" />
+    <link rel="stylesheet" href="assets/css/jquery-ui-1.10.4.custom.min.css " />
+    <link rel="stylesheet" href="assets/css/template.css"/>
+    <link rel="stylesheet" href="assets/css/sweet-alert.css">
+
+    <!-- ace settings handler -->
+    <script src="assets/js/ace-extra.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/jquery-ui-1.10.4.custom.min.js"></script>
+    <script src="assets/js/bootstrap.js"></script>
+    <script src="assets/js/ace/ace.js"></script>
+
+
+    <script src="assets/js/sweet-alert.js"></script>
+    <script src="assets/js/handlebars-v3.js"></script>
+
+    <script src="scripts/app.js"></script>
+    <script src="scripts/template.js"></script>
+    <script src="scripts/api.js"></script>
+    <script src="scripts/main.js"></script>
+    <script src="assets/js/html5-qrcode.min.js"></script>
+    <script src="assets/js/localforage.js"></script>
+  </head>
+  <body class="no-skin">
+		<div id="loader">
+        <div class="loader"></div>
+        <div class="loader-message" id="loader-message"></div>
+		</div>
+		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9;"></div>
+
+    <div id="navbar" class="navbar navbar-default">
+			<div class="navbar-container" id="navbar-container">
+				<div class="navbar-header">Smart TTC</div>
+        <div class="navbar-buttons navbar-header pull-right">
+					<div class="online-status" id="online-status">Online</div>
+				</div>
+			</div>
+		</div>
+
+    <!-- /section:basics/navbar.layout -->
+    <div class="main-container" id="main-container">
+      <div class="main-content">
+        <div class="main-content-inner">
+          <div class="page-content" id="page-content">
+            <div class="row">
+              <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-center">
+                <h1 id="hello"></h1>
+              </div>
+              <div class="divider"></div>
+            </div>
+            <div class="row hide" id="first-menu" style="padding: 0 20px 50px;">
+              <div class="col-xs-12">
+                <a href="meter_list.html" class="row-button text-center hide" id="meter-list"
+                  style="background-color:#2a8bcb; color:white;">รายการมิเตอร์
+                  <span id="meter-list-qty" style="position:absolute; margin-left:5px; font-size:14px;" class="badge badge-danger">15</span>
+                </a>
+                <a href="checkin.html" class="row-button text-center hide" id="check-in" style="background-color:#2a8bcb; color:white;">เบิกมิเตอร์</a>
+              </div>
+              <div class="col-xs-12 text-center">
+                <a href="work_list.html" class="row-button text-center"
+                  style="background-color:#85b558; color:white;">ใบสั่งงาน
+                  <span id="work-qty" style="position:absolute; margin-left:5px; font-size:14px;" class="badge badge-danger">0</span>
+                </a>
+              </div>
+              <div class="col-xs-12 text-center">
+                <a href="temp.html" class="row-button text-center"
+                  style="background-color:#6fb3e0; color:white;">ผลการสับเปลี่ยน
+                  <span id="offline-qty" style="position:absolute; margin-left:5px; font-size:14px;" class="badge badge-danger">0</span>
+                </a>
+              </div>
+
+              <div class="col-xs-12 text-center">
+                <a href="return.html" class="row-button text-center" style="background-color:#9585bf; color:white;">คืนมิเตอร์</a>
+              </div>
+            </div>
+
+
+            <div class="pg-footer">
+              <div class="pg-footer-inner">
+                <div class="pg-footer-content text-right">
+                  <div class="footer-menu width-20">
+                    <li><a href="index.html"><i class="fa fa-home fa-2x white"></i><span>หน้าหลัก</span></a></li>
+                  </div>
+                  <div class="footer-menu width-20">
+                    <li><a href="transfer.html"><i class="fa fa-history fa-2x white"></i><span>ประวัติการติดตั้ง</span></a></li>
+                  </div>
+                  <div class="footer-menu width-20">
+                    <li><a href="work_list.html"><i class="fa fa-tasks fa-2x white"></i><span>ใบสั่งงาน</span></a></li>
+                  </div>
+                  <div class="footer-menu width-20">
+                    <li><a href="meter_list.html"><i class="fa fa-cubes fa-2x white"></i><span>รายการมิเตอร์</span></a></li>
+                  </div>
+                  <div class="footer-menu width-20">
+                    <li><a href="javascript:toggleMenu()"><i class="fa fa-bars fa-2x white"></i><span>การตั้งค่า</span></a></li>
+                  </div>
+                </div>
+             </div>
+           </div>
+        </div> <!-- pang content -->
+      </div><!-- main content inner -->
+    </div><!-- main content -->
+  </div><!-- /.main-container -->
+
+    <script src="scripts/index.js"></script>
+
+    <script>
+      window.addEventListener('load', function() {
+        let userdata = localStorage.getItem('userdata');
+
+        if(userdata.length) {
+          let ud = JSON.parse(userdata);
+          $('#hello').text(ud.displayName);
+        }
+
+        init();
+
+        // localforage.getItem('transfers')
+        // .then((res) => {
+        //   len = 0;
+        //   if(res !== null && res !== undefined) {
+        //     len = res.length;
+        //   }
+        //
+        //   $('#offline-qty').html(len);
+        // });
+      });
+
+    </script>
+
+  </body>
+</html>

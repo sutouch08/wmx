@@ -101,11 +101,24 @@ class User_model extends CI_Model
 
   public function get_name($uname)
   {
-    $rs = $this->db->where('uname', $uname)->get('user');
+    $rs = $this->db->where('uname', $uname)->get($this->tb);
 
     if($rs->num_rows() == 1)
     {
       return $rs->row()->name;
+    }
+
+    return NULL;
+  }
+
+
+  public function get_uname($id)
+  {
+    $rs = $this->db->select('uname')->where('id', $id)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->uname;
     }
 
     return NULL;

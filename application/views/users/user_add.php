@@ -55,7 +55,7 @@
 				<?php echo select_profile(); ?>
 			</select>
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline" id="profile-error">&nbsp;</div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red" id="profile-error">&nbsp;</div>
   </div>
 
 	<div class="form-group">
@@ -66,7 +66,7 @@
 				<span class="lbl">&nbsp;&nbsp; Active</span>
 			</label>
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline red"></div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red"></div>
   </div>
 
 	<div class="form-group">
@@ -77,7 +77,7 @@
 				<span class="lbl">&nbsp;&nbsp; Force user to change password</span>
 			</label>
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline"></div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red"></div>
   </div>
 
   <div class="form-group">

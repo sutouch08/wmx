@@ -153,7 +153,7 @@ function select_user($uname = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= '<option value="'.$rs->uname.'" data-id="'.$rs->id.'" data-uid="'.$rs->uid.'" '.is_selected($rs->uname, $uname).'>'.$rs->name.'</option>';
+			$ds .= '<option value="'.$rs->uname.'" data-id="'.$rs->id.'" data-uid="'.$rs->uid.'" '.is_selected($rs->uname, $uname).'>'.$rs->uname.' | '.$rs->name.'</option>';
 		}
 	}
 
@@ -165,9 +165,15 @@ function display_name($uname)
 {
   $ci =& get_instance();
   $ci->load->model('users/user_model');
-  $name = $ci->user_model->get_name($uname);
+  return $ci->user_model->get_name($uname);
+}
 
-  return $name;
+
+function uname($id)
+{
+  $ci =& get_instance();
+  $ci->load->model('users/user_model');
+  return $ci->user_model->get_uname($id);
 }
 
  ?>

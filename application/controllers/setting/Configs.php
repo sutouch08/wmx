@@ -18,23 +18,23 @@ class Configs extends PS_Controller
   }
 
 
-
   public function index($tab = 'general')
   {
     $groups = $this->config_model->get_group();
-    $ps = get_permission('SCSYSC');
-    $cando = ($ps->can_add + $ps->can_edit + $ps->can_delete) > 0 ? TRUE : FALSE;
+    $cando = can_do(get_permission('SCSYSC'));
     $ds = array();
+
     foreach($groups as $rs)
     {
-       $group = $this->config_model->get_config_by_group($rs->code);
-       if(!empty($group))
-       {
-         foreach($group as $rd)
-         {
-           $ds[$rd->code] = $this->config_model->get($rd->code);
-         }
-       }
+      $group = $this->config_model->get_config_by_group($rs->code);
+
+      if(!empty($group))
+      {
+        foreach($group as $rd)
+        {
+          $ds[$rd->code] = $this->config_model->get($rd->code);
+        }
+      }
     }
 
     $ds['cando'] = $cando;

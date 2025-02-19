@@ -161,9 +161,16 @@ function is_checked($val1, $val2)
 }
 
 
-function is_active($val)
+function is_active($val, $showX = TRUE)
 {
-  return ($val == 1 OR $val == 'Y' OR $val == 'y' OR $val === TRUE) ? '<i class="fa fa-check green"></i>' : '<i class="fa fa-times red"></i>';
+	if($val == 1 OR $val == '1' OR $val == 'Y' OR $val == 'y' OR $val === TRUE)
+	{
+		return '<i class="fa fa-check green"></i>';
+	}
+	else
+	{
+		return $showX ? '<i class="fa fa-times red"></i>' : NULL;
+	}
 }
 
 
@@ -359,7 +366,7 @@ function set_error($key, $name = "data")
 		'delete' => "Delete {$name} failed.",
 		'permission' => "You don't have permission to perform this operation.",
 		'required' => "Missing required parameter.",
-		'exists' => "'{$name}' already exists.",
+		'exists' => "{$name} already exists.",
 		'status' => "Invalid document status",
 		'notfound' => "Data or Document number not found",
 		'transection' => "Unable to delete {$name} because transections exists or link to other module."
@@ -470,5 +477,100 @@ function genUid($lenght = 13)
     return substr(bin2hex($bytes), 0, $lenght);
 }
 
+function action_logs_label($action = NULL)
+{
+	$arr = array(
+		'create' => 'สร้างโดย',
+		'update' => 'แก้ไขโดย',
+		'approve' => 'อนุมัติโดย',
+		'reject' => 'ปฏิเสธโดย',
+		'cancel' => 'ยกเลิกโดย'
+	);
+
+	return empty($arr[$action]) ? 'Unknow' : $arr[$action];
+}
+
+
+function status_text($status = NULL)
+{
+	$arr = array(
+		'-1' => 'Draft',
+		'0' => 'Pending',
+		'1' => 'Success',
+		'2' => 'Canceled',
+		'9' => 'Closed',
+		'O' => 'Open',
+		'P' => 'Pending',
+		'R' => 'In progress',
+		'C' => 'Completed',
+		'D' => 'Canceled'
+	);
+
+	return empty($arr[$status]) ? 'Unknow' : $arr[$status];
+}
+
+function status_label($status = NULL)
+{
+	$label = '<span class="grey">Unknow</span>';
+
+	switch($status)
+	{
+		case '-1' :
+			$label = '<span class="purple">Draft</span>';
+			break;
+		case '0' :
+			$label = '<span class="orange">Pending</span>';
+			break;
+		case '1' :
+			$label = '<span class="green">Success</span>';
+			break;
+		case '2' :
+			$label = '<span class="red">Canceled</span>';
+			break;
+		case 'P' :
+			$label = '<span class="orange">Pending</span>';
+			break;
+		case 'R' :
+			$label = '<span class="purple">Pending</span>';
+			break;
+		case 'C' :
+			$label = '<span class="green">Completed</span>';
+			break;
+		case 'D' :
+			$label = '<span class="red">Canceled</span>';
+			break;
+	}
+
+	return $label;
+}
+
+
+function approval_text($status = 'P')
+{
+	$arr = array(
+		'A' => 'Approved',
+		'P' => 'Pending',
+		'R' => 'Rejected'
+	);
+
+	return empty($arr[$status]) ? 'Pending' : $arr[$status];
+}
+
+function approval_label($status = NULL)
+{
+	$label = '<span class="orange">Pending</span>';
+
+	switch($status)
+	{
+		case 'A' :
+			$label = '<span class="green">Approved</span>';
+			break;
+		case 'R' :
+			$label = '<span class="red">Rejected</span>';
+			break;
+	}
+
+	return $label;
+}
 
  ?>

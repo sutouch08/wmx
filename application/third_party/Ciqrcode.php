@@ -100,7 +100,7 @@ class Ciqrcode
 
 			QRcode::png($params['data'], NULL, $level, $size, 2);
 		}
-	}  
+	}	
 }
 
 /* end of file */

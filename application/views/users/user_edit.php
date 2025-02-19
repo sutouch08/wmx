@@ -15,7 +15,7 @@
 			<input type="text" id="uname"	class="width-100" value="<?php echo $user->uname; ?>" disabled />
 			<input type="hidden" id="id" value="<?php echo $user->id; ?>" />
 		</div>
-		<div class="help-block col-xs-12 col-sm-reset inline red" id="uname-error">&nbsp;</div>
+		<div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red" id="uname-error">&nbsp;</div>
 	</div>
 
 	<div class="form-group">
@@ -23,7 +23,7 @@
     <div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 			<input type="text" id="dname" class="width-100 e" maxlength="100" value="<?php echo $user->name; ?>" />
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline red" id="dname-error">&nbsp;</div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red" id="dname-error">&nbsp;</div>
   </div>
 
   <div class="form-group">
@@ -34,7 +34,7 @@
 				<?php echo select_profile($user->id_profile); ?>
 			</select>
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline" id="profile-error">&nbsp;</div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red" id="profile-error">&nbsp;</div>
   </div>
 
 	<div class="form-group">
@@ -45,7 +45,7 @@
 				<span class="lbl">&nbsp;&nbsp; Active</span>
 			</label>
     </div>
-    <div class="help-block col-xs-12 col-sm-reset inline red"></div>
+    <div class="help-block col-lg-6 col-md-6 col-sm-6 col-xs-12 col-sm-reset inline red"></div>
   </div>
 
   <div class="form-group">
