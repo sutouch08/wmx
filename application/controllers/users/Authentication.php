@@ -15,6 +15,7 @@ class Authentication extends CI_Controller
 	}
 
 
+
 	public function validate_credentials()
 	{
     $sc = TRUE;
@@ -76,6 +77,7 @@ class Authentication extends CI_Controller
 	}
 
 
+
   public function create_user_data(array $ds = array(), $remember = NULL )
   {
     if(!empty($ds))
@@ -97,6 +99,8 @@ class Authentication extends CI_Controller
   }
 
 
+
+
 	public function logout()
 	{
 		delete_cookie('uid');
@@ -104,6 +108,7 @@ class Authentication extends CI_Controller
     delete_cookie('id_profile');
     redirect($this->home);
 	}
+
 
 } //--- end class
 

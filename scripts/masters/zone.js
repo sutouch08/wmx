@@ -1,273 +1,152 @@
-function goBack(){
-  window.location.href = HOME;
-}
-
+var click = 0;
 
 function addNew() {
   window.location.href = HOME + 'add_new';
 }
 
-
-function edit(id){
-  window.location.href = HOME + 'edit/'+id;
-}
-
-
-function goGen() {
-  window.location.href = HOME + 'generate';
+function getEdit(code){
+  window.location.href = HOME + 'edit/'+code;
 }
 
 
 function add() {
-  clearErrorByClass('e');
+  if(click == 0) {
+    click = 1;
+    clearErrorByClass('e');
+    let h = {
+      'code' : $('#code').val().trim(),
+      'name' : $('#name').val().trim(),
+      'warehouse_code' : $('#warehouse').val(),
+      'active' : $('#active').is(':checked') ? 1 : 0,
+      'is_pickface' : $('#is_pickface').is(':checked') ? 1 : 0
+    }
 
-  let h = {
-    'whs_id' : $('#warehouse option:selected').val(),
-    'whs_code' : $('#warehouse option:selected').data('code'),
-    'row' : $('#row').val().trim(),
-    'col' : $('#col').val().trim(),
-    'loc' : $('#loc').val().trim(),
-    'code' : $('#code').val().trim(),
-    'full_code' : $('#full-code').val().trim(),
-    'barcode' : $('#barcode').val().trim(),
-    'name' : $('#name').val().trim(),
-    'freeze' : $('#freeze').is(':checked') ? 1 : 0,
-    'active' : $('#active').is(':checked') == false ? 0 : 1
-  };
+    if(h.warehouse_code == '') {
+      click = 0;
+      $('#warehouse').hasError('Please select');
+      return false;
+    }
 
-  if(h.whs_id == "" || h.whs_code == undefined) {
-    $('#warehouse').hasError("กรุณาระบุคลัง");
-    return false;
-  }
+    if(h.code.length == 0) {
+      click = 0;
+      $('#code').hasError('Required');
+      return false;
+    }
 
-  if(h.row.length == 0) {
-    $('#row').hasError();
-    return false;
-  }
+    if(h.name.length == 0) {
+      click = 0;
+      $('#name').hasError('Required');
+      return false;
+    }
 
-  if(h.col.length == 0) {
-    $('#col').hasError();
-    return false;
-  }
+    load_in();
 
-  if(h.loc.length == 0) {
-    $('#loc').hasError();
-    return false;
-  }
-
-  if(h.code.length == 0) {
-    $('#code').hasError("Code is required");
-    return false;
-  }
-
-  if(h.full_code.length == 0) {
-    $('#full-code').hasError("Invalid location code");
-    return false;
-  }
-
-  if(h.barcode.length == 0) {
-    $('#barcode').hasError("Barcode is required");
-    return false;
-  }
-
-  if(h.name.length == 0) {
-    $('#name').hasError("Name is required");
-    return false;
-  }
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'add',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      load_out();
-
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-
-        if(ds.status == 'success') {
+    $.ajax({
+      url:HOME + 'add',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        click = 0;
+        load_out();
+        if(rs.trim() === 'success') {
           swal({
             title:'Success',
-            text:'เพิ่ม Location สำเร็จต้องการเพิ่มต่อหรือไม่ ?',
-            type:'success'
+            text:'เพิ่มข้อมูลเรียบร้อยแล้ว ต้องการเพิ่มอีกหรือไม่ ?',
+            type:'success',
+            html:true,
+            showCancelButton:true,
+            cancelButtonText:'No',
+            confirmButtonText:'Yes',
+            closeOnConfirm:true
           }, function(isConfirm) {
             if(isConfirm) {
-              $('#row').val('');
-              $('#col').val('');
-              $('#loc').val('');
-              $('#code').val('');
-              $('#full-code').val('');
-              $('#barcode').val('');
               $('#name').val('');
-
-              setTimeout(() => {
-                $('#code').focus();
-              }, 200);
+              $('#code').val('').focus();
             }
             else {
               goBack();
             }
-          })
+          });
         }
         else {
-          showError(ds.message);
+          beep();
+          showError(rs);
         }
-      }
-      else {
+      },
+      error:function(rs) {
+        click = 0;
+        beep();
         showError(rs);
       }
-    },
-    error:function(rs) {
-      showError(rs);
-    }
-  })
+    });
+  }
 }
 
 
 function update() {
-  clearErrorByClass('e');
+  if(click == 0) {
+    click = 1;
+    clearErrorByClass('e');
+    let h = {
+      'id' : $('#id').val(),
+      'code' : $('#code').val().trim(),
+      'name' : $('#name').val().trim(),
+      'warehouse_code' : $('#warehouse').val(),
+      'active' : $('#active').is(':checked') ? 1 : 0,
+      'is_pickface' : $('#is_pickface').is(':checked') ? 1 : 0
+    }
 
-  let h = {
-    'id' : $('#id').val(),
-    'whs_id' : $('#warehouse option:selected').val(),
-    'whs_code' : $('#warehouse option:selected').data('code'),
-    'row' : $('#row').val().trim(),
-    'col' : $('#col').val().trim(),
-    'loc' : $('#loc').val().trim(),
-    'code' : $('#code').val().trim(),
-    'full_code' : $('#full-code').val().trim(),
-    'barcode' : $('#barcode').val().trim(),
-    'name' : $('#name').val().trim(),
-    'freeze' : $('#freeze').is(':checked') ? 1 : 0,
-    'active' : $('#active').is(':checked') == false ? 0 : 1
-  };
+    if(h.warehouse_code == '') {
+      click = 0;
+      $('#warehouse').hasError('Please select');
+      return false;
+    }
 
-  if(h.whs_id == "" || h.whs_code == undefined) {
-    $('#warehouse').hasError("กรุณาระบุคลัง");
-    return false;
-  }
+    if(h.code.length == 0) {
+      click = 0;
+      $('#code').hasError('Required');
+      return false;
+    }
 
-  if(h.row.length == 0) {
-    $('#row').hasError();
-    return false;
-  }
+    if(h.name.length == 0) {
+      click = 0;
+      $('#name').hasError('Required');
+      return false;
+    }
 
-  if(h.col.length == 0) {
-    $('#col').hasError();
-    return false;
-  }
+    load_in();
 
-  if(h.loc.length == 0) {
-    $('#loc').hasError();
-    return false;
-  }
-
-  if(h.code.length == 0) {
-    $('#code').hasError("Code is required");
-    return false;
-  }
-
-  if(h.full_code.length == 0) {
-    $('#full-code').hasError("Invalid location code");
-    return false;
-  }
-
-  if(h.barcode.length == 0) {
-    $('#barcode').hasError("Barcode is required");
-    return false;
-  }
-
-  if(h.name.length == 0) {
-    $('#name').hasError("Name is required");
-    return false;
-  }
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'update',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      load_out();
-
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-
-        if(ds.status == 'success') {
+    $.ajax({
+      url:HOME + 'update',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        click = 0;
+        load_out();
+        if(rs.trim() === 'success') {
           swal({
             title:'Success',
             type:'success',
             timer:1000
-          })
+          });
         }
         else {
-          showError(ds.message);
+          beep();
+          showError(rs);
         }
-      }
-      else {
+      },
+      error:function(rs) {
+        click = 0;
+        beep();
         showError(rs);
       }
-    },
-    error:function(rs) {
-      showError(rs);
-    }
-  })
-}
-
-
-function updateCode() {
-  let row = $('#row').val().trim().toUpperCase();
-  let col = $('#col').val().trim();
-  let loc = $('#loc').val().trim().toUpperCase();
-  let code = row.length == 1 ? row + (col.length > 0 ? "-" + col + (loc.length == 1 ? "-" + loc : "") : "") : "";
-  $('#row').val(row);
-  $('#loc').val(loc);
-  $('#code').val(code);
-  updateFullCode();
-}
-
-
-function updateFullCode() {
-  let prefix = $('#warehouse option:selected').data('code');
-  let code = $('#code').val().trim();
-  let fullCode = prefix == undefined ? "" : prefix + "-"+code;
-  $('#full-code').val(fullCode);
-
-  updateBarcode();
-  updateName();
-}
-
-
-function updateBarcode() {
-  let barcode = $('#barcode').val().trim();
-
-  if($('#chk-barcode').is(':checked')) {
-    barcode = $('#full-code').val().trim();
-    $('#barcode').val(barcode);
-  }
-  else {
-    $('#barcode').val(barcode);
-  }
-}
-
-
-function updateName() {
-  let name = $('#name').val().trim();
-  if($('#chk-name').is(':checked')) {
-    name = $('#code').val().trim();
-    $('#name').val(name);
-  }
-  else {
-    $('#name').val(name);
+    });
   }
 }
 
@@ -282,194 +161,283 @@ function toggleCheckAll() {
 }
 
 
-function checkAllRow() {
-  if($('#chk-all-row').is(':checked')) {
-    $('.chk-row').prop('checked', true);
-  }
-  else {
-    $('.chk-row').prop('checked', false);
-  }
-}
+function togglePickface(id) {
+  let is_pickface = $('#is-pickface-'+id).val();
 
-
-function checkAllLoc() {
-  if($('#chk-all-loc').is(':checked')) {
-    $('.chk-loc').prop('checked', true);
-  }
-  else {
-    $('.chk-loc').prop('checked', false);
-  }
-}
-
-
-function genZone() {
-  clearErrorByClass('e');
-  let warehouse_id = $('#warehouse').val();
-  let warehouse_code = $('#warehouse option:selected').data('code');
-  let rows = [];
-  let start = $('#column-start').val().trim();
-  let end = $('#column-end').val().trim();
-  let digit = $('#column-digit').val();
-  let locs = [];
-  let freeze = $('#freeze').is(':checked') ? 1 : 0;
-  let active = $('#active').is(':checked') == false ? 0 : 1;
-
-  if(warehouse_id == "" || warehouse_code == undefined) {
-    $('#warehouse').hasError();
-    return false;
-  }
-
-  $('.chk-row').each(function() {
-    if($(this).is(':checked')) {
-      rows.push($(this).val());
-    }
-  });
-
-  if(rows.length == 0) {
-    $('#row').hasError();
-    return false;
-  }
-
-  if(start == "") {
-    $('#column-start').hasError();
-    return false;
-  }
-
-  if(end == "") {
-    $('#column-end').hasError();
-    return false;
-  }
-
-  digit = parseDefault(parseInt(digit), 2);
-  start = parseDefault(parseInt(start), 1);
-  end = parseDefault(parseInt(end), 1);
-
-  if(digit == 2 && end > 99) {
-    $('#column-end').hasError();
-    showError("จำนวนสุดท้ายต้องไม่เกิน 99");
-    return false;
-  }
-
-  if(digit == 3 && end > 999) {
-    $('#column-end').hasError();
-    showError("จำนวนสุดท้ายต้องไม่เกิน 999");
-    return false;
-  }
-
-  if( start > end ) {
-    $('#column-start').hasError();
-    $('#column-end').hasError();
-    showError('ช่วงตัวเลขไม่ถูกต้อง');
-    return false;
-  }
-
-  $('.chk-loc').each(function() {
-    if($(this).is(':checked')) {
-      locs.push($(this).val());
-    }
-  });
-
-  if(locs.length == 0) {
-    $('#loc').hasError();
-    return false;
-  }
-
-  let h = {
-    'warehouse_id' : warehouse_id,
-    'warehouse_code' : warehouse_code,
-    'rows' : rows,
-    'digit' : digit,
-    'start' : start,
-    'end' : end,
-    'locs' : locs,
-    'freeze' : freeze,
-    'active' : active
-  };
-
-  load_in();
+  is_pickface = is_pickface == '1' ? '0' : '1';
 
   $.ajax({
-    url:HOME + 'generate_location',
+    url:HOME + 'update_pickface/',
     type:'POST',
     cache:false,
     data:{
-      'data' : JSON.stringify(h)
+      'id' : id,
+      'is_pickface' : is_pickface
     },
     success:function(rs) {
-      load_out();
-
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-
-        if(ds.status === 'success') {
-          swal({
-            title:'Success',
-            text:ds.message,
-            type:'success',
-            html:true
-          }, function() {
-            goBack();
-          });
+      if(rs == 'success') {
+        $('#is-pickface-'+id).val(is_pickface);
+        if(is_pickface == '1') {
+          $('#pickface-label-'+id).text('Yes');
         }
         else {
-          showError(ds.message);
+          $('#pickface-label-'+id).html('No');
         }
       }
       else {
-        showError(rs);
+        swal({
+          title:'Failed !',
+          text:rs,
+          type:'error'
+        })
       }
-    },
-    error:function(rs) {
-      showError(rs);
     }
   })
 }
 
 
-function getDelete(id, code){
+function addEmployee() {
+  let code = $('#zone_code').val();
+  let empID = $('#empID').val();
+  let empName = $('#empID option:selected').data('name');
+  if(code === undefined ){
+    swal('ไม่พบรหัสโซน');
+    return false;
+  }
+
+  if(empID == '' || empName.length == 0){
+    swal('ชื่อพนักงานไม่ถูกต้อง');
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'add_employee',
+    type:'POST',
+    cache:false,
+    data:{
+      'zone_code' : code,
+      'empID' : empID,
+      'empName' : empName
+    },
+    success:function(rs){
+      load_out();
+      if(rs === 'success'){
+        swal({
+          title:'Success',
+          text:'เพิ่มพนักงานเรียบร้อยแล้ว',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(function(){
+          window.location.reload();
+        }, 1200);
+      }else{
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error'
+        });
+      }
+    }
+  });
+}
+
+
+$('#search-box').autocomplete({
+  source:BASE_URL + 'auto_complete/get_customer_code_and_name',
+  autoFocus:true,
+  close:function(){
+    let arr = $(this).val().split(' | ');
+    if(arr.length == 2){
+      let code = arr[0];
+      let name = arr[1];
+      $(this).val(name);
+      $('#customer_code').val(code);
+    }else{
+      $(this).val('');
+      $('#customer_code').val('');
+    }
+  }
+});
+
+
+$('#search-box').keyup(function(e){
+  if(e.keyCode == 13){
+    addCustomer();
+  }
+});
+
+
+function addCustomer(){
+  let code = $('#zone_code').val();
+  let customer_code = $('#customer_code').val();
+  let customer_name = $('#search-box').val();
+  if(code === undefined){
+    swal('ไม่พบรหัสโซน');
+    return false;
+  }
+
+  if(customer_code == '' || customer_name.length == 0){
+    swal('ชื่อลูกค้าไม่ถูกต้อง');
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'add_customer',
+    type:'POST',
+    cache:false,
+    data:{
+      'zone_code' : code,
+      'customer_code' : customer_code
+    },
+    success:function(rs){
+      load_out();
+      if(rs === 'success'){
+        swal({
+          title:'Success',
+          text:'เพิ่มลูกค้าเรียบร้อยแล้ว',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(function(){
+          window.location.reload();
+        }, 1200);
+      }else{
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error'
+        });
+      }
+    }
+  });
+}
+
+
+function getDelete(code){
   swal({
     title:'Are sure ?',
     text:'ต้องการลบ ' + code + ' หรือไม่ ?',
     type:'warning',
     showCancelButton: true,
 		confirmButtonColor: '#FA5858',
-		confirmButtonText: 'Yes',
-		cancelButtonText: 'No',
-		closeOnConfirm: true
-  },function() {
-    load_in();
-    setTimeout(() => {
-      $.ajax({
-        url: HOME + 'delete',
-        type:'POST',
-        cache:false,
-        data:{
-          'id' : id
-        },
-        success:function(rs) {
-          load_out();
-
-          if(rs.trim() === 'success') {
-            swal({
-              title:'Deleted',
-              type:'success',
-              timer:1000
-            });
-
-            $('#row-'+id).remove();
-            reIndex();
-          }
-          else {
-            showError(rs);
-          }
-        },
-        error:function(rs) {
-          showError(rs);
+		confirmButtonText: 'ใช่, ฉันต้องการลบ',
+		cancelButtonText: 'ยกเลิก',
+		closeOnConfirm: false
+  },function(){
+    $.ajax({
+      url: HOME + 'delete/' + code,
+      type:'GET',
+      cache:false,
+      success:function(rs){
+        if(rs === 'success'){
+          swal({
+            title:'Deleted',
+            text:'ลบ '+code+' เรียบร้อยแล้ว',
+            type:'success',
+            timer:1000
+          });
+          $('#row-'+code).remove();
+          reIndex();
+        }else{
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error'
+          });
         }
-      })
-    }, 100);
+      }
+    })
+
   })
 }
+
+
+function deleteCustomer(id,code){
+  swal({
+    title:'Are sure ?',
+    text:'ต้องการลบ ' + code + ' หรือไม่ ?',
+    type:'warning',
+    showCancelButton: true,
+		confirmButtonColor: '#FA5858',
+		confirmButtonText: 'ใช่, ฉันต้องการลบ',
+		cancelButtonText: 'ยกเลิก',
+		closeOnConfirm: false
+  },function(){
+    $.ajax({
+      url: HOME + 'delete_customer/' + id,
+      type:'GET',
+      cache:false,
+      success:function(rs){
+        if(rs === 'success'){
+          swal({
+            title:'Deleted',
+            text:'ลบ '+code+' เรียบร้อยแล้ว',
+            type:'success',
+            timer:1000
+          });
+          $('#row-'+id).remove();
+          reIndex();
+          $('#search-box').focus();
+        }else{
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error'
+          });
+        }
+      }
+    })
+
+  })
+}
+
+
+function deleteEmployee(id,name){
+  swal({
+    title:'Are sure ?',
+    text:'ต้องการลบ ' + name + ' หรือไม่ ?',
+    type:'warning',
+    showCancelButton: true,
+		confirmButtonColor: '#FA5858',
+		confirmButtonText: 'ใช่, ฉันต้องการลบ',
+		cancelButtonText: 'ยกเลิก',
+		closeOnConfirm: false
+  },function(){
+    $.ajax({
+      url: HOME + 'delete_employee/' + id,
+      type:'GET',
+      cache:false,
+      success:function(rs){
+        if(rs === 'success'){
+          swal({
+            title:'Deleted',
+            text:'ลบ '+name+' เรียบร้อยแล้ว',
+            type:'success',
+            timer:1000
+          });
+          $('#emp-'+id).remove();
+          reIndex();
+          $('#search-box').focus();
+        }else{
+          swal({
+            title:'Error!',
+            text:rs,
+            type:'error'
+          });
+        }
+      }
+    })
+
+  })
+}
+
 
 function exportFilter(){
   let code = $('#code').val();
@@ -487,6 +455,14 @@ function exportFilter(){
   $('#exportForm').submit();
 }
 
+
+function editZone() {
+  $('#user_id').removeAttr('disabled').focus();
+  $('#pos-api').removeAttr('disabled');
+  $('#is-pickface').removeAttr('disabled');
+  $('#btn-u-edit').addClass('hide');
+  $('#btn-u-update').removeClass('hide');
+}
 
 
 function generateQrcode() {

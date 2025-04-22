@@ -12,6 +12,7 @@ function thai_date($date, $time = FALSE, $sp = '-')
 }
 
 
+
 function thai_short_text_date($date, $time = FALSE)
 {
 	$Y 	= date('Y', strtotime($date));
@@ -41,10 +42,12 @@ function thai_short_text_date($date, $time = FALSE)
 }
 
 
+
 function now()
 {
   return date('Y-m-d H:i:s');
 }
+
 
 
 function today()
@@ -68,6 +71,25 @@ function db_date($date, $time = FALSE, $sp = '-')
     return $date .' '.$c_time;
   }
 
+
+  return date('Y-m-d', strtotime($date));
+}
+
+
+
+function sap_date($date="", $time = FALSE)
+{
+  //$date = empty($date) ? date('Y-m-d H:i:s') : $date;
+
+  if($time === TRUE)
+  {
+    $c_time = date('H:i:s', strtotime($date));
+    $c_time = ($c_time === '00:00:00') ? date('H:i:s') : $c_time;
+    $date = date('Y-m-d', strtotime($date));
+    return $date .' '.$c_time;
+  }
+
+
   return date('Y-m-d', strtotime($date));
 }
 
@@ -85,6 +107,7 @@ function from_date($date = '')
 }
 
 
+
 function to_date($date = '')
 {
   if($date === '')
@@ -96,6 +119,24 @@ function to_date($date = '')
     return date('Y-m-d 23:59:59', strtotime($date));
   }
 }
+
+
+// function select_years($se = '')
+// {
+// 	$sc 		= '';
+// 	$length	= 5;
+// 	$startYear = getConfig('START_YEAR');
+// 	//$se 		= ($se == '') ? $startYear : $se;
+// 	$year = ($se - $length) < $startYear ? $startYear : $se - $length;
+// 	$lastYear = date('Y') + $length;
+// 	while( $year <= $lastYear )
+// 	{
+// 		$sc .= '<option value="'.$year.'" '.is_selected($year, $se).'>'.$year.'</option>';
+// 		$year++;
+// 	}
+//
+// 	return $sc;
+// }
 
 
 function select_years($se = '')
@@ -117,6 +158,7 @@ function select_years($se = '')
 }
 
 
+
 function selectHour($se = '')
 {
 	$sc	= '';
@@ -127,6 +169,8 @@ function selectHour($se = '')
 	}
 	return $sc;
 }
+
+
 
 
 function selectMin($se = '' )
@@ -142,6 +186,7 @@ function selectMin($se = '' )
 	}
 	return $sc;
 }
+
 
 
 function selectTime($time='')

@@ -6,7 +6,7 @@ class Zone extends PS_Controller
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'WAREHOUSE';
 	public $title = 'เพิ่ม/แก้ไข โซน';
-  public $segment = 4;
+  public $error;
 
   public function __construct()
   {
@@ -21,140 +21,40 @@ class Zone extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'z_code', ''),
-      'barcode' => get_filter('barcode', 'z_barcode', ''),
-      'row' => get_filter('row', 'z_row', ''),
-      'col' => get_filter('col', 'z_col', ''),
-      'loc' => get_filter('loc', 'z_loc', ''),
-      'warehouse' => get_filter('warehouse', 'z_warehouse', 'all'),
-      'freeze' => get_filter('freeze', 'z_freeze', 'all'),
-      'active' => get_filter('active', 'z_active', 'all')
+      'uname' => get_filter('uname', 'z_uname', ''),
+      'warehouse' => get_filter('warehouse', 'z_warehouse', ''),
+      'customer' => get_filter('customer', 'z_customer', ''),
+      'active' => get_filter('active', 'z_active', 'all'),
+      'is_pos_api' => get_filter('is_pos_api', 'z_pos_api', 'all'),
+      'is_pickface' => get_filter('is_pickface', 'z_pickface', 'all')
     );
 
-    if($this->input->post('search'))
+		//--- แสดงผลกี่รายการต่อหน้า
+		$perpage = get_rows();
+		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
+		if($perpage > 300)
+		{
+			$perpage = 20;
+		}
+
+		$segment  = 4; //-- url segment
+		$rows     = $this->zone_model->count_rows($filter);
+		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+		$init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+		$list = $this->zone_model->get_list($filter, $perpage, $this->uri->segment($segment));
+
+    if( ! empty($list))
     {
-      redirect($this->home);
-    }
-    else
-    {
-      $perpage = get_rows();
-      $rows = $this->zone_model->count_rows($filter);
-      $init = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-      $filter['list'] = $this->zone_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-      $this->pagination->initialize($init);
-      $this->load->view('masters/zone/zone_list', $filter);
-    }
-  }
-
-
-  public function generate()
-  {
-    if($this->pm->can_add)
-    {
-      $this->title = "Generate Location";
-      $this->load->view('masters/zone/zone_generate');
-    }
-    else
-    {
-      $this->deny_page();
-    }
-  }
-
-
-  function generate_location()
-  {
-    $sc = TRUE;
-    $ds = json_decode($this->input->post('data'));
-    $codes = [];
-    $gen = 0;
-    $success = 0;
-    $failed = 0;
-    $skip = 0;
-
-    if( ! empty($ds))
-    {
-      $rows = $ds->rows;
-      $locs = $ds->locs;
-      $digit = $ds->digit;
-      $start = $ds->start;
-      $end = $ds->end;
-
-      foreach($rows as $row)
+      foreach($list as $rs)
       {
-        $i = $ds->start;
-        $e = $ds->end;
-
-        while($i <= $e) {
-          $col = $ds->locs;
-
-          foreach($col as $loc)
-          {
-            $col = sprintf('%0'.$ds->digit.'d', $i);
-            $code = $row."-".$col."-".$loc;
-
-            $codes[] = (object) array(
-              'code' => $code,
-              'row' => $row,
-              'col' => $col,
-              'loc' => $loc
-            );
-          }
-
-          $i++;
-        }
+        $rs->customer_count = $this->zone_model->count_customer($rs->code);
       }
     }
 
-    if( ! empty($codes))
-    {
-      foreach($codes as $rs)
-      {
-        $full_code = $ds->warehouse_code."-".$rs->code;
+    $filter['list'] = $list;
 
-        if( ! $this->zone_model->is_exists_code($full_code))
-        {
-          $arr = array(
-            'code' => $full_code,
-            'barcode' => $full_code,
-            'name' => $rs->code,
-            'warehouse_id' => $ds->warehouse_id,
-            'warehouse_code' => $ds->warehouse_code,
-            'row' => $rs->row,
-            'col' => $rs->col,
-            'loc' => $rs->loc,
-            'active' => $ds->active,
-            'freeze' => $ds->freeze,
-            'create_by' => $this->_user->id
-          );
-
-          if( ! $this->zone_model->add($arr))
-          {
-            $failed++;
-          }
-          else
-          {
-            $success++;
-          }
-        }
-        else
-        {
-          $skip++;
-        }
-
-        $gen++;
-      }
-    }
-
-    $message  = "Generate ".number($gen)." locations.<br/>";
-    $message .= "Success ".number($success)." locations.<br/>";
-    $message .= "Failed ".number($failed)." locations.<br/>";
-    $message .= "Skip ".number($skip)." locations";
-
-    $arr = array(
-      'status' => $sc === TRUE ? 'success' : 'failed',
-      'message' => $sc === TRUE ? $message : $this->error
-    );
-
-    echo json_encode($arr);
+		$this->pagination->initialize($init);
+    $this->load->view('masters/zone/zone_list', $filter);
   }
 
 
@@ -179,42 +79,36 @@ class Zone extends PS_Controller
     {
       $ds = json_decode($this->input->post('data'));
 
-      if( ! empty($ds))
+      if( ! empty($ds) && ! empty($ds->code) && ! empty($ds->name) && ! empty($ds->warehouse_code))
       {
-        if( ! $this->zone_model->is_exists_code($ds->full_code))
-        {
-          if( ! $this->zone_model->is_exists_barcode($ds->barcode))
-          {
-            $arr = array(
-              'code' => $ds->full_code,
-              'barcode' => $ds->barcode,
-              'name' => $ds->name,
-              'warehouse_id' => $ds->whs_id,
-              'warehouse_code' => $ds->whs_code,
-              'row' => $ds->row,
-              'col' => $ds->col,
-              'loc' => $ds->loc,
-              'freeze' => $ds->freeze,
-              'active' => $ds->active,
-              'create_by' => $this->_user->id
-            );
-
-            if( ! $this->zone_model->add($arr))
-            {
-              $sc = FALSE;
-              set_error('insert');
-            }
-          }
-          else
-          {
-            $sc = FALSE;
-            set_error('exists', "barcode {$ds->barcode}");
-          }
-        }
-        else
+        if($this->zone_model->is_exists($ds->code))
         {
           $sc = FALSE;
-          set_error('exists', "Location {$ds->full_code}");
+          set_error('exists', $ds->code);
+        }
+
+        if($sc === TRUE && $this->zone_model->is_exists_name($ds->name))
+        {
+          $sc = FALSE;
+          set_error('exists', $ds->name);
+        }
+
+        if($sc === TRUE)
+        {
+          $arr = array(
+            'code' => $ds->code,
+            'name' => $ds->name,
+            'warehouse_code' => $ds->warehouse_code,
+            'active' => $ds->active == 0 ? 0 : 1,
+            'is_pickface' => $ds->is_pickface == 1 ? 1 : 0,
+            'user' => $this->_user->uname
+          );
+
+          if( ! $this->zone_model->add($arr))
+          {
+            $sc = FALSE;
+            set_error('insert');
+          }
         }
       }
       else
@@ -229,70 +123,7 @@ class Zone extends PS_Controller
       set_error('permission');
     }
 
-    $this->_json_response($sc);
-  }
-
-
-  public function update()
-  {
-    $sc = TRUE;
-
-    if($this->pm->can_edit)
-    {
-      $ds = json_decode($this->input->post('data'));
-
-      if( ! empty($ds))
-      {
-        if( ! $this->zone_model->is_exists_code($ds->full_code, $ds->id))
-        {
-          if( ! $this->zone_model->is_exists_barcode($ds->barcode, $ds->id))
-          {
-            $arr = array(
-              'code' => $ds->full_code,
-              'barcode' => $ds->barcode,
-              'name' => $ds->name,
-              'warehouse_id' => $ds->whs_id,
-              'warehouse_code' => $ds->whs_code,
-              'row' => $ds->row,
-              'col' => $ds->col,
-              'loc' => $ds->loc,
-              'freeze' => $ds->freeze,
-              'active' => $ds->active,
-              'date_update' => now(),
-              'update_by' => $this->_user->id
-            );
-
-            if( ! $this->zone_model->update($ds->id, $arr))
-            {
-              $sc = FALSE;
-              set_error('update');
-            }
-          }
-          else
-          {
-            $sc = FALSE;
-            set_error('exists', "barcode {$ds->barcode}");
-          }
-        }
-        else
-        {
-          $sc = FALSE;
-          set_error('exists', "Location {$ds->full_code}");
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        set_error('required');
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('permission');
-    }
-
-    $this->_json_response($sc);
+    $this->_response($sc);
   }
 
 
@@ -334,21 +165,22 @@ class Zone extends PS_Controller
   }
 
 
-  public function edit($id)
+  public function edit($code)
   {
     if($this->pm->can_edit)
     {
-      $zone = $this->zone_model->get($id);
+      $zone = $this->zone_model->get($code);
+      $ds['ds'] = $zone;
+      $ds['customers'] = $this->zone_model->get_customers($code);
+      $ds['employees'] = NULL;
 
-      if( ! empty($zone))
+      if($zone->role == 8)
       {
-        $ds['zone'] = $zone;
-        $this->load->view('masters/zone/zone_edit', $ds);
+        $this->load->helper('employee');
+        $ds['employees'] = $this->zone_model->get_employee($code);
       }
-      else
-      {
-        $this->error_page();
-      }
+
+      $this->load->view('masters/zone/zone_edit', $ds);
     }
     else
     {
@@ -357,28 +189,38 @@ class Zone extends PS_Controller
   }
 
 
-  public function delete()
+
+  public function update()
   {
     $sc = TRUE;
 
-    if($this->pm->can_delete)
+    if($this->pm->can_edit)
     {
-      $id = $this->input->post('id');
+      $ds = json_decode($this->input->post('data'));
 
-      if( ! empty($id))
+      if( ! empty($ds) && ! empty($ds->id) && ! empty($ds->name) && ! empty($ds->warehouse_code))
       {
-        if( ! $this->zone_model->has_transection($id))
-        {
-          if( ! $this->zone_model->delete($id))
-          {
-            $sc = FALSE;
-            set_error('delete');
-          }
-        }
-        else
+        if($this->zone_model->is_exists_name($ds->name, $ds->code))
         {
           $sc = FALSE;
-          set_error('transection');
+          set_error('exists', $ds->code);
+        }
+
+        if($sc === TRUE)
+        {
+          $arr = array(
+            'name' => $ds->name,
+            'warehouse_code' => $ds->warehouse_code,
+            'active' => $ds->active == 0 ? 0 : 1,
+            'is_pickface' => $ds->is_pickface == 1 ? 1 : 0,
+            'update_user' => $this->_user->uname
+          );
+
+          if( ! $this->zone_model->update($ds->id, $arr))
+          {
+            $sc = FALSE;
+            set_error('update');
+          }
         }
       }
       else
@@ -393,10 +235,93 @@ class Zone extends PS_Controller
       set_error('permission');
     }
 
+    $this->_response($sc);
+  }
+
+
+  public function update_pos_api()
+  {
+    $sc = TRUE;
+    $id = $this->input->post('id');
+    $is_pos_api = $this->input->post('is_api') == 1 ? 1 : 0;
+
+    $arr = array('is_pos_api' => $is_pos_api);
+
+    if( ! $this->zone_model->update($id, $arr))
+    {
+      $sc = FALSE;
+      $this->error = "Update failed";
+    }
+
     echo $sc === TRUE ? 'success' : $this->error;
   }
 
 
+  public function update_pickface()
+  {
+    $sc = TRUE;
+    $id = $this->input->post('id');
+    $is_pickface = $this->input->post('is_pickface') == 1 ? 1 : 0;
+
+    $arr = array('is_pickface' => $is_pickface);
+
+    if( ! $this->zone_model->update($id, $arr))
+    {
+      $sc = FALSE;
+      $this->error = "Update failed";
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
+
+
+  public function delete($code)
+  {
+    $sc = TRUE;
+
+    if($this->pm->can_delete)
+    {
+      if($sc === TRUE && $this->zone_model->has_stock($code))
+      {
+        $sc = FALSE;
+        $this->error = "ไม่สามารถลบโซนได้เนื่องจากมีสต็อกคงเหลือในโซน";
+      }
+
+      if($sc === TRUE && $this->zone_model->has_customer($code))
+      {
+        $sc = FALSE;
+        $this->error = "ไม่สามารถลบโซนได้เนื่องจากมีการเชื่อมโยงลูกค้าไว้";
+      }
+
+      if($sc === TRUE && $this->zone_model->has_employee($code))
+      {
+        $sc = FALSE;
+        $this->error = "ไม่สามารถลบโซนได้เนื่องจากมีการเชื่อมโยงพนักงานไว้";
+      }
+
+      if($sc === TRUE && $this->zone_model->has_transection($code))
+      {
+        $sc = FALSE;
+        set_error('transection');
+      }
+
+      if($sc === TRUE)
+      {
+        if( ! $this->zone_model->delete($code))
+        {
+          $sc = FALSE;
+          set_error('delete');
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('permission');
+    }
+
+    $this->_response($sc);
+  }
 
 
   public function add_customer()
@@ -410,7 +335,7 @@ class Zone extends PS_Controller
         $code = $this->input->post('zone_code');
         $customer_code = $this->input->post('customer_code');
         $customer = $this->customers_model->get($customer_code);
-        if(!empty($customer))
+        if( ! empty($customer))
         {
           if($this->zone_model->is_exists_customer($code, $customer->code))
           {
@@ -455,7 +380,6 @@ class Zone extends PS_Controller
   }
 
 
-
   public function delete_customer($id)
   {
     $sc = TRUE;
@@ -476,7 +400,6 @@ class Zone extends PS_Controller
 
     echo $sc === TRUE ? 'success' : $this->error;
   }
-
 
 
   public function add_employee()
@@ -501,7 +424,7 @@ class Zone extends PS_Controller
 
         if($sc === TRUE)
         {
-          if(!empty($emp))
+          if( ! empty($emp))
           {
             if($this->zone_model->is_exists_employee($code, $empID))
             {
@@ -547,7 +470,6 @@ class Zone extends PS_Controller
   }
 
 
-
   public function delete_employee($id)
   {
     $sc = TRUE;
@@ -569,52 +491,6 @@ class Zone extends PS_Controller
     echo $sc === TRUE ? 'success' : $this->error;
   }
 
-
-  public function syncData()
-  {
-    ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)
-    ini_set('sqlsrv.ClientBufferMaxKBSize','524288'); // Setting to 512M
-    ini_set('pdo_sqlsrv.client_buffer_max_kb_size','524288'); // Setting to 512M - for pdo_sqlsrv
-
-    $last_sync = $this->zone_model->get_last_sync_date();
-    $newData = $this->zone_model->get_new_data($last_sync);
-
-    if(!empty($newData))
-    {
-      foreach($newData as $rs)
-      {
-        if($this->zone_model->is_exists_id($rs->id))
-        {
-          $ds = array(
-            'code' => $rs->code,
-            'name' => is_null($rs->name) ? '' : $rs->name,
-						'warehouse_code' => $rs->warehouse_code,
-            'old_code' => $rs->old_code,
-            'active' => $rs->Disabled == 'N' ? 1 : 0,
-            'last_sync' => date('Y-m-d H:i:s'),
-          );
-
-          $this->zone_model->update($rs->id, $ds);
-        }
-        else
-        {
-          $ds = array(
-            'id' => $rs->id,
-            'code' => $rs->code,
-            'name' => is_null($rs->name) ? '' : $rs->name,
-            'warehouse_code' => $rs->warehouse_code,
-            'active' => $rs->Disabled == 'N' ? 1 : 0,
-            'last_sync' => date('Y-m-d H:i:s'),
-            'old_code' => $rs->old_code
-          );
-
-          $this->zone_model->add($ds);
-        }
-      }
-    }
-
-    echo 'done';
-  }
 
   //---- for prepare product
   public function get_zone()
@@ -662,13 +538,12 @@ class Zone extends PS_Controller
   }
 
 
-
   public function get_warehouse_zone()
   {
     $sc = TRUE;
     $code = trim($this->input->get('barcode'));
     $warehouse_code = trim($this->input->get('warehouse_code'));
-    if(!empty($code) && !empty($warehouse_code))
+    if( ! empty($code) && !empty($warehouse_code))
     {
       $zone = $this->zone_model->get_zone_detail_in_warehouse($code, $warehouse_code);
       if($zone === FALSE)
@@ -736,7 +611,7 @@ class Zone extends PS_Controller
     $row = 2;
 
 
-    if(!empty($list))
+    if( ! empty($list))
     {
       $no = 1;
 
@@ -785,18 +660,8 @@ class Zone extends PS_Controller
 
   public function clear_filter()
   {
-    $filter = array(
-      'z_code',
-      'z_barcode',
-      'z_row',
-      'z_col',
-      'z_loc',
-      'z_warehouse',
-      'z_active',
-      'z_freeze'
-    );
-
-    return clear_filter($filter);
+    $filter = array('z_code', 'z_uname', 'z_customer', 'z_warehouse', 'z_active', 'z_pos_api', 'z_pickface');
+    clear_filter($filter);
   }
 
 } //--- end class

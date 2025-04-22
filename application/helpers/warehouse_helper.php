@@ -1,16 +1,37 @@
 <?php
-function select_warehouse($id = NULL)
+function select_warehouse_role($se = NULL)
+{
+  $roles = array(
+    ['role' => '1', 'name' => 'คลังซื้อขาย'],
+    ['role' => '2', 'name' => 'คลังฝากขาย'],
+    ['role' => '7', 'name' => 'คลังระหว่างทำ'],
+    ['role' => '8', 'name' => 'คลังยืมสินค้า']
+  );
+
+  $sc = "";
+
+  foreach($roles as $role)
+  {
+    $sc .= '<option value="'.$role['role'].'" '.is_selected($se, $role['role']).'>'.$role['name'].'</option>';
+  }
+
+  return $sc;
+}
+
+
+function select_warehouse($se = 0)
 {
   $sc = '';
   $ci =& get_instance();
   $ci->load->model('masters/warehouse_model');
-  $options = $ci->warehouse_model->get_list();
+
+  $options = $ci->warehouse_model->get_all(1);
 
   if(!empty($options))
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->id.'" data-code="'.$rs->code.'" '.is_selected($id, $rs->id).'>'.$rs->code." : ".$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" data-role="'.$rs->role.'" '.is_selected($se, $rs->code).'>'.$rs->code." : ".$rs->name.'</option>';
     }
   }
 
@@ -18,18 +39,91 @@ function select_warehouse($id = NULL)
 }
 
 
-function warehouse_name($id)
+//--- เอาเฉพาะคลังซื้อขาย
+function select_sell_warehouse($se = NULL)
 {
+  $sc = '';
   $ci =& get_instance();
   $ci->load->model('masters/warehouse_model');
-  return $ci->warehouse_model->get_name_by_id($id);
+  $options = $ci->warehouse_model->get_sell_warehouse_list();
+
+  $se = empty($se) ? getConfig('DEFAULT_WAREHOUSE') : $se;
+
+  if(!empty($options))
+  {
+    foreach($options as $rs)
+    {
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($se, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
+    }
+  }
+
+  return $sc;
 }
 
-function warehouse_code($id)
+
+function select_consignment_warehouse($se = NULL)
+{
+	$sc = "";
+	$ci =& get_instance();
+	$ci->load->model('masters/warehouse_model');
+	$option = $ci->warehouse_model->get_consignment_list();
+
+	if(!empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($se, $rs->code).'>'.$rs->name.'</option>';
+		}
+	}
+
+	return $sc;
+}
+
+
+function select_common_warehouse($se = NULL)
+{
+	$sc = "";
+	$ci =& get_instance();
+	$ci->load->model('masters/warehouse_model');
+	$option = $ci->warehouse_model->get_common_list();
+
+	if(!empty($option))
+	{
+		foreach($option as $rs)
+		{
+			$sc .= '<option value="'.$rs->code.'" '.is_selected($se, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
+		}
+	}
+
+	return $sc;
+}
+
+
+function select_lend_warehouse($se = NULL)
+{
+  $sc = "";
+  $ci =& get_instance();
+  $ci->load->model('masters/warehouse_model');
+  $option = $ci->warehouse_model->get_lend_warehouse_list();
+
+  if( ! empty($option))
+  {
+    foreach($option as $ra)
+    {
+      $sc .= '<option value="'.$ra->code.'" '.is_selected($se, $ra->code).'>'.$ra->code.' | '.$ra->name.'</option>';
+    }
+  }
+
+  return $sc;
+}
+
+function warehouse_name($code)
 {
   $ci =& get_instance();
   $ci->load->model('masters/warehouse_model');
-  return $ci->warehouse_model->get_code($id);
+  $name = $ci->warehouse_model->get_name($code);
+
+  return $name;
 }
 
  ?>

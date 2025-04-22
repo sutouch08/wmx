@@ -1,50 +1,11 @@
 <?php
 class User_model extends CI_Model
 {
-  private $tb = "user";
-
   public function __construct()
   {
     parent::__construct();
   }
 
-  public function get($uname)
-  {
-    $rs = $this->db->where('uname', $uname)->get($this->tb);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return NULL;
-  }
-
-
-  public function get_by_id($id)
-  {
-    $rs = $this->db->where('id', $id)->get($this->tb);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return NULL;
-  }
-
-
-  public function get_user_by_uid($uid)
-  {
-    $rs = $this->db->where('uid', $uid)->get($this->tb);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return NULL;
-  }
 
 
   public function get_all($all = TRUE)
@@ -66,138 +27,207 @@ class User_model extends CI_Model
     {
       return $rs->result();
     }
-
-    return NULL;
   }
 
 
-  public function add(array $ds = array())
+  public function new_user(array $data = array())
   {
-    if( ! empty($ds))
+    if(!empty($data))
     {
-      return $this->db->insert($this->tb, $ds);
+      return $this->db->insert('user', $data);
     }
 
     return FALSE;
   }
 
 
-  public function update($id, array $ds = array())
+
+
+  public function update_user($id, array $ds = array())
   {
-    if( ! empty($ds))
+    if(!empty($ds))
     {
-      return $this->db->where('id', $id)->update($this->tb, $ds);
+      $this->db->where('id', $id);
+      return $this->db->update('user', $ds);
     }
 
     return FALSE;
   }
 
 
-  public function delete($id)
+
+  public function delete_user($id)
   {
-    return $this->db->where('id', $id)->delete($this->tb);
+    return $this->db->where('id', $id)->delete('user');
   }
+
+
+
+  public function get_user($id)
+  {
+    $rs = $this->db->where('id', $id)->get('user');
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return FALSE;
+  }
+
+
+  public function get_user_by_uid($uid)
+  {
+    $rs = $this->db->where('uid', $uid)->get('user');
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return FALSE;
+  }
+
+
+  public function get($uname)
+  {
+    $rs = $this->db->where('uname', $uname)->get('user');
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return FALSE;
+  }
+
 
 
   public function get_name($uname)
   {
-    $rs = $this->db->where('uname', $uname)->get($this->tb);
-
+    $rs = $this->db->where('uname', $uname)->get('user');
     if($rs->num_rows() == 1)
     {
       return $rs->row()->name;
     }
 
-    return NULL;
+    return "";
   }
 
 
-  public function get_uname($id)
+  public function get_users(array $ds = array(), $perpage = 50, $offset = 0)
   {
-    $rs = $this->db->select('uname')->where('id', $id)->get($this->tb);
 
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->uname;
-    }
+		$this->db
+		->select('user.*, user.name AS dname, profile.name AS pname')
+		->from('user')
+		->join('profile', 'user.id_profile = profile.id', 'left');
+
+		if(!empty($ds['uname']))
+		{
+			$this->db->like('user.uname', $ds['uname']);
+		}
+
+		if(!empty($ds['dname']))
+		{
+			$this->db->like('user.name', $ds['dname']);
+		}
+
+		if(!empty($ds['profile']))
+		{
+			$this->db->like('profile.name', $ds['profile']);
+		}
+
+		$rs = $this->db->order_by('user.name', 'ASC')->limit($perpage, $offset)->get();
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
 
     return NULL;
   }
 
 
-  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+
+  public function get_list(array $ds = array(), $perpage = 50, $offset = 0)
   {
-    $this->db
-    ->select('u.*, p.name AS profile_name')
-    ->from('user AS u')
-    ->join('profile AS p', 'u.id_profile = p.id', 'left')
-    ->where('u.id >', 0);
 
-    if( ! empty($ds['uname']))
+		$this->db
+		->select('user.*, user.name AS dname, profile.name AS pname')
+		->from('user')
+		->join('profile', 'user.id_profile = profile.id', 'left');
+
+		if( ! empty($ds['uname']))
+		{
+			$this->db->like('user.uname', $ds['uname']);
+		}
+
+		if( ! empty($ds['dname']))
+		{
+			$this->db->like('user.name', $ds['dname']);
+		}
+
+		if( ! empty($ds['profile']))
+		{
+			$this->db->like('profile.name', $ds['profile']);
+		}
+
+    if(isset($ds['status']) && $ds['status'] != "" && $ds['status'] != 'all')
     {
-      $this->db->like('u.uname', $ds['uname']);
+      $this->db->where('user.active', $ds['status']);
     }
 
-    if( ! empty($ds['dname']))
-    {
-      $this->db->like('u.name', $ds['dname']);
-    }
+		$rs = $this->db->order_by('user.name', 'ASC')->limit($perpage, $offset)->get();
 
-    if( ! empty($ds['profile']) && $ds['profile'] != 'all')
-    {
-      $this->db->where('u.id_profile', $ds['profile']);
-    }
-
-    if( isset($ds['active']) && $ds['active'] != 'all')
-    {
-      $this->db->where('u.active', $ds['active']);
-    }
-
-    $rs = $this->db->order_by('u.uname', 'DESC')->limit($perpage, $offset)->get();
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
 
     return NULL;
   }
+
+
+
 
 
   public function count_rows(array $ds = array())
   {
-    $this->db->where('id >', 0);
+		$this->db
+		->from('user')
+		->join('profile', 'user.id_profile = profile.id', 'left');
 
-    if( ! empty($ds['uname']))
+		if(!empty($ds['uname']))
+		{
+			$this->db->like('user.uname', $ds['uname']);
+		}
+
+		if(!empty($ds['dname']))
+		{
+			$this->db->like('user.name', $ds['dname']);
+		}
+
+		if(!empty($ds['profile']))
+		{
+			$this->db->like('profile.name', $ds['profile']);
+		}
+
+    if(isset($ds['status']) && $ds['status'] != "" && $ds['status'] != 'all')
     {
-      $this->db->like('uname', $ds['uname']);
+      $this->db->where('user.active', $ds['status']);
     }
 
-    if( ! empty($ds['dname']))
-    {
-      $this->db->like('name', $ds['dname']);
-    }
-
-    if( ! empty($ds['profile']) && $ds['profile'] != 'all')
-    {
-      $this->db->where('id_profile', $ds['profile']);
-    }
-
-    if( isset($ds['active']) && $ds['active'] != 'all')
-    {
-      $this->db->where('active', $ds['active']);
-    }
-
-    return $this->db->count_all_results($this->tb);
+    return $this->db->count_all_results();
   }
+
+
+
+
 
 
   public function get_permission($menu, $uid, $id_profile)
   {
-    if( ! empty($menu))
+    if(!empty($menu))
     {
       $rs = $this->db->where('code', $menu)->get('menu');
-
       if($rs->num_rows() === 1)
       {
         if($rs->row()->valid == 1)
@@ -249,59 +279,162 @@ class User_model extends CI_Model
   }
 
 
-  public function is_exists_uname($uname, $id = NULL)
+  //--- activate suspended user by id
+  public function active_user($id)
   {
-    if( ! empty($id))
+    $this->db->set('active', 1)->where('id', $id);
+
+    if($this->db->update('user'))
+    {
+      return TRUE;
+    }
+
+    return $this->db->error();
+  }
+
+
+
+
+//---- Suspend activeted user by id
+  public function disactive_user($id)
+  {
+    $this->db->set('active', 0)->where('id', $id);
+    if($this->db->update('user'))
+    {
+      return TRUE;
+    }
+
+    return $this->db->error();
+  }
+
+
+
+
+
+  public function is_exists_uname($uname, $id)
+  {
+    if($id !== '')
     {
       $this->db->where('id !=', $id);
     }
 
-    $count = $this->db->where('uname', $uname)->count_all_results($this->tb);
+    $rs = $this->db->where('uname', $uname)->get('user');
 
-    return $count > 0 ? TRUE : FALSE;
+    if($rs->num_rows() > 0)
+    {
+      return TRUE;
+    }
+
+    return FALSE;
   }
 
 
-  public function is_exists_name($name, $id = NULL)
+
+  public function is_exists_display_name($dname, $id)
   {
-    if( ! empty($id))
+    if($id !== '')
     {
       $this->db->where('id !=', $id);
     }
 
-    $count = $this->db->where('name', $name)->count_all_results($this->tb);
+    $rs = $this->db->where('name', $dname)->get('user');
 
-    return $count > 0 ? TRUE : FALSE;
+    if($rs->num_rows() > 0)
+    {
+      return TRUE;
+    }
+
+    return FALSE;
   }
+
+
+
+  public function is_skey_exists($skey, $uid)
+  {
+    $rs = $this->db->where('skey', $skey)->where('uid !=', $uid)->get('user');
+    if($rs->num_rows() > 0)
+    {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
 
 
   public function get_user_credentials($uname)
   {
-    $rs = $this->db->where('uname', $uname)->get($this->tb);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return NULL;
+    $this->db->where('uname', $uname);
+    $rs = $this->db->get('user');
+    return $rs->row();
   }
+
+
+
 
 
   public function change_password($id, $pwd)
   {
-    return $this->db->set('pwd', $pwd)->where('id', $id)->update($this->tb);
+    $this->db->set('pwd', $pwd);
+    $this->db->where('id', $id);
+    return $this->db->update('user');
   }
+
 
 
   public function verify_uid($uid)
   {
-    if( $uid != NULL)
+    $this->db->select('uid');
+    $this->db->where('uid', $uid);
+    $this->db->where('active', 1);
+    $rs = $this->db->get('user');
+
+    return $rs->num_rows() === 1 ? TRUE : FALSE;
+  }
+
+
+  public function is_viewer($uid)
+  {
+    $rs = $this->db
+    ->select('uid')
+    ->where('uid', $uid)
+    ->where('is_viewer', 1)
+    ->get('user');
+
+    return $rs->num_rows() === 1 ? TRUE : FALSE;
+  }
+
+
+
+
+  public function get_user_credentials_by_skey($skey)
+  {
+    if(!empty($skey))
     {
-      return $this->db->where('uid', $uid)->where('active', 1)->count_all_results($this->tb) == 1 ? TRUE : FALSE;
+      $rs = $this->db->where('skey', $skey)->get('user');
+      if($rs->num_rows() === 1)
+      {
+        return $rs->row();
+      }
     }
 
     return FALSE;
+  }
+
+
+  public function search($txt)
+  {
+    $qr = "SELECT uname FROM user WHERE uname LIKE '%".$txt."%' OR name LIKE '%".$txt."%'";
+    $rs = $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+    else
+    {
+      return array();
+    }
+
   }
 
 

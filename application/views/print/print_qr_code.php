@@ -81,8 +81,8 @@
           <div class="sticker-label">
             <div class="sticker-content">
               <table class="width-100">
-                <tr><td class="text-center"><image src="data:image/png;base64, <?php echo $rs->file; ?>" style="width:45mm;"/></td></tr>
-                <tr><td class="text-center font-size-32"><?php echo $rs->name; ?></td></tr>
+                <tr><td class="text-center"><image src="data:image/png;base64, <?php echo $rs->file; ?>" style="width:40mm;"/></td></tr>
+                <tr><td class="text-center" style="font-size:32px;"><?php echo $rs->name; ?></td></tr>
                 <tr><td class="text-center"><image src="<?php echo base_url().'assets/barcode/barcode.php?text='.$rs->code.'&font_size=0'; ?>" style="width:70mm;" /></td></tr>
               </table>
             </div>

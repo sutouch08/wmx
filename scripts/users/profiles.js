@@ -1,65 +1,24 @@
-function addNew() {
-  window.location.href = HOME + 'add_new';
+function newProfile(){
+  window.location.href = BASE_URL+'users/profiles/add_profile';
 }
+
 
 
 function goBack(){
-  window.location.href = HOME;
-}
-
-
-function add() {
-  clearErrorByClass('e');
-
-  let name = $('#name').val().trim();
-
-  if(name.length == 0) {
-    $('#name').hasError("Name is required !");
-    return false;
-  }
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'add',
-    type:'POST',
-    cache:false,
-    data:{
-      'name' : name
-    },
-    success:function(rs) {
-      load_out();
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-
-        if(ds.status === 'success') {
-          swal({
-            title:'Success',
-            type:'success',
-            timer:1000
-          });
-
-          setTimeout(() => {
-            addNew();
-          }, 1200);
-        }
-        else {
-          showError(ds.message);
-        }
-      }
-      else {
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      load_out();
-      showError(rs);
-    }
-  })
+  window.location.href = BASE_URL+'users/profiles';
 }
 
 function getEdit(id){
-  window.location.href = HOME + 'edit/'+id;
+  window.location.href = BASE_URL + 'users/profiles/edit_profile/'+id;
+}
+
+
+function clearFilter(){
+  var url = BASE_URL+'users/profiles/clear_filter';
+  var page = BASE_URL+'users/profiles';
+  $.get(url, function(rs){
+    window.location.href = page;
+  });
 }
 
 
@@ -69,10 +28,10 @@ function getDelete(id, name){
     text:'ต้องการลบ '+ name +' หรือไม่ ?',
     type:'warning',
     showCancelButton: true,
-    confirmButtonColor: '#FA5858',
-    confirmButtonText: 'ใช่, ฉันต้องการลบ',
-    cancelButtonText: 'ยกเลิก',
-    closeOnConfirm: false
+		confirmButtonColor: '#FA5858',
+		confirmButtonText: 'ใช่, ฉันต้องการลบ',
+		cancelButtonText: 'ยกเลิก',
+		closeOnConfirm: false
   },function(){
     window.location.href = BASE_URL + 'users/profiles/delete_profile/'+id;
   })

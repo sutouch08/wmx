@@ -6,12 +6,33 @@
 		<title>Login Page - <?php echo getConfig('COMPANY_NAME'); ?></title>
 		<meta name="description" content="User login page" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
+
+		<!-- text fonts -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
+
+		<!-- ace styles -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" />
+
+		<!--[if lte IE 9]>
+			<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-part2.css" />
+		<![endif]-->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-rtl.css" />
+
+		<!--[if lte IE 9]>
+		  <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-ie.css" />
+		<![endif]-->
+
+		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+
+		<!--[if lt IE 9]>
+		<script src="<?php echo base_url(); ?>assets/js/html5shiv.js"></script>
+		<script src="<?php echo base_url(); ?>assets/js/respond.js"></script>
+		<![endif]-->
 	</head>
+
 	<body class="login-layout blur-login">
 		<div class="main-container">
 			<div class="main-content">
@@ -33,6 +54,7 @@
 									<div class="widget-body">
 										<div class="widget-main">
 											<h4 class="header blue lighter bigger">
+
 												Please Enter Your Information
 											</h4>
 
@@ -57,7 +79,8 @@
 													<div class="space"></div>
 
 													<div class="clearfix">
-														<label class="inline" id="rem-label">
+
+														<label class="inline" id="rem-label" style="visibility:hidden;">
 															<input type="checkbox" name="remember" id="rem-box" class="ace" value="1" />
 															<span class="lbl"> Remember Me</span>
 														</label>
@@ -117,22 +140,23 @@
 	</body>
 
 	<script>
-		// window.addEventListener('load', () => {
-		// 	const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-		// 	const rem = document.getElementById('rem-box');
-		// 	const label = document.getElementById('rem-label');
-		//
-		// 	console.log(isMobile);
-		//
-		// 	if(isMobile) {
-		// 		rem.checked = true;
-		// 		label.style.visibility = 'visible';
-		// 	}
-		// 	else {
-		// 		rem.checked = false;
-		// 		label.style.visibility = 'hidden';
-		// 	}
-		// });
+
+		window.addEventListener('load', () => {
+			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+			const rem = document.getElementById('rem-box');
+			const label = document.getElementById('rem-label');
+
+			console.log(isMobile);
+
+			if(isMobile) {
+				rem.checked = true;
+				label.style.visibility = 'visible';
+			}
+			else {
+				rem.checked = false;
+				label.style.visibility = 'hidden';
+			}
+		});
 
 		function showPwd() {
 			var x = document.getElementById("pwd");
@@ -149,5 +173,6 @@
 				y.classList.add('fa-eye');
 			}
 		}
+
 	</script>
 </html>

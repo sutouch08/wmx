@@ -1,9 +1,9 @@
 <?php
 function _check_login()
 {
-  $ci =& get_instance();
+  $CI =& get_instance();
   $uid = get_cookie('uid');
-  if($uid === NULL OR $ci->user_model->verify_uid($uid) === FALSE)
+  if($uid === NULL OR $CI->user_model->verify_uid($uid) === FALSE)
   {
     redirect(base_url().'users/authentication');
   }
@@ -12,10 +12,10 @@ function _check_login()
 
 function get_permission($menu, $uid = NULL, $id_profile = NULL)
 {
-  $ci =& get_instance();
+  $CI =& get_instance();
 
   $uid = $uid === NULL ? get_cookie('uid') : $uid;
-  $user = $ci->user_model->get_user_by_uid($uid);
+  $user = $CI->user_model->get_user_by_uid($uid);
   if(empty($user))
   {
     return reject_permission();
@@ -33,7 +33,7 @@ function get_permission($menu, $uid = NULL, $id_profile = NULL)
   }
   else
   {
-    $pm = $ci->user_model->get_permission($menu, $uid, $user->id_profile);
+    $pm = $CI->user_model->get_permission($menu, $uid, $user->id_profile);
     if(empty($pm))
     {
       return reject_permission();
@@ -71,8 +71,9 @@ function _can_view_page($can_view)
 {
   if( ! $can_view)
   {
-    $ci =& get_instance();
-    $ci->load->view('deny_page');
+    $CI =& get_instance();
+    $CI->load->view('deny_page');
+    //redirect('deny_page');
   }
 }
 
@@ -81,8 +82,8 @@ function profile_name_in($text)
 {
   if($text !== '')
   {
-    $ci =& get_instance();
-    $ci->db->select('id');
+    $CI =& get_instance();
+    $CI->db->select('id');
   }
 }
 
@@ -90,9 +91,9 @@ function profile_name_in($text)
 function user_in($txt)
 {
   $sc = array('0');
-  $ci =& get_instance();
-  $ci->load->model('users/user_model');
-  $users = $ci->user_model->search($txt);
+  $CI =& get_instance();
+  $CI->load->model('users/user_model');
+  $users = $CI->user_model->search($txt);
 
   if(!empty($users))
   {
@@ -153,7 +154,7 @@ function select_user($uname = NULL)
 	{
 		foreach($option as $rs)
 		{
-			$ds .= '<option value="'.$rs->uname.'" data-id="'.$rs->id.'" data-uid="'.$rs->uid.'" '.is_selected($rs->uname, $uname).'>'.$rs->uname.' | '.$rs->name.'</option>';
+			$ds .= '<option value="'.$rs->uname.'" '.is_selected($rs->uname, $uname).'>'.$rs->name.'</option>';
 		}
 	}
 
@@ -165,15 +166,9 @@ function display_name($uname)
 {
   $ci =& get_instance();
   $ci->load->model('users/user_model');
-  return $ci->user_model->get_name($uname);
-}
+  $name = $ci->user_model->get_name($uname);
 
-
-function uname($id)
-{
-  $ci =& get_instance();
-  $ci->load->model('users/user_model');
-  return $ci->user_model->get_uname($id);
+  return $name;
 }
 
  ?>

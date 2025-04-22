@@ -5,7 +5,6 @@ class Profiles extends PS_Controller{
 	public $menu_code = 'SCPROF'; //--- Add/Edit Profile
 	public $menu_group_code = 'SC'; //--- System security
 	public $title = 'Profiles';
-	public $segment = 4;
 
   public function __construct()
   {
@@ -15,77 +14,62 @@ class Profiles extends PS_Controller{
   }
 
 
+
+
   public function index()
   {
-		$filter = array(
-			'name' => get_filter('name', 'profile_name', '')
-		);
+		$profileName = get_filter('profileName', 'profileName', '');
 
-		$perpage = get_rows();
-		$rows = $this->profile_model->count_rows($filter);
-		$filter['list'] = $this->profile_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+		//--- แสดงผลกี่รายการต่อหน้า
+		$perpage = get_filter('set_rows', 'rows', 20);
+		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
+		if($perpage > 300)
+		{
+			$perpage = get_filter('rows', 'rows', 300);
+		}
+
+		$segment = 4; //-- url segment
+		$rows = $this->profile_model->count_rows($profileName);
+
+		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+
+		$result = $this->profile_model->get_profiles($profileName, $perpage, $this->uri->segment($segment));
+    $data = array();
+
+    if(!empty($result))
+    {
+      foreach($result as $rs)
+      {
+        $row = new stdClass();
+        $row->id = $rs->id;
+        $row->name = $rs->name;
+        $row->member = $this->profile_model->count_members($rs->id);
+        $data[] = $row;
+      }
+    }
+
+    $ds = array(
+      'profileName' => $profileName,
+			'data' => $data
+    );
+
 		$this->pagination->initialize($init);
 
-    $this->load->view('users/profile_list', $filter);
+    $this->load->view('users/profile_view', $ds);
   }
 
 
-	public function add_new()
-	{
-		if($this->pm->can_add)
-		{
-			$this->load->view('users/profile_add');
-		}
-		else
-		{
-			$this->deny_page();
-		}
-	}
 
 
-	public function add()
-	{
-		$sc = TRUE;
+  public function add_profile()
+  {
+    $data['pname'] = $this->session->flashdata('profileName');
+    $this->title = 'New profile';
+    $this->load->view('users/profile_add_view', $data);
+  }
 
-		if($this->pm->can_add)
-		{
-			$name = trim($this->input->post('name'));
 
-			if( ! empty($name))
-			{
-				if( ! $this->profile_model->is_extsts($name))
-				{
-					$arr = array(
-						'name' => $name
-					);
-
-					if( ! $this->profile_model->add($arr))
-					{
-						$sc = FALSE;
-						set_error('insert');
-					}
-				}
-				else
-				{
-					$sc = FALSE;
-					set_error('exists', $name);
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				set_error('required');
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('permission');
-		}
-
-		$this->_json_response($sc);
-	}
 
 
   public function edit_profile($id)

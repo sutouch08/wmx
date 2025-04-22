@@ -2394,7 +2394,7 @@ input[type="search"] {
   input[type="time"].input-sm,
   input[type="datetime-local"].input-sm,
   input[type="month"].input-sm {
-    line-height: 31px;
+    line-height: 30px;
   }
   input[type="date"].input-lg,
   input[type="time"].input-lg,
@@ -2479,7 +2479,7 @@ fieldset[disabled] .checkbox label {
 }
 .input-sm,
 .form-group-sm .form-control {
-  height: 31px;
+  height: 30px;
   padding: 5px 10px;
   font-size: 12px;
   line-height: 1.5;
@@ -2487,8 +2487,8 @@ fieldset[disabled] .checkbox label {
 }
 select.input-sm,
 select.form-group-sm .form-control {
-  height: 31px;
-  line-height: 31px;
+  height: 30px;
+  line-height: 30px;
 }
 textarea.input-sm,
 textarea.form-group-sm .form-control,

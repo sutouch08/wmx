@@ -1,182 +1,29 @@
-function addNew(){
-  window.location.href = HOME +'add_new';
+var validUname = true;
+var validDname = true;
+var validPwd = true;
+var HOME = BASE_URL + 'users/users/';
+
+
+function newUser(){
+  window.location.href = BASE_URL+'users/users/add_user';
 }
+
 
 
 function goBack(){
-  window.location.href = HOME;
+  window.location.href = BASE_URL+'users/users';
 }
 
-
 function getEdit(id){
-  window.location.href = HOME + 'edit/'+id;
+  window.location.href = BASE_URL + 'users/users/edit_user/'+id;
 }
 
 
 function getReset(id){
-  window.location.href = HOME + 'reset_password/'+id;
+  window.location.href = BASE_URL + 'users/users/reset_password/'+id;
 }
 
 
-function showPwd() {
-  $('#pwd').attr('type', 'text');
-  $('#cm-pwd').attr('type', 'text');
-  $('.show-eye').addClass('hide');
-  $('.hide-eye').removeClass('hide');
-}
-
-
-function hidePwd() {
-  $('#pwd').attr('type', 'password');
-  $('#cm-pwd').attr('type', 'password');
-  $('.hide-eye').addClass('hide');
-  $('.show-eye').removeClass('hide');
-}
-
-
-function add() {
-  clearErrorByClass('e');
-
-  let h = {
-    'uname' : $('#uname').val().trim(),
-    'dname' : $('#dname').val().trim(),
-    'pwd' : $('#pwd').val().trim(),
-    'cmp' : $('#cm-pwd').val().trim(),
-    'id_profile' : $('#profile').val(),
-    'active' : $('#active').is(':checked') ? 1 : 0,
-    'force' : $('#force-reset').is(':checked') ? 1 : 0
-  };
-
-  if(h.uname.length == 0) {
-    $('#uname').hasError("User name is required");
-    return false;
-  }
-
-  if(h.dname.length == 0) {
-    $('#dname').hasError("Display name is required");
-    return false;
-  }
-
-  if(h.pwd.length == 0) {
-    $('#pwd').hasError('Password is required !');
-    return false;
-  }
-
-  if(h.pwd.length > 0) {
-    if( ! validatePassword(h.pwd)) {
-      $('#pwd').hasError('รหัสผ่านต้องมีความยาว 8 - 20 ตัวอักษร และต้องประกอบด้วย ตัวอักษรภาษาอังกฤษ พิมพ์เล็ก พิมพ์ใหญ่ และตัวเลขอย่างน้อย อย่างละตัว');
-      return false;
-    }
-
-    if(h.pwd != h.cmp) {
-      $('#cm-pwd').hasError('Password missmatch!');
-			return false;
-    }
-  }
-
-  if(h.id_profile == "") {
-    $('#profile').hasError("Please select permission profile");
-    return false;
-  }
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'add',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      load_out();
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-        if(ds.status == 'success') {
-          swal({
-            title:'Success',
-            text:'Create user successfully',
-            type:'success'
-          }, function() {
-            window.location.reload();
-          })
-        }
-        else {
-          showError(ds.message);
-        }
-      }
-      else {
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      load_out();
-      showError(rs);
-    }
-  })
-}
-
-
-function update() {
-  clearErrorByClass('e');
-
-  let h = {
-    'id' : $('#id').val(),
-    'uname' : $('#uname').val().trim(),
-    'dname' : $('#dname').val().trim(),
-    'id_profile' : $('#profile').val(),
-    'active' : $('#active').is(':checked') ? 1 : 0
-  };
-
-  if(h.uname.length == 0) {
-    $('#uname').hasError("User name is required");
-    return false;
-  }
-
-  if(h.dname.length == 0) {
-    $('#dname').hasError("Display name is required");
-    return false;
-  }
-
-  if(h.id_profile == "") {
-    $('#profile').hasError("Please select permission profile");
-    return false;
-  }
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'update',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      load_out();
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-        if(ds.status == 'success') {
-          swal({
-            title:'Success',
-            type:'success',
-            timer:1000
-          });
-        }
-        else {
-          showError(ds.message);
-        }
-      }
-      else {
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      load_out();
-      showError(rs);
-    }
-  })
-}
 
 
 function getDelete(id, uname){
@@ -219,7 +66,45 @@ function getDelete(id, uname){
 }
 
 
-function validatePassword(input) {
+
+
+
+
+function addUser(){
+  var dname = $('#dname').val();
+  var uname = $('#uname').val();
+  var pwd = $('#pwd').val();
+  var cmp = $('#cm-pwd').val();
+  var profile = $('#profile').val();
+  var status = $('input[name=status]:checked').val();
+
+  if( !validDname || !validUname || !validPwd ){
+    return false;
+  }
+
+  $('#addForm').submit();
+} //--- end function
+
+
+
+function updateUser(){
+  var id = $('#user_id').val();
+  var dname = $('#dname').val();
+  var uname = $('#uname').val();
+  var profile = $('#profile').val();
+  var status = $('input[name=status]:checked').val();
+
+  if( !validDname || !validUname ){
+    return false;
+  }
+
+  $('#editForm').submit();
+
+}
+
+
+function validatePassword(input)
+{
 	var passw = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,20}$/;
 
 	if(input.match(passw))
@@ -233,68 +118,205 @@ function validatePassword(input) {
 }
 
 
-function changePassword() {
-  clearErrorByClass('e');
+function changePassword(){
+  var id = $('#user_id').val();
+  var pwd = $('#pwd').val();
+  var cmp = $('#pwd').val();
+  if(pwd.length == 0 || cmp.length == 0) {
+    validPWD();
+  }
 
-  let h = {
-    'id' : $('#id').val(),
-    'pwd' : $('#pwd').val().trim(),
-    'cmp' : $('#cm-pwd').val().trim(),
-    'force' : $('#force-reset').is(':checked') ? 1 : 0
-  };
-
-  if(h.pwd.length == 0) {
-    $('#pwd').hasError('Password is required !');
+  if(! validPwd){
     return false;
   }
 
-  if(h.pwd.length > 0) {
-    if( ! validatePassword(h.pwd)) {
-      $('#pwd').hasError('รหัสผ่านต้องมีความยาว 8 - 20 ตัวอักษร และต้องประกอบด้วย ตัวอักษรภาษาอังกฤษ พิมพ์เล็ก พิมพ์ใหญ่ และตัวเลขอย่างน้อย อย่างละตัว');
-      return false;
-    }
+  $('#resetForm').submit();
+}
 
-    if(h.pwd != h.cmp) {
-      $('#cm-pwd').hasError('Password missmatch!');
+
+
+function validPWD(){
+  var pwd = $('#pwd').val();
+  var cmp = $('#cm-pwd').val();
+  if(pwd.length > 0) {
+
+		if(!validatePassword(pwd)) {
+			$('#pwd-error').text('รหัสผ่านต้องมีความยาว 8 - 20 ตัวอักษร และต้องประกอบด้วย ตัวอักษรภาษาอังกฤษ พิมพ์เล็ก พิมพ์ใหญ่ และตัวเลขอย่างน้อย อย่างละตัว');
+      $('#pwd').addClass('has-error');
+			validPwd = false;
+      return false;
+		}
+		else {
+			$('#pwd-error').text('');
+			$('#pwd').removeClass('has-error');
+			validPwd = true;
+		}
+
+    if(pwd != cmp) {
+      $('#cm-pwd-error').text('Password missmatch!');
+      $('#cm-pwd').addClass('has-error');
+      validPwd = false;
 			return false;
     }
+		else {
+      $('#cm-pwd-error').text('');
+      $('#cm-pwd').removeClass('has-error');
+      validPwd = true;
+    }
   }
+	else {
+    $('#pwd-error').text('Password is required!');
+    $('#pwd').addClass('has-error');
+    validPwd = false;
+  }
+}
 
-  load_in();
 
-  $.ajax({
-    url:HOME + 'change_password',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      load_out();
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-        if(ds.status == 'success') {
-          swal({
-            title:'Success',
-            text:'Password has been changed',
-            type:'success',
-            timer:1000
-          })
+
+
+
+function validUserName(){
+  var uname = $('#uname').val();
+  var id = $('#user_id').val();
+  if(uname.length > 0){
+    let url = BASE_URL + 'users/users/valid_uname/'+uname+'/'+id;
+    $.get(url, function(rs){
+        rs = $.trim(rs);
+        if(rs === 'exists'){
+          $('#uname-error').text('User name already exists!');
+          $('#uname').addClass('has-error');
+          validUname = false;
+        }else{
+          $('#uname-error').text('');
+          $('#uname').removeClass('has-error');
+          validUname = true;
         }
-        else {
-          showError(ds.message);
-        }
+    });
+  }else{
+    $('#uname-error').text('User name is required!');
+    $('#uname').addClass('has-error');
+    validUname = false;
+  }
+}
+
+
+
+function validDisplayName(){
+  var dname = $('#dname').val();
+  var id = $('#user_id').val();
+  if(dname.length > 0){
+    let url = BASE_URL + 'users/users/valid_dname/'+dname+'/'+id;
+    $.get(url, function(rs){
+      rs = $.trim(rs);
+      if(rs === 'exists'){
+        $('#dname-error').text('Display name already exists!');
+        $('#dname').addClass('has-error');
+        validDname = false;
+      }else{
+        $('#dname-error').text('');
+        $('#dname').removeClass('has-error');
+        validDname = true;
       }
-      else {
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      load_out();
-      showError(rs);
+    })
+  }else{
+    $('#dname-error').text('Display name is required!');
+    $('#dname').addClass('has-error');
+    validDname = false;
+  }
+}
+
+
+
+
+$('#dname').focusout(function(){
+  validDisplayName();
+})
+
+
+
+$('#uname').focusout(function(){
+  validUserName();
+})
+
+
+
+$('#pwd').focusout(function(){
+  validPWD();
+})
+
+
+$('#cm-pwd').keyup(function(e){
+  validPWD();
+})
+
+$('#cm-pwd').focusout(function(){
+  validPWD();
+})
+
+
+function clearFilter(){
+  var url = BASE_URL+'users/users/clear_filter';
+  var page = BASE_URL+'users/users';
+  $.get(url, function(rs){
+    window.location.href = page;
+  });
+}
+
+
+
+
+//--- active user
+function setActive(id){
+  url = BASE_URL+'users/users/active_user/'+id;
+  $.get(url, function(rs){
+    rs = $.trim(rs);
+    if(rs === 'success'){
+      $('#btn-active-'+id).addClass('hide');
+      $('#btn-disActive-'+id).removeClass('hide');
+
+      $('#label-disActive-'+id).addClass('hide');
+      $('#label-active-'+id).removeClass('hide');
+    }else{
+      //err = $.parseJSON(rs);
+      swal({
+        title:'Error!',
+        text: rs,
+        type:'error'
+      });
+    }
+  });
+}
+
+
+
+
+
+//--- disactive user
+function disActive(id){
+  url = BASE_URL+'users/users/disactive_user/'+id;
+  $.get(url, function(rs){
+    rs = $.trim(rs);
+    if(rs === 'success'){
+      $('#btn-disActive-'+id).addClass('hide');
+      $('#btn-active-'+id).removeClass('hide');
+
+      $('#label-active-'+id).addClass('hide');
+      $('#label-disActive-'+id).removeClass('hide');
+    }else{
+      swal({
+        title:'Error!',
+        text:rs,
+        type:'error'
+      });
     }
   })
 }
+
+
+function getSearch(){
+  $('#searchForm').submit();
+}
+
 
 
 function getPermission(id) {
@@ -329,6 +351,15 @@ function getPermission(id) {
       }
     }
   });
+}
+
+
+function CloseModal() {
+  $('#permission-modal').modal('hide');
+}
+
+function CloseModalAll() {
+  $('#all-permission-modal').modal('hide');
 }
 
 

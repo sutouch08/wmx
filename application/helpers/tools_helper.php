@@ -1,7 +1,15 @@
 <?php
+function is_api($is_wms = 0, $wmsApi = FALSE, $sokoApi = FALSE)
+{
+	$is_api = $is_wms == 0 ? FALSE : ($is_wms == 1 && $wmsApi ? TRUE : ($is_wms == 2 && $sokoApi ? TRUE : FALSE));
+
+	return $is_api;
+}
+
+
 function setToken($token)
 {
-	$ci =& get_instance();
+	$CI =& get_instance();
 	$cookie = array(
 		'name' => 'file_download_token',
 		'value' => $token,
@@ -9,7 +17,7 @@ function setToken($token)
 		'path' => '/'
 	);
 
-	return $ci->input->set_cookie($cookie);
+	return $CI->input->set_cookie($cookie);
 }
 
 
@@ -176,17 +184,17 @@ function is_active($val, $showX = TRUE)
 
 function get_filter($postName, $cookieName, $defaultValue = "")
 {
-  $ci =& get_instance();
+  $CI =& get_instance();
   $sc = '';
 
-  if($ci->input->post($postName) !== NULL)
+  if($CI->input->post($postName) !== NULL)
   {
-    $sc = trim($ci->input->post($postName));
-    $ci->input->set_cookie(array('name' => $cookieName, 'value' => $sc, 'expire' => 3600 , 'path' => '/'));
+    $sc = trim($CI->input->post($postName));
+    $CI->input->set_cookie(array('name' => $cookieName, 'value' => $sc, 'expire' => 3600 , 'path' => '/'));
   }
-  else if($ci->input->cookie($cookieName) !== NULL)
+  else if($CI->input->cookie($cookieName) !== NULL)
   {
-    $sc = $ci->input->cookie($cookieName);
+    $sc = $CI->input->cookie($cookieName);
   }
   else
   {
@@ -250,12 +258,34 @@ function ac_format($val, $digit = 0)
 
 function getConfig($code)
 {
-  $ci =& get_instance();
-  $rs = $ci->db->select('value')->where('code', $code)->get('config');
+  $CI =& get_instance();
+  $rs = $CI->db->select('value')->where('code', $code)->get('config');
   if($rs->num_rows() == 1)
   {
     return $rs->row()->value;
   }
+
+	return NULL;
+}
+
+
+function getWrxApiConfig()
+{
+	$fields = ['WRX_API', 'WRX_API_HOST', 'WRX_API_CREDENTIAL', 'WRX_TEST', 'WRX_LOG_JSON'];
+	$ci =& get_instance();
+	$rs = $ci->db->select('code, value')->where_in('code', $fields)->get('config');
+
+	if($rs->num_rows() >  0)
+	{
+		$ds = [];
+
+		foreach($rs->result() as $ro)
+		{
+			$ds[$ro->code] = $ro->value;
+		}
+
+		return $ds;
+	}
 
 	return NULL;
 }
@@ -282,7 +312,6 @@ function get_vat_amount($amount, $vat = NULL, $type = 'I')
 			$re_vat = ($amount * $vat) / (100+$vat);
 		}
 	}
-
 
 	return round($re_vat,6);
 }
@@ -366,9 +395,9 @@ function set_error($key, $name = "data")
 		'delete' => "Delete {$name} failed.",
 		'permission' => "You don't have permission to perform this operation.",
 		'required' => "Missing required parameter.",
-		'exists' => "{$name} already exists.",
+		'exists' => "'{$name}' already exists.",
 		'status' => "Invalid document status",
-		'notfound' => "Data or Document number not found",
+		'notfound' => "Document number not found",
 		'transection' => "Unable to delete {$name} because transections exists or link to other module."
 	);
 
@@ -380,8 +409,8 @@ function set_error($key, $name = "data")
 
 function set_message($message)
 {
-  $ci =& get_instance();
-  $ci->session->set_flashdata('success', $message);
+  $CI =& get_instance();
+  $CI->session->set_flashdata('success', $message);
 }
 
 
@@ -424,153 +453,119 @@ function get_zero($value)
 
 function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment = 3)
 {
-    $rows = get_rows();
-    $input_rows  = '<p class="pull-right pagination">';
-    $input_rows .= 'ทั้งหมด '.number($total_rows).' รายการ';
-    $input_rows .= '<input type="number" name="set_rows" id="set_rows" class="input-mini text-center margin-left-15 margin-right-10" value="'.$rows.'" />';
-    $input_rows .= 'ต่อหน้า ';
-    $input_rows .= '<buton class="btn btn-success btn-xs" type="button" onClick="set_rows()">แสดง</button>';
-    $input_rows .= '</p>';
+	$rows = get_rows();
+	$input_rows  = '<p class="pull-right pagination">';
+	$input_rows .= 'ทั้งหมด '.number($total_rows).' รายการ';
+	$input_rows .= '<input type="number" name="set_rows" id="set_rows" class="input-mini text-center margin-left-15 margin-right-10" value="'.$rows.'" />';
+	$input_rows .= 'ต่อหน้า ';
+	$input_rows .= '<buton class="btn btn-success btn-xs" type="button" onClick="set_rows()">แสดง</button>';
+	$input_rows .= '</p>';
 
-		$config['full_tag_open'] 		= '<nav><ul class="pagination">';
-		$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav><hr class="hidden-xs">';
-		$config['first_link'] 				= 'First';
-		$config['first_tag_open'] 		= '<li>';
-		$config['first_tag_close'] 		= '</li>';
-		$config['next_link'] 				= 'Next';
-		$config['next_tag_open'] 		= '<li>';
-		$config['next_tag_close'] 	= '</li>';
-		$config['prev_link'] 			= 'prev';
-		$config['prev_tag_open'] 	= '<li>';
-		$config['prev_tag_close'] 	= '</li>';
-		$config['last_link'] 				= 'Last';
-		$config['last_tag_open'] 		= '<li>';
-		$config['last_tag_close'] 		= '</li>';
-		$config['cur_tag_open'] 		= '<li class="active"><a href="#">';
-		$config['cur_tag_close'] 		= '</a></li>';
-		$config['num_tag_open'] 		= '<li>';
-		$config['num_tag_close'] 		= '</li>';
-		$config['uri_segment'] 		= $segment;
-		$config['per_page']			= $perpage;
-		$config['total_rows']			= $total_rows != false ? $total_rows : 0 ;
-		$config['base_url']				= $base_url;
-		return $config;
+	$config['full_tag_open'] 		= '<nav><ul class="pagination">';
+	$config['full_tag_close'] 		= '</ul>'.$input_rows.'</nav><hr class="hidden-xs">';
+	$config['first_link'] 				= 'First';
+	$config['first_tag_open'] 		= '<li>';
+	$config['first_tag_close'] 		= '</li>';
+	$config['next_link'] 				= 'Next';
+	$config['next_tag_open'] 		= '<li>';
+	$config['next_tag_close'] 	= '</li>';
+	$config['prev_link'] 			= 'prev';
+	$config['prev_tag_open'] 	= '<li>';
+	$config['prev_tag_close'] 	= '</li>';
+	$config['last_link'] 				= 'Last';
+	$config['last_tag_open'] 		= '<li>';
+	$config['last_tag_close'] 		= '</li>';
+	$config['cur_tag_open'] 		= '<li class="active"><a href="#">';
+	$config['cur_tag_close'] 		= '</a></li>';
+	$config['num_tag_open'] 		= '<li>';
+	$config['num_tag_close'] 		= '</li>';
+	$config['uri_segment'] 		= $segment;
+	$config['per_page']			= $perpage;
+	$config['total_rows']			= $total_rows != false ? $total_rows : 0 ;
+	$config['base_url']				= $base_url;
+
+	return $config;
+}
+
+
+function convert($txt)
+{
+	//return iconv('UTF-8', 'CP850', $txt);
+	return $txt;
+}
+
+
+function statusBackgroundColor($is_expire, $status, $is_approve = 1)
+{
+	$bk_color = "";
+
+	if($is_expire == 1 OR $status == 2)
+	{
+		$bk_color = $status == 2 ? "#f7c3bf" : "#dbdbdb";
+	}
+	else
+	{
+		switch($status)
+		{
+			case -1 :
+				$bk_color = "#fff4d5";
+				break;
+			case 0 :
+				$bk_color = "#ddf0f9";
+				break;
+			case 1 :
+				$bk_color = $is_approve == 1 ? "#f4ffe7" : "#ffe3b9";
+				break;
+			case 2 :
+				$bk_color = "#f7c3bf";
+				break;
+			case 3 :
+				$bk_color = "#fbe4ff";
+				break;
+      case 4 :
+        $bk_color = "#ffe3b9";
+        break;
+		}
+	}
+
+	return "background-color:{$bk_color};";
+}
+
+function textStatusColor($status = 'P')
+{
+	$bk_color = "";
+
+	$arr = [
+		'P' => "#fff4d5",
+		'S' => "#e1f0ff",
+		'C' => "#f4ffe7",
+		'D' => "#f7c3bf"
+	];
+
+	$bk_color = empty($arr[$status]) ? "" : $arr[$status];
+
+	return "background-color:{$bk_color};";
 }
 
 
 function genUid($lenght = 13)
 {
-    // uniqid gives 13 chars, but you could adjust it to your needs.
-    if (function_exists("random_bytes"))
-		{
-        $bytes = random_bytes(ceil($lenght / 2));
-    }
-		elseif (function_exists("openssl_random_pseudo_bytes"))
-		{
-        $bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
-    }
-		else
-		{
-        $bytes = uniqid('', TRUE);
-    }
-
-    return substr(bin2hex($bytes), 0, $lenght);
-}
-
-function action_logs_label($action = NULL)
-{
-	$arr = array(
-		'create' => 'สร้างโดย',
-		'update' => 'แก้ไขโดย',
-		'approve' => 'อนุมัติโดย',
-		'reject' => 'ปฏิเสธโดย',
-		'cancel' => 'ยกเลิกโดย'
-	);
-
-	return empty($arr[$action]) ? 'Unknow' : $arr[$action];
-}
-
-
-function status_text($status = NULL)
-{
-	$arr = array(
-		'-1' => 'Draft',
-		'0' => 'Pending',
-		'1' => 'Success',
-		'2' => 'Canceled',
-		'9' => 'Closed',
-		'O' => 'Open',
-		'P' => 'Pending',
-		'R' => 'In progress',
-		'C' => 'Completed',
-		'D' => 'Canceled'
-	);
-
-	return empty($arr[$status]) ? 'Unknow' : $arr[$status];
-}
-
-function status_label($status = NULL)
-{
-	$label = '<span class="grey">Unknow</span>';
-
-	switch($status)
+	// uniqid gives 13 chars, but you could adjust it to your needs.
+	if (function_exists("random_bytes"))
 	{
-		case '-1' :
-			$label = '<span class="purple">Draft</span>';
-			break;
-		case '0' :
-			$label = '<span class="orange">Pending</span>';
-			break;
-		case '1' :
-			$label = '<span class="green">Success</span>';
-			break;
-		case '2' :
-			$label = '<span class="red">Canceled</span>';
-			break;
-		case 'P' :
-			$label = '<span class="orange">Pending</span>';
-			break;
-		case 'R' :
-			$label = '<span class="purple">Pending</span>';
-			break;
-		case 'C' :
-			$label = '<span class="green">Completed</span>';
-			break;
-		case 'D' :
-			$label = '<span class="red">Canceled</span>';
-			break;
+		$bytes = random_bytes(ceil($lenght / 2));
+	}
+	elseif (function_exists("openssl_random_pseudo_bytes"))
+	{
+		$bytes = openssl_random_pseudo_bytes(ceil($lenght / 2));
+	}
+	else
+	{
+		$bytes = uniqid('', TRUE);
 	}
 
-	return $label;
+	return substr(bin2hex($bytes), 0, $lenght);
 }
 
-
-function approval_text($status = 'P')
-{
-	$arr = array(
-		'A' => 'Approved',
-		'P' => 'Pending',
-		'R' => 'Rejected'
-	);
-
-	return empty($arr[$status]) ? 'Pending' : $arr[$status];
-}
-
-function approval_label($status = NULL)
-{
-	$label = '<span class="orange">Pending</span>';
-
-	switch($status)
-	{
-		case 'A' :
-			$label = '<span class="green">Approved</span>';
-			break;
-		case 'R' :
-			$label = '<span class="red">Rejected</span>';
-			break;
-	}
-
-	return $label;
-}
 
  ?>

@@ -3,10 +3,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Api_logs_model extends CI_Model
 {
 	private $td = 'api_logs';
+	public $logs;
 
   public function __construct()
   {
     parent::__construct();
+		$this->logs = $this->load->database('logs', TRUE);
   }
 
 	public function add_logs($ds = array())
@@ -17,8 +19,6 @@ class Api_logs_model extends CI_Model
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
-    $this->db->select('id, trans_id, type, api_path, code, action, status, message, date_upd');
-
 		if(!empty($ds['code']))
 		{
 			$this->logs->like('code', $ds['code'], 'after');

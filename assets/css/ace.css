@@ -8799,7 +8799,7 @@ textarea.form-control {
 }
 select {
   padding: 3px 4px;
-  height: 31px;
+  height: 30px;
 }
 select.form-control {
   padding: 4px 6px;
@@ -14888,7 +14888,7 @@ div.ColVis_collectionBackground {
 }
 .select2-container .select2-choice {
   border-radius: 0;
-  height: 31px;
+  height: 30px;
   line-height: 28px;
 }
 .select2-container.select2-drop-above .select2-choice {

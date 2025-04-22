@@ -16,8 +16,7 @@ function goCancle(code){
 }
 
 
-function cancle(code)
-{
+function cancle(code){
 	var reason = $.trim($('#cancle-reason').val());
 
 	if(reason.length < 10)
@@ -96,4 +95,10 @@ $("#toDate").datepicker({
   onClose:function(sd){
     $("#fromDate").datepicker("option", "maxDate", sd);
   }
+});
+
+
+$(document).ready(function() {
+	//---	reload ทุก 5 นาที
+	setTimeout(function(){ goBack(); }, 300000);
 });

@@ -1,208 +1,106 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Users extends PS_Controller {
+class Users extends PS_Controller{
 	public $menu_code = 'SCUSER'; //--- Add/Edit Users
 	public $menu_group_code = 'SC'; //--- System security
 	public $title = 'Users';
-	public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
     $this->home = base_url().'users/users';
-		$this->load->helper('profile');
   }
 
 
-	public function index()
-	{
+
+  public function index()
+  {
 		$filter = array(
-			'uname' => get_filter('uname', 'user_uname', ''),
-			'dname' => get_filter('dname', 'user_name', ''),
-			'profile' => get_filter('profile', 'user_profile', 'all'),
-			'active' => get_filter('active', 'user_active', 'all')
+			'uname' => get_filter('uname', 'user', ''),
+			'dname' => get_filter('dname', 'dname', ''),
+			'profile' => get_filter('profile', 'profile', ''),
+			'status' => get_filter('status', 'status', 'all')
 		);
 
-		$perpage = get_rows();
+		//--- แสดงผลกี่รายการต่อหน้า
+		$perpage = get_filter('set_rows', 'rows', 20);
+		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
+		if($perpage > 300)
+		{
+			$perpage = get_filter('rows', 'rows', 300);
+		}
 
+		$segment = 4; //-- url segment
 		$rows = $this->user_model->count_rows($filter);
 
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
+		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
 
-		$filter['user'] = $this->user_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+		$rs = $this->user_model->get_list($filter, $perpage, $this->uri->segment($segment));
+
+		$filter['data'] = $rs;
 
 		$this->pagination->initialize($init);
-
-		$this->load->view('users/users_list', $filter);
-	}
-
-
-  public function add_new()
-  {
-    $this->load->view('users/user_add');
+    $this->load->view('users/users_view', $filter);
   }
 
 
-	public function add()
+
+
+
+  public function add_user()
+  {
+		$this->load->helper('profile');
+		$this->load->helper('saleman');
+    $this->load->view('users/user_add_view');
+  }
+
+
+	public function edit_user($id)
 	{
-		$sc = TRUE;
-		$ds = json_decode($this->input->post('data'));
-
-		if( ! empty($ds))
-		{
-			if( ! $this->user_model->is_exists_uname($ds->uname))
-			{
-				if( ! $this->user_model->is_exists_name($ds->dname))
-				{
-					$arr = array(
-						'uname' => $ds->uname,
-						'pwd' => password_hash($ds->pwd, PASSWORD_DEFAULT),
-						'name' => $ds->dname,
-						'uid' => genUid(),
-						'id_profile' => $ds->id_profile,
-						'active' => $ds->active,
-						'force_reset' => $ds->force,
-						'create_by' => $this->_user->id
-					);
-
-					if( ! $this->user_model->add($arr))
-					{
-						$sc = FALSE;
-						$this->error = "Failed to create user";
-					}
-				}
-				else
-				{
-					$sc = FALSE;
-					set_error('exists', $ds->dname);
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				set_error('exists', $ds->uname);
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-		$this->_json_response($sc);
-	}
-
-
-	public function edit($id)
-	{
-		$ds = array(
-			'user' => $this->user_model->get_by_id($id)
-		);
-
-		$this->load->view('users/user_edit', $ds);
-	}
-
-
-	public function update()
-	{
-		$sc = TRUE;
-		$ds = json_decode($this->input->post('data'));
-
-		if( ! empty($ds))
-		{
-			$user = $this->user_model->get_by_id($ds->id);
-
-			if( ! empty($user))
-			{
-				if($user->name != $ds->dname)
-				{
-					if($this->user_model->is_exists_name($ds->dname, $ds->id))
-					{
-						$sc = FALSE;
-						set_error('exists', $ds->dname);
-					}
-				}
-
-
-				if($sc === TRUE)
-				{
-					$arr = array(
-						'name' => $ds->dname,
-						'id_profile' => $ds->id_profile,
-						'active' => $ds->active,
-						'date_update' => now(),
-						'update_by' => $this->_user->id
-					);
-
-					if( ! $this->user_model->update($ds->id, $arr))
-					{
-						$sc = FALSE;
-						set_error('update');
-					}
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				set_error('notfound');
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-		$this->_json_response($sc);
+		$this->load->helper('profile');
+		$this->load->helper('saleman');
+		$ds['data'] = $this->user_model->get_user($id);
+		$this->load->view('users/user_edit_view', $ds);
 	}
 
 
 	public function reset_password($id)
 	{
-		$this->title = 'Reset Password';
-		$ds['user'] = $this->user_model->get_by_id($id);
-		$this->load->view('users/user_reset_pwd', $ds);
+			$this->title = 'Reset Password';
+			$data['data'] = $this->user_model->get_user($id);
+			$this->load->view('users/user_reset_pwd_view', $data);
 	}
+
 
 
 	public function change_password()
 	{
-		$sc = TRUE;
-		$ds = json_decode($this->input->post('data'));
-
-		if( ! empty($ds))
+		if($this->input->post('user_id'))
 		{
-			$user = $this->user_model->get_by_id($ds->id);
+			$id = $this->input->post('user_id');
+			$pwd = password_hash($this->input->post('pwd'), PASSWORD_DEFAULT);
+			$rs = $this->user_model->change_password($id, $pwd);
 
-			if( ! empty($user))
+			if($rs === TRUE)
 			{
 				$arr = array(
-					'pwd' => password_hash($ds->pwd, PASSWORD_DEFAULT),
-					'force_reset' => $ds->force,
 					'last_pass_change' => date('Y-m-d')
 				);
-
-				if( ! $this->user_model->update($ds->id, $arr))
-				{
-					$sc = FALSE;
-					$this->error = "Failed to update password";
-				}
+				//--- update last pass change
+				$this->user_model->update_user($user->id, $arr);
+				$this->session->set_flashdata('success', 'Password changed');
 			}
 			else
 			{
-				$sc = FALSE;
-				$this->error = "User not found !";
+				$this->session->set_flashdata('error', 'Change password not successfull, please try again');
 			}
 		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
 
-		$this->_json_response($sc);
+		redirect($this->home);
 	}
+
 
 
 	public function delete_user($id)
@@ -235,13 +133,160 @@ class Users extends PS_Controller {
 	}
 
 
-	public function get_user_permissions($id)
+
+	public function update_user()
 	{
 		$sc = TRUE;
+		if($this->input->post('user_id'))
+		{
+			$id = $this->input->post('user_id');
+			$uname = $this->input->post('uname');
+			$dname = $this->input->post('dname');
+			$id_profile = $this->input->post('profile') === '' ? NULL : $this->input->post('profile');
+			$sale_id = $this->input->post('sale_id') === '' ? NULL : $this->input->post('sale_id');
+			$status = $this->input->post('status');
+			$is_viewer = $this->input->post('is_viewer');
+
+			$data = array(
+				'uname' => $uname,
+				'name' => $dname,
+				'id_profile' => $id_profile,
+				'sale_id' => $sale_id,
+				'active' => $status,
+				'is_viewer' => $is_viewer
+			);
+
+			$rs = $this->user_model->update_user($id, $data);
+			if($rs === FALSE)
+			{
+				$this->session->set_flashdata('error', 'Update user not successfully');
+			}
+			else
+			{
+				$this->session->set_flashdata('success', 'User updated');
+			}
+		}
+		else
+		{
+			$this->session->set_flashdata('error','Update fail : data not found');
+		}
+
+		redirect($this->home.'/edit_user/'.$id);
+
+	}
+
+
+
+
+	public function new_user()
+	{
+		if($this->input->post('uname'))
+		{
+			$uname = $this->input->post('uname');
+			$dname = $this->input->post('dname');
+			$pwd = password_hash($this->input->post('pwd'), PASSWORD_DEFAULT);
+			$uid = md5(uniqid());
+			$id_profile = $this->input->post('profile') === '' ? NULL : $this->input->post('profile');
+			$sale_id = $this->input->post('sale_id') === '' ? NULL : $this->input->post('sale_id');
+			$status = $this->input->post('status');
+			$is_viewer = $this->input->post('is_viewer');
+
+			$data = array(
+				'uname' => $uname,
+				'pwd' => $pwd,
+				'name' => $dname,
+				'uid' => $uid,
+				'id_profile' => $id_profile,
+				'sale_id' => $sale_id,
+				'active' => $status,
+				'is_viewer' => $is_viewer,
+				'last_pass_change' => date('Y-m-d')
+			);
+
+			$rs = $this->user_model->new_user($data);
+
+			if($rs === FALSE)
+			{
+				set_error('Create User fail');
+			}
+			else
+			{
+				set_message('User created');
+			}
+
+		}
+		else
+		{
+
+			set_error('Create User fail : Empty data');
+		}
+
+		redirect($this->home.'/add_user');
+	}
+
+
+
+
+	public function valid_dname($dname, $id = '')
+	{
+		$rs = $this->user_model->is_exists_display_name($dname, $id);
+
+		if($rs === TRUE)
+		{
+			echo 'exists';
+		}
+		else
+		{
+			echo 'not exists';
+		}
+	}
+
+
+
+	public function valid_uname($uname, $id = '')
+	{
+		$rs = $this->user_model->is_exists_uname($uname, $id);
+		if($rs === TRUE)
+		{
+			echo 'exists';
+		}
+		else
+		{
+			echo 'not exists';
+		}
+	}
+
+
+
+
+	//--- Activeate suspend user by id;
+	public function active_user($id)
+	{
+		$rs = $this->user_model->active_user($id);
+		echo $rs === TRUE ? 'success' : json_encode($rs);
+	}
+
+
+
+
+
+
+	//--- Suspend activated user by id
+	public function disactive_user($id)
+	{
+		$rs = $this->user_model->disactive_user($id);
+
+		echo $rs === TRUE ? 'success' : $rs;
+	}
+
+
+	public function get_user_permissions($id)
+	{
 		$this->load->model('users/permission_model');
+		$sc = TRUE;
 		$ds = array();
 
-		$user = $this->user_model->get_by_id($id);
+		$user = $this->user_model->get_user($id);
 
 		if( ! empty($user))
 		{
@@ -460,13 +505,11 @@ class Users extends PS_Controller {
 
 						$arr['menus'] = $items;
 					}
+					
+					$ds[] = $arr;
 				}
-
-				$ds[] = $arr;
 			}
-
 		}
-
 
     //--- load excel library
     $this->load->library('excel');
@@ -570,7 +613,9 @@ class Users extends PS_Controller {
 
 	public function clear_filter()
 	{
-		return clear_filter(['user_uname', 'user_name', 'user_profile', 'user_active']);
+		$filter = array('user', 'dname', 'profile');
+		clear_filter($filter);
+		echo 'done';
 	}
 
 }//--- end class
