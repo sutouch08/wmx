@@ -19,7 +19,6 @@ class Discount_rule_model extends CI_Model
   }
 
 
-
   public function update($id, array $ds = array())
   {
     if(!empty($ds))
@@ -29,7 +28,6 @@ class Discount_rule_model extends CI_Model
 
     return FALSE;
   }
-
 
 
   public function get($id)
@@ -326,6 +324,22 @@ class Discount_rule_model extends CI_Model
     return $sc;
   }
 
+
+  public function getRuleProduct($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->code] = $rd->code;
+      }
+    }
+
+    return $sc;
+  }
 
 
   public function getRuleProductStyle($id)
@@ -1097,15 +1111,9 @@ class Discount_rule_model extends CI_Model
       ->group_end();
     }
 
-    if(isset($ds['discount']) && $ds['discount'] != "" && $ds['discount'] != NULL)
+    if(isset($ds['type']) && $ds['type'] != 'all')
     {
-      $this->db
-      ->group_start()
-      ->where('r.item_price', $ds['discount'])
-      ->or_where('r.item_disc', $ds['discount'])
-      ->or_where('r.item_disc_2', $ds['discount'])
-      ->or_where('r.item_disc_3', $ds['discount'])
-      ->group_end();
+      $this->db->where('r.type', $ds['type']);
     }
 
     if(isset($ds['rule_status']) && $ds['rule_status'] != "" && $ds['rule_status'] != NULL && $ds['rule_status'] != "all")
@@ -1131,7 +1139,7 @@ class Discount_rule_model extends CI_Model
     ->join('discount_policy AS p', 'r.id_policy = p.id', 'left')
     ->where('r.isDeleted', 0);
 
-    if(isset($ds['code']) && $ds['code'] != "" && $ds['code'] != NULL)
+    if( ! empty($ds['code']))
     {
       $this->db
       ->group_start()
@@ -1149,15 +1157,9 @@ class Discount_rule_model extends CI_Model
       ->group_end();
     }
 
-    if(isset($ds['discount']) && $ds['discount'] != "" && $ds['discount'] != NULL)
+    if(isset($ds['type']) && $ds['type'] != 'all')
     {
-      $this->db
-      ->group_start()
-      ->where('r.item_price', $ds['discount'])
-      ->or_where('r.item_disc', $ds['discount'])
-      ->or_where('r.item_disc_2', $ds['discount'])
-      ->or_where('r.item_disc_3', $ds['discount'])
-      ->group_end();
+      $this->db->where('r.type', $ds['type']);
     }
 
     if(isset($ds['rule_status']) && $ds['rule_status'] != "" && $ds['rule_status'] != NULL && $ds['rule_status'] != "all")

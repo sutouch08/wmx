@@ -265,12 +265,8 @@ class Orders extends REST_Controller
     if($sc === TRUE)
     {
       //---- check duplicate order number
-      $order = $this->orders_model->get_active_order_by_reference($data->order_number);
-
-      //--- รหัสเล่มเอกสาร [อ้างอิงจาก SAP]
-      //--- ถ้าเป็นฝากขายแบบโอนคลัง ยืมสินค้า เบิกแปรสภาพ เบิกสินค้า (ไม่เปิดใบกำกับ เปิดใบโอนคลังแทน) นอกนั้น เปิด SO
-      $bookcode = getConfig('BOOK_CODE_ORDER');
-
+      $order = $this->orders_model->get_active_order_by_so($data->order_number);
+        
       $role = 'S';
 
       $date_add = date('Y-m-d H:i:s');
@@ -291,7 +287,6 @@ class Orders extends REST_Controller
       $sender = $this->sender_model->get_id($data->shipping);
 
       $id_sender = empty($sender) ? NULL : $sender;
-      $id_address = NULL;
 
       //--- order code gen จากระบบ
       $order_code = empty($order) ? $this->get_new_code($date_add) : $order->code;
@@ -304,18 +299,8 @@ class Orders extends REST_Controller
       $is_backorder = FALSE;
       $backorderList = [];
 
-      $tax_status = empty($data->tax_status) ? 0 : ($data->tax_status == 'Y' ? 1 : 0);
-      $is_etax = empty($data->ETAX) ? 0 : ($data->ETAX == 'Y' && $tax_status == 1 ? 1 : 0);
-      $bill_to = empty($data->bill_to) ? NULL : (array) $data->bill_to;
       $ship_to = empty($data->ship_to) ? NULL : (array) $data->ship_to;
       $customer_ref = empty(trim($data->customer_ref)) ? NULL : get_null(trim($data->customer_ref));
-
-      $taxType = array(
-        'NIDN' => 'NIDN', //-- บุคคลธรรมดา
-        'TXID' => 'TXID', //-- นิติบุคคล
-        'CCPT' => 'CCPT', //--- Passport
-        'OTHR' => 'OTHR' //--- N/A
-      );
 
       if(empty($order))
       {
@@ -323,13 +308,14 @@ class Orders extends REST_Controller
         $ds = array(
           'code' => $order_code,
           'role' => $role,
-          'bookcode' => $bookcode,
-          'reference' => $data->order_number,
+          'so_no' => $data->order_number,
+          'reference' => get_null($data->reference),
           'customer_code' => $data->customer_code,
           'customer_name' => $data->customer_name,
           'customer_ref' => $customer_ref,
           'channels_code' => $data->channel,
           'payment_code' => $data->payment_method,
+          'cod_amount' => $data->cod_amount,
           'sale_code' => $sale_code,
           'state' => 3,
           'is_term' => $data->payment_method === "COD" ? 1 : 0,
@@ -342,67 +328,20 @@ class Orders extends REST_Controller
           'warehouse_code' => $warehouse_code,
           'is_api' => 1,
           'is_pre_order' => $is_pre_order ? 1 : 0,
-          'id_sender' => $id_sender,
-          'tax_status' => $tax_status,
-          'is_etax' => $is_etax
+          'id_sender' => $id_sender
         );
-
-        if($tax_status)
-        {
-          if( ! empty($bill_to))
-          {
-            $bill_to = (object) $bill_to;
-
-            if(
-                empty($bill_to->tax_id)
-                OR empty($bill_to->name)
-                OR empty($bill_to->address)
-                OR empty($bill_to->sub_district)
-                OR empty($bill_to->district)
-                OR empty($bill_to->province)
-              )
-              {
-                $sc = FALSE;
-                $this->error = "You must fill in all required fields [tax_id, name, address, sub_district, district, province]";
-              }
-
-            $email = empty($bill_to->email) ? NULL : $bill_to->email;
-
-            if($is_etax == 1 && empty($email))
-            {
-              $sc = FALSE;
-              $this->error = "Email is required for E-TAX";
-            }
-
-            $ds['tax_type'] = empty($taxType[$bill_to->tax_type]) ? "NIDN" : $bill_to->tax_type;
-            $ds['tax_id'] = get_null($bill_to->tax_id);
-            $ds['name'] = get_null($bill_to->name);
-            $ds['branch_code'] = empty($bill_to->branch_code) ? "00000" : $bill_to->branch_code;
-            $ds['branch_name'] = empty($bill_to->branch_name) ? "สำนักงานใหญ่" : $bill_to->branch_name;
-            $ds['address'] = get_null($bill_to->address);
-            $ds['sub_district'] = get_null($bill_to->sub_district);
-            $ds['district'] = get_null($bill_to->district);
-            $ds['province'] = get_null($bill_to->province);
-            $ds['postcode'] = get_null($bill_to->postcode);
-            $ds['phone'] = get_null($bill_to->phone);
-            $ds['email'] = get_null($bill_to->email);
-          }
-          else
-          {
-            $sc = FALSE;
-            $this->error = "bill_to is required for tax_status = Y";
-          }
-        }
       }
       else
       {
         //--- เตรียมข้อมูลสำหรับเพิ่มเอกสารใหม่
         $ds = array(
+          'reference' => get_null($data->reference),
           'customer_code' => $data->customer_code,
           'customer_name' => $data->customer_name,
           'customer_ref' => $customer_ref,
           'channels_code' => $data->channel,
           'payment_code' => $data->payment_method,
+          'cod_amount' => $data->cod_amount,
           'sale_code' => $sale_code,
           'state' => 3,
           'is_term' => $data->payment_method === "COD" ? 1 : 0,
@@ -414,72 +353,8 @@ class Orders extends REST_Controller
           'warehouse_code' => $warehouse_code,
           'is_api' => 1,
           'is_pre_order' => $is_pre_order ? 1 : 0,
-          'id_sender' => $id_sender,
-          'tax_status' => $tax_status,
-          'is_etax' => $is_etax
+          'id_sender' => $id_sender
         );
-
-        if($tax_status)
-        {
-          if( ! empty($bill_to))
-          {
-            $bill_to = (object) $bill_to;
-
-            if(
-                empty($bill_to->tax_id)
-                OR empty($bill_to->name)
-                OR empty($bill_to->address)
-                OR empty($bill_to->sub_district)
-                OR empty($bill_to->district)
-                OR empty($bill_to->province)
-              )
-              {
-                $sc = FALSE;
-                $this->error = "You must fill in all required fields [tax_id, name, address, sub_district, district, province]";
-              }
-
-            $email = empty($bill_to->email) ? NULL : $bill_to->email;
-
-            if($is_etax == 1 && empty($email))
-            {
-              $sc = FALSE;
-              $this->error = "Email is required for E-TAX";
-            }
-
-            $ds['tax_type'] = empty($taxType[$bill_to->tax_type]) ? "NIDN" : $bill_to->tax_type;
-            $ds['tax_id'] = get_null($bill_to->tax_id);
-            $ds['name'] = get_null($bill_to->name);
-            $ds['branch_code'] = empty($bill_to->branch_code) ? "00000" : $bill_to->branch_code;
-            $ds['branch_name'] = empty($bill_to->branch_name) ? "สำนักงานใหญ่" : $bill_to->branch_name;
-            $ds['address'] = get_null($bill_to->address);
-            $ds['sub_district'] = get_null($bill_to->sub_district);
-            $ds['district'] = get_null($bill_to->district);
-            $ds['province'] = get_null($bill_to->province);
-            $ds['postcode'] = get_null($bill_to->postcode);
-            $ds['phone'] = get_null($bill_to->phone);
-            $ds['email'] = get_null($bill_to->email);
-          }
-          else
-          {
-            $sc = FALSE;
-            $this->error = "Missing required parameter : bill_to";
-          }
-        }
-        else
-        {
-          $ds['tax_type'] = NULL;
-          $ds['tax_id'] = NULL;
-          $ds['name'] = NULL;
-          $ds['branch_code'] = NULL;
-          $ds['branch_name'] = NULL;
-          $ds['address'] = NULL;
-          $ds['sub_district'] = NULL;
-          $ds['district'] = NULL;
-          $ds['province'] = NULL;
-          $ds['postcode'] = NULL;
-          $ds['phone'] = NULL;
-          $ds['email'] = NULL;
-        }
       }
 
       //---- if any error return
@@ -543,31 +418,30 @@ class Orders extends REST_Controller
         //--- add state event
         $this->order_state_model->add_state($arr);
 
-
-        if( ! empty($customer_ref) && ! empty($ship_to) && ! empty($ship_to->address))
+        if( ! empty($ship_to) && ! empty($ship_to['address']))
         {
-          $id_address = $this->address_model->get_id($data->customer_ref, $data->ship_to->address);
+          $arr = array(
+            'order_code' => $order_code,
+            'name' => $data->ship_to->name,
+            'address' => $data->ship_to->address,
+            'sub_district' => get_null($data->ship_to->sub_district),
+            'district' => get_null($data->ship_to->district),
+            'province' => get_null($data->ship_to->province),
+            'postcode' => get_null($data->ship_to->postcode),
+            'phone' => get_null($data->ship_to->phone)
+          );
 
-          if($id_address === FALSE)
+          $adr = $this->address_model->get_ship_to_address($order_code);
+
+
+          if(empty($adr))
           {
-            $arr = array(
-              'code' => $data->customer_ref,
-              'name' => $data->ship_to->name,
-              'address' => $data->ship_to->address,
-              'sub_district' => $data->ship_to->sub_district,
-              'district' => $data->ship_to->district,
-              'province' => $data->ship_to->province,
-              'postcode' => $data->ship_to->postcode,
-              'phone' => $data->ship_to->phone,
-              'email' => $data->ship_to->email,
-              'alias' => empty($data->alias) ? 'Home' : $data->alias,
-              'is_default' => 1
-            );
-
-            $id_address = $this->address_model->add_shipping_address($arr);
+            $this->address_model->add_shipping_address($arr);
           }
-
-          $this->orders_model->set_address_id($order_code, $id_address);
+          else
+          {
+            $this->address_model->update_shipping_address($adr->id, $arr);
+          }
         }
 
         //---- add order details
@@ -666,6 +540,8 @@ class Orders extends REST_Controller
 
             if($this->checkBackorder && ! empty($backorderList))
             {
+              $this->orders_model->drop_backlogs_list($order_code);
+
               foreach($backorderList as $rs)
               {
                 $backlogs = array(
@@ -1797,7 +1673,13 @@ class Orders extends REST_Controller
 
   public function verify_data($data)
 	{
-    if($this->orders_model->is_active_order_reference($data->order_number) !== FALSE)
+    // if($this->orders_model->is_active_order_reference($data->order_number) !== FALSE)
+    // {
+    //   $this->error = 'Order number already exists';
+		// 	return FALSE;
+    // }
+
+    if($this->orders_model->is_active_order_so($data->order_number) !== FALSE)
     {
       $this->error = 'Order number already exists';
 			return FALSE;

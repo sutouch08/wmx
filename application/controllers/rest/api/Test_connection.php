@@ -8,18 +8,7 @@ class Test_connection extends REST_Controller
 
   public function __construct()
   {
-    parent::__construct();
-		$this->api = is_true(getConfig('PROMOTION_API'));
-
-		if( ! $this->api)
-		{
-			$arr = array(
-				'status' => FALSE,
-				'error' => "Access denied : Api is not enabled"
-			);
-
-			$this->response($arr, 400);
-		}
+    parent::__construct();			
   }
 
   public function index_get()

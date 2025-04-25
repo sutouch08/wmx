@@ -1,6 +1,8 @@
 <?php
 class Product_brand_model extends CI_Model
 {
+  private $tb = "product_brand";
+
   public function __construct()
   {
     parent::__construct();
@@ -11,7 +13,7 @@ class Product_brand_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return  $this->db->insert('product_brand', $ds);
+      return  $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -24,7 +26,7 @@ class Product_brand_model extends CI_Model
     if(!empty($ds))
     {
       $this->db->where('code', $code);
-      return $this->db->update('product_brand', $ds);
+      return $this->db->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -33,7 +35,7 @@ class Product_brand_model extends CI_Model
 
   public function delete($code)
   {
-    return $this->db->where('code', $code)->delete('product_brand');
+    return $this->db->where('code', $code)->delete($this->tb);
   }
 
 
@@ -51,7 +53,7 @@ class Product_brand_model extends CI_Model
       $this->db->like('name', $name);
     }
 
-    $rs = $this->db->get('product_brand');
+    $rs = $this->db->get($this->tb);
 
     return $rs->num_rows();
   }
@@ -61,7 +63,7 @@ class Product_brand_model extends CI_Model
 
   public function get($code)
   {
-    $rs = $this->db->where('code', $code)->get('product_brand');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -70,7 +72,17 @@ class Product_brand_model extends CI_Model
     return FALSE;
   }
 
+  public function get_all()
+  {
+    $rs = $this->db->get($this->tb);
 
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
   public function get_name($code)
   {
@@ -79,7 +91,7 @@ class Product_brand_model extends CI_Model
       return $code;
     }
 
-    $rs = $this->db->select('name')->where('code', $code)->get('product_brand');
+    $rs = $this->db->select('name')->where('code', $code)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row()->name;
@@ -109,7 +121,7 @@ class Product_brand_model extends CI_Model
       $this->db->limit($perpage, $offset);
     }
 
-    $rs = $this->db->get('product_brand');
+    $rs = $this->db->get($this->tb);
 
     return $rs->result();
   }
@@ -124,7 +136,7 @@ class Product_brand_model extends CI_Model
       $this->db->where('code !=', $old_code);
     }
 
-    $rs = $this->db->where('code', $code)->get('product_brand');
+    $rs = $this->db->where('code', $code)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -143,7 +155,7 @@ class Product_brand_model extends CI_Model
       $this->db->where('name !=', $old_name);
     }
 
-    $rs = $this->db->where('name', $name)->get('product_brand');
+    $rs = $this->db->where('name', $name)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {

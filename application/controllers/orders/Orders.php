@@ -48,9 +48,10 @@ class Orders extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'order_code', ''),
+      'so_no' =>  get_filter('so_no', 'so_no', ''),
+      'reference' => get_filter('reference', 'order_reference', ''),
       'customer' => get_filter('customer', 'order_customer', ''),
       'user' => get_filter('user', 'order_user', 'all'),
-      'reference' => get_filter('reference', 'order_reference', ''),
       'ship_code' => get_filter('shipCode', 'order_shipCode', ''),
       'channels' => get_filter('channels', 'order_channels', 'all'),
       'payment' => get_filter('payment', 'order_payment', 'all'),
@@ -954,15 +955,17 @@ class Orders extends PS_Controller
     if( ! empty($rs))
     {
       $rs->channels_name = $this->channels_model->get_name($rs->channels_code);
-      $rs->payment_name  = $this->payment_methods_model->get_name($rs->payment_code);
+      $rs->payment_name = $this->payment_methods_model->get_name($rs->payment_code);
       $rs->customer_name = empty($rs->customer_name) ? $this->customers_model->get_name($rs->customer_code) : $rs->customer_name;
-      $rs->total_amount  = $rs->doc_total <= 0 ? $this->orders_model->get_order_total_amount($rs->code) : $rs->doc_total;
-      $rs->user          = $this->user_model->get_name($rs->user);
-      $rs->state_name    = get_state_name($rs->state);
-      $rs->has_payment   = $this->order_payment_model->is_exists($code);
+      $rs->total_amount = $rs->doc_total <= 0 ? $this->orders_model->get_order_total_amount($rs->code) : $rs->doc_total;
+      $rs->user = $this->user_model->get_name($rs->user);
+      $rs->state_name = get_state_name($rs->state);
+      $rs->has_payment = $this->order_payment_model->is_exists($code);
 
 			$state = $this->order_state_model->get_order_state($code);
+
 	    $ost = array();
+
 	    if( ! empty($state))
 	    {
 	      foreach($state as $st)
@@ -972,15 +975,32 @@ class Orders extends PS_Controller
 	    }
 
 	    $details = $this->orders_model->get_order_details($code);
-	    $ship_to = empty($rs->customer_ref) ? $this->address_model->get_ship_to_address($rs->customer_code) : $this->address_model->get_shipping_address($rs->customer_ref);
+	    $ship_to = $this->address_model->get_ship_to_address($code);
 	    $banks = $this->bank_model->get_active_bank();
       $tracking = $this->orders_model->get_order_tracking($code);
       $backlogs = $rs->is_backorder == 1 ? $this->orders_model->get_backlogs_details($rs->code) : NULL;
 
+      if(empty($ship_to))
+      {
+        $ship_to = (object)array(
+          'id' => NULL,
+          'name' => NULL,
+          'address' => NULL,
+          'sub_district' => NULL,
+          'district' => NULL,
+          'province' => NULL,
+          'postcode' => NULL,
+          'country' => NULL,
+          'phone' => NULL,
+          'email' => NULL,
+          'alias' => NULL
+        );
+      }
+
 	    $ds['state'] = $ost;
 	    $ds['order'] = $rs;
 	    $ds['details'] = $details;
-	    $ds['addr']  = $ship_to;
+	    $ds['ship_to']  = $ship_to;
 	    $ds['banks'] = $banks;
       $ds['tracking'] = $tracking;
       $ds['backlogs'] = $backlogs;
@@ -1017,7 +1037,7 @@ class Orders extends PS_Controller
 
       $order = $this->orders_model->get($code);
 
-      if(! empty($order))
+      if( ! empty($order))
       {
         if( $order->state == 1)
         {
@@ -2121,147 +2141,205 @@ class Orders extends PS_Controller
 
   public function save_address()
   {
-    $this->load->model('address/address_model');
     $sc = TRUE;
-		$customer_code = trim($this->input->post('customer_code'));
-		$cus_ref = trim($this->input->post('customer_ref'));
-    $is_spx = $this->input->post('id_sender') == 148 ? TRUE : FALSE;
+    $this->load->model('address/address_model');
 
-    if( ! empty($customer_code) OR !empty($cus_ref))
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds) && ! empty($ds->order_code) && ! empty($ds->name) && ! empty($ds->address))
     {
-      $this->load->model('address/address_model');
-      $id = $this->input->post('id_address');
-      $err = [
-        'district' => NULL,
-        'sub_district' =>  NULL,
-        'province' => NULL,
-        'postcode' => NULL,
-        'phone' => NULL,
-        'address' => NULL
-      ];
+      $adr = $this->address_model->get_ship_to_address($ds->order_code);
 
-      $province = $this->input->post('province');
-      $sub_district = $this->input->post('sub_district');
-      $district = $this->input->post('district');
-      $phone = $this->input->post('phone');
-      $postcode = $this->input->post('postcode');
-
-      if($is_spx)
+      if(empty($adr))
       {
-        $province = parseProvince($province);
-        $sub_district = parseSubDistrict($sub_district, $province);
-        $district = parseDistrict($district, $province);
-        $phone = parsePhoneNumber($phone);
-        $postcode = $postcode;
+        $arr = array(
+          'order_code' => $ds->order_code,
+          'name' => $ds->name,
+          'address' => $ds->address,
+          'sub_district' => get_null($ds->sub_district),
+          'district' => get_null($ds->district),
+          'province' => get_null($ds->province),
+          'postcode' => get_null($ds->postcode),
+          'phone' => get_null($ds->phone)
+        );
 
-        //--- validate with table address_info
-        if( ! $this->address_model->is_valid_sub_district($sub_district))
+        if( ! $this->address_model->add_shipping_address($arr))
         {
           $sc = FALSE;
-          $err['sub_district'] = "ตำบลไม่ถูกต้อง ";
-        }
-
-        if( ! $this->address_model->is_valid_district($district))
-        {
-          $sc = FALSE;
-          $err['district'] = "อำเภอไม่ถูกต้อง ";
-        }
-
-        if( ! $this->address_model->is_valid_province($province))
-        {
-          $sc = FALSE;
-          $err['province'] = "จังหวัดไม่ถูกต้อง ";
-        }
-
-        if( ! $this->address_model->is_valid_postcode($postcode))
-        {
-          $sc = FALSE;
-          $err['postcode'] = "รหัสไปรษณีย์ไม่ถูกต้อง ";
-        }
-
-        if($sc === TRUE)
-        {
-          if( ! $this->address_model->is_valid_full_address($sub_district, $district, $province, $postcode))
-          {
-            $sc = FALSE;
-            $err['address'] = "ตำบล อำเภอ จังหวัด หรือ รหัสไปรษณีย์ ไม่สอดคล้องกัน";
-          }
-        }
-
-        if(strlen($phone) < 9 OR strlen($phone) > 10)
-        {
-          $sc = FALSE;
-          $err['phone'] = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+          set_error('insert');
         }
       }
-
-      if($sc === TRUE)
+      else
       {
-        if(! empty($id))
+        $arr = array(
+          'name' => $ds->name,
+          'address' => $ds->address,
+          'sub_district' => get_null($ds->sub_district),
+          'district' => get_null($ds->district),
+          'province' => get_null($ds->province),
+          'postcode' => get_null($ds->postcode),
+          'phone' => get_null($ds->phone)
+        );
+
+        if( ! $this->address_model->update_shipping_address($adr->id, $arr))
         {
-          $arr = array(
-            'code' => $cus_ref,
-            'customer_code' => $customer_code,
-            'name' => trim($this->input->post('name')),
-            'address' => trim($this->input->post('address')),
-            'sub_district' => $sub_district,
-            'district' => $district,
-            'province' => $province,
-            'postcode' => $postcode,
-            'country' => trim($this->input->post('country')),
-            'phone' => $phone,
-            'email' => trim($this->input->post('email')),
-            'alias' => trim($this->input->post('alias'))
-          );
-
-          if(! $this->address_model->update_shipping_address($id, $arr))
-          {
-            $sc = FALSE;
-            $err['address'] = 'แก้ไขที่อยู่ไม่สำเร็จ';
-          }
-
-        }
-        else
-        {
-          $arr = array(
-            'address_code' => '0000',
-            'code' => $cus_ref,
-            'customer_code' => $customer_code,
-            'name' => trim($this->input->post('name')),
-            'address' => trim($this->input->post('address')),
-            'sub_district' => $sub_district,
-            'district' => $district,
-            'province' => $province,
-            'postcode' => $postcode,
-            'country' => trim($this->input->post('country')),
-            'phone' => $phone,
-            'email' => trim($this->input->post('email')),
-            'alias' => trim($this->input->post('alias'))
-          );
-
-          $rs = $this->address_model->add_shipping_address($arr);
-
-          if($rs === FALSE)
-          {
-            $sc = FALSE;
-            $err['address'] = 'เพิ่มที่อยู่ไม่สำเร็จ';
-          }
+          $sc = FALSE;
+          set_error('update');
         }
       }
     }
     else
     {
       $sc = FALSE;
-      $err['address'] = 'Missing required parameter : customer code';
+      set_error('required');
     }
 
-    $arr = array(
-      'status' => $sc === TRUE ? 'success' : 'failed',
-      'message' => $sc === TRUE ? 'success' : $err
-    );
-
-    echo json_encode($arr);
+    $this->_response($sc);
   }
+
+  // public function save_address()
+  // {
+  //   $this->load->model('address/address_model');
+  //   $sc = TRUE;
+	// 	$customer_code = trim($this->input->post('customer_code'));
+	// 	$cus_ref = trim($this->input->post('customer_ref'));
+  //   $is_spx = $this->input->post('id_sender') == 148 ? TRUE : FALSE;
+  //
+  //   if( ! empty($customer_code) OR !empty($cus_ref))
+  //   {
+  //     $this->load->model('address/address_model');
+  //     $id = $this->input->post('id_address');
+  //     $err = [
+  //       'district' => NULL,
+  //       'sub_district' =>  NULL,
+  //       'province' => NULL,
+  //       'postcode' => NULL,
+  //       'phone' => NULL,
+  //       'address' => NULL
+  //     ];
+  //
+  //     $province = $this->input->post('province');
+  //     $sub_district = $this->input->post('sub_district');
+  //     $district = $this->input->post('district');
+  //     $phone = $this->input->post('phone');
+  //     $postcode = $this->input->post('postcode');
+  //
+  //     if($is_spx)
+  //     {
+  //       $province = parseProvince($province);
+  //       $sub_district = parseSubDistrict($sub_district, $province);
+  //       $district = parseDistrict($district, $province);
+  //       $phone = parsePhoneNumber($phone);
+  //       $postcode = $postcode;
+  //
+  //       //--- validate with table address_info
+  //       if( ! $this->address_model->is_valid_sub_district($sub_district))
+  //       {
+  //         $sc = FALSE;
+  //         $err['sub_district'] = "ตำบลไม่ถูกต้อง ";
+  //       }
+  //
+  //       if( ! $this->address_model->is_valid_district($district))
+  //       {
+  //         $sc = FALSE;
+  //         $err['district'] = "อำเภอไม่ถูกต้อง ";
+  //       }
+  //
+  //       if( ! $this->address_model->is_valid_province($province))
+  //       {
+  //         $sc = FALSE;
+  //         $err['province'] = "จังหวัดไม่ถูกต้อง ";
+  //       }
+  //
+  //       if( ! $this->address_model->is_valid_postcode($postcode))
+  //       {
+  //         $sc = FALSE;
+  //         $err['postcode'] = "รหัสไปรษณีย์ไม่ถูกต้อง ";
+  //       }
+  //
+  //       if($sc === TRUE)
+  //       {
+  //         if( ! $this->address_model->is_valid_full_address($sub_district, $district, $province, $postcode))
+  //         {
+  //           $sc = FALSE;
+  //           $err['address'] = "ตำบล อำเภอ จังหวัด หรือ รหัสไปรษณีย์ ไม่สอดคล้องกัน";
+  //         }
+  //       }
+  //
+  //       if(strlen($phone) < 9 OR strlen($phone) > 10)
+  //       {
+  //         $sc = FALSE;
+  //         $err['phone'] = "เบอร์โทรศัพท์ไม่ถูกต้อง";
+  //       }
+  //     }
+  //
+  //     if($sc === TRUE)
+  //     {
+  //       if(! empty($id))
+  //       {
+  //         $arr = array(
+  //           'code' => $cus_ref,
+  //           'customer_code' => $customer_code,
+  //           'name' => trim($this->input->post('name')),
+  //           'address' => trim($this->input->post('address')),
+  //           'sub_district' => $sub_district,
+  //           'district' => $district,
+  //           'province' => $province,
+  //           'postcode' => $postcode,
+  //           'country' => trim($this->input->post('country')),
+  //           'phone' => $phone,
+  //           'email' => trim($this->input->post('email')),
+  //           'alias' => trim($this->input->post('alias'))
+  //         );
+  //
+  //         if(! $this->address_model->update_shipping_address($id, $arr))
+  //         {
+  //           $sc = FALSE;
+  //           $err['address'] = 'แก้ไขที่อยู่ไม่สำเร็จ';
+  //         }
+  //
+  //       }
+  //       else
+  //       {
+  //         $arr = array(
+  //           'address_code' => '0000',
+  //           'code' => $cus_ref,
+  //           'customer_code' => $customer_code,
+  //           'name' => trim($this->input->post('name')),
+  //           'address' => trim($this->input->post('address')),
+  //           'sub_district' => $sub_district,
+  //           'district' => $district,
+  //           'province' => $province,
+  //           'postcode' => $postcode,
+  //           'country' => trim($this->input->post('country')),
+  //           'phone' => $phone,
+  //           'email' => trim($this->input->post('email')),
+  //           'alias' => trim($this->input->post('alias'))
+  //         );
+  //
+  //         $rs = $this->address_model->add_shipping_address($arr);
+  //
+  //         if($rs === FALSE)
+  //         {
+  //           $sc = FALSE;
+  //           $err['address'] = 'เพิ่มที่อยู่ไม่สำเร็จ';
+  //         }
+  //       }
+  //     }
+  //   }
+  //   else
+  //   {
+  //     $sc = FALSE;
+  //     $err['address'] = 'Missing required parameter : customer code';
+  //   }
+  //
+  //   $arr = array(
+  //     'status' => $sc === TRUE ? 'success' : 'failed',
+  //     'message' => $sc === TRUE ? 'success' : $err
+  //   );
+  //
+  //   echo json_encode($arr);
+  // }
 
 
   public function get_address_table()
@@ -3509,7 +3587,7 @@ class Orders extends PS_Controller
   {
     $filter = array(
       'order_code',
-			'qt_no',
+			'so_no',
       'order_customer',
       'order_user',
       'order_reference',

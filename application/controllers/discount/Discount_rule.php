@@ -24,14 +24,15 @@ class Discount_rule extends PS_Controller
     $this->load->helper('discount_rule');
 
     $filter = array(
-      'code' => get_filter('rule_code', 'rule_code', ''),
-      'policy' => get_filter('policy', 'policy', ''),
-      'rule_status' => get_filter('rule_status', 'rule_status', 'all'),
-      'policy_status' => get_filter('policy_status', 'policy_status', 'all'),
-      'discount' => get_filter('rule_disc', 'rule_disc', '')
+      'code' => get_filter('code', 'rule_code', ''),
+      'name' => get_filter('name', 'rule_name', ''),
+      'active' => get_filter('active', 'rule_active', 'all'),
+      'type' => get_filter('type', 'rule_type', 'all'),
+      'policy' => get_filter('policy', 'rule_policy', ''),
+      'priority' => get_filter('priority', 'rule_priority', 'all')
     );
 
-			//--- แสดงผลกี่รายการต่อหน้า
+		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
 
 		$rows = $this->discount_rule_model->count_rows($filter);
@@ -39,13 +40,11 @@ class Discount_rule extends PS_Controller
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
 
-		$result = $this->discount_rule_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
-
-    $filter['rules'] = $result;
+    $filter['data'] = $this->discount_rule_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
 
 		$this->pagination->initialize($init);
 
-    $this->load->view('discount/rule/rule_view', $filter);
+    $this->load->view('discount/rule-new/rule_list', $filter);
   }
 
 
@@ -105,14 +104,55 @@ class Discount_rule extends PS_Controller
 
 
 
-  public function edit_rule($id_rule)
+  public function edit($id, $tab = "discount")
   {
     $this->load->model('masters/channels_model');
     $this->load->model('masters/payment_methods_model');
     $this->load->model('masters/customers_model');
     $this->load->model('masters/products_model');
-    $data['rule'] = $this->discount_rule_model->get($id_rule);
-    $this->load->view('discount/rule/rule_edit_view', $data);
+    $this->load->model('masters/customer_group_model');
+    $this->load->model('masters/customer_type_model');
+    $this->load->model('masters/customer_kind_model');
+    $this->load->model('masters/customer_area_model');
+    $this->load->model('masters/customer_class_model');
+    $this->load->model('masters/products_model');
+    $this->load->model('masters/product_group_model');
+    $this->load->model('masters/product_category_model');
+    $this->load->model('masters/product_type_model');
+    $this->load->model('masters/product_brand_model');
+
+    $data = array(
+      "rule" => $this->discount_rule_model->get($id),
+      //"channels" => $this->channels_model->get_all(),
+      //"payments" => $this->payment_term_model->get_all(),
+      "cusList" => $this->discount_rule_model->getRuleCustomerId($id),
+      "custGroup" => $this->discount_rule_model->getRuleCustomerGroup($id),
+      "custType" => $this->discount_rule_model->getRuleCustomerType($id),
+      "custKind" => $this->discount_rule_model->getRuleCustomerKind($id),
+      "custArea" => $this->discount_rule_model->getRuleCustomerArea($id),
+      "custGrade" => $this->discount_rule_model->getRuleCustomerClass($id),
+      "customer_groups" => $this->customer_group_model->get_all(),
+      "customer_types" => $this->customer_type_model->get_all(),
+      "customer_kinds" => $this->customer_kind_model->get_all(),
+      "customer_areas" => $this->customer_area_model->get_all(),
+      "customer_grades" => $this->customer_class_model->get_all(),
+      "pdList" => $this->discount_rule_model->getRuleProduct($id),
+      "pdModel" => $this->discount_rule_model->getRuleProductStyle($id),
+      "pdGroup" => $this->discount_rule_model->getRuleProductGroup($id),
+      "pdType" => $this->discount_rule_model->getRuleProductType($id),
+      "pdCategory" => $this->discount_rule_model->getRuleProductCategory($id),
+      "pdBrand" => $this->discount_rule_model->getRuleProductBrand($id),
+      "product_groups" => $this->product_group_model->get_all(),
+      "product_categorys" => $this->product_category_model->all(),
+      "product_types" => $this->product_type_model->get_all(),
+      "product_brands" => $this->product_brand_model->get_all(),
+      // "free_items" => $this->discount_rule_model->getRuleFreeProduct($id),
+
+      "tab" => $tab
+    );
+
+
+    $this->load->view('discount/rule/rule_edit', $data);
   }
 
 
@@ -524,8 +564,16 @@ class Discount_rule extends PS_Controller
 
   public function clear_filter()
   {
-    $filter = array('rule_code', 'policy', 'rule_status', 'policy_status','rule_disc');  
-    clear_filter($filter);
+    $filter = array(
+      'rule_code',
+      'rule_name',
+      'rule_active',
+      'rule_type',
+      'rule_policy',
+      'rule_priority'
+    );
+
+    return clear_filter($filter);
   }
 } //--- end class
 ?>

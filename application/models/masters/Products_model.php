@@ -8,6 +8,17 @@ class Products_model extends CI_Model
     parent::__construct();
   }
 
+  public function get_id($code)
+  {
+    $rs = $this->db->select('id')->where('code', $code)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->id;
+    }
+
+    return NULL;
+  }
 
   public function count_rows(array $ds = array())
   {
@@ -405,7 +416,7 @@ class Products_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return  $this->db->replace($this->tb, $ds);
+      return $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -663,6 +674,16 @@ class Products_model extends CI_Model
     return $this->db->set('barcode', $barcode)->where('code', $code)->update($this->tb);
   }
 
+
+  public function is_exists_barcode($barcode, $id = NULL)
+  {
+    if( ! empty($id))
+    {
+      $this->db->where('id !=', $id);
+    }
+
+    return $this->db->where('barcode', $barcode)->count_all_results($this->tb) > 0 ? TRUE : FALSE;
+  }
 
   public function is_exists($code)
   {

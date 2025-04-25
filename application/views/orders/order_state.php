@@ -88,24 +88,22 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
 
   <?php $link = $order->state == 9 ? 'onclick="showReason()"' : ''; ?>
   <?php $pointer = $order->state == 9 ? 'pointer' : ''; ?>
+    <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-14 <?php echo $pointer; ?>"
+      <?php echo $link; ?>	style="height: 49px; border:solid 2px white; <?php echo state_color($order->state); ?>"	>
+      <center>สถานปัจจุบัน</center>
+      <center><?php echo get_state_name($order->state); ?></center>
+    </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-14 <?php echo $pointer; ?>"
-    <?php echo $link; ?>	style="height: 49px; border:solid 2px white; <?php echo state_color($order->state); ?>"	>
-		<center>สถานปัจจุบัน</center>
-		<center><?php echo get_state_name($order->state); ?></center>
-	</div>
-
-
-<?php if( !empty($state) ) : ?>
-  <?php foreach($state as $rs) : ?>
-	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-10" style="height: 49px; border:solid 2px white; white-space: nowrap; overflow: hidden; <?php echo state_color($rs->state); ?>" >
-    <center><?php echo get_state_name($rs->state); ?></center>
-    <center><?php echo $this->user_model->get_name($rs->update_user); ?></center>
-    <center><?php echo thai_date($rs->date_upd,TRUE, '/'); ?></center>
+    <?php if( !empty($state) ) : ?>
+      <?php foreach($state as $rs) : ?>
+        <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-10" style="height: 49px; border:solid 2px white; white-space: nowrap; overflow: hidden; <?php echo state_color($rs->state); ?>" >
+          <center><?php echo get_state_name($rs->state); ?></center>
+          <center><?php echo $this->user_model->get_name($rs->update_user); ?></center>
+          <center><?php echo thai_date($rs->date_upd,TRUE, '/'); ?></center>
+        </div>
+      <?php	endforeach; ?>
+    <?php endif; ?>
   </div>
-<?php	endforeach; ?>
-<?php endif; ?>
-</div>
 
 <?php $this->load->view('order_cancle_modal'); ?>
 

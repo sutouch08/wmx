@@ -46,7 +46,7 @@ class Customers_model extends CI_Model
   {
     return $this->db->where('code', $code)->delete($this->tb);
   }
-  
+
 
   public function delete_by_id($id)
   {
@@ -74,6 +74,19 @@ class Customers_model extends CI_Model
     if($rs->num_rows() === 1)
     {
       return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_id($code)
+  {
+    $rs = $this->db->select('id')->where('code', $code)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->id;
     }
 
     return NULL;

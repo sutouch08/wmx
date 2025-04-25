@@ -61,4 +61,26 @@ function parse_discount_to_label(array $ds = array())
 
 	return $disc;
 }
+
+
+function discount_label($type, $price, $disc1, $disc2, $disc3)
+{
+	$disc = 0.00;
+	//---	ถ้าเป็นการกำหนดราคาขาย
+	//--- N = netprice , P = percent
+	if($type == 'N')
+	{
+		$disc = $price;
+	}
+	else
+	{
+		$disc = round($disc1, 2)."%";
+		$disc .= ($disc1 > 0 && $disc2 > 0) ? "+".round($disc2)."%" : "";
+		$disc .= ($disc2 > 0 && $disc3 > 0) ? "+".round($disc3)."%" : "";
+		$disc .= ($disc3 > 0 && $disc4 > 0) ? "+".round($disc4)."%" : "";
+		$disc .= ($disc4 > 0 && $disc5 > 0) ? "+".round($disc5)."%" : "";
+	}
+
+	return $disc;
+}
 ?>

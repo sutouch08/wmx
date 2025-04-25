@@ -8,40 +8,29 @@
 	}
 </style>
 <div class="row">
-	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-5 padding-top-5">
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 padding-top-5">
 		<h3 class="title"><?php echo $this->title; ?></h3>
-	</div>
-	<div class="col-lg-8 col-md-8 col-sm-8 col-xs-12 padding-5 text-right">
-		<?php if($this->pm->can_add) : ?>
-			<?php if($can_upload) : ?>
-				<button type="button" class="btn btn-white btn-primary top-btn btn-100" onclick="getUploadFile()"><i class="fa fa-upload"></i> &nbsp; Import Order</button>
-			<?php endif;?>
-			<button type="button" class="btn btn-white btn-purple top-btn btn-100" onclick="getTemplate()"><i class="fa fa-download"></i> &nbsp; Template</button>
-			<button type="button" class="btn btn-white btn-success top-btn btn-100" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
-		<?php endif; ?>
 	</div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 	<div class="row">
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>เลขที่เอกสาร</label>
+			<label>Order No.</label>
 			<input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
+		</div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>SO No.</label>
+			<input type="text" class="form-control input-sm search" name="so_no"  value="<?php echo $so_no; ?>" />
+		</div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>MKP No.</label>
+			<input type="text" class="form-control input-sm search" name="reference" value="<?php echo $reference; ?>" />
 		</div>
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>ลูกค้า</label>
 			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
 		</div>
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>เลขที่อ้างอิง</label>
-			<input type="text" class="form-control input-sm search" name="reference" value="<?php echo $reference; ?>" />
-		</div>
-
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>เลขที่จัดส่ง</label>
-			<input type="text" class="form-control input-sm search" name="shipCode" value="<?php echo $ship_code; ?>" />
-		</div>
-
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>ช่องทางขาย</label>
 			<select class="width-100 filter" name="channels" id="channels">
@@ -132,9 +121,9 @@
 			<button type="button" id="btn-state-7" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_7']; ?>" onclick="toggleState(7)">รอเปิดบิล</button>
 			<button type="button" id="btn-state-8" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_8']; ?>" onclick="toggleState(8)">เปิดบิลแล้ว</button>
 			<button type="button" id="btn-state-9" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_9']; ?>" onclick="toggleState(9)">ยกเลิก</button>
-			<button type="button" id="btn-not-save" class="btn btn-sm margin-bottom-5 <?php echo $btn['not_save']; ?>" onclick="toggleNotSave()">ไม่บันทึก</button>
+			<!-- <button type="button" id="btn-not-save" class="btn btn-sm margin-bottom-5 <?php echo $btn['not_save']; ?>" onclick="toggleNotSave()">ไม่บันทึก</button>
 			<button type="button" id="btn-expire" class="btn btn-sm margin-bottom-5 <?php echo $btn['is_expire']; ?>" onclick="toggleIsExpire()">หมดอายุ</button>
-			<button type="button" id="btn-only-me" class="btn btn-sm margin-bottom-5 <?php echo $btn['only_me']; ?>" onclick="toggleOnlyMe()">เฉพาะฉัน</button>
+			<button type="button" id="btn-only-me" class="btn btn-sm margin-bottom-5 <?php echo $btn['only_me']; ?>" onclick="toggleOnlyMe()">เฉพาะฉัน</button> -->
 		</div>
 	</div>
 
@@ -158,14 +147,15 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="order-table" style="overflow:auto;">
-		<table class="table tableFixHead" style="min-width:1140px; margin-bottom:20px;">
+		<table class="table tableFixHead" style="min-width:1260px; margin-bottom:20px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-40 middle text-center fix-header">ลำดับ</th>
 					<th class="fix-width-80 middle text-center fix-header">วันที่</th>
-					<th class="fix-width-100 middle fix-header">เลขที่เอกสาร</th>
-					<th class="fix-width-120 middle fix-header">เลขที่อ้างอิง</th>
-					<th class="fix-width-250 middle fix-header">ลูกค้า</th>
+					<th class="fix-width-100 middle fix-header">Order No.</th>
+					<th class="fix-width-120 middle fix-header">SO No.</th>
+					<th class="fix-width-120 middle fix-header">MKP No.</th>
+					<th class="min-width-250 middle fix-header">ลูกค้า</th>
 					<th class="fix-width-100 middle text-right fix-header">ยอดเงิน</th>
 					<th class="fix-width-150 middle fix-header">ช่องทางขาย</th>
 					<th class="fix-width-150 middle fix-header">การชำระเงิน</th>
@@ -182,6 +172,7 @@
               <td class="middle text-center"><?php echo $no; ?></td>
               <td class="middle text-center pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo thai_date($rs->date_add); ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->code . $cn_text; ?></td>
+							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->so_no; ?></td>
 							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->reference; ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')">
 								<?php if($rs->role == 'L' OR $rs->role == 'R') : ?>

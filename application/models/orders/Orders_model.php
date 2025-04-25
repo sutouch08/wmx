@@ -12,7 +12,7 @@ class Orders_model extends CI_Model
 
   public function add(array $ds = array())
   {
-    if(!empty($ds))
+    if( ! empty($ds))
     {
       return $this->db->insert($this->tb, $ds);
     }
@@ -23,7 +23,7 @@ class Orders_model extends CI_Model
 
   public function update($code, array $ds = array())
   {
-    if(!empty($ds))
+    if( ! empty($ds))
     {
       return $this->db->where('code', $code)->update($this->tb, $ds);
     }
@@ -70,7 +70,7 @@ class Orders_model extends CI_Model
 
   public function add_detail(array $ds = array())
   {
-    if(!empty($ds))
+    if( ! empty($ds))
     {
       return $this->db->insert($this->td, $ds);
     }
@@ -81,7 +81,7 @@ class Orders_model extends CI_Model
 
 	public function add_cancle_reason(array $ds = array())
 	{
-		if(!empty($ds))
+		if( ! empty($ds))
 		{
 			return $this->db->insert('order_cancle_reason', $ds);
 		}
@@ -511,9 +511,40 @@ class Orders_model extends CI_Model
   }
 
 
+  //--- เช็คว่า reference นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ reference ได้
+  public function is_active_order_so($so_no)
+  {
+    $rs = $this->db
+    ->select('code')
+    ->where('so_no', $so_no)
+    ->where_in('state', [4, 5, 6, 7,8])
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return TRUE;
+    }
+
+    return FALSE;
+  }
+
+
   public function get_active_order_by_reference($reference)
   {
     $rs = $this->db->where('reference', $reference)->where('state <=', 7)->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_active_order_by_so($so_no)
+  {
+    $rs = $this->db->where('so_no', $so_no)->where('state <=', 7)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -646,6 +677,11 @@ class Orders_model extends CI_Model
       $this->db->like('code', $ds['code']);
     }
 
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('so_no', $ds['so_no']);
+    }
+    
     //--- รหัส/ชื่อ ลูกค้า
     if( ! empty($ds['customer']))
     {
@@ -698,7 +734,7 @@ class Orders_model extends CI_Model
       $this->db->like('user_ref', $ds['user_ref']);
     }
 
-    if(!empty($ds['empName']))
+    if( ! empty($ds['empName']))
     {
       $this->db->like('empName', $ds['empName']);
     }
@@ -708,7 +744,7 @@ class Orders_model extends CI_Model
       $this->db->where('warehouse_code', $ds['warehouse']);
     }
 
-    if(!empty($ds['notSave']))
+    if( ! empty($ds['notSave']))
     {
       $this->db->where('status', 0);
     }
@@ -723,17 +759,17 @@ class Orders_model extends CI_Model
       }
     }
 
-    if(!empty($ds['onlyMe']))
+    if( ! empty($ds['onlyMe']))
     {
       $this->db->where('user', $this->_user->uname);
     }
 
-    if(!empty($ds['isExpire']))
+    if( ! empty($ds['isExpire']))
     {
       $this->db->where('is_expired', 1);
     }
 
-    if(!empty($ds['state_list']))
+    if( ! empty($ds['state_list']))
     {
       $this->db->where_in('state', $ds['state_list']);
     }
@@ -801,7 +837,7 @@ class Orders_model extends CI_Model
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $role = 'S')
   {
     $this->db
-    ->select('id, code, role, reference, customer_code, customer_name, customer_ref')
+    ->select('id, code, role, so_no, reference, customer_code, customer_name, customer_ref')
     ->select('channels_code, payment_code, state, status, warehouse_code, zone_code, date_add, is_expired, doc_total')
     ->select('is_backorder, is_approved, user, empName, is_cancled, budget_id, budget_code')
     ->where('role', $role);
@@ -822,6 +858,17 @@ class Orders_model extends CI_Model
       $this->db->like('code', $ds['code']);
     }
 
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('so_no', $ds['so_no']);
+    }
+
+    //---- เลขที่อ้างอิงออเดอร์ภายนอก
+    if( ! empty($ds['reference']))
+    {
+      $this->db->like('reference', $ds['reference'], 'after');
+    }
+
     //--- รหัส/ชื่อ ลูกค้า
     if( ! empty($ds['customer']))
     {
@@ -836,12 +883,6 @@ class Orders_model extends CI_Model
     if( isset($ds['user']) && $ds['user'] != 'all')
     {
       $this->db->where('user', $ds['user']);
-    }
-
-    //---- เลขที่อ้างอิงออเดอร์ภายนอก
-    if( ! empty($ds['reference']))
-    {
-      $this->db->like('reference', $ds['reference'], 'after');
     }
 
     //---เลขที่จัดส่ง
@@ -889,7 +930,7 @@ class Orders_model extends CI_Model
       $this->db->where('warehouse_code', $ds['warehouse']);
     }
 
-    if(!empty($ds['notSave']))
+    if( ! empty($ds['notSave']))
     {
       $this->db->where('status', 0);
     }
@@ -909,12 +950,12 @@ class Orders_model extends CI_Model
       $this->db->where('user', $this->_user->uname);
     }
 
-    if(!empty($ds['isExpire']))
+    if( ! empty($ds['isExpire']))
     {
       $this->db->where('is_expired', 1);
     }
 
-    if(!empty($ds['state_list']))
+    if( ! empty($ds['state_list']))
     {
       $this->db->where_in('state', $ds['state_list']);
     }
@@ -975,7 +1016,7 @@ class Orders_model extends CI_Model
 			}
 		}
 
-    if(!empty($ds['order_by']))
+    if( ! empty($ds['order_by']))
     {
       $order_by = "{$ds['order_by']}";
       $this->db->order_by($order_by, $ds['sort_by']);
@@ -1633,7 +1674,7 @@ class Orders_model extends CI_Model
 
   public function set_expire_order($code)
   {
-    if(!empty($code))
+    if( ! empty($code))
     {
       return $this->db
       ->set('is_expired', 1)
@@ -1647,7 +1688,7 @@ class Orders_model extends CI_Model
 
   public function set_expire_order_details($code)
   {
-    if(!empty($code))
+    if( ! empty($code))
     {
       return $this->db
       ->set('is_expired', 1)

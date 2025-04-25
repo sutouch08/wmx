@@ -1,25 +1,25 @@
 <?php
-$set_price = $rule->item_price > 0 ? 'Y' : 'N';
-$price = $rule->item_price;
-$btn_price_yes = $rule->item_price > 0 ? 'btn-primary' : '';
-$btn_price_no = $rule->item_price > 0 ? '' : 'btn-primary';
+$set_price = $rule->price > 0 ? 'Y' : 'N';
+$price = $rule->price;
+$btn_price_yes = $rule->price > 0 ? 'btn-primary' : '';
+$btn_price_no = $rule->price > 0 ? '' : 'btn-primary';
 $ac_price = $set_price == 'Y' ? '' : 'disabled';
 
-$item_disc1 = ($rule->item_disc > 0 && $rule->item_price == 0) ? 'Y' : 'N';
+$item_disc1 = ($rule->disc_1> 0 && $rule->price == 0) ? 'Y' : 'N';
 
-$btn_unit_p = $rule->item_disc_unit == 'percent' ? 'btn-primary' : '';
-$btn_unit_a = $rule->item_disc_unit == 'amount' ? 'btn-primary' : '';
-$unit = $rule->item_disc_unit == 'amount' ? 'A' :'P';
+$btn_unit_p = $rule->unit_1== 'percent' ? 'btn-primary' : '';
+$btn_unit_a = $rule->unit_1== 'amount' ? 'btn-primary' : '';
+$unit1 = $rule->unit_1== 'amount' ? 'A' :'P';
 $ac_disc = $set_price == 'Y' ? 'disabled' : '';
 
-$btn_unit_p2 = $rule->item_disc_2_unit == 'percent' ? 'btn-primary' : '';
-$btn_unit_a2 = $rule->item_disc_2_unit == 'amount' ? 'btn-primary' : '';
-$unit2 = $rule->item_disc_2_unit == 'amount' ? 'A' :'P';
+$btn_unit_p2 = $rule->unit_2 == 'percent' ? 'btn-primary' : '';
+$btn_unit_a2 = $rule->unit_2 == 'amount' ? 'btn-primary' : '';
+$unit2 = $rule->unit_2 == 'amount' ? 'A' :'P';
 $ac_disc2 = $set_price === 'Y' ? 'disabled' : '';
 
-$btn_unit_p3 = $rule->item_disc_3_unit == 'percent' ? 'btn-primary' : '';
-$btn_unit_a3 = $rule->item_disc_3_unit == 'amount' ? 'btn-primary' : '';
-$unit3 = $rule->item_disc_3_unit == 'amount' ? 'A' :'P';
+$btn_unit_p3 = $rule->unit_3 == 'percent' ? 'btn-primary' : '';
+$btn_unit_a3 = $rule->unit_3 == 'amount' ? 'btn-primary' : '';
+$unit3 = $rule->unit_3 == 'amount' ? 'A' :'P';
 $ac_disc3 = $set_price === 'Y' ? 'disabled' : '';
 
 $can_group = $rule->canGroup == 1 ? 'Y' : 'N';
@@ -43,7 +43,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 			</div>
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-4">
-			<input type="number" class="form-control input-sm text-center" id="txt-price" value="<?php echo $rule->item_price; ?>" <?php echo $ac_price; ?> />
+			<input type="number" class="form-control input-sm text-center" id="txt-price" value="<?php echo $rule->price; ?>" <?php echo $ac_price; ?> />
 		</div>
 		<div class="divider-hidden"></div>
 
@@ -53,7 +53,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
 			<div class="btn-group width-100">
-				<input type="number" class="form-control input-sm text-center" id="txt-discount" value="<?php echo $rule->item_disc; ?>" <?php echo $ac_disc; ?> />
+				<input type="number" class="form-control input-sm text-center" id="txt-discount" value="<?php echo $rule->disc_1; ?>" <?php echo $ac_disc; ?> />
 			</div>
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
@@ -70,7 +70,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
 			<div class="btn-group width-100">
-				<input type="number" class="form-control input-sm text-center" id="txt-discount2" value="<?php echo $rule->item_disc_2; ?>" <?php echo $ac_disc2; ?> />
+				<input type="number" class="form-control input-sm text-center" id="txt-discount2" value="<?php echo $rule->disc_2; ?>" <?php echo $ac_disc2; ?> />
 			</div>
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
@@ -87,7 +87,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
 			<div class="btn-group width-100">
-				<input type="number" class="form-control input-sm text-center" id="txt-discount3" value="<?php echo $rule->item_disc_3; ?>" <?php echo $ac_disc3; ?> />
+				<input type="number" class="form-control input-sm text-center" id="txt-discount3" value="<?php echo $rule->disc_3; ?>" <?php echo $ac_disc3; ?> />
 			</div>
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
@@ -104,7 +104,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
 			<div class="btn-group width-100">
-				<input type="number" class="form-control input-sm text-center" id="txt-qty" value="<?php echo $rule->qty; ?>" />
+				<input type="number" class="form-control input-sm text-center" id="txt-qty" value="<?php echo $rule->minQty; ?>" />
 			</div>
 		</div>
 		<div class="divider-hidden"></div>
@@ -115,7 +115,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 		</div>
 		<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-4">
 			<div class="btn-group width-100">
-				<input type="number" class="form-control input-sm text-center" id="txt-amount" value="<?php echo $rule->amount; ?>" />
+				<input type="number" class="form-control input-sm text-center" id="txt-amount" value="<?php echo $rule->minAmount; ?>" />
 			</div>
 		</div>
 		<div class="divider-hidden"></div>
@@ -139,7 +139,7 @@ $btn_can_group_no = $can_group == 'N' ? 'btn-primary' : '';
 	</div>
 
 		<input type="hidden" id="set_price" value="<?php echo $set_price; ?>" />
-		<input type="hidden" id="disc_unit" value="<?php echo $unit; ?>" />
+		<input type="hidden" id="disc_unit" value="<?php echo $unit1; ?>" />
 		<input type="hidden" id="disc_unit2" value="<?php echo $unit2; ?>" />
 		<input type="hidden" id="disc_unit3" value="<?php echo $unit3; ?>" />
 		<input type="hidden" id="can_group" value="<?php echo $can_group; ?>" />
