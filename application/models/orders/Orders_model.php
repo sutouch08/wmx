@@ -644,12 +644,6 @@ class Orders_model extends CI_Model
   }
 
 
-  public function clear_inv_code($code)
-  {
-    return $this->db->set('inv_code', NULL)->set('is_exported', 0)->where('code', $code)->update($this->tb);
-  }
-
-
   public function paid($code, $paid)
   {
     $paid = $paid === TRUE ? 1 : 0;
@@ -681,7 +675,7 @@ class Orders_model extends CI_Model
     {
       $this->db->like('so_no', $ds['so_no']);
     }
-    
+
     //--- รหัส/ชื่อ ลูกค้า
     if( ! empty($ds['customer']))
     {
@@ -1477,13 +1471,6 @@ class Orders_model extends CI_Model
   }
 
 
-  //---- ระบุที่อยู่จัดส่งในออเดอร์นั้นๆ
-  public function set_address_id($code, $id_address)
-  {
-    return $this->db->set('id_address', $id_address)->where('code', $code)->update($this->tb);
-  }
-
-
   public function clear_order_detail($code)
   {
     return $this->db->where('order_code', $code)->delete($this->td);
@@ -1500,148 +1487,6 @@ class Orders_model extends CI_Model
   public function valid_transfer_draft($code)
   {
     return $this->db->set('is_valid', 1)->where('code', $code)->update($this->tb);
-  }
-
-
-  public function get_order_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where_in('role', 'S')
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  public function get_sponsor_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where_in('role', array('P', 'U'))
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  public function get_consignment_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where('role', 'C')
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  //--- WT
-  public function get_order_transfer_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where('role', 'N')
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('is_valid', 1)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  //---- WL
-  public function get_order_lend_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where('role', 'L')
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  //--- WQ, WV
-  public function get_order_transform_non_inv_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->where_in('role', array('Q','T'))
-    ->where('state', 8)
-    ->where('status', 1)
-    ->where('is_cancled', 0)
-    ->where('is_expired', 0)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  public function update_inv($code, $doc_num)
-  {
-    return $this->db->set('inv_code', $doc_num)->where('code', $code)->update($this->tb);
   }
 
 

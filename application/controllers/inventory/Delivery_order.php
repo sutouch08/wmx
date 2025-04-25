@@ -26,6 +26,7 @@ class Delivery_order extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
+      'so_no' => get_filter('so_no', 'ic_so_no', ''),
       'reference' => get_filter('reference', 'ic_reference', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
       'user' => get_filter('user', 'ic_user', 'all'),
@@ -289,7 +290,6 @@ class Delivery_order extends PS_Controller
                       'id_rule' => $rs->id_rule,
                       'customer_code' => $order->customer_code,
                       'customer_ref' => $order->customer_ref,
-                      'sale_code' => $order->sale_code,
                       'user' => $order->user,
                       'date_add' => $date_add,
                       'zone_code' => $rm->zone_code,
@@ -448,7 +448,6 @@ class Delivery_order extends PS_Controller
               'id_rule' => $rs->id_rule,
               'customer_code' => $order->customer_code,
               'customer_ref' => $order->customer_ref,
-              'sale_code' => $order->sale_code,
               'user' => $order->user,
               'date_add' => $date_add,
               'zone_code' => NULL,
@@ -599,6 +598,7 @@ class Delivery_order extends PS_Controller
   {
     $filter = array(
       'ic_code',
+      'ic_so_no',
       'ic_reference',
       'ic_customer',
       'ic_user',

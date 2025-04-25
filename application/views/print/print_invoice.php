@@ -150,17 +150,13 @@ while($total_page > 0 )
     $qty  = number($total_qty);
     $total_order = number($total_order, 2);
     $total_discount_amount = number(($total_discount + $bill_discount),2);
-    $net_amount = number( ($total_amount + $order->shipping_fee + $order->service_fee) - $bill_discount, 2);
-    $service_fee = number($order->service_fee, 2);
-    $shipping_fee = number($order->shipping_fee, 2);
+    $net_amount = number($total_amount - $bill_discount, 2);
     $remark = $order->remark;
   }
   else
   {
     $qty = "";
-    $amount = "";
-    $shipping_fee = "";
-    $service_fee = "";
+    $amount = "";        
     $total_discount_amount = "";
     $net_amount = "";
     $remark = "";

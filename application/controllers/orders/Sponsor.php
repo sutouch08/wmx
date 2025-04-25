@@ -174,8 +174,7 @@ class Sponsor extends PS_Controller
             'user_ref' => $data->empName,
             'warehouse_code' => $wh->code,
             'budget_id' => $data->budget_id,
-            'budget_code' => $data->budget_code,
-    				'transformed' => $data->transformed == 1 ? 1 : 0
+            'budget_code' => $data->budget_code
           );
 
           if( ! $this->orders_model->add($ds))
@@ -313,9 +312,7 @@ class Sponsor extends PS_Controller
                 'budget_id' => $data->budget_id,
                 'remark' => get_null($data->remark),
                 'status' => 0,
-    						'id_address' => NULL,
-    						'id_sender' => NULL,
-    						'transformed' => $data->transformed
+    						'id_sender' => NULL
               );
             }
             else
@@ -414,31 +411,7 @@ class Sponsor extends PS_Controller
       $sc = FALSE;
       $this->error = "ไม่พบงบประมาณที่ใช้ได้";
     }
-
-		if(empty($order->id_address))
-		{
-			$this->load->model('address/address_model');
-			$id_address = NULL;
-
-			if( ! empty($order->customer_ref))
-			{
-				$id_address = $this->address_model->get_shipping_address_id_by_code($order->customer_ref);
-			}
-			else
-			{
-				$id_address = $this->address_model->get_default_ship_to_address_id($order->customer_code);
-			}
-
-			if( ! empty($id_address))
-			{
-				$arr = array(
-					'id_address' => $id_address
-				);
-
-				$this->orders_model->update($order->code, $arr);
-			}
-		}
-
+		
 		if(empty($order->id_sender))
 		{
 			$this->load->model('masters/sender_model');

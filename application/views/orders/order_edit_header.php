@@ -44,23 +44,12 @@
 
 		<div class="col-lg-5 col-md-5 col-sm-5 col-xs-12 padding-5">
 			<label>คลัง</label>
-			<input type="text" class="width-100" value="<?php echo $order->warehouse_code . " : ". warehouse_name($order->warehouse_code); ?>" disabled />	    
+			<input type="text" class="width-100" value="<?php echo $order->warehouse_code . " : ". warehouse_name($order->warehouse_code); ?>" disabled />
 	  </div>
 		<?php if($order->is_backorder == 1 && $order->state < 5) : ?>
 			<?php $this->load->view('backorder_watermark'); ?>
 		<?php endif; ?>
-
-		<?php if($order->state == 1) : ?>
-			<?php if( $order->is_expired == 0 && ($this->pm->can_add OR $this->pm->can_edit)): ?>
-				<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-					<label class="display-block not-show">แก้ไข</label>
-					<button type="button" class="btn btn-xs btn-warning btn-block" id="btn-edit" onclick="getEdit()"><i class="fa fa-pencil"></i> แก้ไข</i></button>
-					<button type="button" class="btn btn-xs btn-success btn-block hide" id="btn-update" onclick="validUpdate()"><i class="fa fa-save"></i> บันทึก</i></button>
-				</div>
-			<?php endif; ?>
-		<?php endif; ?>
     <input type="hidden" name="customerCode" id="customerCode" value="<?php echo $order->customer_code; ?>" />
 		<input type="hidden" name="order_code" id="order_code" value="<?php echo $order->code; ?>" />
-		<input type="hidden" name="address_id" id="address_id" value="<?php echo $order->id_address; //--- id_address ใช้แล้วใน online modal?>" />
 </div>
 <hr class="margin-bottom-15 padding-5"/>

@@ -23,27 +23,7 @@
   <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 padding-5">
     	<p class="pull-right top-p text-right" >
 				<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-				<?php if($order->is_term == 0 && $order->status == 1 && $order->state < 3 && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
-				<button type="button" class="btn btn-xs btn-info top-btn" onclick="payOrder()">แจ้งชำระเงิน</button>
-				<?php endif; ?>
-				<button type="button" class="btn btn-xs btn-purple top-btn" onclick="getSummary()">สรุปข้อมูล</button>
 				<button type="button" class="btn btn-xs btn-default top-btn hidden-xs" onclick="printOrderSheet()"><i class="fa fa-print"></i> พิมพ์</button>
-				<?php if($isAdmin && $order->state < 4 && $order->never_expire == 0 && $order->is_expired == 0) : ?>
-				<button type="button" class="btn btn-xs btn-primary top-btn" onclick="setNotExpire(1)">ยกเว้นการหมดอายุ</button>
-				<?php endif; ?>
-				<?php if($isAdmin && $order->never_expire == 1 && $order->is_expired == 0) : ?>
-					<button type="button" class="btn btn-xs btn-info top-btn" onclick="setNotExpire(0)">ไม่ยกเว้นการหมดอายุ</button>
-				<?php endif; ?>
-				<?php if($isAdmin && $order->is_expired == 1) : ?>
-								<button type="button" class="btn btn-xs btn-warning top-btn" onclick="unExpired()">ทำให้ไม่หมดอายุ</button>
-				<?php endif; ?>
-
-				<?php if($order->state < 3) : ?>
-				 	<?php if( $order->is_expired == 0 && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
-						<button type="button" class="btn btn-xs btn-info" onclick="recalDiscount()">คำนวณส่วนลดใหม่</button></button>
-					<?php endif; ?>
-				<?php endif; ?>
-
 				<?php if($order->status == 0 && $order->is_expired == 0) : ?>
 					<button type="button" id="btn-save-order" class="btn btn-xs btn-success btn-100 top-btn" onclick="saveOrder()">บันทึก</button>
 				<?php else : ?>
@@ -55,12 +35,7 @@
 <hr/>
 <?php $this->load->view('orders/order_edit_header'); ?>
 <?php $this->load->view('orders/order_panel'); ?>
-<?php
-	if($order->state == 1)
-	{
-		$this->load->view('orders/order_item_add_control');
-	}
-	?>
+
 <?php $this->load->view('orders/order_discount_bar'); ?>
 <?php $this->load->view('orders/order_detail'); ?>
 <?php //$this->load->view('orders/order_online_modal'); ?>

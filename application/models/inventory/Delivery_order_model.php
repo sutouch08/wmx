@@ -38,6 +38,11 @@ class Delivery_order_model extends CI_Model
       $this->db->like('code', $ds['code']);
     }
 
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('so_no', $ds['so_no']);
+    }
+
     if( ! empty($ds['reference']))
     {
       $this->db->like('reference', $ds['reference']);
@@ -100,8 +105,8 @@ class Delivery_order_model extends CI_Model
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $state = 7)
   {
     $this->db
-    ->select('id, code, role, reference, customer_code, customer_name, customer_ref')
-    ->select('channels_code, payment_code, date_add, shipped_date, user, doc_total, inv_code, empID, empName, is_cancled, is_hold')
+    ->select('id, code, role, so_no, reference, customer_code, customer_name, customer_ref')
+    ->select('channels_code, payment_code, date_add, shipped_date, user, doc_total, empID, empName, is_cancled, is_hold')
     ->where('state', $state);
 
     if($ds['from_date'] != '' && $ds['to_date'] != '')
@@ -117,6 +122,11 @@ class Delivery_order_model extends CI_Model
     if( ! empty($ds['code']))
     {
       $this->db->like('code', $ds['code']);
+    }
+
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('so_no', $ds['so_no']);
     }
 
     if( ! empty($ds['reference']))
@@ -336,7 +346,7 @@ class Delivery_order_model extends CI_Model
 
 
     private function get_max_id()
-    {
+    {            
       $rs = $this->db->query("SELECT MAX(id) AS id FROM orders");
 
       if($rs->num_rows() === 1)

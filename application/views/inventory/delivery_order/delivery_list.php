@@ -10,12 +10,17 @@
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 <div class="row">
 	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
-    <label>เลขที่เอกสาร</label>
+    <label>Order No.</label>
     <input type="text" class="form-control input-sm search-box" name="code"  value="<?php echo $code; ?>" />
   </div>
 
 	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
-    <label>เลขที่อ้างอิง</label>
+    <label>SO No.</label>
+    <input type="text" class="form-control input-sm search-box" name="so_no"  value="<?php echo $so_no; ?>" />
+  </div>
+
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+    <label>MKP No.</label>
     <input type="text" class="form-control input-sm search-box" name="reference"  value="<?php echo $reference; ?>" />
   </div>
 
@@ -32,7 +37,7 @@
     </select>
   </div>
 
-	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5 hide">
     <label>รูปแบบ</label>
 		<select class="width-100 filter" name="role" id="role">
       <option value="all">ทั้งหมด</option>
@@ -58,7 +63,7 @@
 
 	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
     <label>วันที่</label>
-    <div class="input-daterange input-group">
+    <div class="input-daterange input-group width-100">
       <input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
       <input type="text" class="form-control input-sm width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
     </div>

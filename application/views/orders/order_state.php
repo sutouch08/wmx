@@ -13,69 +13,23 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
 <div class="row" style="padding:15px;">
 	<div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 padding-5">
     	<table class="table" style="margin-bottom:0px;">
-        <?php if( $this->pm->can_add OR $this->pm->can_edit OR $this->pm->can_delete ) : ?>
-        	<tr>
-            	<td class="width-25 middle text-right" style="border:0px; padding:5px;">สถานะ : </td>
-                <td class="width-50" style="border:0px; padding:5px;">
-                	<select class="form-control input-sm" style="padding-top:0px; padding-bottom:0px;" id="stateList">
-                    	<option value="0">เลือกสถานะ</option>
-							<?php if($this->_SuperAdmin) : ?>
-											<option value="1">รอดำเนินการ</option>
-											<option value="2">รอชำระเงิน</option>
-											<option value="3">รอจัดสินค้า</option>
-											<option value="7">รอเปิดบิล</option>
-											<option value="9">ยกเลิก</option>
-							<?php elseif( $order->state != 9 && $order->is_expired == 0 && $order->status == 1) : ?>
-
-                 <?php if( $order->state <=3) : ?>
-
-                        <?php if($order->state != 1): ?>
-													<option value="1">รอดำเนินการ</option>
-												<?php endif; ?>
-												<?php if($order->state != 2 && $order->is_term == 0) : ?>
-                        <option value="2">รอชำระเงิน</option>
-												<?php endif; ?>
-                        <?php if($order->state != 3 && $order->role == 'S') : ?>
-                          <?php if($order->is_paid == 1 OR $canSetPrepare OR $canSkip) : ?>
-                            <option value="3">รอจัดสินค้า</option>
-                          <?php endif; ?>
-                        <?php elseif($order->state != 3 && $order->is_approved == 1) : ?>
-                          <option value="3">รอจัดสินค้า</option>
-                        <?php endif; ?>
-
-								 <?php elseif($order->state > 3 && $order->state < 8 && $canChange ) : ?>
-											 <option value="1">รอดำเนินการ</option>
-											 <option value="2">รอชำระเงิน</option>
-											 <option value="3">รอจัดสินค้า</option>
-								 <?php elseif($order->state > 3 && $order->state >= 8 && $canUnbill ) : ?>
-                       <option value="1">รอดำเนินการ</option>
-                       <option value="2">รอชำระเงิน</option>
-                       <option value="3">รอจัดสินค้า</option>
-								 <?php endif; ?>
-
-                 <?php if( $order->state < 8 && $this->pm->can_delete ) : ?>
-                        <option value="9">ยกเลิก</option>
-								 <?php elseif( $order->state >= 8 && $canUnbill) : ?>
-												<option value="9">ยกเลิก</option>
-                 <?php endif; ?>
-
-							<?php elseif($order->is_expired == 1 && $this->pm->can_delete) : ?>
-												<option value="9">ยกเลิก</option>
-							<?php elseif($order->state == 9 && $this->pm->can_edit) : ?>
-												<option value="1">รอดำเนินการ</option>
-							<?php endif; ?>
-                    </select>
-                </td>
-                <td class="width-25" style="border:0px; padding:5px;">
-                <?php if( $order->status == 1 && $order->is_expired == 0 ) : ?>
-                	<button class="btn btn-xs btn-primary btn-block" id="btn-change-state" onclick="changeState()">เปลี่ยนสถานะ</button>
-								<?php elseif($order->is_expired == 1 && $this->pm->can_delete) : ?>
-									<button class="btn btn-xs btn-primary btn-block" id="btn-change-state" onclick="changeState()">เปลี่ยนสถานะ</button>
-								<?php elseif($order->state == 9 && $this->pm->can_delete) : ?>
-									<button class="btn btn-xs btn-primary btn-block" id="btn-change-state" onclick="changeState()">เปลี่ยนสถานะ</button>
-                <?php endif; ?>
-                </td>
-            </tr>
+      <?php if( $this->pm->can_add OR $this->pm->can_edit OR $this->pm->can_delete ) : ?>
+          <tr>
+            <td class="width-25 middle text-right" style="border:0px; padding:5px;">สถานะ : </td>
+            <td class="width-50" style="border:0px; padding:5px;">
+              <select class="form-control input-sm" style="padding-top:0px; padding-bottom:0px;" id="stateList">
+                <option value="0">เลือกสถานะ</option>
+                <option value="1">รอดำเนินการ</option>
+                <option value="3">รอจัดสินค้า</option>
+                <option value="5">รอตรวจ</option>
+                <option value="7">รอเปิดบิล</option>
+                <option value="9">ยกเลิก</option>
+              </select>
+            </td>
+            <td class="width-25" style="border:0px; padding:5px;">
+              <button class="btn btn-xs btn-primary btn-block" id="btn-change-state" onclick="changeState()">เปลี่ยนสถานะ</button>
+            </td>
+          </tr>
        <?php else : ?>
        			<tr>
             	<td class="width-30 text-center" style="border:0px;">สถานะ</td>
@@ -86,13 +40,32 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
       </table>
 	</div>
 
-  <?php $link = $order->state == 9 ? 'onclick="showReason()"' : ''; ?>
-  <?php $pointer = $order->state == 9 ? 'pointer' : ''; ?>
-    <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-14 <?php echo $pointer; ?>"
-      <?php echo $link; ?>	style="height: 49px; border:solid 2px white; <?php echo state_color($order->state); ?>"	>
-      <center>สถานปัจจุบัน</center>
-      <center><?php echo get_state_name($order->state); ?></center>
-    </div>
+  <?php
+    $link = "";
+    switch($order->state)
+    {
+      case '9' :
+      $link = 'onclick="showReason()"';
+      break;
+      case '7' :
+      $link = 'onclick="view_delivery()"';
+      break;
+      case '8' :
+      $link = 'onclick="view_closed()"';
+      break;
+      default :
+      $line = "";
+      break;
+    }
+
+    $pointer = empty($link) ? '' : 'pointer';
+  ?>
+
+  <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5 font-size-14 <?php echo $pointer; ?>"
+    <?php echo $link; ?>	style="height: 49px; border:solid 2px white; <?php echo state_color($order->state); ?>"	>
+		<center>สถานปัจจุบัน</center>
+		<center><?php echo get_state_name($order->state); ?></center>
+	</div>
 
     <?php if( !empty($state) ) : ?>
       <?php foreach($state as $rs) : ?>
@@ -147,3 +120,20 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
    </div>
  </div>
 </div>
+
+<script>
+  function view_delivery() {
+    let code = $('#order_code').val();
+    let target = BASE_URL + 'inventory/delivery_order/view_detail/'+code;
+
+    window.open(target, "_blank", "width=1000, height=800, scrollbars=yes");
+  }
+
+  function view_closed() {
+    let code = $('#order_code').val();
+    let target = BASE_URL + 'inventory/invoice/view_detail/'+code;
+
+    window.open(target, "_blank", "width=1000, height=800, scrollbars=yes");
+  }
+
+</script>

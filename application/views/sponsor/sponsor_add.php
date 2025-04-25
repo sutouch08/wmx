@@ -39,15 +39,7 @@
 			<input type="text" class="form-control input-sm e" name="empName" id="empName" value="" required />
 		</div>
 
-		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-4 padding-5">
-			<label>งานแปร</label>
-			<select class="form-control input-sm" name="transformed" id="transformed">
-				<option value="0">No</option>
-				<option value="1">Yes</option>
-			</select>
-		</div>
-
-		<div class="col-lg-3 col-md-4 col-sm-4 col-xs-8 padding-5">
+		<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 padding-5">
 			<label>คลัง</label>
 			<select class="width-100 e" name="warehouse" id="warehouse">
 				<option value="">เลือกคลัง</option>

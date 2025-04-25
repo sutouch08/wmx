@@ -61,15 +61,6 @@
 		</select>
   </div>
 
-	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
-    <label>SAP</label>
-    <select class="form-control input-sm" name="is_exported" onchange="getSearch()">
-			<option value="all">ทั้งหมด</option>
-			<option value="0" <?php echo is_selected("0", $is_exported); ?>>ยังไม่ส่ง</option>
-			<option value="1" <?php echo is_selected('1', $is_exported); ?>>ส่งออกแล้ว</option>
-		</select>
-  </div>
-
 	<div class="col-lg-2 col-md-2-harf col-sm-3 col-xs-6 padding-5">
     <label>วันที่</label>
     <div class="input-group width-100">

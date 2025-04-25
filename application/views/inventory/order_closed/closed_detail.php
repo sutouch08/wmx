@@ -30,6 +30,10 @@
         </span>
       </div>
     </div>
+    <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+      <label class="font-size-2 blod">SO No.</label>
+      <input type="text" class="width-100 text-center" value="<?php echo $order->so_no; ?>" disabled />
+    </div>
 
     <?php if($order->role == 'C' OR $order->role == 'N') : ?>
     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -62,11 +66,8 @@
         </span>
       </div>
     </div>
-    <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-      <label class="font-size-2 blod">SAP No</label>
-      <input type="text" class="form-control input-sm text-center" value="<?php echo $order->inv_code; ?>" disabled />
-    </div>
     <?php else : ?>
+
       <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
         <label>อ้างอิง</label>
         <input type="text" class="width-100 text-center" value="<?php echo $order->reference; ?>" disabled />
@@ -101,10 +102,6 @@
           </span>
         </div>
       </div>
-      <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-        <label class="font-size-2 blod">SAP No</label>
-        <input type="text" class="width-100 text-center" value="<?php echo $order->inv_code; ?>" disabled />
-      </div>
     <?php endif; ?>
   </div>
   <hr/>
@@ -114,7 +111,7 @@
       <?php if($order->channels_code == '0009' && ! empty($order->reference)) : ?>
         <button type="button" class="btn btn-white btn-info top-btn" onclick="shipOrderTiktok('<?php echo $order->reference; ?>')"><i class="fa fa-print"></i> TikTok Label</button>
       <?php endif; ?>
-      <button type="button" class="btn btn-sm btn-info top-btn" onclick="printAddress(<?php echo $order->id_address; ?>, '<?php echo $order->code; ?>', <?php echo $order->id_sender; ?>)"><i class="fa fa-print"></i> ใบนำส่ง</button>
+      <button type="button" class="btn btn-sm btn-info top-btn" onclick="printAddress('<?php echo $order->code; ?>')"><i class="fa fa-print"></i> ใบนำส่ง</button>
       <button type="button" class="btn btn-sm btn-primary top-btn" onclick="printOrder()"><i class="fa fa-print"></i> Packing List </button>
       <button type="button" class="btn btn-sm btn-success top-btn" onclick="printOrderBarcode()"><i class="fa fa-print"></i> Packing List (barcode)</button>
       <button type="button" class="btn btn-sm btn-warning top-btn" onclick="showBoxList()"><i class="fa fa-print"></i> Packing List (ปะหน้ากล่อง)</button>
@@ -150,11 +147,7 @@
           $totalPrice = 0;
   ?>
   <?php   foreach($details as $rs) :  ?>
-		<?php  if($order->is_wms) : ?>
-    <?php     $color = ($rs->order_qty == $rs->sold OR $rs->is_count == 0) ? '' : 'red'; ?>
-		<?php 	else : ?>
-		<?php     $color = ($rs->order_qty == $rs->qc OR $rs->is_count == 0) ? '' : 'red'; ?>
-		<?php 	endif; ?>
+    <?php   $color = (($rs->order_qty == $rs->prepared && $rs->order_qty == $rs->qc && $rs->order_qty == $rs->sold) OR $rs->is_count == 0) ? '' : 'red'; ?>
             <tr class="font-size-12 <?php echo $color; ?>">
               <td class="middle text-center">
                 <?php echo $no; ?>
