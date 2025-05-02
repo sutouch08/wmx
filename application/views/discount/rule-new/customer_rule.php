@@ -53,13 +53,9 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
        <button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-id-no" onclick="toggleCustomerId('N')" disabled>NO</button>
      </div>
    </div>
-   <div class="divider-hidden"></div>
-   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5 not-show">
-     <span class="form-control left-label">SKU</span>
-   </div>
    <div class="col-lg-5 col-md-5-harf col-sm-4-harf padding-5">
      <input type="text" class="option form-control input-sm" id="txt-cust-id-box" placeholder="ค้นหาชื่อลูกค้า" disabled />
-     <input type="hidden" id="id_customer" />
+     <input type="hidden" id="customer-id" data-code="" data-name="" />
    </div>
    <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block" id="btn-cust-id-add" onclick="addCustId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
@@ -90,14 +86,14 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
              <tr class="font-size-11" id="customer-row-<?php echo $rs->customer_id; ?>">
                <td class="middle text-center">
                  <label>
-                   <input type="checkbox" class="ace customer-chk" value="<?php echo $rs->customer_id; ?>">
+                   <input type="checkbox" class="ace customer-chk"
+                   data-code="<?php echo $rs->customer_code; ?>"
+                   data-name="<?php echo $rs->customer_name; ?>"
+                   value="<?php echo $rs->customer_id; ?>">
                    <span class="lbl"></span>
                  </label>
                </td>
-               <td class="middle">
-                 <?php echo $rs->customer_code; ?>
-                 <input type="hidden" class="customer-id" id="customer-id-<?php echo $rs->customer_id; ?>" value="<?php echo $rs->customer_id; ?>">
-               </td>
+               <td class="middle"><?php echo $rs->customer_code; ?></td>
                <td class="middle" colspan="2"><?php echo $rs->customer_name; ?></td>
              </tr>
            <?php endforeach; ?>
@@ -108,7 +104,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Customer Group</span>
+     <span class="form-control left-label text-right">Group</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -118,7 +114,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-group" onclick="showCustomerGroup()" disabled>
-       Customer Group <span class="badge pull-right" id="badge-group"><?php echo $custGroupNo; ?></span>
+       Group <span class="badge pull-right" id="badge-group"><?php echo $custGroupNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -126,7 +122,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Customer Type</span>
+     <span class="form-control left-label text-right">Type</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -136,7 +132,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-type" onclick="showCustomerType()" disabled>
-       Customer Type <span class="badge pull-right" id="badge-type"><?php echo $custTypeNo; ?></span>
+       Type <span class="badge pull-right" id="badge-type"><?php echo $custTypeNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -144,7 +140,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Customer Kind</span>
+     <span class="form-control left-label text-right">Kind</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -154,14 +150,14 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-kind" onclick="showCustomerKind()" disabled>
-       Customer Kind <span class="badge pull-right" id="badge-kind"><?php echo $custKindNo; ?></span>
+       Kind <span class="badge pull-right" id="badge-kind"><?php echo $custKindNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Customer Area</span>
+     <span class="form-control left-label text-right">Area</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -171,13 +167,13 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-area" onclick="showCustomerArea()" disabled>
-       Customer Area <span class="badge pull-right" id="badge-area"><?php echo $custAreaNo; ?></span>
+       Area <span class="badge pull-right" id="badge-area"><?php echo $custAreaNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Customer Grade</span>
+     <span class="form-control left-label text-right">Grade</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -187,7 +183,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-grade" onclick="showCustomerGrade()" disabled>
-       Customer Grade <span class="badge pull-right" id="badge-grade"><?php echo $custGradeNo; ?></span>
+       Grade <span class="badge pull-right" id="badge-grade"><?php echo $custGradeNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -210,11 +206,14 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
  <script type="text/x-handlebarsTemplate" id="customerRowTemplate">
    <tr class="font-size-11" id="customer-row-{{id}}">
-     <td class="middle text-center"><label><input type="checkbox" class="ace customer-chk" value="{{id}}"><span class="lbl"></span></label></td>
-     <td class="middle">
-       {{code}}
-       <input type="hidden" class="customer-id" id="customer-id-{{id}}" value="{{id}}">
+     <td class="middle text-center">
+        <label>
+          <input type="checkbox" class="ace customer-chk"
+          data-code="{{code}}" data-name="{{name}}" value="{{id}}">
+          <span class="lbl"></span>
+        </label>
      </td>
+     <td class="middle">{{code}}</td>
      <td class="middle" colspan="2">{{name}}</td>
    </tr>
  </script>

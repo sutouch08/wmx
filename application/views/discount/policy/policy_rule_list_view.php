@@ -27,12 +27,12 @@
           <td class="middle text-center"><?php echo $no; ?></td>
           <td class="middle text-center"><?php echo $rs->code; ?></td>
           <td class="middle"><?php echo $rs->name; ?></td>
-          <td class="middle text-center"><?php echo showItemDiscountLabel($rs->item_price, $rs->item_disc, $rs->item_disc_unit); ?></td>
+          <td class="middle text-center"><?php echo discount_label($rs->type, $rs->price, $rs->disc1, $rs->disc2, $rs->disc3); ?></td>
           <td class="middle text-center"><?php echo ($rs->all_customer == 1 ? 'ทั้งหมด' : 'กำหนดค่า'); ?></td>
           <td class="middle text-center"><?php echo ($rs->all_product == 1 ? 'ทั้งหมด' : 'กำหนดค่า'); ?></td>
           <td class="middle text-center"><?php echo ($rs->all_channels == 1 ? 'ทั้งหมด' : 'กำหนดค่า'); ?></td>
           <td class="middle text-center"><?php echo ($rs->all_payment == 1 ? 'ทั้งหมด' : 'กำหนดค่า'); ?></td>
-          <td class="middle text-center"><?php echo ($rs->qty > 0 ? $rs->qty.' pcs' : ($rs->amount > 0 ? $rs->amount.' '.getConfig('CURRENTCY') : 'No')); ?></td>
+          <td class="middle text-center"><?php echo ($rs->minQty > 0 ? $rs->minQty.' pcs' : ($rs->minAmount > 0 ? $rs->minAmount.' '.getConfig('CURRENTCY') : 'No')); ?></td>
           <td class="middle text-right">
             <?php if(empty($view_detail)) : ?>
             <button type="button" class="btn btn-xs btn-info" onclick="viewRuleDetail('<?php echo $rs->id; ?>')"><i class="fa fa-eye"></i></button>

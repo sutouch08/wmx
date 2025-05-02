@@ -8,7 +8,7 @@
       </div>
       <div class="modal-body" id="cust-group-body">
         <div class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
     <?php if( ! empty($customer_groups)) : ?>
       <?php foreach($customer_groups as $rs) : ?>
         <?php $se = isset($custGroup[$rs->code]) ? 'checked' : ''; ?>
@@ -41,7 +41,7 @@
       </div>
       <div class="modal-body" id="cust-type-body">
         <div class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
     <?php if(! empty($customer_types)) : ?>
       <?php foreach($customer_types as $rs) : ?>
         <?php $se = isset($custType[$rs->code]) ? 'checked' : ''; ?>
@@ -65,8 +65,6 @@
 </div>
 
 
-
-
 <div class="modal fade" id="cust-kind-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:400px;">
     <div class="modal-content">
@@ -76,7 +74,7 @@
       </div>
       <div class="modal-body" id="cust-kind-body">
         <div class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
     <?php if( ! empty($customer_kinds)) : ?>
       <?php foreach($customer_kinds as $rs) : ?>
         <?php $se = isset($custKind[$rs->code]) ? 'checked' : ''; ?>
@@ -100,8 +98,6 @@
 </div>
 
 
-
-
 <div class="modal fade" id="cust-area-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:400px;">
     <div class="modal-content">
@@ -111,7 +107,7 @@
       </div>
       <div class="modal-body" id="cust-area-body">
         <div class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
     <?php if( ! empty($customer_areas)) : ?>
       <?php foreach($customer_areas as $rs) : ?>
         <?php $se = isset($custArea[$rs->code]) ? 'checked' : ''; ?>
@@ -135,8 +131,6 @@
 </div>
 
 
-
-
 <div class="modal fade" id="cust-grade-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:300px;">
     <div class="modal-content">
@@ -146,7 +140,7 @@
       </div>
       <div class="modal-body" id="cust-grade-body">
         <div class="row">
-          <div class="col-sm-12">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
     <?php if( ! empty($customer_grades)) : ?>
       <?php foreach($customer_grades as $rs) : ?>
         <?php $se = isset($custGrade[$rs->code]) ? 'checked' : ''; ?>

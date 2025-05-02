@@ -309,6 +309,34 @@ class Auto_complete extends CI_Controller
   }
 
 
+  public function get_customer_code_name_id()
+  {
+    $ds = [];
+
+    $txt = $_REQUEST['term'];
+
+    $rs = $this->db
+    ->select('id, code, name')
+		->where('active', 1)
+    ->group_start()
+    ->like('code', $txt)
+    ->or_like('name', $txt)
+    ->group_end()
+    ->limit(50)
+    ->get('customers');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $ds[] = $rd->code.' | '.$rd->name.' | '.$rd->id;
+      }
+    }
+
+    echo json_encode($ds);
+  }
+
+
   public function get_style_code()
   {
     $sc = array();
@@ -333,6 +361,44 @@ class Auto_complete extends CI_Controller
 
     echo json_encode($sc);
   }
+
+
+  //--- use in discount_rule
+  public function get_model_name()
+  {
+    $ds = [];
+
+    $txt = trim($_REQUEST['term']);
+
+    $this->db->select('id, code, name');
+
+    if($txt != '*')
+    {
+      $this->db
+      ->group_start()
+      ->like('code', $txt)
+      ->or_like('name', $txt)
+      ->group_end();
+    }
+
+    $this->db->order_by('code', 'ASC')->limit(50);
+    $rs = $this->db->get('product_style');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $ds[] = $rd->code." | ".$rd->name." | ".$rd->id;
+      }
+    }
+    else
+    {
+      $ds[] = "not found";
+    }
+
+    echo json_encode($ds);
+  }
+
 
 
   public function get_style_code_and_name()
@@ -1061,6 +1127,40 @@ class Auto_complete extends CI_Controller
       foreach($qs->result() as $rs)
       {
         $sc[] = $rs->code.' | '.$rs->name;
+      }
+    }
+    else
+    {
+      $sc[] = "not found";
+    }
+
+    echo json_encode($sc);
+  }
+
+
+  public function get_item_code_name_id()
+  {
+    $ds = [];
+  	$txt = trim($_REQUEST['term']);
+
+  	$this->db->select('id, code, name');
+
+  	if($txt !== '*')
+  	{
+  		$this->db->like('code', $txt)->or_like('name', $txt);
+  	}
+
+  	$this->db->order_by('code', 'ASC');
+
+  	$this->db->limit(50);
+
+    $qs = $this->db->get('products');
+
+    if($qs->num_rows() > 0)
+    {
+      foreach($qs->result() as $rs)
+      {
+        $sc[] = $rs->code.' | '.$rs->name.' | '.$rs->id;
       }
     }
     else

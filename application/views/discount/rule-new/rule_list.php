@@ -98,20 +98,7 @@
        <tbody>
 <?php if(!empty($data)) : ?>
   <?php $no = $this->uri->segment($this->segment) + 1; ?>
-  <?php foreach($data as $rs) : ?>
-    <?php
-        $disc = array(
-          'type' => $rs->type,
-          'price' => $rs->price,
-          'disc_1' => $rs->disc_1,
-          'unit_1' => $rs->unit_1,
-          'disc_2' => $rs->disc_2,
-          'unit_2' => $rs->unit_2,
-          'disc_3' => $rs->disc_3,
-          'unit_3' => $rs->unit_3
-        );
-      ?>
-
+  <?php foreach($data as $rs) : ?>  
         <tr class="font-size-11" id="row-<?php echo $rs->id; ?>">
           <td class="middle">
             <button type="button" class="btn btn-minier btn-info" onclick="viewDetail('<?php echo $rs->id; ?>')"><i class="fa fa-eye"></i></button>
@@ -131,7 +118,7 @@
 					</td>
           <td class="middle text-center"><?php echo $rs->policy_code; ?></td>
           <td class="middle text-center">
-				<?php echo $rs->type == 'F' ? $rs->freeQty.' PCS' : ($rs->type == 'N' ? number($rs->price, 2).' THB' : parse_discount_to_label($disc)); ?></td>
+				<?php echo $rs->type == 'F' ? $rs->freeQty.' PCS' : ($rs->type == 'N' ? number($rs->price, 2).' THB' : discount_label($rs->type, $rs->price, $rs->disc1, $rs->disc2, $rs->disc3)); ?></td>
 					<td class="middle text-center"><?php echo $rs->priority; ?></td>
           <td class="middle"><?php echo $rs->name; ?></td>
         </tr>

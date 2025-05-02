@@ -1,6 +1,5 @@
 function changeURL(id, tab)
 {
-
 	var url = HOME + 'edit/' + id + '/' + tab;
 	var stObj = { stage: 'stage' };
 	window.history.pushState(stObj, 'discount_rule', url);
@@ -38,17 +37,6 @@ function saveAdd(){
 }
 
 
-
-function getEdit(){
-  $('#txt-rule-name').removeAttr('disabled');
-  $('#btn-active-rule').removeAttr('disabled');
-  $('#btn-dis-rule').removeAttr('disabled');
-  $('#btn-edit').addClass('hide');
-  $('#btn-update').removeClass('hide');
-
-}
-
-
 function activeRule(){
   $('#isActive').val(1);
   $('#btn-active-rule').addClass('btn-success');
@@ -63,10 +51,11 @@ function disActiveRule(){
 }
 
 function updateRule() {
-  var id = $('#rule_id').val();
+  var id = $('#id_rule').val();
   var isActive = $('#isActive').val();
   var name = $('#txt-rule-name').val();
-  if(isNaN(parseInt(id))){
+
+	if(isNaN(parseInt(id))){
     swal('ไม่พบ ID Rule');
     return false;
   }
@@ -86,22 +75,24 @@ function updateRule() {
       'name' : name,
       'active' : isActive
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
+
+      if(rs.trim() == 'success') {
         swal({
           title:'Updated',
           type:'success',
           timer:1000
         });
-
-        $('#txt-rule-name').attr('disabled','disabled');
-        $('#btn-active-rule').attr('disabled', 'disabled');
-        $('#btn-dis-rule').attr('disabled', 'disabled');
-        $('#btn-update').addClass('hide');
-        $('#btn-edit').removeClass('hide');
       }
-    }
+			else {
+				beep();
+				showError(rs);
+			}
+    },
+		error:function(rs) {
+			beep();
+			showError(rs);
+		}
   });
 }

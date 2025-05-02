@@ -1,39 +1,36 @@
-function saveChannels(){
-  rule_id = $('#rule_id').val();
-  all_channels = $('#all_channels').val();
-  countChannels = parseInt($('.chk-channels:checked').size());
+function saveChannels() {
+  let h = {
+    'id' : $('#id_rule').val(),
+    'all' : $('#all_channels').val(),
+    'channelsList' : []
+  }
 
-  if(all_channels == 'N' && countChannels == 0){
-    swal('กรุณาระบุช่องทางการขายอย่างน้อย 1 รายการ');
+  countChannels = $('.chk-channels:checked').length;
+
+  if(h.all == 'N' && countChannels == 0) {
+    swal('Warning', 'กรุณาระบุช่องทางการขายอย่างน้อย 1 รายการ', 'warning');
     return false;
   }
 
-  ds = [
-    {'name':'rule_id', 'value':rule_id},
-    {'name':'all_channels', 'value':all_channels}
-  ];
-
-  if(all_channels == 'N'){
-    i = 0;
-    $('.chk-channels').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'channels['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.all == 'N') {
+    $('.chk-channels:checked').each(function() {
+      h.channelsList.push($(this).val());
+    })
   }
 
-
   load_in();
+
   $.ajax({
-    url: BASE_URL + 'discount/discount_rule/set_channels_rule',
+    url: HOME + 'set_channels_rule',
     type:'POST',
-    cache:'false',
-    data:ds,
-    success:function(rs){
+    cache:false,
+    data: {
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
       load_out();
-      if(rs == 'success'){
+
+      if(rs.trim() == 'success') {
         swal({
           title:'Saved',
           type:'success',
@@ -43,10 +40,15 @@ function saveChannels(){
 				setTimeout(function(){
 					window.location.reload();
 				}, 1200);
-				
-      }else{
-        swal('Error!', rs, 'error');
       }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   });
 }

@@ -35,18 +35,15 @@ $currency = getConfig('CURRENTCY');
       </tr>
       <tr class="">
         <td class="middle text-right"><strong>ส่วนลด</strong></td>
-        <td class="middle">
-          <?php echo $rule->item_disc; ?>
-          <?php echo ($rule->item_disc_unit == 'amount' ? $currency : '%'); ?>
-        </td>
+        <td class="middle"><?php echo $rule->disc1.'%'; ?></td>
         <td class="middle text-right"><strong>กำหนดราคา</strong></td>
-        <td class="middle"><?php echo ($rule->item_price > 0 ? number($rule->item_price, 2).' '.$currency : 'No'); ?></td>
+        <td class="middle"><?php echo ($rule->type == 'N' ? number($rule->price, 2) : 'No'); ?></td>
       </tr>
       <tr>
         <td class="middle text-right"><strong>จำนวนขั้นต่ำ</strong></td>
-        <td class="middle"><?php echo ($rule->qty > 0 ? number($rule->qty) : 'No'); ?></td>
+        <td class="middle"><?php echo ($rule->minQty > 0 ? number($rule->minQty) : 'No'); ?></td>
         <td class="middle text-right"><strong>มูลค่าขั้นต่ำ</strong></td>
-        <td class="middle"><?php echo ($rule->amount > 0 ? number($rule->amount, 2).' '.$currency : 'No'); ?></td>
+        <td class="middle"><?php echo ($rule->minAmount > 0 ? number($rule->minAmount, 2).' '.$currency : 'No'); ?></td>
       </tr>
       <tr>
         <td class="middle text-right"><strong>รวมยอดได้</strong></td>

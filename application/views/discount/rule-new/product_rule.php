@@ -1,36 +1,43 @@
 <?php
 $allProduct = $rule->all_product == 0 ? 'N' : 'Y';
 
-
 //--- ระบุชื่อสินค้า
-$pdListNo = count($pdList);
+$pdListNo = empty($pdList) ? 0 : count($pdList);
 $product_id = ($allProduct == 'N' && $pdListNo > 0 ) ? 'Y' : 'N';
 
-
 //--- กำหนดรุ่นสินค้า
-$pdModelNo = count($pdModel);
+$pdModelNo = empty($pdModel) ? 0 : count($pdModel);
 $product_model = ($pdModelNo > 0 && $allProduct == 'N') ? 'Y' : 'N';
 
 //--- กำหนดกลุ่มสินค้า
 $pdGroupNo = count($pdGroup);
-$product_group = ($pdGroupNo > 0 && $allProduct == 'N' && $product_style == 'N') ? 'Y' : 'N';
+$product_group = ($pdGroupNo > 0 && $allProduct == 'N' && $product_id == 'N' && $product_model == 'N') ? 'Y' : 'N';
+
+//--- กำหนดกลุ่มสินค้าย่อย
+$pdSubGroupNo = count($pdSubGroup);
+$product_sub_group = ($pdSubGroupNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+//--- กำหนดประเภทสินค้า
+$pdKindNo = count($pdKind);
+$product_kind = ($pdKindNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดชนิดสินค้า
-$pdType = $this->discount_rule_model->getRuleProductType($rule->id);
 $pdTypeNo = count($pdType);
 $product_type = ($pdTypeNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 
 //--- กำหนดหมวดหมู่สินค้า
-$pdCategory = $this->discount_rule_model->getRuleProductCategory($rule->id);
 $pdCategoryNo = count($pdCategory);
 $product_category = ($pdCategoryNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 
 //--- กำหนดยี่ห้อสินค้า
-$pdBrand = $this->discount_rule_model->getRuleProductBrand($rule->id);
 $pdBrandNo = count($pdBrand);
 $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+//--- กำหนดปีสินค้า
+$pdYearNo = count($pdYear);
+$product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
  ?>
 
  <div class="row">
@@ -40,7 +47,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
    <div class="divider margin-top-5"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">All products</span>
+     <span class="form-control text-label text-right">All products</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -51,7 +58,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
    <div class="divider-hidden"></div>
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">SKU</span>
+     <span class="form-control text-label text-right">SKU</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -62,25 +69,25 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
    <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
      <input type="text" class="not-pd-all option form-control input-sm" id="txt-product-id-box" placeholder="รหัส/ชื่อสินค้า" disabled />
-     <input type="hidden" id="id_product" />
+     <input type="hidden" id="product-id" data-code="" data-name=""/>
    </div>
 
    <div class="col-sm-1 padding-5">
      <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-id-add" onclick="addProductId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
    </div>
 
-   <div class="col-sm-1 col-1-harf padding-5">
+   <div class="col-sm-1 col-1-harf padding-5 hide">
      <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-import" onclick="getUploadFile()" disabled><i class="fa fa-upload"></i> import</button>
    </div>
 
    <div class="divider-hidden"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 not-show">
-     <span class="form-control left-label">SKU</span>
+     <span class="form-control text-label">SKU</span>
    </div>
    <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="max-height:300px; overflow:auto; margin-bottom:5px;">
      <table class="table table-striped border-1">
        <thead>
-         <tr>
+         <tr class="font-size-11">
            <th class="fix-width-40">
              <label>
                <input type="checkbox" class="ace" onchange="checkItemAll($(this))">
@@ -89,24 +96,24 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
            </th>
            <th class="fix-width-150">SKU Code</th>
            <th class="min-width-250">Description</th>
-           <th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeItem()">Delete</button></th>
+           <th class="fix-width-60 text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeItem()">Delete</button></th>
          </tr>
        </thead>
        <tbody id="itemList">
          <?php if(!empty($pdList)) : ?>
            <?php foreach($pdList as $item) : ?>
-             <tr id="item-row-<?php echo $item->product_id; ?>">
+             <tr class="font-size-11" id="item-row-<?php echo $item->product_id; ?>">
                <td class="middle text-center">
                  <label>
-                   <input type="checkbox" class="ace item-chk" value="<?php echo $item->product_id; ?>">
+                   <input type="checkbox" class="ace item-chk"
+                    id="item-id-<?php echo $item->product_id; ?>"
+                    value="<?php echo $item->product_id; ?>"
+                    data-code="<?php echo $item->product_code; ?>" >
                    <span class="lbl"></span>
                  </label>
                </td>
-               <td class="middle">
-                 <?php echo $item->code; ?>
-                 <input type="hidden" class="item-id" id="item-id-<?php echo $item->product_id; ?>" value="<?php echo $item->product_id; ?>">
-               </td>
-               <td class="middle" colspan="2"><?php echo $item->name; ?></td>
+               <td class="middle"><?php echo $item->product_code; ?></td>
+               <td class="middle" colspan="2"><?php echo $item->product_name; ?></td>
              </tr>
            <?php endforeach; ?>
          <?php endif; ?>
@@ -116,7 +123,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Model</span>
+     <span class="form-control text-label text-right">Model</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -128,25 +135,25 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
    <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
      <input type="text" class="not-pd-all option form-control input-sm" id="txt-model-id-box" placeholder="รหัส/ชื่อรุ่น" disabled />
-     <input type="hidden" id="id_model" />
+     <input type="hidden" id="model-id" data-code="" data-name="" />
    </div>
 
-   <div class="col-sm-1 padding-5">
+   <div class="col-lg-1 col-md-1 col-sm-1 padding-5">
      <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-id-add" onclick="addModelId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
    </div>
 
-   <div class="col-sm-1 col-1-harf padding-5">
-     <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-import" onclick="getUploadFile()" disabled><i class="fa fa-upload"></i> import</button>
+   <div class="col-sm-1 col-1-harf padding-5 hide">
+     <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-import" onclick="getUploadFile()" disabled><i class="fa fa-file-excel-o"></i>&nbsp; import</button>
    </div>
 
    <div class="divider-hidden"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 not-show">
-     <span class="form-control left-label">Model</span>
+     <span class="form-control text-label">Model</span>
    </div>
    <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="max-height:300px; overflow:auto; margin-bottom:5px;">
      <table class="table table-striped border-1">
        <thead>
-         <tr>
+         <tr class="font-size-11">
            <th class="fix-width-40">
              <label>
                <input type="checkbox" class="ace" onchange="checkModelAll($(this))">
@@ -155,24 +162,24 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
            </th>
            <th class="min-width-100">Model Code</th>
            <th class="min-width-250">Desctiption</th>
-           <th class="fix-width-60 text-center"><button type="button" class="btn btn-mini btn-danger btn-block" onclick="removeModel()">Delete</button></th>
+           <th class="fix-width-60 text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeModel()">Delete</button></th>
          </tr>
        </thead>
        <tbody id="modelList">
          <?php if(!empty($pdModel)) : ?>
            <?php foreach($pdModel as $item) : ?>
-             <tr id="model-row-<?php echo $item->model_id; ?>">
+             <tr class="font-size-11" id="model-row-<?php echo $item->style_id; ?>">
                <td class="middle text-center">
                  <label>
-                   <input type="checkbox" class="ace model-chk" value="<?php echo $item->model_id; ?>">
+                   <input type="checkbox" class="ace model-chk"
+                   id="model-<?php echo $item->style_id; ?>"
+                   value="<?php echo $item->style_id; ?>"
+                   data-code="<?php echo $item->style_code; ?>"  />
                    <span class="lbl"></span>
                  </label>
                </td>
-               <td class="middle"><?php echo $item->code; ?></td>
-               <td class="middle" colspan="2">
-                 <?php echo $item->name; ?>
-                 <input type="hidden" class="model-id" id="model-id-<?php echo $item->model_id; ?>" value="<?php echo $item->model_id; ?>">
-               </td>
+               <td class="middle"><?php echo $item->style_code; ?></td>
+               <td class="middle" colspan="2"><?php echo $item->style_name; ?></td>
              </tr>
            <?php endforeach; ?>
          <?php endif; ?>
@@ -182,7 +189,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Group</span>
+     <span class="form-control text-label text-right">Group</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -197,9 +204,40 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
    </div>
    <div class="divider-hidden"></div>
 
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Sub Group</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-subgroup-yes" onclick="toggleProductSubGroup('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-subgroup-no" onclick="toggleProductSubGroup('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-subgroup" onclick="showProductSubGroup()" disabled>
+       Select Sub Group <span class="badge pull-right" id="badge-pd-subgroup"><?php echo $pdSubGroupNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Type</span>
+     <span class="form-control text-label text-right">Kind</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-kind-yes" onclick="toggleProductKind('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-kind-no" onclick="toggleProductKind('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-kind" onclick="showProductKind()" disabled>
+       Select Kind <span class="badge pull-right" id="badge-pd-kind"><?php echo $pdKindNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Type</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -216,7 +254,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Category</span>
+     <span class="form-control text-label text-right">Category</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -233,7 +271,7 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Brand</span>
+     <span class="form-control text-label text-right">Brand</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -244,6 +282,22 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-brand" onclick="showProductBrand()" disabled>
        Select Brand <span class="badge pull-right" id="badge-pd-brand"><?php echo $pdBrandNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Year</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-year-yes" onclick="toggleProductYear('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-year-no" onclick="toggleProductYear('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-year" onclick="showProductYear()" disabled>
+       Select Brand <span class="badge pull-right" id="badge-pd-year"><?php echo $pdYearNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -260,9 +314,13 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
  <input type="hidden" id="all_product" value="<?php echo $allProduct; ?>" />
  <input type="hidden" id="product_id" value="<?php echo $product_id; ?>" />
  <input type="hidden" id="product_model" value="<?php echo $product_model; ?>" />
+ <input type="hidden" id="product_group" value="<?php echo $product_group; ?>" />
+ <input type="hidden" id="product_sub_group" value="<?php echo $product_sub_group; ?>" />
+ <input type="hidden" id="product_kind" value="<?php echo $product_kind; ?>" />
  <input type="hidden" id="product_type" value="<?php echo $product_type; ?>" />
  <input type="hidden" id="product_category" value="<?php echo $product_category; ?>" />
  <input type="hidden" id="product_brand" value="<?php echo $product_brand; ?>" />
+ <input type="hidden" id="product_year" value="<?php echo $product_year; ?>" />
 
 
  <div class="modal fade" id="upload-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -294,30 +352,35 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
  </div>
 
  <script type="text/x-handlebarsTemplate" id="itemRowTemplate">
-   <tr id="item-row-{{id}}">
-     <td class="middle text-center"><label><input type="checkbox" class="ace item-chk" value="{{id}}"><span class="lbl"></span></label></td>
-     <td class="middle">
-       {{code}}
-       <input type="hidden" class="item-id" id="item-id-{{id}}" value="{{id}}">
-     </td>
+   <tr class="font-size-11" id="item-row-{{id}}">
+     <td class="middle text-center">
+      <label>
+        <input type="checkbox" class="ace item-chk"
+        id="item-{{id}}"
+        value="{{id}}"
+        data-code="{{code}}" />
+        <span class="lbl"></span>
+      </label>
+    </td>
+     <td class="middle">{{code}}</td>
      <td class="middle" colspan="2">{{name}}</td>
    </tr>
  </script>
 
  <script type="text/x-handlebarsTemplate" id="modelRowTemplate">
-   <tr id="model-row-{{id}}">
-     <td class="middle text-center"><label><input type="checkbox" class="ace model-chk" value="{{id}}"><span class="lbl"></span></label></td>
-     <td class="middle" >
-       {{code}}
-       <input type="hidden" class="model-id" id="model-id-{{id}}" value="{{id}}">
-     </td>
+   <tr class="font-size-11" id="model-row-{{id}}">
+     <td class="middle text-center">
+      <label>
+        <input type="checkbox" class="ace model-chk"
+        id="model-{{id}}"
+        value="{{id}}"
+        data-code="{{code}}" />
+        <span class="lbl"></span>
+      </label>
+    </td>
+     <td class="middle" >{{code}}</td>
      <td class="middle" colspan="2">{{name}}</td>
    </tr>
  </script>
 
- <script>
-   $('#id_product').select2();
-   $('#id_model').select2();
- </script>
-
- <?php $this->load->view('discount/rule/product_rule_modal'); ?>
+ <?php $this->load->view('discount/rule-new/product_rule_modal'); ?>

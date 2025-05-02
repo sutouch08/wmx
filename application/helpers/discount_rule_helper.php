@@ -49,13 +49,13 @@ function parse_discount_to_label(array $ds = array())
     }
     else
     {
-      $disc_1 = empty($ds['disc_1']) ? 0 : (round($ds['disc_1'], 2) . (empty($ds['unit_1']) ? '%' : ($ds['unit_1'] == 'percent' ? '%' : '')));
-      $disc_2 = empty($ds['disc_2']) ? 0 : (round($ds['disc_2'], 2) . (empty($ds['unit_2']) ? '%' : ($ds['unit_2'] == 'percent' ? '%' : '')));
-      $disc_3 = empty($ds['disc_3']) ? 0 : (round($ds['disc_3'], 2) . (empty($ds['unit_3']) ? '%' : ($ds['unit_3'] == 'percent' ? '%' : '')));
+      $disc1 = empty($ds['disc1']) ? 0 : round($ds['disc1'], 2) . '%';
+      $disc2 = empty($ds['disc2']) ? 0 : round($ds['disc2'], 2) . '%';
+      $disc3 = empty($ds['disc3']) ? 0 : round($ds['disc3'], 2) . '%';
 
-      $disc  = $disc_1;
-      $disc .= $disc_2 == 0 ? "" : "+".$disc_2;
-      $disc .= $disc_3 == 0 ? "" : "+".$disc_3;
+      $disc  = $disc1;
+      $disc .= $disc2 == 0 ? "" : "+".$disc2;
+      $disc .= $disc3 == 0 ? "" : "+".$disc3;
     }
   }
 
@@ -78,7 +78,6 @@ function discount_label($type, $price, $disc1, $disc2, $disc3)
 		$disc .= ($disc1 > 0 && $disc2 > 0) ? "+".round($disc2)."%" : "";
 		$disc .= ($disc2 > 0 && $disc3 > 0) ? "+".round($disc3)."%" : "";
 		$disc .= ($disc3 > 0 && $disc4 > 0) ? "+".round($disc4)."%" : "";
-		$disc .= ($disc4 > 0 && $disc5 > 0) ? "+".round($disc5)."%" : "";
 	}
 
 	return $disc;

@@ -8,18 +8,15 @@
       </div>
       <div class="modal-body" id="payment-body">
         <div class="row">
-          <div class="col-sm-12">
-    <?php if( ! empty($payments)) : ?>
-      <?php $pm = $this->discount_rule_model->getRulePayment($rule->id); ?>
-      <?php foreach($payments as $rs) : ?>
-        <?php $se = isset($pm[$rs->id]) ? 'checked' : ''; ?>
+          <div class="col-sm-12"style="height:60vh; overflow:auto;">
+    <?php if( ! empty($payment_list)) : ?>
+      <?php foreach($payment_list as $rs) : ?>
+        <?php $se = isset($payments[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
                 <input type="checkbox"
 								class="ace chk-payment"
-								name="chk-payment-<?php echo $rs->id; ?>"
-								id="chk-payment-<?php echo $rs->id; ?>"
-								value="<?php echo $rs->id; ?>" <?php echo $se; ?> />
-								<span class="lbl"><?php echo $rs->name; ?></span>
+								value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+								<span class="lbl">&nbsp;&nbsp; <?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>

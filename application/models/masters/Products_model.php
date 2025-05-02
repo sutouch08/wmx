@@ -893,5 +893,20 @@ class Products_model extends CI_Model
 	}
 
 
+  public function get_all_year()
+  {
+    $rs = $this->db->select('year')
+    ->where('year IS NOT NULL', NULL, FALSE)
+    ->group_by('year')
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
 }
 ?>

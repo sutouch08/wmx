@@ -62,86 +62,92 @@ class Promotions extends REST_Controller
       $this->response($arr, 400);
     }
 
+    if( ! empty($data->items))
+    {
+      foreach($)
+    }
 
-    $ds = array(
-      'refId' => "xxx",
-      'maxDiscountPercent' => 20.00,
-      'discountGPpercent' => 20.00,
-      'items' => array(
-        array(
-          'productId' => "xxxx",
-          'itemSKU' => "xxxx",
-          'discount' => 200.00,
-          'discountPercent' => 20.00,
-          'discountLabel' => "10+30%",
-          'discountGP' => 200.00,
-          'discountGPpercent' => 20.00,
-          'conditionCode' => '1234',
-          'conditionName' => 'xxxx',
-          'freeQty' => 10,
-          'freeItems' => array(
-            array(
-              'freeSKU' => 'WA-xxx-xxx'
-            ),
-            array(
-              'freeSKU' => 'WA-xxx-xxy'
-            )
-          ),
-          'promotion' => array(
-            array(
-              'name' => 'xxx1',
-              'code' => '1234',
-              'conditionName' => 'xxxx',
-              'conditionCode' => '1234',
-              'conditionPriority' => '1'
-            ),
-            array(
-              'name' => 'xxx2',
-              'code' => '1235',
-              'conditionName' => 'xxxx2',
-              'conditionCode' => '4567',
-              'conditionPriority' => '10'
-            )
-          )
-        ),
-        array(
-          'productId' => "xxxx",
-          'itemSKU' => "xxxx",
-          'discount' => 200.00,
-          'discountPercent' => 20.00,
-          'discountLabel' => "10+30%",
-          'discountGP' => 200.00,
-          'discountGPpercent' => 20.00,
-          'conditionCode' => '1234',
-          'conditionName' => 'xxxx',
-          'freeQty' => 10,
-          'freeItems' => array(
-            array(
-              'freeSKU' => 'WA-xxx-xxx'
-            ),
-            array(
-              'freeSKU' => 'WA-xxx-xxy'
-            )
-          ),
-          'promotion' => array(
-            array(
-              'name' => 'xxx1',
-              'code' => '1234',
-              'conditionName' => 'xxxx',
-              'conditionCode' => '1234',
-              'conditionPriority' => '1'
-            ),
-            array(
-              'name' => 'xxx2',
-              'code' => '1235',
-              'conditionName' => 'xxxx2',
-              'conditionCode' => '4567',
-              'conditionPriority' => '10'
-            )
-          )
-        )
-      )
-    );
+    $ds = $data;
+
+    // $ds = array(
+    //   'refId' => "xxx",
+    //   'maxDiscountPercent' => 20.00,
+    //   'discountGPpercent' => 20.00,
+    //   'items' => array(
+    //     array(
+    //       'productId' => "xxxx",
+    //       'itemSKU' => "xxxx",
+    //       'discount' => 200.00,
+    //       'discountPercent' => 20.00,
+    //       'discountLabel' => "10+30%",
+    //       'discountGP' => 200.00,
+    //       'discountGPpercent' => 20.00,
+    //       'conditionCode' => '1234',
+    //       'conditionName' => 'xxxx',
+    //       'freeQty' => 10,
+    //       'freeItems' => array(
+    //         array(
+    //           'freeSKU' => 'WA-xxx-xxx'
+    //         ),
+    //         array(
+    //           'freeSKU' => 'WA-xxx-xxy'
+    //         )
+    //       ),
+    //       'promotion' => array(
+    //         array(
+    //           'name' => 'xxx1',
+    //           'code' => '1234',
+    //           'conditionName' => 'xxxx',
+    //           'conditionCode' => '1234',
+    //           'conditionPriority' => '1'
+    //         ),
+    //         array(
+    //           'name' => 'xxx2',
+    //           'code' => '1235',
+    //           'conditionName' => 'xxxx2',
+    //           'conditionCode' => '4567',
+    //           'conditionPriority' => '10'
+    //         )
+    //       )
+    //     ),
+    //     array(
+    //       'productId' => "xxxx",
+    //       'itemSKU' => "xxxx",
+    //       'discount' => 200.00,
+    //       'discountPercent' => 20.00,
+    //       'discountLabel' => "10+30%",
+    //       'discountGP' => 200.00,
+    //       'discountGPpercent' => 20.00,
+    //       'conditionCode' => '1234',
+    //       'conditionName' => 'xxxx',
+    //       'freeQty' => 10,
+    //       'freeItems' => array(
+    //         array(
+    //           'freeSKU' => 'WA-xxx-xxx'
+    //         ),
+    //         array(
+    //           'freeSKU' => 'WA-xxx-xxy'
+    //         )
+    //       ),
+    //       'promotion' => array(
+    //         array(
+    //           'name' => 'xxx1',
+    //           'code' => '1234',
+    //           'conditionName' => 'xxxx',
+    //           'conditionCode' => '1234',
+    //           'conditionPriority' => '1'
+    //         ),
+    //         array(
+    //           'name' => 'xxx2',
+    //           'code' => '1235',
+    //           'conditionName' => 'xxxx2',
+    //           'conditionCode' => '4567',
+    //           'conditionPriority' => '10'
+    //         )
+    //       )
+    //     )
+    //   )
+    // );
 
     $arr = array(
       'status' => TRUE,
