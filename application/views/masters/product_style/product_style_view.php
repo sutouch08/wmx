@@ -82,6 +82,6 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/masters/product_style.js?v=<?php echo "></script>
+<script src="<?php echo base_url(); ?>scripts/masters/product_style.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>
