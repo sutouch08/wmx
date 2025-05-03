@@ -35,11 +35,7 @@ function savePayment() {
           title:'Saved',
           type:'success',
           timer:1000
-        });
-
-				setTimeout(function() {
-					window.location.reload();
-				}, 1200)
+        });				
       }
       else {
         beep();
