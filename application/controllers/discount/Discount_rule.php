@@ -44,7 +44,7 @@ class Discount_rule extends PS_Controller
 
 		$this->pagination->initialize($init);
 
-    $this->load->view('discount/rule-new/rule_list', $filter);
+    $this->load->view('discount/rule/rule_list', $filter);
   }
 
 
@@ -52,17 +52,19 @@ class Discount_rule extends PS_Controller
   {
     if($this->pm->can_add)
     {
-      $this->load->view('discount/rule/rule_add_view');
+      $this->load->view('discount/rule/rule_add');
     }
     else
     {
-      redirect($this->home);
+      $this->deny_page();
     }
   }
 
 
   public function add()
   {
+    $sc = TRUE;
+
     if($this->pm->can_add)
     {
       if($this->input->post('name'))
@@ -77,27 +79,32 @@ class Discount_rule extends PS_Controller
         );
 
         $id = $this->discount_rule_model->add($arr);
-        if($id !== FALSE)
+
+        if( ! $id)
         {
-          redirect($this->home.'/edit_rule/'.$id);
-        }
-        else
-        {
-          set_error('สร้างเงื่อนไขส่วนลดไม่สำเร็จ');
-          redirect($this->home.'/add_new');
+          $sc = FALSE;
+          set_error('insert');
         }
       }
       else
       {
-        set_error('ไม่พบชื่อเงื่อนไข กรุณาตรวจสอบแล้วลองใหม่อีกครั้ง');
-        redirect($this->home.'/add_new');
+        $sc = FALSE;
+        set_error('required');
       }
     }
     else
     {
-      set_error('คุณไม่มีสิทธิ์ในการสร้างเงื่อนไขส่วนลด');
-      redirect($this->home);
+      $sc = FALSE;
+      set_error('permission');
     }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'id' => $sc === TRUE ? $id : NULL
+    );
+
+    echo json_encode($arr);
   }
 
 

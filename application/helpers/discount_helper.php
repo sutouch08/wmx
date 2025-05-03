@@ -40,9 +40,9 @@ function parse_discount_text($discText, $price)
 function discountLabel($disc = 0, $disc2 = 0, $disc3 = 0)
 {
 	$label = '';
-	$label = $disc == 0 ? 0 : getDiscLabel($disc);
-	$label .= $disc2 == 0 ? '' : '+'.getDiscLabel($disc2);
-	$label .= $disc3 == 0 ? '' : '+'.getDiscLabel($disc3);
+	$label = $disc == 0 ? 0 : $disc."%";
+	$label .= $disc2 == 0 ? '' : '+'.$disc2."%";
+	$label .= $disc3 == 0 ? '' : '+'.$disc3."%";
 	return $label;
 }
 

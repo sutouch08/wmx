@@ -76,8 +76,7 @@ function discount_label($type, $price, $disc1, $disc2, $disc3)
 	{
 		$disc = round($disc1, 2)."%";
 		$disc .= ($disc1 > 0 && $disc2 > 0) ? "+".round($disc2)."%" : "";
-		$disc .= ($disc2 > 0 && $disc3 > 0) ? "+".round($disc3)."%" : "";
-		$disc .= ($disc3 > 0 && $disc4 > 0) ? "+".round($disc4)."%" : "";
+		$disc .= ($disc2 > 0 && $disc3 > 0) ? "+".round($disc3)."%" : "";		
 	}
 
 	return $disc;

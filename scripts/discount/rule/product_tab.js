@@ -1,227 +1,207 @@
-function saveProduct(){
-  id_rule = $('#id_rule').val();
-  all_product = $('#all_product').val();
-  product_style = $('#product_style').val();
-  product_group = $('#product_group').val();
-  product_sub = $('#product_sub').val();
-  product_category = $('#product_category').val();
-  product_type = $('#product_type').val();
-  product_kind = $('#product_kind').val();
-  product_brand = $('#product_brand').val();
-  product_year = $('#product_year').val();
+var click = 0;
 
-  countId = $('.styleId').length;
+function saveProduct() {
+  rule_id = $('#id_rule').val();
+
+  let h = {
+    'id' : $('#id_rule').val(),
+    'all' : $('#all_product').val(), //--- Y, N
+    'sku' : $('#product_id').val(), // -- Y, N
+    'model' : $('#product_model').val(), //=- Y, N
+    'group' : $('#product_group').val(),
+    'sub_group' : $('#product_sub_group').val(), //-- Y, N
+    'kind' : $('#product_kind').val(),
+    'type' : $('#product_type').val(),
+    'category' : $('#product_category').val(),
+    'brand': $('#product_brand').val(),
+    'year' : $('#product_year').val(),
+    'skuList' : [],
+    'modelList' : [],
+    'groupList' : [],
+    'subGroupList' : [],
+    'kindList' : [],
+    'typeList' : [],
+    'categoryList' : [],
+    'brandList' : [],
+    'yearList' : []
+  }
 
   //--- ถ้าเลือกสินค้าทั้งหมดจะไม่สนใจเงื่อนไขอื่นๆ
-  if(all_product == 'N'){
-
-    //--- ถ้าเป็นการระบุชื่อสินค้ารายคนแล้วยังไม่ได้ระบุ
-    if(product_style == 'Y' && countId == 0){
-      swal('กรุณาระบุสินค้าอย่างน้อย 1 รายการ');
+  if(h.all == 'N') {
+    if(h.sku == 'Y' && $('.item-chk').length == 0) {
+      swal("Warning", "Please select at least 1 SKU", "warning");
       return false;
     }
 
-    if(product_style == 'N'){
-      count_group = parseInt($('.chk-pd-group:checked').size());
-      count_sub   = parseInt($('.chk-pd-sub:checked').size());
-      count_type  = parseInt($('.chk-pd-type:checked').size());
-      count_kind  = parseInt($('.chk-pd-kind:checked').size());
-      count_cate  = parseInt($('.chk-pd-cat:checked').size());
-      count_brand = parseInt($('.chk-pd-brand:checked').size());
-      count_year  = parseInt($('.chk-pd-year:checked').size());
-      sum_count = count_group + count_sub + count_type + count_kind + count_cate + count_brand + count_year;
+    if(h.model == 'Y' && $('.model-chk').length == 0) {
+      swal('Warning', 'Please select at least 1 Model', 'warning');
+      return false;
+    }
 
+    if(h.sku == 'N' && h.model == 'N') {
+      let groupCount = $('.chk-pd-group:checked').length;
+      let subGroupCount = $('.chk-pd-subgroup:checked').length;
+      let kindCount = $('.chk-pd-kind:checked').length;
+      let typeCount = $('.chk-pd-type:checked').length;
+      let cateCount = $('.chk-pd-cat:checked').length;
+      let brandCount = $('.chk-pd-brand:checked').length;
+      let yearCount = $('.chk-pd-year:checked').length;
 
-      //---- กรณีลือกสินค้าแบบเป็นกลุ่มแล้วไม่ได้เลือก
-      if(product_group == 'Y' && count_group == 0 ){
-        swal('กรุณาเลือกกลุ่มสินค้าอย่างน้อย 1 รายการ');
+      let allCount = groupCount + subGroupCount + kindCount + typeCount + cateCount + brandCount + yearCount;
+
+      if(allCount == 0) {
+        swal('Warning', 'Please select at least 1 of attributes', 'warning');
         return false;
       }
 
-      //---- กรณีลือกสินค้าแบบเป็นกลุ่มย่อยแล้วไม่ได้เลือก
-      if(product_sub == 'Y' && count_sub == 0 ){
-        swal('กรุณาเลือกกลุ่มย่อย อย่างน้อย 1 รายการ');
+      if(h.group == 'Y' && groupCount == 0) {
+        swal('Warning', 'Please select product group', 'warning');
         return false;
       }
 
-
-      //---- กรณีลือกสินค้าแบบเป็นหมวดหมู่แล้วไม่ได้เลือก
-      if(product_category == 'Y' && count_cate == 0 ){
-        swal('กรุณาเลือกหมวดหมู่สินค้าอย่างน้อย 1 รายการ');
+      if(h.sub_group == 'Y' && subGroupCount == 0) {
+        swal('Warning', 'Please select product sub group', 'warning');
         return false;
       }
 
-      //---- กรณีลือกสินค้าแบบเป็นชนิดแล้วไม่ได้เลือก
-      if(product_type == 'Y' && count_type == 0 ){
-        swal('กรุณาเลือกชนิดสินค้าอย่างน้อย 1 รายการ');
+      if(h.kind == 'Y' && kindCount == 0) {
+        swal('Warning', 'Please select product kind', 'warning');
         return false;
       }
 
-      //---- กรณีลือกสินค้าแบบเป็นประเภทแล้วไม่ได้เลือก
-      if(product_kind == 'Y' && count_kind == 0 ){
-        swal('กรุณาเลือกประเภทสินค้าอย่างน้อย 1 รายการ');
+      if(h.type == 'Y' && typeCount == 0) {
+        swal('Warning', 'Please select product type', 'warning');
         return false;
       }
 
-      //---- กรณีลือกสินค้าแบบเป็นยี่ห้อแล้วไม่ได้เลือก
-      if(product_brand == 'Y' && count_brand == 0 ){
-        swal('กรุณาเลือกยี่ห้อ อย่างน้อย 1 รายการ');
+      if(h.category == 'Y' && cateCount == 0) {
+        swal('Warning', 'Please select product category', 'warning');
         return false;
       }
 
-      //---- กรณีลือกสินค้าแบบเป็นเกรดแล้วไม่ได้เลือก
-      if(product_year == 'Y' && count_year == 0 ){
-        swal('กรุณาเลือกปีสินค้าอย่างน้อย 1 รายการ');
+      if(h.brand == 'Y' && brandCount == 0 ){
+        swal('Warning', 'Please select product brand', 'warning');
         return false;
       }
 
-      if(sum_count == 0){
-        swal('กรุณาระบุอย่างน้อย 1 เงื่อนไข');
+      if(h.year == 'Y' && yearCount == 0) {
+        swal('Warning', 'Please select product sub group', 'warning');
         return false;
       }
-
-    } //-- end if product_style == 'N'
-
-  } //--- end if all_product
-
-  ds = [
-    {'name':'id_rule', 'value':id_rule},
-    {'name':'all_product', 'value':all_product},
-    {'name':'product_style', 'value':product_style},
-    {'name':'product_group', 'value':product_group},
-    {'name':'product_sub_group', 'value':product_sub},
-    {'name':'product_category', 'value':product_category},
-    {'name':'product_type', 'value':product_type},
-    {'name':'product_kind', 'value':product_kind},
-    {'name':'product_brand', 'value':product_brand},
-    {'name':'product_year', 'value':product_year}
-  ];
-
-  //--- เก็บข้อมูลชื่อสินค้า
-  if(product_style == 'Y'){
-    $('.styleId').each(function(index, el) {
-      ds.push({'name':$(this).attr('name'), 'value':$(this).val()});
-    });
+    }
   }
 
-  //--- เก็บข้อมูลกลุ่มสินค้า
-  if(product_style == 'N' && product_group == 'Y'){
-    i = 0;
-    $('.chk-pd-group').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'productGroup['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.sku == 'Y') {
+    $('.item-chk').each(function() {
+      let el = $(this);
+      h.skuList.push({'id' : el.val(), 'code' : el.data('code')});
+    })
   }
 
-
-  //--- เก็บข้อมูลกลุ่มย่อยสินค้า
-  if(product_style == 'N' && product_sub == 'Y'){
-    i = 0;
-    $('.chk-pd-sub').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'productSubGroup['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.model == 'Y') {
+    $('.model-chk').each(function() {
+      let el = $(this);
+      h.modelList.push({'id' : el.val(), 'code' : el.data('code')});
+    })
   }
 
-
-  //--- เก็บข้อมูลหมวดหมู่สินค้า
-  if(product_style == 'N' && product_category == 'Y'){
-    i = 0;
-    $('.chk-pd-cat').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'productCategory['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.group == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-group:checked').each(function() {
+      h.groupList.push($(this).val());
+    })
   }
 
-
-  //--- เก็บข้อมูลชนิดสินค้า
-  if(product_style == 'N' && product_type == 'Y'){
-    i = 0;
-    $('.chk-pd-type').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'productType['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.sub_group == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-subgroup:checked').each(function() {
+      h.subGroupList.push($(this).val());
+    })
   }
 
-  //--- เก็บข้อมูเลือกประเภทสินค้า
-  if(product_style == 'N' && product_kind == 'Y'){
-    i = 0;
-    $('.chk-pd-kind').each(function(index, el){
-      if($(this).is(':checked')){
-        name = 'productKind['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.kind == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-kind:checked').each(function() {
+      h.kindList.push($(this).val());
+    })
   }
 
-  //--- เก็บข้อมูลยี่ห้อสินค้า
-  if(product_style == 'N' && product_brand == 'Y'){
-    i = 0;
-    $('.chk-pd-brand').each(function(index, el){
-      if($(this).is(':checked')){
-        name = 'productBrand['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.type == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-type:checked').each(function() {
+      h.typeList.push($(this).val());
+    })
   }
 
+  if(h.category == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-cat:checked').each(function() {
+      h.categoryList.push($(this).val());
+    })
+  }
 
-  //--- เก็บข้อมูลเกรดสินค้า
-  if(product_style == 'N' && product_year == 'Y'){
-    i = 0;
-    $('.chk-pd-year').each(function(index, el){
-      if($(this).is(':checked')){
-        name = 'productYear['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.brand == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-brand:checked').each(function() {
+      h.brandList.push($(this).val());
+    })
+  }
+
+  if(h.year == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-year:checked').each(function() {
+      h.yearList.push($(this).val());
+    })
   }
 
   load_in();
+
   $.ajax({
     url: BASE_URL + 'discount/discount_rule/set_product_rule',
     type:'POST',
     cache:'false',
-    data:ds,
+    data:{
+      'data' : JSON.stringify(h)
+    },
     success:function(rs){
+
       load_out();
-      if(rs == 'success'){
+
+      if(rs.trim() == 'success'){
         swal({
           title:'Saved',
           type:'success',
           timer:1000
         });
-      }else{
-        swal('Error!', rs, 'error');
+
+        setTimeout(function() {
+          window.location.reload();
+        }, 1200);
       }
+      else{
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   });
-
-
-} //--- end function
-
-
-
-
-function showStyleList(){
-  $('#style-list-modal').modal('show');
 }
 
+
+function checkItemAll(el) {
+	if(el.is(':checked')) {
+		$('.item-chk').prop('checked', true);
+	}
+	else {
+		$('.item-chk').prop('checked', false);
+	}
+}
+
+
+function checkModelAll(el) {
+	if(el.is(':checked')) {
+		$('.model-chk').prop('checked', true);
+	}
+	else {
+		$('.model-chk').prop('checked', false);
+	}
+}
 
 
 function showProductGroup(){
@@ -229,17 +209,9 @@ function showProductGroup(){
 }
 
 
-
 function showProductSubGroup(){
-  $('#pd-sub-modal').modal('show');
+  $('#pd-subgroup-modal').modal('show');
 }
-
-
-
-function showProductType(){
-  $('#pd-type-modal').modal('show');
-}
-
 
 
 function showProductKind(){
@@ -247,12 +219,14 @@ function showProductKind(){
 }
 
 
+function showProductType(){
+  $('#pd-type-modal').modal('show');
+}
+
 
 function showProductCategory(){
   $('#pd-cat-modal').modal('show');
 }
-
-
 
 
 function showProductBrand(){
@@ -260,25 +234,27 @@ function showProductBrand(){
 }
 
 
-
 function showProductYear(){
   $('#pd-year-modal').modal('show');
 }
 
 
-
-
-
-$('#txt-style-id-box').keyup(function(e){
+$('#txt-product-id-box').keyup(function(e){
   if(e.keyCode == 13){
     if($(this).val() != ''){
-      addStyleId();
+      addProductId();
     }
   }
 });
 
 
-
+$('#txt-model-id-box').keyup(function(e){
+  if(e.keyCode == 13){
+    if($(this).val() != ''){
+      addModelId();
+    }
+  }
+});
 
 
 $('.chk-pd-group').change(function(e){
@@ -292,21 +268,15 @@ $('.chk-pd-group').change(function(e){
 });
 
 
-
-
-
-$('.chk-pd-type').change(function(e){
+$('.chk-pd-subgroup').change(function(e){
   count = 0;
-  $('.chk-pd-type').each(function(index, el) {
+  $('.chk-pd-subgroup').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-pd-type').text(count);
+  $('#badge-pd-subgroup').text(count);
 });
-
-
-
 
 
 $('.chk-pd-kind').change(function(e){
@@ -320,6 +290,26 @@ $('.chk-pd-kind').change(function(e){
 });
 
 
+$('.chk-pd-year').change(function(e){
+  count = 0;
+  $('.chk-pd-year').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-year').text(count);
+});
+
+
+$('.chk-pd-type').change(function(e){
+  count = 0;
+  $('.chk-pd-type').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-type').text(count);
+});
 
 
 $('.chk-pd-cat').change(function(e){
@@ -333,20 +323,6 @@ $('.chk-pd-cat').change(function(e){
 });
 
 
-
-
-$('.chk-pd-sub').change(function(e){
-  count = 0;
-  $('.chk-pd-sub').each(function(index, el) {
-    if($(this).is(':checked')){
-      count++;
-    }
-  });
-  $('#badge-pd-sub').text(count);
-});
-
-
-
 $('.chk-pd-brand').change(function(e){
   count = 0;
   $('.chk-pd-brand').each(function(index, el) {
@@ -358,85 +334,131 @@ $('.chk-pd-brand').change(function(e){
 });
 
 
-
-
-$('.chk-pd-year').change(function(e){
-  count = 0;
-  $('.chk-pd-year').each(function(index, el) {
-    if($(this).is(':checked')){
-      count++;
-    }
-  });
-  $('#badge-pd-year').text(count);
-});
-
-
-
-
-
-$('#txt-style-id-box').autocomplete({
-  source: BASE_URL + 'auto_complete/get_style_code',
+$('#txt-product-id-box').autocomplete({
+  source: BASE_URL + 'auto_complete/get_item_code_name_id',
   autoFocus:true,
   close:function(){
     arr = $(this).val().split(' | ');
-    if(arr.length == 2){
-      code = arr[0];
-      $('#id_style').val(code);
+    if(arr.length == 3){
+			code = arr[0];
+      name = arr[1];
+			id = arr[2];
+      $('#product-id').val(id);
+      $('#product-id').data('code', code);
+      $('#product-id').data('name', name);
       $(this).val(code);
-    }else{
+    }
+    else {
       $(this).val('');
-      $('#id_style').val('');
+      $('#product-id').val('');
+      $('#product-id').data('code', '');
+      $('#product-id').data('name', '');
     }
   }
 });
 
 
+function addProductId(){
+  let id = $('#product-id').val()
+  let code = $('#product-id').data('code')
+  let name = $('#product-id').data('name');
 
-function addStyleId(){
-  id = $('#id_style').val();
-  psCode = $('#txt-style-id-box').val();
-  if(psCode.length > 0 && id === psCode){
-		addStyle(psCode);
-    $('#txt-style-id-box').val('');
-    $('#id_style').val('');
-    $('#txt-style-id-box').focus();
+  if(code.length > 0 && id != "") {
+		addProduct(id, code, name);
+    $('#product-id').val('');
+    $('#product-id').data('code', '');
+    $('#product-id').data('name', '');
+    $('#txt-product-id-box').val('').focus();
   }
-
 }
 
 
-function addStyle(code) {
-	if(code.length) {
-		no = parseDefault(parseInt($('#style-no').val()), 0) +1;
-		count = parseInt($('#psCount').text());
-		count++;
-		list  = '<li style="min-height:15px; padding:5px;" id="style-id-'+no+'">';
-		list += '<a href="#" class="paddint-5" onclick="removeStyleId('+no+')"><i class="fa fa-times red"></i></a>';
-		list += '<span style="margin-left:10px;">'+code+'</span>';
-		list += '</li>';
+function addProduct(id, code, name) {
+	if(code.length && $('#item-id-'+id).length == 0) {
+    let ds = {"id" : id, "code" : code, "name" : name};
+    let source = $('#itemRowTemplate').html();
+    let output = $('#itemList');
 
-		input = '<input type="hidden" name="styleId['+no+']" id="styleId-'+no+'" class="styleId" value="'+code+'" />';
-		$('#style-list').append(list);
-		$('#style-list').append(input);
-		$('#psCount').text(count);
-		$('#style-no').val(no);
+    render_append(source, ds, output);
 	}
-
 }
 
 
-function removeStyleId(id){
-  count = parseInt($('#psCount').text());
-  $('#style-id-'+id).remove();
-  $('#styleId-'+id).remove();
-  count--;
-  $('#psCount').text(count);
+function removeItem(){
+  $('.item-chk').each(function() {
+		if($(this).is(':checked')) {
+			let id = $(this).val();
+			$('#item-row-'+id).remove();
+		}
+	})
+}
+
+
+
+$('#txt-model-id-box').autocomplete({
+  source: BASE_URL + 'auto_complete/get_model_name',
+  autoFocus:true,
+  close:function(){
+    arr = $(this).val().split(' | ');
+    if(arr.length == 3){
+      code = arr[0];
+			name = arr[1];
+      id = arr[2];
+      $(this).val(code);
+      $('#model-id').val(id);
+      $('#model-id').data('code', code);
+      $('#model-id').data('name', name);
+    }
+    else{
+      $(this).val('');
+      $('#model-id').val('');
+      $('#model-id').data('code', '');
+      $('#model-id').data('name', '');
+    }
+  }
+});
+
+
+function addModelId() {
+  let id = $('#model-id').val();
+  let code = $('#model-id').data('code');
+  let name = $('#model-id').data('name');
+
+  if(code.length > 0 && id != "") {
+    addModel(id, code, name);
+    $('#model-id').val('');
+    $('#model-id').data('code', '');
+    $('#model-id').data('name', '');
+    $('#txt-model-id-box').val('').focus();
+  }
+}
+
+
+function addModel(id, code, name) {
+  if(code.length && $('#model-'+id.length == 0)) {
+    let ds = {"id" : id, "code" : code, "name" : name};
+    let source = $('#modelRowTemplate').html();
+    let output = $('#modelList');
+    render_append(source, ds, output);
+  }
+}
+
+
+function removeModel(){
+  $('.model-chk').each(function() {
+		let id = $(this).val();
+
+		if($(this).is(':checked')) {
+			$('#model-row-'+id).remove();
+		}
+	});
 }
 
 
 //--- เลือกสินค้าทั้งหมด
 function toggleAllProduct(option){
   $('#all_product').val(option);
+
   if(option == 'Y'){
     $('#btn-pd-all-yes').addClass('btn-primary');
     $('#btn-pd-all-no').removeClass('btn-primary');
@@ -445,6 +467,8 @@ function toggleAllProduct(option){
     $('#btn-pd-all-no').addClass('btn-primary');
     $('#btn-pd-all-yes').removeClass('btn-primary');
     $('.not-pd-all').removeAttr('disabled');
+		toggleProductId();
+		toggleModelId();
     activeProductControl();
   }
 }
@@ -452,81 +476,125 @@ function toggleAllProduct(option){
 
 
 function disActiveProductControl(){
-  toggleProductGroup();
-  toggleProductSubGroup();
-  toggleProductCategory();
-  toggleProductType();
-  toggleProductKind();
-  toggleProductBrand();
-  toggleProductYear();
   $('.not-pd-all').attr('disabled', 'disabled');
 }
 
 
-
-
 function activeProductControl(){
-  product_style = $('#product_style').val();
-  if(product_style == 'Y'){
+	product_id = $('#product_id').val();
+  product_model = $('#product_model').val();
+
+  if(product_model == 'Y' || product_id == 'Y') {
     toggleProductGroup();
     toggleProductSubGroup();
+    toggleProductKind();
     toggleProductCategory();
     toggleProductType();
-    toggleProductKind();
     toggleProductBrand();
     toggleProductYear();
     return;
   }
 
   toggleProductGroup($('#product_group').val());
-  toggleProductSubGroup($('#product_sub').val());
+  toggleProductSubGroup($('#product_sub_group').val());
+  toggleProductKind($('#product_kind').val());
   toggleProductCategory($('#product_category').val());
   toggleProductType($('#product_type').val());
-  toggleProductKind($('#product_kind').val());
   toggleProductBrand($('#product_brand').val());
   toggleProductYear($('#product_year').val());
 }
 
 
-
-
-
-
-function toggleStyleId(option){
+function toggleProductId(option){
   if(option == '' || option == undefined){
-    option = $('#product_style').val();
+    option = $('#product_id').val();
   }
 
-  $('#product_style').val(option);
-  if(option == 'Y'){
-    $('#btn-style-id-yes').addClass('btn-primary');
-    $('#btn-style-id-no').removeClass('btn-primary');
-    $('#txt-style-id-box').removeAttr('disabled');
-    $('#btn-style-id-add').removeAttr('disabled');
-		$('#btn-style-import').removeAttr('disabled');
+  $('#product_id').val(option);
 
-  }else if(option == 'N'){
-    $('#btn-style-id-no').addClass('btn-primary');
-    $('#btn-style-id-yes').removeClass('btn-primary');
-    $('#txt-style-id-box').attr('disabled', 'disabled');
-    $('#btn-style-id-add').attr('disabled', 'disabled');
-		$('#btn-style-import').attr('disabled', 'disabled');
+	all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N') {
+    $('#btn-product-id-yes').addClass('btn-primary');
+    $('#btn-product-id-no').removeClass('btn-primary');
+		$('#btn-product-id-add').removeAttr('disabled');
+    $('#txt-product-id-box').removeAttr('disabled');
+		$('#btn-product-import').removeAttr('disabled');
+    activeProductModel('N');
+  }
+
+  if(option == 'N') {
+    $('#btn-product-id-no').addClass('btn-primary');
+    $('#btn-product-id-yes').removeClass('btn-primary');
+		$('#btn-product-id-add').attr('disabled', 'disabled');
+    $('#txt-product-id-box').attr('disabled', 'disabled');
+		$('#btn-product-import').attr('disabled', 'disabled');
+    activeProductModel('Y');
+  }
+
+  toggleModelId();
+  activeProductControl();
+}
+
+
+function activeProductModel(option) {
+  if(option == 'Y') {
+    $('#btn-model-id-yes').removeAttr('disabled');
+    $('#btn-model-id-no').removeAttr('disabled');
+		$('#btn-model-id-add').removeAttr('disabled');
+    $('#txt-model-id-box').removeAttr('disabled');
+		$('#btn-model-import').removeAttr('disabled');
+  }
+
+  if(option == 'N') {
+    $('#btn-model-id-no').attr('disabled', 'disabled');
+    $('#btn-model-id-yes').attr('disabled', 'disabled');
+    $('#btn-model-id-add').attr('disabled', 'disabled');
+    $('#txt-model-id-box').attr('disabled', 'disabled');
+    $('#btn-model-import').attr('disabled', 'disabled');
+  }
+}
+
+
+function toggleModelId(option){
+  if(option == '' || option == undefined){
+    option = $('#product_model').val();
+  }
+
+  $('#product_model').val(option);
+  let all = $('#all_product').val();
+  let sku = $('#product_id').val();
+
+  if(option == 'Y' && all == 'N' && sku == 'N') {
+    $('#btn-model-id-yes').addClass('btn-primary');
+    $('#btn-model-id-no').removeClass('btn-primary');
+		$('#btn-model-id-add').removeAttr('disabled');
+    $('#txt-model-id-box').removeAttr('disabled');
+		$('#btn-model-import').removeAttr('disabled');
+  }
+  else if(option == 'N'){
+    $('#btn-model-id-no').addClass('btn-primary');
+    $('#btn-model-id-yes').removeClass('btn-primary');
+		$('#btn-model-id-add').attr('disabled', 'disabled');
+    $('#txt-model-id-box').attr('disabled', 'disabled');
+		$('#btn-model-import').attr('disabled', 'disabled');
   }
 
   activeProductControl();
 }
 
 
-function toggleProductGroup(option){
-  if(option == '' || option == undefined){
+function toggleProductGroup(option) {
+  if(option == '' || option == undefined) {
     option = $('#product_group').val();
   }
 
   $('#product_group').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
   all = $('#all_product').val();
-  sc = $('#product_style').val();
 
-  if(option == 'Y' && sc == 'N' && all == 'N'){
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
     $('#btn-pd-group-no').removeClass('btn-primary');
     $('#btn-pd-group-yes').addClass('btn-primary');
     $('#btn-pd-group-no').removeAttr('disabled');
@@ -535,62 +603,93 @@ function toggleProductGroup(option){
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
     $('#btn-pd-group-yes').removeClass('btn-primary');
     $('#btn-pd-group-no').addClass('btn-primary');
     $('#btn-pd-group-no').removeAttr('disabled');
     $('#btn-pd-group-yes').removeAttr('disabled');
     $('#btn-select-pd-group').attr('disabled', 'disabled');
-
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
     $('#btn-pd-group-yes').attr('disabled', 'disabled');
     $('#btn-pd-group-no').attr('disabled', 'disabled');
     $('#btn-select-pd-group').attr('disabled', 'disabled');
-    return;
   }
 }
 
 
-function toggleProductSubGroup(option){
-  if(option == '' || option == undefined){
-    option = $('#product_sub').val();
+function toggleProductSubGroup(option) {
+  if(option == '' || option == undefined) {
+    option = $('#product_sub_group').val();
   }
 
-  $('#product_sub').val(option);
+  $('#product_sub_group').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
   all = $('#all_product').val();
-  sc = $('#product_style').val();
-  if(option == 'Y' && sc == 'N' && all == 'N'){
-    $('#btn-pd-sub-no').removeClass('btn-primary');
-    $('#btn-pd-sub-yes').addClass('btn-primary');
-    $('#btn-pd-sub-no').removeAttr('disabled');
-    $('#btn-pd-sub-yes').removeAttr('disabled');
-    $('#btn-select-pd-sub').removeAttr('disabled');
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
+    $('#btn-pd-subgroup-no').removeClass('btn-primary');
+    $('#btn-pd-subgroup-yes').addClass('btn-primary');
+    $('#btn-pd-subgroup-no').removeAttr('disabled');
+    $('#btn-pd-subgroup-yes').removeAttr('disabled');
+    $('#btn-select-pd-subgroup').removeAttr('disabled');
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
-    $('#btn-pd-sub-yes').removeClass('btn-primary');
-    $('#btn-pd-sub-no').addClass('btn-primary');
-    $('#btn-pd-sub-no').removeAttr('disabled');
-    $('#btn-pd-sub-yes').removeAttr('disabled');
-    $('#btn-select-pd-sub').attr('disabled', 'disabled');
-
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-subgroup-yes').removeClass('btn-primary');
+    $('#btn-pd-subgroup-no').addClass('btn-primary');
+    $('#btn-pd-subgroup-no').removeAttr('disabled');
+    $('#btn-pd-subgroup-yes').removeAttr('disabled');
+    $('#btn-select-pd-subgroup').attr('disabled', 'disabled');
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
-    $('#btn-pd-sub-yes').attr('disabled', 'disabled');
-    $('#btn-pd-sub-no').attr('disabled', 'disabled');
-    $('#btn-select-pd-sub').attr('disabled', 'disabled');
-    return;
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-subgroup-yes').attr('disabled', 'disabled');
+    $('#btn-pd-subgroup-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-subgroup').attr('disabled', 'disabled');
   }
 }
 
 
+function toggleProductKind(option) {
+  if(option == '' || option == undefined) {
+    option = $('#product_kind').val();
+  }
 
+  $('#product_kind').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
+    $('#btn-pd-kind-no').removeClass('btn-primary');
+    $('#btn-pd-kind-yes').addClass('btn-primary');
+    $('#btn-pd-kind-no').removeAttr('disabled');
+    $('#btn-pd-kind-yes').removeAttr('disabled');
+    $('#btn-select-pd-kind').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-kind-yes').removeClass('btn-primary');
+    $('#btn-pd-kind-no').addClass('btn-primary');
+    $('#btn-pd-kind-no').removeAttr('disabled');
+    $('#btn-pd-kind-yes').removeAttr('disabled');
+    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-kind-yes').attr('disabled', 'disabled');
+    $('#btn-pd-kind-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+  }
+}
 
 
 function toggleProductCategory(option){
@@ -600,10 +699,11 @@ function toggleProductCategory(option){
 
 
   $('#product_category').val(option);
-  sc = $('#product_style').val();
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
   all = $('#all_product').val();
 
-  if(option == 'Y' && all == 'N' && sc == 'N'){
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ){
     $('#btn-pd-cat-no').removeClass('btn-primary');
     $('#btn-pd-cat-yes').addClass('btn-primary');
     $('#btn-pd-cat-no').removeAttr('disabled');
@@ -612,7 +712,7 @@ function toggleProductCategory(option){
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
     $('#btn-pd-cat-yes').removeClass('btn-primary');
     $('#btn-pd-cat-no').addClass('btn-primary');
     $('#btn-pd-cat-no').removeAttr('disabled');
@@ -621,13 +721,12 @@ function toggleProductCategory(option){
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
     $('#btn-pd-cat-yes').attr('disabled', 'disabled');
     $('#btn-pd-cat-no').attr('disabled', 'disabled');
     $('#btn-select-pd-cat').attr('disabled', 'disabled');
   }
 }
-
 
 
 function toggleProductType(option){
@@ -636,9 +735,10 @@ function toggleProductType(option){
   }
 
   $('#product_type').val(option);
-  sc = $('#product_style').val();
+  sc = $('#product_model').val();
+	pd = $('#product_id').val();
   all = $('#all_product').val();
-  if(option == 'Y' && all == 'N' && sc == 'N'){
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N'){
     $('#btn-pd-type-no').removeClass('btn-primary');
     $('#btn-pd-type-yes').addClass('btn-primary');
     $('#btn-pd-type-no').removeAttr('disabled');
@@ -647,7 +747,7 @@ function toggleProductType(option){
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
     $('#btn-pd-type-yes').removeClass('btn-primary');
     $('#btn-pd-type-no').addClass('btn-primary');
     $('#btn-pd-type-yes').removeAttr('disabled');
@@ -657,47 +757,10 @@ function toggleProductType(option){
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
     $('#btn-pd-type-yes').attr('disabled', 'disabled');
     $('#btn-pd-type-no').attr('disabled', 'disabled');
     $('#btn-select-pd-type').attr('disabled', 'disabled');
-  }
-}
-
-
-
-function toggleProductKind(option){
-  if(option == '' || option == undefined){
-    option = $('#product_kind').val();
-  }
-
-
-  $('#product_kind').val(option);
-  sc = $('#product_style').val();
-  all = $('#all_product').val();
-
-  if(option == 'Y' && all == 'N' && sc == 'N'){
-    $('#btn-pd-kind-no').removeClass('btn-primary');
-    $('#btn-pd-kind-yes').addClass('btn-primary');
-    $('#btn-pd-kind-no').removeAttr('disabled');
-    $('#btn-pd-kind-yes').removeAttr('disabled');
-    $('#btn-select-pd-kind').removeAttr('disabled');
-    return;
-  }
-
-  if(option == 'N' && sc == 'N' && all == 'N'){
-    $('#btn-pd-kind-yes').removeClass('btn-primary');
-    $('#btn-pd-kind-no').addClass('btn-primary');
-    $('#btn-pd-kind-no').removeAttr('disabled');
-    $('#btn-pd-kind-yes').removeAttr('disabled');
-    $('#btn-select-pd-kind').attr('disabled', 'disabled');
-    return;
-  }
-
-  if(all == 'Y' || sc == 'Y'){
-    $('#btn-pd-kind-yes').attr('disabled', 'disabled');
-    $('#btn-pd-kind-no').attr('disabled', 'disabled');
-    $('#btn-select-pd-kind').attr('disabled', 'disabled');
   }
 }
 
@@ -709,10 +772,11 @@ function toggleProductBrand(option){
 
 
   $('#product_brand').val(option);
-  sc = $('#product_style').val();
+  sc = $('#product_model').val();
+	pd = $('#product_id').val();
   all = $('#all_product').val();
 
-  if(option == 'Y' && all == 'N' && sc == 'N'){
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N'){
     $('#btn-pd-brand-no').removeClass('btn-primary');
     $('#btn-pd-brand-yes').addClass('btn-primary');
     $('#btn-pd-brand-no').removeAttr('disabled');
@@ -721,7 +785,7 @@ function toggleProductBrand(option){
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
+  if(option == 'N' && sc == 'N' && all == 'N' && pd =='N'){
     $('#btn-pd-brand-yes').removeClass('btn-primary');
     $('#btn-pd-brand-no').addClass('btn-primary');
     $('#btn-pd-brand-no').removeAttr('disabled');
@@ -730,7 +794,7 @@ function toggleProductBrand(option){
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
     $('#btn-pd-brand-yes').attr('disabled', 'disabled');
     $('#btn-pd-brand-no').attr('disabled', 'disabled');
     $('#btn-select-pd-brand').attr('disabled', 'disabled');
@@ -738,17 +802,17 @@ function toggleProductBrand(option){
 }
 
 
-function toggleProductYear(option){
-  if(option == '' || option == undefined){
+function toggleProductYear(option) {
+  if(option == '' || option == undefined) {
     option = $('#product_year').val();
   }
 
-
   $('#product_year').val(option);
-  sc = $('#product_style').val();
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
   all = $('#all_product').val();
 
-  if(option == 'Y' && all == 'N' && sc == 'N'){
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
     $('#btn-pd-year-no').removeClass('btn-primary');
     $('#btn-pd-year-yes').addClass('btn-primary');
     $('#btn-pd-year-no').removeAttr('disabled');
@@ -757,7 +821,7 @@ function toggleProductYear(option){
     return;
   }
 
-  if(option == 'N' && sc == 'N' && all == 'N'){
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
     $('#btn-pd-year-yes').removeClass('btn-primary');
     $('#btn-pd-year-no').addClass('btn-primary');
     $('#btn-pd-year-no').removeAttr('disabled');
@@ -766,7 +830,7 @@ function toggleProductYear(option){
     return;
   }
 
-  if(all == 'Y' || sc == 'Y'){
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
     $('#btn-pd-year-yes').attr('disabled', 'disabled');
     $('#btn-pd-year-no').attr('disabled', 'disabled');
     $('#btn-select-pd-year').attr('disabled', 'disabled');
@@ -776,11 +840,13 @@ function toggleProductYear(option){
 
 $(document).ready(function() {
   var all = $('#all_product').val();
-  var styleId = $('#product_style').val();
-  toggleAllProduct(all);
-  toggleStyleId(styleId);
-});
+  var modelId = $('#product_model').val();
+	var productId = $('#product_id').val();
 
+  toggleAllProduct(all);
+  toggleModelId(modelId);
+	toggleProductId(productId);
+});
 
 
 function getUploadFile(){
@@ -788,16 +854,9 @@ function getUploadFile(){
 }
 
 
-
 function getFile(){
 	$('#uploadFile').click();
 }
-
-
-
-
-
-
 
 
 $("#uploadFile").change(function(){
@@ -814,7 +873,7 @@ $("#uploadFile").change(function(){
 			$(this).val('');
 			return false;
 		}
-		//readURL(this);
+
 		$('#show-file-name').text(name);
 	}
 });
@@ -887,18 +946,17 @@ function readExcelFile() {
 
 
 function addToList(jsondata) {
-	console.log(jsondata);
 	if(jsondata.length) {
-		//--- clear current li in style-list
-		$('#style-list li').remove();
+		//--- clear current li in model-list
+		$('#model-list li').remove();
 		//--- clear current hidden input list
-		$('.styleId').remove();
+		$('.modelId').remove();
 		$('#psCount').text('0');
 
 		for (var i = 0; i < jsondata.length; i++) {
-			console.log(jsondata[i]);
+			//console.log(jsondata[i]);
 			var code = $.trim(jsondata[i].Model);
-			addStyle(code);
+			addModel(code);
 		}
 	}
 }

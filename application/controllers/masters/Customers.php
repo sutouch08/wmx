@@ -211,7 +211,7 @@ class Customers extends PS_Controller
     if( ! empty($customer))
     {
       $bill_to = $this->customer_address_model->get_customer_bill_to_address($customer->code);
-      $ship_to = $this->customer_address_model->get_ship_to_address($customer->code);
+      $ship_to = NULL; //$this->customer_address_model->get_ship_to_address($customer->code);
 
       $data['ds'] = $customer;
       $data['tab'] = $tab;
@@ -467,7 +467,7 @@ class Customers extends PS_Controller
       set_error('permission');
     }
 
-    $this->_response($sc);    
+    $this->_response($sc);
   }
 
 

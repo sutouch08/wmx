@@ -1,63 +1,23 @@
-<?php $id = $rule->id; ?>
-<div class="modal fade" id="style-list-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:600px; max-width:95vw;">
-    <div class="modal-content">
-      <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">รุ่นสินค้าที่กำหนด</h4>
-      </div>
-      <div class="modal-body" id="style-list-body">
-        <ul style="list-style-type:none;" id="style-list">
-<?php
-      $qr  = "SELECT ps.code FROM discount_rule_product_style AS sr ";
-      $qr .= "LEFT JOIN product_style AS ps ON sr.style_code = ps.code ";
-      $qr .= "WHERE sr.id_rule = ".$id;
-?>
-<?php $qs = $this->db->query($qr); ?>
-<?php if($qs->num_rows() > 0) : ?>
-<?php  $style_no = 1; ?>
-<?php   foreach($qs->result() as $rs) : ?>
-          <li style="min-height:15px; padding:5px;" id="style-id-<?php echo $style_no; ?>">
-            <a href="#" class="paddint-5" onclick="removeStyleId('<?php echo $style_no; ?>')">
-              <i class="fa fa-times red"></i>
-            </a>
-            <span style="margin-left:10px;"><?php echo $rs->code; ?></span>
-          </li>
-          <input type="hidden" name="styleId[<?php echo $style_no; ?>]" id="styleId-<?php echo $style_no; ?>" class="styleId" value="<?php echo $rs->code; ?>" />
-					<?php $style_no++; ?>
-<?php endforeach; ?>
-<?php endif; ?>
-        </ul>
-      </div>
-      <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-
 <div class="modal fade" id="pd-group-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:400px; max-width:95vw;">
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกกลุ่มสินค้า</h4>
+      <h4 class="modal-title">Group</h4>
       </div>
       <div class="modal-body" id="pd-group-body">
         <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_group"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductGroup($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+    <?php if( ! empty($product_groups)) : ?>
+      <?php foreach($product_groups as $rs) : ?>
+        <?php $se = isset($pdGroup[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-pd-group" name="chk-pd-group-<?php echo $rs->code; ?>" id="chk-pd-group-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+                  class=" ace chk-pd-group"
+                  name="chk-pd-group-<?php echo $rs->code; ?>"
+                  id="chk-pd-group-<?php echo $rs->code; ?>"
+                  value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+                  <span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>
@@ -72,94 +32,26 @@
 </div>
 
 
-
-<div class="modal fade" id="pd-sub-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+<div class="modal fade" id="pd-subgroup-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:400px; max-width:95vw;">
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกกลุ่มสินค้า</h4>
+      <h4 class="modal-title">Sub Group</h4>
       </div>
-      <div class="modal-body" id="pd-sub-body">
+      <div class="modal-body" id="pd-subgroup-body">
         <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_sub_group"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductSubGroup($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+    <?php if( ! empty($product_sub_groups)) : ?>
+      <?php foreach($product_sub_groups as $rs) : ?>
+        <?php $se = isset($pdSubGroup[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-pd-sub" name="chk-pd-sub-<?php echo $rs->code; ?>" id="chk-pd-sub-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
-              </label>
-      <?php endforeach; ?>
-    <?php endif;?>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="modal fade" id="pd-cat-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:400px; max-width:95vw;">
-    <div class="modal-content">
-      <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกหมวดหมู่สินค้า</h4>
-      </div>
-      <div class="modal-body" id="pd-cat-body">
-        <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_category"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductCategory($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
-              <label class="display-block">
-                <input type="checkbox" class="chk-pd-cat" name="chk-pd-cat-<?php echo $rs->code; ?>" id="chk-pd-cat-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
-              </label>
-      <?php endforeach; ?>
-    <?php endif;?>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-      <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-
-<div class="modal fade" id="pd-type-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-  <div class="modal-dialog" style="width:400px; max-width:95vw;">
-    <div class="modal-content">
-      <div class="modal-header">
-      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกชนิดสินค้า</h4>
-      </div>
-      <div class="modal-body" id="pd-type-body">
-        <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_type"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductType($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
-              <label class="display-block">
-                <input type="checkbox" class="chk-pd-type" name="chk-pd-type-<?php echo $rs->code; ?>" id="chk-pd-type-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+                  class=" ace chk-pd-subgroup"
+                  name="chk-pd-subgroup-<?php echo $rs->code; ?>"
+                  id="chk-pd-subgroup-<?php echo $rs->code; ?>"
+                  value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+                  <span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>
@@ -179,23 +71,91 @@
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกประเภทสินค้า</h4>
+      <h4 class="modal-title">Kind</h4>
       </div>
       <div class="modal-body" id="pd-kind-body">
         <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_kind"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductKind($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+    <?php if( ! empty($product_kinds)) : ?>
+      <?php foreach($product_kinds as $rs) : ?>
+        <?php $se = isset($pdKind[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-pd-kind" name="chk-pd-kind-<?php echo $rs->code; ?>" id="chk-pd-kind-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+                  class=" ace chk-pd-kind"
+                  name="chk-pd-kind-<?php echo $rs->code; ?>"
+                  id="chk-pd-kind-<?php echo $rs->code; ?>"
+                  value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+                  <span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="pd-cat-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:400px; max-width:95vw;">
+    <div class="modal-content">
+      <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 class="modal-title">Category</h4>
+      </div>
+      <div class="modal-body" id="pd-cat-body">
+        <div class="row" style="margin-left:0px;">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+    <?php if(! empty($product_categorys)) : ?>
+      <?php foreach($product_categorys as $rs) : ?>
+        <?php $se = isset($pdCategory[$rs->code]) ? 'checked' : ''; ?>
+              <label class="display-block">
+                <input type="checkbox"
+								class="ace chk-pd-cat"
+								name="chk-pd-cat-<?php echo $rs->code; ?>"
+								id="chk-pd-cat-<?php echo $rs->code; ?>"
+								value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+								<span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
+              </label>
+      <?php endforeach; ?>
+    <?php endif;?>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+      <button type="button" class="btn btn-default" data-dismiss="modal">ปิด</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal fade" id="pd-type-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog" style="width:400px; max-width:95vw;">
+    <div class="modal-content">
+      <div class="modal-header">
+      <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+      <h4 class="modal-title">Type</h4>
+      </div>
+      <div class="modal-body" id="pd-type-body">
+        <div class="row" style="margin-left:0px;">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">            
+				    <?php if( ! empty($product_types)) : ?>
+				      <?php foreach($product_types as $rs) : ?>
+								<?php $se = isset($pdType[$rs->code]) ? 'checked' : ''; ?>
+				            <label class="display-block">
+				              <input type="checkbox"
+											class="ace chk-pd-type"
+											name="chk-pd-type-<?php echo $rs->code; ?>"
+											id="chk-pd-type-<?php echo $rs->code; ?>"
+											value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+				              <span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
+				             </label>
+				      <?php endforeach; ?>
+				    <?php endif;?>
           </div>
         </div>
       </div>
@@ -213,20 +173,22 @@
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกยี่ห้อสินค้า</h4>
+      <h4 class="modal-title">Brands</h4>
       </div>
       <div class="modal-body" id="pd-brand-body">
-        <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT * FROM product_brand"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductBrand($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->code]) ? 'checked' : ''; ?>
+        <div class="row" style="margin-left:0px;">
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+
+    <?php if( ! empty($product_brands)) : ?>
+      <?php foreach($product_brands as $rs) : ?>
+        <?php $se = isset($pdBrand[$rs->code]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-pd-brand" name="chk-pd-brand-<?php echo $rs->code; ?>" id="chk-pd-brand-<?php echo $rs->code; ?>" value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
-                <?php echo $rs->name; ?>
+                <input type="checkbox"
+								class="ace chk-pd-brand"
+								name="chk-pd-brand-<?php echo $rs->code; ?>"
+								id="chk-pd-brand-<?php echo $rs->code; ?>"
+								value="<?php echo $rs->code; ?>" <?php echo $se; ?> />
+								<span class="lbl">&nbsp;&nbsp;<?php echo $rs->name; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>
@@ -241,26 +203,26 @@
 </div>
 
 
-
 <div class="modal fade" id="pd-year-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-dialog" style="width:400px; max-width:95vw;">
     <div class="modal-content">
       <div class="modal-header">
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-      <h4 class="modal-title">เลือกปีสินค้า</h4>
+      <h4 class="modal-title">Product Year</h4>
       </div>
       <div class="modal-body" id="pd-year-body">
         <div class="row">
-          <div class="col-sm-12">
-    <?php
-    $qs = $this->db->query("SELECT DISTINCT year FROM products"); ?>
-    <?php if($qs->num_rows() > 0) : ?>
-      <?php $sd = $this->discount_rule_model->getRuleProductYear($id); ?>
-      <?php foreach($qs->result() as $rs) : ?>
-        <?php $se = isset($sd[$rs->year]) ? 'checked' : ''; ?>
+          <div class="col-sm-12" style="height:60vh; overflow:auto;">
+    <?php if( ! empty($product_years)) : ?>
+      <?php foreach($product_years as $rs) : ?>
+        <?php $se = isset($pdYear[$rs->year]) ? 'checked' : ''; ?>
               <label class="display-block">
-                <input type="checkbox" class="chk-pd-year" name="chk-pd-year-<?php echo $rs->year; ?>" id="chk-pd-year-<?php echo $rs->year; ?>" value="<?php echo $rs->year; ?>" <?php echo $se; ?> />
-                <?php echo (($rs->year == '0000' OR $rs->year == '') ? 'ไม่ระบุ' :$rs->year); ?>
+                <input type="checkbox"
+                  class=" ace chk-pd-year"
+                  name="chk-pd-year-<?php echo $rs->year; ?>"
+                  id="chk-pd-year-<?php echo $rs->year; ?>"
+                  value="<?php echo $rs->year; ?>" <?php echo $se; ?> />
+                  <span class="lbl">&nbsp;&nbsp;<?php echo $rs->year; ?></span>
               </label>
       <?php endforeach; ?>
     <?php endif;?>

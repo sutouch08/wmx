@@ -1,22 +1,46 @@
-function addNew(){
-  var ruleName = $('#name').val();
-  if(ruleName.length < 4){
-    swal('Error!', 'ชื่อเงื่อนไขต้องมากกว่า 4 ตัวอักษร', 'error');
-    return false;
-  }
-
-  $('#addForm').submit();
+function changeURL(id, tab)
+{
+	var url = HOME + 'edit/' + id + '/' + tab;
+	var stObj = { stage: 'stage' };
+	window.history.pushState(stObj, 'discount_rule', url);
 }
 
+function saveAdd() {
+  let name = $('#name').val();
 
+	if(name.length == 0) {
+		$('#name').addClass('has-error');
+		$('#name').focus();
+		return false;
+	}
 
-function getEdit(){
-  $('#txt-rule-name').removeAttr('disabled');
-  $('#btn-active-rule').removeAttr('disabled');
-  $('#btn-dis-rule').removeAttr('disabled');
-  $('#btn-edit').addClass('hide');
-  $('#btn-update').removeClass('hide');
+	$.ajax({
+		url:HOME + 'add',
+		type:'POST',
+		cache:false,
+		data:{
+			"name" : name
+		},
+		success:function(rs) {
+			if(isJson(rs)) {
+				let ds = JSON.parse(rs)
 
+				if(ds.status == 'success') {
+					goEdit(ds.id);
+				}
+				else {
+					showError(ds.message);
+				}
+			}
+			else {
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			beep();
+			showError(rs);
+		}
+	});
 }
 
 
@@ -33,11 +57,12 @@ function disActiveRule(){
   $('#btn-dis-rule').addClass('btn-danger');
 }
 
-function updateRule(){
+function updateRule() {
   var id = $('#id_rule').val();
   var isActive = $('#isActive').val();
   var name = $('#txt-rule-name').val();
-  if(isNaN(parseInt(id))){
+
+	if(isNaN(parseInt(id))){
     swal('ไม่พบ ID Rule');
     return false;
   }
@@ -50,29 +75,31 @@ function updateRule(){
   load_in();
 
   $.ajax({
-    url: BASE_URL + 'discount/discount_rule/update_rule/'+id,
+    url: HOME + 'update_rule/'+id,
     type:'POST',
     cache:'false',
     data:{
       'name' : name,
       'active' : isActive
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
+
+      if(rs.trim() == 'success') {
         swal({
           title:'Updated',
           type:'success',
           timer:1000
         });
-
-        $('#txt-rule-name').attr('disabled','disabled');
-        $('#btn-active-rule').attr('disabled', 'disabled');
-        $('#btn-dis-rule').attr('disabled', 'disabled');
-        $('#btn-update').addClass('hide');
-        $('#btn-edit').removeClass('hide');
       }
-    }
+			else {
+				beep();
+				showError(rs);
+			}
+    },
+		error:function(rs) {
+			beep();
+			showError(rs);
+		}
   });
 }

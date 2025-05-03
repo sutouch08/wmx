@@ -14,7 +14,7 @@
 <div class="row">
   <div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
     <label>Document No.</label>
-    <input type="text" class="form-control input-sm text-center" name="code" id="code" value="<?php echo $code; ?>" disabled />
+    <input type="text" class="form-control input-sm text-center" name="code" id="code" value="" disabled />
   </div>
 
   <div class="col-lg-9-harf col-md-9-harf col-sm-9 col-xs-6 padding-5">

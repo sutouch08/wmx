@@ -37,7 +37,7 @@ class Promotions extends REST_Controller
   public function index_post()
   {
     $this->api_path = $this->api_path;
-    $action = "GET";
+    $action = "GET Promotions";
     $json = file_get_contents("php://input");
 
     $data = json_decode($json);
@@ -62,92 +62,127 @@ class Promotions extends REST_Controller
       $this->response($arr, 400);
     }
 
-    if( ! empty($data->items))
+    $this->load->model('masters/products_model');
+    $this->load->model('masters/customers_model');
+    $this->load->model('discount/discount_model');
+    $this->load->library('promotion');
+    $this->load->helper('discount');
+
+    $cs = $this->customers_model->get($data->customerCode);
+
+    if(empty($cs))
     {
-      foreach($)
+      $arr = array(
+        'status' => FALSE,
+        'error' => "Invalid customerCode"
+      );
+
+      $this->response($arr, 400);
     }
 
-    $ds = $data;
 
-    // $ds = array(
-    //   'refId' => "xxx",
-    //   'maxDiscountPercent' => 20.00,
-    //   'discountGPpercent' => 20.00,
-    //   'items' => array(
-    //     array(
-    //       'productId' => "xxxx",
-    //       'itemSKU' => "xxxx",
-    //       'discount' => 200.00,
-    //       'discountPercent' => 20.00,
-    //       'discountLabel' => "10+30%",
-    //       'discountGP' => 200.00,
-    //       'discountGPpercent' => 20.00,
-    //       'conditionCode' => '1234',
-    //       'conditionName' => 'xxxx',
-    //       'freeQty' => 10,
-    //       'freeItems' => array(
-    //         array(
-    //           'freeSKU' => 'WA-xxx-xxx'
-    //         ),
-    //         array(
-    //           'freeSKU' => 'WA-xxx-xxy'
-    //         )
-    //       ),
-    //       'promotion' => array(
-    //         array(
-    //           'name' => 'xxx1',
-    //           'code' => '1234',
-    //           'conditionName' => 'xxxx',
-    //           'conditionCode' => '1234',
-    //           'conditionPriority' => '1'
-    //         ),
-    //         array(
-    //           'name' => 'xxx2',
-    //           'code' => '1235',
-    //           'conditionName' => 'xxxx2',
-    //           'conditionCode' => '4567',
-    //           'conditionPriority' => '10'
-    //         )
-    //       )
-    //     ),
-    //     array(
-    //       'productId' => "xxxx",
-    //       'itemSKU' => "xxxx",
-    //       'discount' => 200.00,
-    //       'discountPercent' => 20.00,
-    //       'discountLabel' => "10+30%",
-    //       'discountGP' => 200.00,
-    //       'discountGPpercent' => 20.00,
-    //       'conditionCode' => '1234',
-    //       'conditionName' => 'xxxx',
-    //       'freeQty' => 10,
-    //       'freeItems' => array(
-    //         array(
-    //           'freeSKU' => 'WA-xxx-xxx'
-    //         ),
-    //         array(
-    //           'freeSKU' => 'WA-xxx-xxy'
-    //         )
-    //       ),
-    //       'promotion' => array(
-    //         array(
-    //           'name' => 'xxx1',
-    //           'code' => '1234',
-    //           'conditionName' => 'xxxx',
-    //           'conditionCode' => '1234',
-    //           'conditionPriority' => '1'
-    //         ),
-    //         array(
-    //           'name' => 'xxx2',
-    //           'code' => '1235',
-    //           'conditionName' => 'xxxx2',
-    //           'conditionCode' => '4567',
-    //           'conditionPriority' => '10'
-    //         )
-    //       )
-    //     )
-    //   )
-    // );
+    if( ! empty($data->items))
+    {
+      $c_item = [];
+      $maxDisc = 0;
+
+      foreach($data->items as $item)
+      {
+        $promoList = [];
+        $promoApply = [];
+        $pd = $this->products_model->get($item->itemSKU);
+
+        if( ! empty($pd))
+        {
+          $disc = $this->promotion->getItemDiscount($pd, $cs, $item->sellingPrice, $item->qty, $data->paymentChannel, $data->salesChannel, $data->requestDate);
+
+          // มูลค่าหลังส่วนลด ใช้เพือดูของแถม
+          // ถ้าไม่พบส่วนลดก่อนหน้านี้ ใช้ราคาขายเลย
+          $amount = empty($disc->rule_code) ? $item->sellingPrice * $item->qty : $disc->sellPrice * $item->qty;
+
+          // ถ้ามีส่วนลดก่อนหน้า จะต้องดึงเฉพาะโปรของแถมที่ใช้ร่วมกับโปรอื่นได้เท่านั้น
+          $canGroup = empty($disc->rule_code) ? 0 : 1;
+          $freeList = $this->promotion->getFreeItemRule($pd, $cs, $amount, $item->qty, $data->paymentChannel, $data->salesChannel, $data->requestDate, $canGroup);
+          // print_r($freeList);
+
+          //---- update max disc
+          if( ! empty($disc->rule_code))
+          {
+            $maxDisc =  $disc->totalDiscPrecent > $maxDisc ? $disc->totalDiscPrecent : $maxDisc;
+            $promoApply[] = array(
+              'code' => $disc->policy_code,
+              'name' => $disc->policy_name,
+              'conditionCode' => $disc->rule_code,
+              'conditionName' => $disc->rule_name
+            );
+
+            if( ! empty($disc->all_rules))
+            {
+              foreach($disc->all_rules as $ro)
+              {
+                $promoList[] = $ro;
+              }
+            }
+          }
+
+          if( ! empty($freeList) && ! empty($freeList->all_rules))
+          {
+            $promoApply[] = array(
+              'code' => $freeList->policy_code,
+              'name' => $freeList->policy_name,
+              'conditionCode' => $freeList->rule_code,
+              'conditionName' => $freeList->rule_name
+            );
+
+            foreach($freeList->all_rules as $ro)
+            {
+              $promoList[] = $ro;
+            }
+          }
+
+          $c_item[] = array(
+            'productId' => $item->productId,
+            'itemSKU' => $item->itemSKU,
+            'discount' => $disc->totalDiscAmount,
+            'discountPercent' => $disc->totalDiscPrecent,
+            'discountLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3),
+            'discountGP' => $disc->totalDiscAmount,
+            'discountGPpercent' => $disc->totalDiscPrecent,
+            'conditionCode' => ! empty($disc->rule_code) ? $disc->rule_code : $freeList->rule_code,
+            'conditionName' => ! empty($disc->rule_code) ? $disc->rule_name : $freeList->rule_name,
+            'freeQty' => floatval($freeList->freeQty),
+            'freeItems' => empty($freeList->id_rule) ? NULL : $this->promotion->getFreeItemList($freeList->id_rule),
+            'promotionApply' => $promoApply,
+            'promotions' => $promoList
+          );
+        }
+        else
+        {
+          $c_item[] = array(
+            'productId' => $item->productId,
+            'itemSKU' => $item->itemSKU,
+            'discount' => 0,
+            'discountPercent' => 0,
+            'discountLabel' => 0,
+            'discountGP' => 0,
+            'discountGPpercent' => 0,
+            'conditionCode' => NULL,
+            'conditionName' => NULL,
+            'freeQty' => 0,
+            'freeItems' => NULL,
+            'promotionApply' => NULL,
+            'promotions' => NULL
+          );
+        }
+      }
+    }
+
+    $ds = array(
+      'refId' => $data->refId,
+      'maxDiscountPercent' => $maxDisc,
+      'discountGPpercent' => $maxDisc,
+      'items' => $c_item
+    );
 
     $arr = array(
       'status' => TRUE,

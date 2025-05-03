@@ -78,29 +78,20 @@
   <div class="col-lg-10-harf col-md-10 col-sm-10 col-xs-12 padding-5" id="content-block" style="border-left:solid 1px #ccc; min-height:600px; max-height:1000px;">
     <div class="tab-content" style="border:0;">
       <div class="tab-pane fade <?php echo $tab1; ?>" id="discount">
-        <?php $this->load->view('discount/rule-new/discount_rule'); ?>
+        <?php $this->load->view('discount/rule/discount_rule'); ?>
       </div>
       <div class="tab-pane fade <?php echo $tab2; ?>" id="customer">
-        <?php $this->load->view('discount/rule-new/customer_rule'); ?>
+        <?php $this->load->view('discount/rule/customer_rule'); ?>
       </div>
       <div class="tab-pane fade <?php echo $tab3; ?>" id="product">
-        <?php $this->load->view('discount/rule-new/product_rule'); ?>
+        <?php $this->load->view('discount/rule/product_rule'); ?>
       </div>
       <div class="tab-pane fade <?php echo $tab4; ?>" id="channels">
-        <?php $this->load->view('discount/rule-new/channels_rule'); ?>
+        <?php $this->load->view('discount/rule/channels_rule'); ?>
       </div>
       <div class="tab-pane fade <?php echo $tab5; ?>" id="payment">
-        <?php $this->load->view('discount/rule-new/payment_rule'); ?>
+        <?php $this->load->view('discount/rule/payment_rule'); ?>
       </div>
-
-      <?php
-      // $this->load->view('discount/rule-new/discount_rule');
-      // $this->load->view('discount/rule/customer_rule');
-      // $this->load->view('discount/rule/product_rule');
-      // $this->load->view('discount/rule/channels_rule');
-      // $this->load->view('discount/rule/payment_rule');
-
-      ?>
 
     </div>
   </div><!--/ col-sm-9  -->
@@ -109,13 +100,12 @@
 	<div class="col-xs-12"><h1 class="text-center">Not support mobile</h1></div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/rule.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/rule_add.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/rule_detail.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/channels_tab.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/payment_tab.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/customer_tab.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/product_tab.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/discount/rule-new/discount_tab.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/rule.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/rule_add.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/channels_tab.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/payment_tab.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/customer_tab.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/product_tab.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/discount/rule/discount_tab.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

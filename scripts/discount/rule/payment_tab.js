@@ -1,46 +1,54 @@
-function savePayment(){
-  id_rule = $('#id_rule').val();
-  all_payment = $('#all_payment').val();
-  countPayment = parseInt($('.chk-payment:checked').size());
+function savePayment() {
+  let h = {
+    'id' : $('#id_rule').val(),
+    'all' : $('#all_payment').val(),
+    'paymentList' : []
+  }
 
-  if(all_payment == 'N' && countPayment == 0){
-    swal('กรุณาระบุช่องทางการชำระเงินอย่างน้อย 1 รายการ');
+  let countPayment = $('.chk-payment:checked').length;
+
+  if(h.all == 'N' && countPayment == 0){
+    swal('Warning', 'กรุณาระบุช่องทางการชำระเงินอย่างน้อย 1 รายการ', 'warning');
     return false;
   }
 
-  ds = [
-    {'name':'id_rule', 'value':id_rule},
-    {'name':'all_payment', 'value':all_payment}
-  ];
-
-  if(all_payment == 'N'){
-    i = 0;
-    $('.chk-payment').each(function(index, el) {
-      if($(this).is(':checked')){
-        name = 'payment['+i+']';
-        ds.push({'name':name, 'value':$(this).val()});
-        i++;
-      }
-    });
+  if(h.all == 'N') {
+    $('.chk-payment:checked').each(function() {
+      h.paymentList.push($(this).val())
+    })
   }
 
   load_in();
+
   $.ajax({
-    url: BASE_URL + 'discount/discount_rule/set_payment_rule',
+    url: HOME + 'set_payment_rule',
     type:'POST',
-    cache:'false',
-    data:ds,
-    success:function(rs){
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
       load_out();
-      if(rs == 'success'){
+
+      if(rs.trim() == 'success') {
         swal({
           title:'Saved',
           type:'success',
           timer:1000
         });
-      }else{
-        swal('Error!', rs, 'error');
+
+				setTimeout(function() {
+					window.location.reload();
+				}, 1200)
       }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   });
 }
