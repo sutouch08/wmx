@@ -206,6 +206,6 @@ class Discount_model extends CI_Model
 
 		return NULL;
 	}
-	
+
 } //--- end class
 ?>
