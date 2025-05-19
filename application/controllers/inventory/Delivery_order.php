@@ -74,7 +74,7 @@ class Delivery_order extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == '0009')
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -84,6 +84,36 @@ class Delivery_order extends PS_Controller
       {
         $is_cancel = TRUE;
       }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_shopee_api');
+
+      $order_status = $this->wrx_shopee_api->get_order_status($reference);
+
+      if($order_status == 'CANCELLED' OR $order_status == 'IN_CANCEL')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_lazada_api');
+
+      $order_status = $this->wrx_lazada_api->get_order_status($reference);
+
+      if($order_status == 'canceled' OR $order_status == 'CANCELED' OR $order_status == 'Canceled')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
     }
 
     return $is_cancel;
@@ -106,7 +136,41 @@ class Delivery_order extends PS_Controller
     $code = $this->input->post('order_code');
     $order = $this->orders_model->get($code);
 
-    if(empty($order))
+    if( ! empty($order))
+    {
+      $wrx_api = is_true(getConfig('WRX_API'));
+      $lazada_code = getConfig('LAZADA_CHANNELS_CODE');
+      $shopee_code = getConfig('SHOPEE_CHANNELS_CODE');
+      $tiktok_code = getConfig('TIKTOK_CHANNELS_CODE');
+
+      //--- check cancel request
+      if($this->orders_model->is_cancel_request($order->code))
+      {
+        $sc = FALSE;
+        $this->error = "ออเดอร์ถูกยกเลิกบน Platform แล้ว";
+      }
+
+      if($sc === TRUE)
+      {
+        if($wrx_api)
+        {
+          if( ! empty($order->reference))
+          {
+            if($order->channels_code == $tiktok_code OR $order->channels_code == $shopee_code OR $order->channels_code == $lazada_code)
+            {
+              if($this->is_cancel($order->reference, $order->channels_code))
+              {
+                $sc = FALSE;
+                $this->error = "ออเดอร์ถูกยกเลิกบน Platform แล้ว";
+
+                $this->orders_model->update($order->code, ['is_cancled' => 1]);
+              }
+            }
+          }
+        }
+      }
+    }
+    else
     {
       $sc = FALSE;
       $this->error = "Order Not Found";

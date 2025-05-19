@@ -96,8 +96,13 @@ class Receive_po extends PS_Controller
       $doc->zone_name = $this->zone_model->get_name($doc->zone_code);
       $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
 
-      if($doc->status == 'O')
+      if($doc->status == 'O' OR $doc->status == 'R')
       {
+        if($doc->status == 'O')
+        {
+          $this->receive_po_model->update($doc->code, ['status' => 'R', 'update_user' => $this->_user->uname]);
+        }
+
         $this->load->model('masters/products_model');
 
         $details = $this->receive_po_model->get_details($code);
@@ -140,8 +145,13 @@ class Receive_po extends PS_Controller
 
     if( ! empty($doc))
     {
-      if($doc->status == 'O')
+      if($doc->status == 'O' OR $doc->status == 'R')
       {
+        if($doc->status == 'O')
+        {
+          $this->receive_po_model->update($doc->code, ['status' => 'R', 'update_user' => $this->_user->uname]);
+        }
+        
         $totalQty = 0;
         $totalReceive = 0;
 
@@ -233,11 +243,8 @@ class Receive_po extends PS_Controller
 
               if($sc === TRUE)
               {
-                $amount = round($newQty * $detail->price, 6);
-
                 $arr = array(
                   'receive_qty' => $newQty,
-                  'amount' => $amount,
                   'valid' => $detail->qty <= $newQty ? 1 : 0
                 );
 
@@ -325,11 +332,8 @@ class Receive_po extends PS_Controller
 
                 if($sc === TRUE)
                 {
-                  $amount = round($newQty * $detail->price, 6);
-
                   $arr = array(
                     'receive_qty' => $newQty,
-                    'amount' => $amount,
                     'valid' => $detail->qty <= $newQty ? 1 : 0
                   );
 
@@ -457,6 +461,21 @@ class Receive_po extends PS_Controller
               {
                 $sc = FALSE;
                 $this->error = "Failed to close document";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              if($this->po_model->recal_total($doc->po_code))
+              {
+                if($this->po_model->is_all_done($doc->po_code))
+                {
+                  $this->po_model->update($doc->po_code, ['status' => 'C']);
+                }
+                else
+                {
+                  $this->po_model->update($doc->po_code, ['status' => 'P']);
+                }
               }
             }
 
@@ -731,7 +750,6 @@ class Receive_po extends PS_Controller
 
             $date_add = db_date($ds->doc_date, TRUE);
             $remark = get_null(trim($ds->remark));
-            $currency = empty($ds->currency) ? "THB" : $ds->currency;
 
             if($sc === TRUE)
             {
@@ -748,7 +766,6 @@ class Receive_po extends PS_Controller
                 'warehouse_code' => $zone->warehouse_code,
                 'update_user' => $this->_user->uname,
                 'approver' => $ds->approver,
-                'currency' => $currency,
                 'status' => $ds->save_type == '0' ? 'P' : ($ds->save_type == '3' ? 'O' : 'C')
               );
 
@@ -781,8 +798,6 @@ class Receive_po extends PS_Controller
 
                       if( ! empty($po_detail))
                       {
-                        $amount = round($rs->qty * $rs->price, 6);
-
                         $de = array(
                           'receive_code' => $ds->code,
                           'po_code' => $rs->po_code,
@@ -790,13 +805,10 @@ class Receive_po extends PS_Controller
                           'zone_code' => $zone->code,
                           'product_code' => $rs->product_code,
                           'product_name' => $rs->product_name,
-                          'price' => $rs->price,
                           'qty' => $rs->qty,
                           'receive_qty' => $ds->save_type == '1' ? $rs->qty : 0,
-                          'amount' => $amount,
                           'valid' => $ds->save_type == '1' ? 1 : 0,
                           'line_status' => $ds->save_type == '1' ? 'C' : 'O',
-                          'currency' => $currency,
                           'update_user' => $this->_user->uname
                         );
 
@@ -823,12 +835,11 @@ class Receive_po extends PS_Controller
                             {
                               $open_qty = $po_detail->open_qty - $rs->qty;
                               $open_qty = $open_qty < 0 ? 0 : $open_qty;
-                              $arr = ['open_qty' => $open_qty];
-
-                              if($open_qty == 0)
-                              {
-                                $arr['line_status'] = 'C';
-                              }
+                              $arr = array(
+                                'open_qty' => $open_qty,
+                                'line_status' => $open_qty == 0 ? 'C' : 'P',
+                                'update_user' => $this->_user->uname
+                              );
 
                               if( ! $this->po_model->update_detail($rs->po_detail_id, $arr))
                               {
@@ -1000,7 +1011,7 @@ class Receive_po extends PS_Controller
                           $open_qty = $po_detail->open_qty;
                           $openQty = $open_qty + $rs->receive_qty;
 
-                          $arr = ['open_qty' => $openQty, 'valid' => 0, 'line_status' => 'O'];
+                          $arr = ['open_qty' => $openQty, 'valid' => 0, 'line_status' => $openQty == $po_detail->qty ? 'O' : 'P'];
 
                           if( ! $this->po_model->update_detail($rs->po_detail_id, $arr))
                           {
@@ -1022,10 +1033,17 @@ class Receive_po extends PS_Controller
                     }
 
                     //---- roll back po status
-                    if($sc === TRUE && ! $this->po_model->update($doc->po_code, ['status' => 'O']))
+                    if($sc === TRUE)
                     {
-                      $sc = FALSE;
-                      $this->error = "Failed to change PO status";
+                      $this->po_model->recal_total($doc->po_code);
+
+                      $po_status = $this->po_model->is_all_open($doc->po_code) ? 'O' : 'P';
+
+                      if( ! $this->po_model->update($doc->po_code, ['status' => $po_status]))
+                      {
+                        $sc = FALSE;
+                        $this->error = "Failed to change PO status";
+                      }
                     }
                   }
 
@@ -1266,15 +1284,13 @@ class Receive_po extends PS_Controller
 
             $arr = array(
               'no' => $no,
-              'uid' => $rs->po_id.$rs->id,
+              'uid' => $rs->po_id."-".$rs->id,
               'po_code' => $po_code,
               'po_detail_id' => $rs->id,
               'product_code' => $rs->product_code,
               'product_name' => $rs->product_name,
-              'price' => round($rs->price, 2),
-              'price_label' => number($rs->price, 2),
-              'currency' => $rs->currency,
-              'Rate' => empty($rs->rate) ? 1 : $rs->rate,
+              'on_order' => $onOrder,
+              'on_order_label' => number($onOrder, 2),
               'qty_label' => number($qty, 2),
               'qty' => round($qty, 2),
               'onOrder' => $onOrder,

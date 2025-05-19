@@ -77,7 +77,7 @@ class Products extends REST_Controller
     }
 
     //--- required fields
-    $fields = ['code', 'barcode', 'name'];
+    $fields = ['code', 'name', 'item_type'];
 
     //--- check required fields
     foreach($fields as $field)
@@ -117,61 +117,84 @@ class Products extends REST_Controller
 
     if($sc === TRUE)
     {
-      $id = $this->products_model->get_id(trim($ds->code));
+      $id = $this->products_model->get_id(trim($ds->code));    
 
-      if($this->products_model->is_exists_barcode(trim($ds->barcode), $id))
+      if( ! empty($ds->barcode))
       {
-        $sc = FALSE;
-
-        $this->error = "Barcode {$ds->barcode} already exists with another SKU";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
+        if($this->products_model->is_exists_barcode(trim($ds->barcode), $id))
         {
-          $logs = array(
+          $sc = FALSE;
+
+          $this->error = "Barcode {$ds->barcode} already exists with another SKU";
+
+          $arr = array(
             'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' =>'ITEM',
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
+            'status' => FALSE,
+            'error' => $this->error
           );
 
-          $this->api_logs_model->add_logs($logs);
-        }
+          if($this->logs_json)
+          {
+            $logs = array(
+              'trans_id' => $trans_id,
+              'api_path' => $this->api_path,
+              'type' =>'ITEM',
+              'code' => $ds->code,
+              'action' => $action,
+              'status' => 'failed',
+              'message' => $this->error,
+              'request_json' => $json,
+              'response_json' => json_encode($arr)
+            );
 
-        $this->response($arr, 200);
+            $this->api_logs_model->add_logs($logs);
+          }
+
+          $this->response($arr, 200);
+        }
       }
+
 
       if($sc === TRUE)
       {
         $arr = array(
           'code' => trim($ds->code),
-          'barcode' => trim($ds->barcode),
           'name' => trim($ds->name),
-          'style_code' => get_null(trim($ds->model_code)),
-          'color_code' => get_null(trim($ds->color_code)),
-          'size_code' => get_null(trim($ds->size_code)),
-          'main_group_code' => get_null(trim($ds->main_group_code)),
-          'group_code' => get_null(trim($ds->group_code)),
-          'sub_group_code' => get_null(trim($ds->sub_group_code)),
-          'category_code' => get_null(trim($ds->category_code)),
-          'kind_code' => get_null(trim($ds->kind_code)),
-          'type_code' => get_null(trim($ds->type_code)),
-          'brand_code' => get_null(trim($ds->brand_code)),
-          'collection_code' => get_null(trim($ds->collection_code)),
-          'year' => get_null(trim($ds->year)),
-          'unit_code' => empty($ds->unit_code) ? 'PCS': trim($ds->unit_code),
-          'cost' => round(trim($ds->cost), 2),
-          'price' => round(trim($ds->price), 2)
+          'barcode' => empty($ds->barcode) ? NULL : get_null(trim($ds->barcode)),
+          'model_code' => empty($ds->model_code) ? NULL : get_null($ds->model_code),
+          'color_code' => empty($ds->color_code) ? NULL : get_null($ds->color_code),
+          'size_code' => empty($ds->size_code) ? NULL : get_null($ds->size_code),
+          'main_group_code' => empty($ds->main_group_code) ? NULL : get_null($ds->main_group_code),
+          'main_group_name' => empty($ds->main_group_name) ? NULL : get_null($ds->main_group_name),
+          'group_code' => empty($ds->group_code) ? NULL : get_null($ds->group_code),
+          'group_name' => empty($ds->model_name) ? NULL : get_null($ds->group_name),
+          'segment_code' => empty($ds->segment_code) ? NULL : get_null($ds->segment_code),
+          'segment_name' => empty($ds->segment_name) ? NULL : get_null($ds->segment_name),
+          'class_code' => empty($ds->class_code) ? NULL : get_null($ds->class_code),
+          'class_name' => empty($ds->class_name) ? NULL : get_null($ds->class_name),
+          'family_code' => empty($ds->family_code) ? NULL : get_null($ds->family_code),
+          'family_name' => empty($ds->family_name) ? NULL : get_null($ds->family_name),
+          'type_code' => empty($ds->type_code) ? NULL : get_null($ds->type_code),
+          'type_name' => empty($ds->type_name) ? NULL : get_null($ds->type_name),
+          'kind_code' => empty($ds->kind_code) ? NULL : get_null($ds->kind_code),
+          'kind_name' => empty($ds->kind_name) ? NULL : get_null($ds->kind_name),
+          'gender_code' => empty($ds->gender_code) ? NULL : get_null($ds->gender_code),
+          'gender_name' => empty($ds->gender_name) ? NULL : get_null($ds->gender_name),
+          'sport_type_code' => empty($ds->sport_type_code) ? NULL : get_null($ds->sport_type_code),
+          'sport_type_name' => empty($ds->sport_type_name) ? NULL : get_null($ds->sport_type_name),
+          'collection_code' => empty($ds->collection_code) ? NULL : get_null($ds->collection_code),
+          'collection_name' => empty($ds->collection_name) ? NULL : get_null($ds->collection_name),
+          'brand_code' => empty($ds->brand_code) ? NULL : get_null($ds->brand_code),
+          'brand_name' => empty($ds->brand_name) ? NULL : get_null($ds->brand_name),
+          'year' => empty($ds->year) ? NULL : $ds->year,
+          'cost' => empty($ds->cost) ? 0.00 : round($ds->cost, 2),
+          'price' => empty($ds->price) ? 0.00 : round($ds->price, 2),
+          'unit_code' => empty($ds->unit_code) ? NULL : $ds->unit_code,
+          'item_type' => empty($ds->item_type) ? 'I' : $ds->item_type,
+          'count_stock' => empty($ds->item_type) ? 1 : ($ds->item_type == 'S' ? 0 : 1),
+          'active' => empty($ds->active) ? 0 : 1,
+          'is_api' => empty($ds->is_api) ? 0 : 1,
+          'api_rate' => empty($ds->api_rate) ? 0.00 : get_zero($ds->api_rate)
         );
 
         if(empty($id))

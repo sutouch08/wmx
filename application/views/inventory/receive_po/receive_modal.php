@@ -11,8 +11,9 @@
             <th class="fix-width-40 text-center">#</th>
             <th class="fix-width-200 text-center">รหัส</th>
             <th class="min-width-200 text-center">สินค้า</th>
-						<th class="fix-width-100 text-center">ราคาหลังส่วนลด</th>
             <th class="fix-width-100 text-center">ค้างรับ</th>
+						<th class="fix-width-100 text-center">รอรับ</th>
+            <th class="fix-width-100 text-center">คงเหลือ</th>
             <th class="fix-width-100 text-center">จำนวน</th>
           </thead>
           <tbody id="po-body">
@@ -22,7 +23,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default top-btn" id="btn_close" data-dismiss="modal">ปิด</button>
-				<button type="button" class="btn btn-yellow top-btn" onclick="receiveAll()">รับยอดค้างทั้งหมด</button>
+				<button type="button" class="btn btn-yellow top-btn" onclick="receiveAll()">รับยอดคงเหลือทั้งหมด</button>
 				<button type="button" class="btn btn-purple top-btn" onclick="clearAll()">เคลียร์ตัวเลขทั้งหมด</button>
         <button type="button" class="btn btn-primary top-btn" onclick="addPoItems()">เพิ่มในรายการ</button>
        </div>

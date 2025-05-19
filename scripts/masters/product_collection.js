@@ -1,5 +1,3 @@
-var HOME = BASE_URL + 'masters/product_collection/';
-
 function addNew(){
   window.location.href = HOME + 'add_new';
 }
@@ -11,16 +9,10 @@ function goBack(){
 }
 
 
-function getEdit(id){
-  window.location.href = HOME + 'edit/'+id;
+function getEdit(code){
+  window.location.href = HOME + 'edit/'+code;
 }
 
-
-function clearFilter(){
-  $.get(HOME + 'clear_filter', function() {
-    goBack();
-  })
-}
 
 function add() {
   $('.r').removeClass('has-error');
@@ -28,7 +20,6 @@ function add() {
 
   let code = $.trim($('#code').val());
   let name = $.trim($('#name').val());
-  let active = $('#active').val() == '0' ? 0 : 1;
 
   if(code.length == 0) {
     $('#code').addClass('has-error');
@@ -48,38 +39,28 @@ function add() {
     cache:false,
     data:{
       'code' : code,
-      'name' : name,
-      'active' : active
+      'name' : name
     },
     success:function(rs) {
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-        if(ds.status == 'success') {
-          swal({
-            title:'Success',
-            type:'success',
-            timer:1000
-          });
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
 
-          setTimeout(() => {
-            addNew();
-          }, 1200);
-        }
-        else {
-          swal({
-            title:'Error!',
-            text:ds.message,
-            type:'error'
-          });
-        }
+        setTimeout(() => {
+          addNew();
+        }, 1200);
       }
       else {
-        swal({
-          title:'Error',
-          text:rs,
-          type:'error'
-        })
+        beep();
+        showError(rs);
       }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   })
 }
@@ -89,10 +70,8 @@ function update() {
   $('.r').removeClass('has-error');
   $('.e').text('');
 
-  let id = $('#id').val();
   let code = $.trim($('#code').val());
   let name = $.trim($('#name').val());
-  let active = $('#active').val() == '0' ? 0 : 1;
 
   if(name.length == 0) {
     $('#name').addClass('has-error');
@@ -105,87 +84,75 @@ function update() {
     type:'POST',
     cache:false,
     data:{
-      'id' : id,
       'code' : code,
-      'name' : name,
-      'active' : active
+      'name' : name
     },
     success:function(rs) {
-      if(isJson(rs)) {
-        let ds = JSON.parse(rs);
-        if(ds.status == 'success') {
-          swal({
-            title:'Success',
-            type:'success',
-            timer:1000
-          });
-        }
-        else {
-          swal({
-            title:'Error!',
-            text:ds.message,
-            type:'error'
-          });
-        }
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(() => {
+          addNew();
+        }, 1200);
       }
       else {
-        swal({
-          title:'Error',
-          text:rs,
-          type:'error'
-        })
+        beep();
+        showError(rs);
       }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   })
 }
 
 
-function getDelete(id, name){
+function getDelete(code, name, no){
   swal({
     title:'Are sure ?',
     text:'ต้องการลบ ' + name + ' หรือไม่ ?',
     type:'warning',
     showCancelButton: true,
-		confirmButtonColor: '#FA5858',
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
+    confirmButtonColor: '#FA5858',
+    confirmButtonText: 'ใช่, ฉันต้องการลบ',
+    cancelButtonText: 'ยกเลิก',
+    closeOnConfirm: false
   },function() {
-    $.ajax({
-      url:HOME + 'delete/'+id,
-      type:'POST',
-      cache:false,
-      success:function(rs) {
-        if(isJson(rs)) {
-          let ds = JSON.parse(rs);
-
-          if(ds.status == 'success') {
+    setTimeout(() => {
+      $.ajax({
+        url:HOME + 'delete',
+        type:'POST',
+        cache:false,
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
+          if(rs.trim() === 'success') {
             swal({
               title:'Success',
               type:'success',
               timer:1000
             });
 
-            $('#row-'+id).remove();
+            $('#row-'+no).remove();
             reIndex();
           }
           else {
-            swal({
-              title:'Error!',
-              text:ds.message,
-              type:'error'
-            })
+            beep();
+            showError(rs);
           }
+        },
+        error:function(rs) {
+          beep();
+          showError(rs);
         }
-        else {
-          swal({
-            title:'Error!',
-            text:rs,
-            type:'error'
-          })
-        }
-      }
-    })
+      })
+    }, 100);
   })
 }
 

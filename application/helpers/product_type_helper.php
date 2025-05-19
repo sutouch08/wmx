@@ -3,7 +3,7 @@ function select_product_type($code = '')
 {
   $CI =& get_instance();
   $CI->load->model('masters/product_type_model');
-  $result = $CI->product_type_model->get_data();
+  $result = $CI->product_type_model->get_all();
   $ds = '';
   if(!empty($result))
   {

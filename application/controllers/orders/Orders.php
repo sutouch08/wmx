@@ -10,7 +10,8 @@ class Orders extends PS_Controller
   public $filter;
   public $error;
 	public $logs; //--- logs database;
-  public $sync_chatbot_stock = FALSE;
+  public $sync_api_stock = FALSE;
+  public $ix_warehouse = NULL;
   public $log_delete = TRUE;
 
   public function __construct()
@@ -27,6 +28,7 @@ class Orders extends PS_Controller
     $this->load->model('masters/product_style_model');
     $this->load->model('masters/products_model');
     $this->load->model('orders/discount_model');
+    $this->load->model('orders/reserv_stock_model');
     //--- เฉพาะกิจ
     $this->load->model('inventory/transfer_model');
 
@@ -41,6 +43,8 @@ class Orders extends PS_Controller
     $this->load->helper('warehouse');
 
     $this->filter = getConfig('STOCK_FILTER');
+    $this->sync_api_stock = is_true(getConfig('SYNC_IX_STOCK'));
+    $this->ix_warehouse = getConfig('IX_WAREHOUSE');
   }
 
 
@@ -258,8 +262,6 @@ class Orders extends PS_Controller
   {
     $sc = TRUE;
     $auz = getConfig('ALLOW_UNDER_ZERO');
-		$this->sync_chatbot_stock = getConfig('SYNC_CHATBOT_STOCK') == 1 ? TRUE : FALSE;
-		$chatbot_warehouse_code = getConfig('CHATBOT_WAREHOUSE_CODE');
 		$sync_stock = array();
     $err = 0;
     $data = $this->input->post('data');
@@ -378,11 +380,11 @@ class Orders extends PS_Controller
                 else
                 {
                   //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_chatbot_stock)
+                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
                   {
-                    if($order->warehouse_code == $chatbot_warehouse_code)
+                    if($order->warehouse_code == $this->ix_warehouse)
                     {
-                      $sync_stock[] = $item->code;
+                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                     }
                   }
                 }
@@ -427,11 +429,11 @@ class Orders extends PS_Controller
                 else
                 {
                   //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_chatbot_stock)
+                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
                   {
-                    if($order->warehouse_code == $chatbot_warehouse_code)
+                    if($order->warehouse_code == $this->ix_warehouse)
                     {
-                      $sync_stock[] = $item->code;
+                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                     }
                   }
                 }
@@ -458,9 +460,9 @@ class Orders extends PS_Controller
           $this->orders_model->update($order_code, $arr);
         }
 
-        if($this->sync_chatbot_stock && !empty($sync_stock))
+        if($this->sync_api_stock && !empty($sync_stock))
         {
-          $this->update_chatbot_stock($sync_stock);
+          $this->update_api_stock($sync_stock);
         }
       }
     }
@@ -474,8 +476,6 @@ class Orders extends PS_Controller
   {
     $sc = TRUE;
     $auz = getConfig('ALLOW_UNDER_ZERO');
-		$this->sync_chatbot_stock = getConfig('SYNC_CHATBOT_STOCK') == 1 ? TRUE : FALSE;
-		$chatbot_warehouse_code = getConfig('CHATBOT_WAREHOUSE_CODE');
 		$sync_stock = array();
     $err = 0;
     $data = $this->input->post('data');
@@ -548,11 +548,11 @@ class Orders extends PS_Controller
                 else
                 {
                   //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_chatbot_stock)
+                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
                   {
-                    if($order->warehouse_code == $chatbot_warehouse_code)
+                    if($order->warehouse_code == $this->ix_warehouse)
                     {
-                      $sync_stock[] = $item->code;
+                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                     }
                   }
                 }
@@ -578,11 +578,11 @@ class Orders extends PS_Controller
                 else
                 {
                   //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_chatbot_stock)
+                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
                   {
-                    if($order->warehouse_code == $chatbot_warehouse_code)
+                    if($order->warehouse_code == $this->ix_warehouse)
                     {
-                      $sync_stock[] = $item->code;
+                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                     }
                   }
                 }
@@ -598,9 +598,9 @@ class Orders extends PS_Controller
           }	//--- if qty > 0
         } //--- end foreach
 
-        if($this->sync_chatbot_stock && !empty($sync_stock))
+        if($this->sync_api_stock && !empty($sync_stock))
         {
-          $this->update_chatbot_stock($sync_stock);
+          $this->update_api_stock($sync_stock);
         }
       }
     }
@@ -646,9 +646,10 @@ class Orders extends PS_Controller
               $sell_stock = $this->stock_model->get_sell_stock($detail->product_code, $order->warehouse_code);
 
               //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
-              $reserv_stock = $this->orders_model->get_reserv_stock_exclude($detail->product_code, $order->warehouse_code, $detail->id);
+              $ordered = $this->orders_model->get_reserv_stock_exclude($detail->product_code, $order->warehouse_code, $detail->id);
+              $reserv_stock = $this->reserv_stock_model->get_reserv_stock($detail->product_code, $order->warehouse_code);
 
-              $available = $sell_stock - $reserv_stock;
+              $available = $sell_stock - $ordered - $reserv_stock;
             }
 
             if($qty <= $available OR $auz)
@@ -713,6 +714,24 @@ class Orders extends PS_Controller
               );
 
               $this->orders_model->update($code, $arr);
+
+              //--- update api stock
+              if($this->sync_api_stock && $detail->is_count == 1 && ! $order->is_pre_order && $order->warehouse_code == $this->ix_warehouse)
+              {
+                $sync_stock = array();
+                $item = $this->products_model->get($detail->product_code);
+
+                if( ! empty($item))
+                {
+                  if($item->is_api)
+                  {
+                    $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
+
+                    $this->update_api_stock($sync_stock);
+                  }
+                }
+              }
+              //--- end update api stock
             }
     			}
     			else
@@ -908,6 +927,22 @@ class Orders extends PS_Controller
 
               $this->orders_model->log_delete($arr);
             }
+
+            if($this->sync_api_stock && $detail->is_count == 1 && ! $order->is_pre_order && $order->warehouse_code == $this->ix_warehouse)
+            {
+              $item = $this->products_model->get($detail->product_code);
+
+              if(! empty($item))
+              {
+                if($item->is_api == 1)
+                {
+                  $sync_stock = array();
+                  $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
+                  $this->update_api_stock($sync_stock);
+                }
+              }
+            }
+            //--- sync api stock
           }
 				}
 				else
@@ -1209,8 +1244,10 @@ class Orders extends PS_Controller
           if($rs->is_count)
           {
             $sell_stock = $this->stock_model->get_sell_stock($rs->product_code, $order->warehouse_code);
-            $reserv_stock = $this->orders_model->get_reserv_stock_exclude($rs->product_code, $order->warehouse_code, $rs->id);
-            $available = $sell_stock - $reserv_stock;
+            $ordered = $this->orders_model->get_reserv_stock_exclude($rs->product_code, $order->warehouse_code, $rs->id);
+            $reserv_stock = $this->reserv_stock_model->get_reserv_stock($rs->product_code, $order->warehouse_code);
+
+            $available = $sell_stock - $ordered - $reserv_stock;
 
             if($available < $rs->qty)
             {
@@ -1331,9 +1368,10 @@ class Orders extends PS_Controller
                 $sell_stock = $this->stock_model->get_sell_stock($item->code, $order->warehouse_code);
 
                 //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
-                $reserv_stock = $this->orders_model->get_reserv_stock_exclude($item->code, $order->warehouse_code, $row->id);
+                $ordered = $this->orders_model->get_reserv_stock_exclude($item->code, $order->warehouse_code, $row->id);
+                $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item->code, $order->warehouse_code);
 
-                $availableStock = $sell_stock - $reserv_stock;
+                $availableStock = $sell_stock - $ordered - $reserv_stock;
 
                 $rs[] = array(
                   'id' => $row->id,
@@ -1829,8 +1867,9 @@ class Orders extends PS_Controller
   {
     //---- Orignal
     $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse, $zone);
-    $reserv_stock = $this->orders_model->get_reserv_stock($item_code, $warehouse, $zone);
-    $availableStock = $sell_stock - $reserv_stock;
+    $ordered = $this->orders_model->get_reserv_stock($item_code, $warehouse, $zone);
+    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item_code, $warehouse);
+    $availableStock = $sell_stock - $ordered - $reserv_stock;
 		return $availableStock < 0 ? 0 : $availableStock;
   }
 
@@ -2162,6 +2201,7 @@ class Orders extends PS_Controller
     $this->_response($sc);
   }
 
+
   public function get_address_table()
   {
     $sc = TRUE;
@@ -2218,7 +2258,6 @@ class Orders extends PS_Controller
 
 		echo $sc === TRUE ? 'success' : $this->error;
 	}
-
 
 
   public function set_never_expire()
@@ -3012,6 +3051,7 @@ class Orders extends PS_Controller
     echo $sc === TRUE ? 'success' : $this->error;
   }
 
+
   public function update_gp()
   {
     $code = $this->input->post('code');
@@ -3292,34 +3332,33 @@ class Orders extends PS_Controller
   }
 
 
-
   public function get_available_stock($item)
   {
     $sell_stock = $this->stock_model->get_sell_stock($item);
-    $reserv_stock = $this->orders_model->get_reserv_stock($item);
-    $availableStock = $sell_stock - $reserv_stock;
+    $ordered = $this->orders_model->get_reserv_stock($item);
+    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item);
+    $availableStock = $sell_stock - $ordered - $reserv_stock;
     return $availableStock < 0 ? 0 : $availableStock;
   }
 
 
-  public function update_web_stock($code, $old_code)
+	 //---- send calcurated stock to marketplace
+  public function update_api_stock(array $ds = array())
   {
-    if(getConfig('SYNC_WEB_STOCK') == 1)
+    if($this->sync_api_stock && ! empty($ds))
     {
-      $this->load->library('api');
-      $qty = $this->get_sell_stock($code);
-      $item = empty($old_code) ? $code : $old_code;
-      $this->api->update_web_stock($item, $qty);
-    }
-  }
+      $this->load->library('wrx_stock_api');
+      $warehouse_code = getConfig('IX_WAREHOUSE');
 
-	public function update_chatbot_stock(array $ds = array())
-  {
-    if($this->sync_chatbot_stock && !empty($ds))
-    {
-			$this->logs = $this->load->database('logs', TRUE);
-      $this->load->library('chatbot_api');
-      $this->chatbot_api->sync_stock($ds);
+      foreach($ds as $item)
+      {
+        $rate = $item->rate > 0 ? ($item->rate < 100 ? $item->rate * 0.01 : 1) : 1;
+        $available = $this->get_sell_stock($item->code, $warehouse_code);
+
+        $qty = floor($available * $rate);
+
+        $this->wrx_stock_api->update_available_stock($item->code, $qty);
+      }
     }
   }
 

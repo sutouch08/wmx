@@ -20,12 +20,11 @@ class Product_collection_model extends CI_Model
   }
 
 
-
-  public function update($id, array $ds = array())
+  public function update($code, array $ds = array())
   {
     if(!empty($ds))
     {
-      $this->db->where('id', $id);
+      $this->db->where('code', $code);
 
       return $this->db->update($this->tb, $ds);
     }
@@ -34,22 +33,9 @@ class Product_collection_model extends CI_Model
   }
 
 
-  public function delete($id)
+  public function delete($code)
   {
-    return $this->db->where('id', $id)->delete($this->tb);
-  }
-
-
-
-  public function get_by_id($id)
-  {
-    $rs = $this->db->where('id', $id)->get($this->tb);
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return NULL;
+    return $this->db->where('code', $code)->delete($this->tb);
   }
 
 
@@ -80,24 +66,11 @@ class Product_collection_model extends CI_Model
       return $rs->result();
     }
   }
-  
+
 
   public function get_name($code)
   {
     $rs = $this->db->where('code', $code)->get($this->tb);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->name;
-    }
-
-    return NULL;
-  }
-
-
-  public function get_name_by_id($id)
-  {
-    $rs = $this->db->where('id', $id)->get($this->tb);
 
     if($rs->num_rows() === 1)
     {
@@ -136,7 +109,7 @@ class Product_collection_model extends CI_Model
       $this->db->like('name', $ds['name']);
     }
 
-    $rs = $this->db->order_by('id', 'DESC')->limit($perpage, $offset)->get($this->tb);
+    $rs = $this->db->order_by('code', 'DESC')->limit($perpage, $offset)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -147,13 +120,8 @@ class Product_collection_model extends CI_Model
   }
 
 
-  public function is_exists($code, $id = NULL)
+  public function is_exists($code)
   {
-    if( ! empty($id))
-    {
-      $this->db->where('id !=', $id);
-    }
-
     $rs = $this->db->where('code', $code)->get($this->tb);
 
     if($rs->num_rows() > 0)
@@ -165,12 +133,11 @@ class Product_collection_model extends CI_Model
   }
 
 
-
-  public function is_exists_name($name, $id = NULL)
+  public function is_exists_name($name, $code = NULL)
   {
-    if( ! empty($id))
+    if( ! empty($code))
     {
-      $this->db->where('id !=', $id);
+      $this->db->where('code !=', $code);
     }
 
     $rs = $this->db->where('name', $name)->get($this->tb);
@@ -182,7 +149,6 @@ class Product_collection_model extends CI_Model
 
     return FALSE;
   }
-
 
 
   public function count_members($code)

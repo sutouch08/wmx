@@ -3,7 +3,7 @@ function select_product_brand($code = '')
 {
   $CI =& get_instance();
   $CI->load->model('masters/product_brand_model');
-  $result = $CI->product_brand_model->get_data();
+  $result = $CI->product_brand_model->get_all();
   $ds = '';
   if(!empty($result))
   {

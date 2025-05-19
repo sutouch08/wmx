@@ -4,10 +4,7 @@
     <h3 class="title"> <?php echo $this->title; ?></h3>
   </div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-		<button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>		
-		<?php if(($this->pm->can_add OR $this->pm->can_edit) && $po->status == 'P') : ?>
-			<button type="button" class="btn btn-white btn-success btn-100 top-btn" onclick="save()">Save</button>
-		<?php endif; ?>
+		<button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>				
 	</div>
 </div><!-- End Row -->
 <hr class=""/>

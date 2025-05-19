@@ -67,7 +67,7 @@ class Po extends PS_Controller
   {
     $sc = TRUE;
 
-    if($this->pm->can_add)
+    if($this->_SuperAdmin)
     {
       $ds = json_decode($this->input->post('data'));
 
@@ -608,118 +608,6 @@ class Po extends PS_Controller
   }
 
 
-  public function save()
-  {
-    $sc = TRUE;
-    $code = $this->input->post('code');
-
-    if( ! empty($code))
-    {
-      $doc = $this->po_model->get($code);
-
-      if( ! empty($doc))
-      {
-        if($doc->status == 'P')
-        {
-          $arr = array(
-            'status' => 'O',
-            'update_user' => $this->_user->uname
-          );
-
-          if( ! $this->po_model->update($code, $arr))
-          {
-            $sc = FALSE;
-            $this->error = "Failed to update document status";
-          }
-        }
-        else
-        {
-          $sc = FALSE;
-          set_error('status');
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        set_error('notfound');
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('required');
-    }
-
-    $this->_response($sc);
-  }
-
-
-  public function unsave()
-  {
-    $sc = TRUE;
-    $code = $this->input->post('code');
-
-    if( ! empty($code))
-    {
-      $doc = $this->po_model->get($code);
-
-      if( ! empty($doc))
-      {
-        if($doc->status == 'O' OR $this->_SuperAdmin)
-        {
-          $this->db->trans_begin();
-
-          $arr = array(
-            'status' => 'P',
-            'update_user' => $this->_user->uname
-          );
-
-          if( ! $this->po_model->update($code, $arr))
-          {
-            $sc = FALSE;
-            $this->error = "Failed to update document status";
-          }
-
-          if($sc === TRUE)
-          {
-            if( ! $this->po_model->un_close_details($code))
-            {
-              $sc = FALSE;
-              $this->error = "Failed to update line status";
-            }
-          }
-
-          if($sc === TRUE)
-          {
-            $this->db->trans_commit();
-          }
-          else
-          {
-            $this->db->trans_rollback();
-          }
-        }
-        else
-        {
-          $sc = FALSE;
-          set_error('status');
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        set_error('notfound');
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('required');
-    }
-
-    $this->_response($sc);
-  }
-
-
   public function view_detail($code)
   {
     $doc = $this->po_model->get($code);
@@ -754,7 +642,7 @@ class Po extends PS_Controller
 
         if( ! empty($doc))
         {
-          if($doc->status == 'O')
+          if($doc->status == 'O' OR $doc->status == 'P')
           {
             $this->db->trans_begin();
 

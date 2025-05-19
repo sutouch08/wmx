@@ -28,10 +28,8 @@ function addPoItems() {
 					let itemName = el.data('name');
 					let baseCode = el.data('basecode');
 					let baseLine = el.data('baseline');
-					let price = parseDefault(parseFloat(el.data('price')), 0.00); //--- price Af discount
 					let limit = parseDefault(parseFloat(el.data('limit')), 0.00);
 					let backlogs = parseDefault(parseFloat(el.data('backlogs')), 0);
-					let amount = roundNumber(qty * price, 2);
 
 					let item = {
 						'uid' : no,
@@ -39,15 +37,11 @@ function addPoItems() {
 						'pdName' : itemName,
 						'baseCode' : baseCode,
 						'baseLine' : baseLine,
-						'price' : price,
-						'priceLabel' : addCommas(price.toFixed(3)),
 						'qty' : qty,
 						'qtyLabel' : addCommas(qty.toFixed(2)),
 						'backlogs' : backlogs,
 						'backLogsLabel' : addCommas(backlogs.toFixed(2)),
-						'limit' : limit,
-						'amount' : amount,
-						'amountLabel' : addCommas(amount.toFixed(2))
+						'limit' : limit
 					}
 
 					items.push(item);
@@ -87,31 +81,20 @@ function addPoItems() {
 
 
 function recalAmount(id) {
-	let price = parseDefault(parseFloat(removeCommas($('#row-price-'+id).val())), 0);
-	let qty = parseDefault(parseFloat($('#receive-qty-'+id).val()), 0);
-	let amount = price * qty;
-	$('#line-total-'+id).val(addCommas(amount.toFixed(2)));
-
 	recalTotal();
 }
 
 
 function recalTotal() {
-	let totalAmount = 0;
 	let totalQty = 0;
 
 	$('.receive-qty').each(function() {
 		let id = $(this).data('uid');
 		let qty = parseDefault(parseFloat(removeCommas($('#receive-qty-'+id).val())), 0);
-		let price = parseDefault(parseFloat(removeCommas($('#row-price-'+id).val())), 0);
-		let amount = qty * price;
-
 		totalQty += qty;
-		totalAmount += amount;
 	});
 
 	$('#total-receive').val(addCommas(totalQty.toFixed(2)));
-	$('#total-amount').val(addCommas(totalAmount.toFixed(2)));
 }
 
 
@@ -221,71 +204,6 @@ function getPoDetail(poCode) {
 					render(source, data, output);
 
 					$('#poGrid').modal('show');
-				}
-				else {
-					swal({
-						title:'Error!',
-						text:ds.message,
-						type:'error'
-					});
-				}
-			}
-			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error',
-					html:true
-				});
-			}
-		}
-	})
-}
-
-
-function getPoItems() {
-	let po = $('#poCode').val();
-
-	if(po.length == 0) {
-		swal({
-			title:'Oops !',
-			text:'กรุณาระบุเลขที่ใบสั่งซื้อ',
-			type:'warning'
-		});
-
-		return false;
-	}
-
-	load_in();
-
-	$.ajax({
-		url:HOME + 'get_po_detail',
-		type:'GET',
-		cache:false,
-		data:{
-			'po_code' : poCode
-		},
-		success:function(rs) {
-			load_out();
-
-			if(isJson(rs)) {
-				let ds = JSON.parse(rs);
-
-				if(ds.status === 'success') {
-					$('#po-code').val(ds.DocNum);
-					$('#DocCur').val(ds.DocCur);
-					$('#DocRate').val(ds.DocRate);
-					$('#vender_code').val(ds.CardCode);
-					$('#venderName').val(ds.CardName);
-
-					let source = $('#po-template').html();
-					let data = ds.details;
-					let output = $('#po-body');
-
-					render(source, data, output);
-
-					$('#poGrid').modal('show');
-
 				}
 				else {
 					swal({

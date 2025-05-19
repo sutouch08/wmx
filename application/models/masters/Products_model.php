@@ -31,10 +31,7 @@ class Products_model extends CI_Model
     {
       if( ! empty($ds['code']))
       {
-        $this->db->group_start();
         $this->db->like('products.code', $ds['code']);
-        $this->db->or_like('products.old_code', $ds['code']);
-        $this->db->group_end();
       }
 
       if( ! empty($ds['name']))
@@ -92,24 +89,24 @@ class Products_model extends CI_Model
         }
       }
 
+      if(isset($ds['main_group']) && $ds['main_group'] != 'all')
+      {
+        $this->db->where('main_group_code', $ds['main_group']);
+      }
+
       if(isset($ds['group']) && $ds['group'] != 'all')
       {
         $this->db->where('group_code', $ds['group']);
       }
 
-      if(isset($ds['sub_group']) && $ds['sub_group'] != 'all')
+      if(isset($ds['segment']) && $ds['segment'] != 'all')
       {
-        $this->db->where('sub_group_code', $ds['sub_group']);
+        $this->db->where('segment_code', $ds['segment']);
       }
 
-      if(isset($ds['category']) && $ds['category'] != 'all')
+      if(isset($ds['class']) && $ds['class'] != 'all')
       {
-        $this->db->where('category_code', $ds['category']);
-      }
-
-      if(isset($ds['kind']) && $ds['kind'] != 'all')
-      {
-        $this->db->where('kind_code', $ds['kind']);
+        $this->db->where('class_code', $ds['class']);
       }
 
       if(isset($ds['type']) && $ds['type'] != 'all')
@@ -117,14 +114,29 @@ class Products_model extends CI_Model
         $this->db->where('type_code', $ds['type']);
       }
 
-      if(isset($ds['brand']) && $ds['brand'] != 'all')
+      if(isset($ds['kind']) && $ds['kind'] != 'all')
       {
-        $this->db->where('brand_code', $ds['brand']);
+        $this->db->where('kind_code', $ds['kind']);
+      }
+
+      if(isset($ds['gender']) && $ds['gender'] != 'all')
+      {
+        $this->db->where('gender_code', $ds['gender']);
+      }
+
+      if(isset($ds['sport_type']) && $ds['sport_type'] != 'all')
+      {
+        $this->db->where('sport_type_code', $ds['sport_type']);
       }
 
       if(isset($ds['collection']) && $ds['collection'] != 'all')
       {
         $this->db->where('collection_code', $ds['collection']);
+      }
+
+      if(isset($ds['brand']) && $ds['brand'] != 'all')
+      {
+        $this->db->where('brand_code', $ds['brand']);
       }
 
       if(isset($ds['year']) && $ds['year'] != 'all')
@@ -154,10 +166,7 @@ class Products_model extends CI_Model
     {
       if( ! empty($ds['code']))
       {
-        $this->db->group_start();
         $this->db->like('products.code', $ds['code']);
-        //$this->db->or_like('products.old_code', $ds['code']);
-        $this->db->group_end();
       }
 
       if( ! empty($ds['name']))
@@ -184,7 +193,7 @@ class Products_model extends CI_Model
         }
       }
 
-      if(isset($ds['color_group']) && $ds['color_group'] != 'all')
+      if( isset($ds['color_group']) && $ds['color_group'] != 'all')
       {
         $this->db->where('product_color.id_group', $ds['color_group']);
       }
@@ -215,24 +224,24 @@ class Products_model extends CI_Model
         }
       }
 
+      if(isset($ds['main_group']) && $ds['main_group'] != 'all')
+      {
+        $this->db->where('main_group_code', $ds['main_group']);
+      }
+
       if(isset($ds['group']) && $ds['group'] != 'all')
       {
         $this->db->where('group_code', $ds['group']);
       }
 
-      if(isset($ds['sub_group']) && $ds['sub_group'] != 'all')
+      if(isset($ds['segment']) && $ds['segment'] != 'all')
       {
-        $this->db->where('sub_group_code', $ds['sub_group']);
+        $this->db->where('segment_code', $ds['segment']);
       }
 
-      if(isset($ds['category']) && $ds['category'] != 'all')
+      if(isset($ds['class']) && $ds['class'] != 'all')
       {
-        $this->db->where('category_code', $ds['category']);
-      }
-
-      if(isset($ds['kind']) && $ds['kind'] != 'all')
-      {
-        $this->db->where('kind_code', $ds['kind']);
+        $this->db->where('class_code', $ds['class']);
       }
 
       if(isset($ds['type']) && $ds['type'] != 'all')
@@ -240,14 +249,29 @@ class Products_model extends CI_Model
         $this->db->where('type_code', $ds['type']);
       }
 
-      if(isset($ds['brand']) && $ds['brand'] != 'all')
+      if(isset($ds['kind']) && $ds['kind'] != 'all')
       {
-        $this->db->where('brand_code', $ds['brand']);
+        $this->db->where('kind_code', $ds['kind']);
+      }
+
+      if(isset($ds['gender']) && $ds['gender'] != 'all')
+      {
+        $this->db->where('gender_code', $ds['gender']);
+      }
+
+      if(isset($ds['sport_type']) && $ds['sport_type'] != 'all')
+      {
+        $this->db->where('sport_type_code', $ds['sport_type']);
       }
 
       if(isset($ds['collection']) && $ds['collection'] != 'all')
       {
         $this->db->where('collection_code', $ds['collection']);
+      }
+
+      if(isset($ds['brand']) && $ds['brand'] != 'all')
+      {
+        $this->db->where('brand_code', $ds['brand']);
       }
 
       if(isset($ds['year']) && $ds['year'] != 'all')
@@ -261,9 +285,6 @@ class Products_model extends CI_Model
       }
     }
 
-    // $this->db->order_by('style_code', 'ASC');
-    // $this->db->order_by('color_code', 'ASC');
-    // $this->db->order_by('product_size.position', 'ASC');
     $this->db->order_by('products.id','DESC');
     $this->db->limit($perpage, $offset);
 
@@ -682,8 +703,11 @@ class Products_model extends CI_Model
       $this->db->where('id !=', $id);
     }
 
-    return $this->db->where('barcode', $barcode)->count_all_results($this->tb) > 0 ? TRUE : FALSE;
+    $count =  $this->db->where('barcode', $barcode)->count_all_results($this->tb);
+
+    return $count > 0 ? TRUE : FALSE;
   }
+
 
   public function is_exists($code)
   {
@@ -846,6 +870,7 @@ class Products_model extends CI_Model
 
     return NULL;
   }
+
 
   public function has_transection($code)
   {

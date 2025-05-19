@@ -96,9 +96,7 @@ function save() {
 				'product_code' : el.data('code'),
 				'product_name' : el.data('name'),
 				'qty' : qty,
-				'price' : el.data('price'),
-				'backlogs' : el.data('backlogs'),
-				'currency' : el.data('currency')
+				'backlogs' : el.data('backlogs')
 			}
 
 			h.rows.push(row);

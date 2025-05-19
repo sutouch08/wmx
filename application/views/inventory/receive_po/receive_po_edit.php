@@ -122,10 +122,8 @@
 					<th class="fix-width-40 text-center">#</th>
 					<th class="fix-width-200">รหัสสินค้า</th>
 					<th class="min-width-250">ชื่อสินค้า</th>
-					<th class="fix-width-100 text-center">ราคา (PO)</th>
 					<th class="fix-width-100 text-center">ค้างรับ</th>
 					<th class="fix-width-100 text-center">จำนวน</th>
-					<th calss="fix-width-120 text-center">มูลค่า</th>
 				</tr>
 			</thead>
 			<tbody id="receive-table">
@@ -145,11 +143,12 @@
 				<td class="middle text-center no"><?php echo $no; ?></td>
 				<td class="middle"><?php echo $rs->product_code; ?></td>
 				<td class="middle"><?php echo $rs->product_name; ?></td>
-				<td class="middle">
-					<input type="text" class="form-control input-sm text-right text-label row-price e" id="row-price-<?php echo $uid; ?>" value="<?php echo number($rs->price, 4); ?>" readonly />
-				</td>
 				<td class="middle text-center">
-					<input type="text" class="form-control input-sm text-right text-label" id="backlogs-<?php echo $uid; ?>" data-backlogs="<?php echo $rs->backlogs; ?>" value="<?php echo number($rs->backlogs); ?>" readonly />
+					<input type="text"
+						class="form-control input-sm text-center text-label"
+						id="backlogs-<?php echo $uid; ?>"
+						data-backlogs="<?php echo $rs->backlogs; ?>"
+						value="<?php echo number($rs->backlogs); ?>" readonly />
 				</td>
 				<td class="middle text-center">
 					<input type="number"
@@ -158,7 +157,6 @@
 						data-uid="<?php echo $uid; ?>"
 						data-limit="<?php echo $rs->limit; ?>"
 						data-backlogs="<?php echo $rs->backlogs; ?>"
-						data-price="<?php echo $rs->price; ?>"
 						data-basecode="<?php echo $rs->po_code; ?>"
 						data-baseline="<?php echo $rs->po_detail_id; ?>"
 						data-code="<?php echo $rs->product_code; ?>"
@@ -166,13 +164,9 @@
 						value="<?php echo round($rs->qty, 2); ?>"
 						onchange="recalAmount(<?php echo $uid; ?>)" />
 				</td>
-				<td class="fix-width-120 middle">
-					<input type="text" class="form-control input-sm text-right text-label" id="line-total-<?php echo $uid; ?>" value="<?php echo number($rs->amount, 4); ?>" readonly/>
-				</td>
 			</tr>
 			<?php $no++; ?>
 			<?php $totalQty += $rs->qty; ?>
-			<?php $totalAmount += $rs->amount; ?>
 		<?php endforeach; ?>
 	<?php endif; ?>
 			</tbody>
@@ -203,12 +197,6 @@
           <input type="text" class="form-control input-sm text-right" id="total-receive" value="<?php echo number($totalQty); ?>" disabled>
         </div>
       </div>
-			<div class="form-group" style="margin-bottom:5px;">
-        <label class="col-lg-8 col-md-8 col-sm-7 col-xs-6 control-label no-padding-right">มูลค่ารวม</label>
-        <div class="col-lg-4 col-md-4 col-sm-5 col-xs-6 padding-5">
-          <input type="text" class="form-control input-sm text-right" id="total-amount" value="<?php echo number($totalAmount, 4); ?>" disabled>
-        </div>
-      </div>
 		</div>
 	</div>
 </div>
@@ -233,9 +221,6 @@
 			<td class="middle text-center no">{{no}}</td>
 			<td class="middle">{{pdCode}}</td>
 			<td class="middle">{{pdName}}</td>
-			<td class="middle">
-				<input type="text" class="form-control input-sm text-right text-label row-price e" id="row-price-{{uid}}" value="{{priceLabel}}" readonly />
-			</td>
 			<td class="middle text-center">
 				<input type="text" class="form-control input-sm text-right text-label"
 					id="backlogs-{{uid}}" data-backlogs="{{backlogs}}" value="{{backLogsLabel}}" readonly />
@@ -247,16 +232,11 @@
 					data-uid="{{uid}}"
 					data-limit="{{limit}}"
 					data-backlogs="{{backlogs}}"
-					data-price="{{price}}"
 					data-basecode="{{baseCode}}"
 					data-baseline="{{baseLine}}"
 					data-code="{{pdCode}}"
-					data-name="{{pdName}}"
-					data-currency="{{currency}}"
+					data-name="{{pdName}}"					
 					value="{{qty}}" onchange="recalAmount({{uid}})" />
-			</td>
-			<td class="middle fix-width-120">
-				<input type="text" class="form-contorl input-sm text-right text-label" id="line-total-{{uid}}" data-amount="{{amount}}" value="{{amountLabel}}" readonly/>
 			</td>
 		</tr>
 	{{/each}}
@@ -268,8 +248,9 @@
 		<td class="middle text-center no">{{no}}</td>
 		<td class="middle">{{product_code}}</td>
 		<td class="middle">{{product_name}}</td>
-		<td class="middle text-right">{{price_label}} <span style="font-size:10px;">{{currency}}</span></td>
 		<td class="middle text-center">{{backlog_label}}</td>
+		<td class="middle text-center">{{on_order_label}}</td>
+		<td class="middle text-center">{{qty_label}}</td>
 		<td class="middle">
 			<input type="number"
 				class="form-control input-sm text-center po-qty"
@@ -282,8 +263,6 @@
 				data-limit="{{limit}}"
 				data-backlogs="{{backlog}}"
 				data-qty="{{qty}}"
-				data-price="{{price}}"
-				data-currency="{{currency}}"
 				data-no="{{no}}"
 				value="" />
 		</td>

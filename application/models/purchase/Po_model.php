@@ -36,6 +36,27 @@ class Po_model extends CI_Model
   }
 
 
+  public function get_by_reference($reference, $option = 'NOT_CANCEL')
+  {
+    //--- option : NOT_CANCEL, ALL
+
+    $this->db->where('reference', $reference);
+
+    if($option === 'NOT_CANCEL')
+    {
+      $this->db->where('status !=', 'D');
+    }
+
+    $rs = $this->db->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
   //--- get po detail in document
   public function get_details($code)
   {
@@ -65,7 +86,10 @@ class Po_model extends CI_Model
 
   public function get_detail_by_product($po_code, $product_code)
   {
-    $rs = $this->db->where('po_code', $po_code)->where('product_code', $product_code)->get($this->td);
+    $rs = $this->db
+    ->where('po_code', $po_code)
+    ->where('product_code', $product_code)
+    ->get($this->td);
 
     if($rs->num_rows() === 1)
     {
@@ -76,12 +100,47 @@ class Po_model extends CI_Model
   }
 
 
+  public function get_detail_by_product_and_line_num($po_code, $product_code, $line_num)
+  {
+    $rs = $this->db
+    ->where('po_code', $po_code)
+    ->where('product_code', $product_code)
+    ->where('line_num', $line_num)
+    ->get($this->td);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_details_exclude_ids($po_code, array $ids = array())
+  {
+    if( ! empty($ids))
+    {
+      $rs = $this->db->where('po_code', $po_code)->where_not_in('id', $ids)->get($this->td);
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
+
   //--- add new document
   public function add(array $ds = array())
   {
     if( ! empty($ds))
     {
-      return $this->db->insert($this->tb, $ds);
+      if($this->db->insert($this->tb, $ds))
+      {
+        return $this->db->insert_id();
+      }
     }
 
     return FALSE;
@@ -164,17 +223,31 @@ class Po_model extends CI_Model
   }
 
 
+  //--- delete rows by id array
+  public function delete_rows_id(array $ids = array())
+  {
+    return $this->db->where_in('id', $ids)->delete($this->td);
+  }
+
+
   public function is_all_done($code)
   {
     $openQty = $this->db
     ->where('po_code', $code)
-    ->where('line_status', 'O')
+    ->where_in('line_status', ['O', 'P'])
     ->where('open_qty >', 0)
     ->count_all_results($this->td);
 
     return $openQty > 0 ? FALSE : TRUE;
   }
 
+
+  public function is_all_open($code)
+  {
+    $count = $this->db->where('po_code', $code)->where('line_status !=', 'O')->count_all_results($this->td);
+
+    return $count > 0 ? FALSE : TRUE;
+  }
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
@@ -281,7 +354,6 @@ class Po_model extends CI_Model
       return $this->db
       ->set('total_qty', get_zero($sum->qty))
       ->set('total_open_qty', get_zero($sum->open_qty))
-      ->set('doc_total', get_zero($sum->line_total))
       ->where('code', $code)
       ->update($this->tb);
     }
@@ -295,7 +367,6 @@ class Po_model extends CI_Model
     $rs = $this->db
     ->select_sum('qty')
     ->select_sum('open_qty')
-    ->select_sum('line_total')
     ->where('po_code', $code)
     ->get($this->td);
 

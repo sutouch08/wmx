@@ -242,7 +242,7 @@ class Prepare extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == '0009')
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -252,6 +252,36 @@ class Prepare extends PS_Controller
       {
         $is_cancel = TRUE;
       }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_shopee_api');
+
+      $order_status = $this->wrx_shopee_api->get_order_status($reference);
+
+      if($order_status == 'CANCELLED' OR $order_status == 'IN_CANCEL')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_lazada_api');
+
+      $order_status = $this->wrx_lazada_api->get_order_status($reference);
+
+      if($order_status == 'canceled' OR $order_status == 'CANCELED' OR $order_status == 'Canceled')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
     }
 
     return $is_cancel;
@@ -263,6 +293,10 @@ class Prepare extends PS_Controller
     $this->load->model('masters/customers_model');
     $this->load->model('masters/channels_model');
     $this->load->helper('warehouse');
+    $wrx_api = is_true(getConfig('WRX_API'));
+    $lazada_code = getConfig('LAZADA_CHANNELS_CODE');
+    $shopee_code = getConfig('SHOPEE_CHANNELS_CODE');
+    $tiktok_code = getConfig('TIKTOK_CHANNELS_CODE');
 
     $is_cancel = FALSE;
 
@@ -271,12 +305,18 @@ class Prepare extends PS_Controller
     if( ! empty($order))
     {
       //--- check cancel request
-      // $is_cancel = $this->orders_model->is_cancel_request($order->code);
-      //
-      // if( ! $is_cancel && ! empty($order->reference) && ($order->channels_code == '0009'))
-      // {
-      //   $is_cancel = $this->is_cancel($order->reference, $order->channels_code);
-      // }
+      $is_cancel = $this->orders_model->is_cancel_request($order->code);
+
+      if($wrx_api)
+      {
+        if(! $is_cancel && ! empty($order->reference))
+        {
+          if($order->channels_code == $tiktok_code OR $order->channels_code == $shopee_code OR $order->channels_code == $lazada_code)
+          {
+            $is_cancel = $this->is_cancel($order->reference, $order->channels_code);
+          }
+        }
+      }
 
       if( ! $is_cancel)
       {

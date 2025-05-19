@@ -54,6 +54,7 @@
 				<option value="all">ทั้งหมด</option>
 				<option value="P" <?php echo is_selected('P', $status); ?>>Draft</option>
 				<option value="O" <?php echo is_selected('O', $status); ?>>Open</option>
+				<option value="R" <?php echo is_selected('R', $status); ?>>On Process</option>
 				<option value="C" <?php echo is_selected('C', $status); ?>>Closed</option>
 				<option value="D" <?php echo is_selected('D', $status); ?>>Canceled</option>
 			</select>

@@ -4,7 +4,7 @@
     <h3 class="title"> <?php echo $this->title; ?></h3>
   </div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-		<?php if($this->pm->can_add) : ?>
+		<?php if($this->_SuperAdmin) : ?>
 			<button type="button" class="btn btn-sm btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
 		<?php endif; ?>
 	</div>
@@ -24,8 +24,8 @@
 			<label>สถานะ</label>
 			<select class="form-control input-sm filter" name="status">
 				<option value="all" <?php echo is_selected('all', $status); ?>>ทั้งหมด</option>
-				<option value="P" <?php echo is_selected('P', $status); ?>>Draft</option>
 				<option value="O" <?php echo is_selected('O', $status); ?>>Open</option>
+				<option value="P" <?php echo is_selected('P', $status); ?>>Partial</option>
 				<option value="C" <?php echo is_selected('C', $status); ?>>Closed</option>
 				<option value="D" <?php echo is_selected('D', $status); ?>>Canceled</option>
 			</select>
@@ -52,7 +52,7 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-hover border-1" style="min-width:980px;">
+		<table class="table table-striped table-hover border-1" style="min-width:1080px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-100 middle"></th>
@@ -61,7 +61,8 @@
 					<th class="fix-width-100 middle">เลขที่</th>
 					<th class="fix-width-80 middle text-center">สถานะ</th>
 					<th class="fix-width-250 middle">ผู้ขาย</th>
-					<th class="fix-width-100 middle text-right">มูลค่า</th>
+					<th class="fix-width-100 middle text-right">จำนวน</th>
+					<th class="fix-width-100 middle text-right">ค้างรับ</th>
 					<th class="fix-width-100 middle text-center">วันครบกำหนด</th>
 					<th class="min-width-100 middle">User</th>
 				</tr>
@@ -73,9 +74,6 @@
             <tr class="font-size-11" id="row-<?php echo $rs->id; ?>" style="background-color:<?php echo po_status_color($rs->status); ?>">
 							<td class="middle">
 									<button type="button" class="btn btn-minier btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
-								<?php if($rs->status === 'P' && $this->pm->can_edit) : ?>
-									<button type="button" class="btn btn-minier btn-warning" onclick="goEdit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
-								<?php endif; ?>
 								<?php if(($rs->status != 'C' && $rs->status != 'D' && $this->pm->can_delete) OR ($rs->status != 'D' && $this->_SuperAdmin)) : ?>
 									<button type="button" class="btn btn-minier btn-danger" onclick="goCancel('<?php echo $rs->code; ?>')"><i class="fa fa-times"></i></button>
 								<?php endif; ?>
@@ -85,7 +83,8 @@
               <td class="middle"><?php echo $rs->code; ?></td>
 							<td class="middle text-center"><?php echo po_status_text($rs->status); ?></td>
 							<td class="middle"><?php echo $rs->vender_name; ?></td>
-							<td class="middle text-right"><?php echo number($rs->doc_total, 2); ?></td>
+							<td class="middle text-right"><?php echo number($rs->total_qty, 2); ?></td>
+							<td class="middle text-right"><?php echo number($rs->total_open_qty, 2); ?></td>							
 							<td class="middle text-center"><?php echo thai_date($rs->due_date); ?></td>
 							<td class="middle"><?php echo $rs->user; ?></td>
             </tr>
@@ -93,7 +92,7 @@
           <?php endforeach; ?>
 				<?php else : ?>
 					<tr>
-						<td colspan="9" class="text-center">---- ไม่พบรายการ ----</td>
+						<td colspan="11" class="text-center">---- ไม่พบรายการ ----</td>
 					</tr>
         <?php endif; ?>
 			</tbody>

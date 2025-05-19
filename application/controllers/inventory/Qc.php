@@ -59,6 +59,265 @@ class Qc extends PS_Controller
 
   }
 
+  public function ship_order_shopee($reference)
+  {
+    $sc = TRUE;
+    $logs = [];
+    $shipment = NULL;
+    $tracking = NULL;
+    $this->load->library('wrx_shopee_api');
+    $order = $this->orders_model->get_order_by_reference($reference);
+
+    if( ! empty($order))
+    {
+      $status = $this->wrx_shopee_api->get_order_status($reference);
+      $logs['status'] = $status;
+
+      if($status === 'CANCELLED' OR $status === 'IN_CANCEL')
+      {
+        $sc = FALSE;
+        $this->error = "ออเดอร์ถูกยกเลิกในระบบ Shopee แล้ว";
+      }
+
+      if($sc === TRUE)
+      {
+        $pickup_data = $this->wrx_shopee_api->get_shipping_param($reference);
+
+        if(empty($pickup_data))
+        {
+          sleep(1);  //--- wait 1 second and retry to request again
+
+          $pickup_data = $this->wrx_shopee_api->get_shipping_param($reference);
+
+          if(empty($pickup_data))
+          {
+            $sc = FALSE;
+            $this->error = "Cannot get param from api";
+          }
+        }
+
+        $logs['shipping_param'] = $pickup_data;
+      }
+
+
+      if($sc === TRUE && $status === 'READY_TO_SHIP')
+      {
+        //--- ship order
+        if( ! empty($pickup_data))
+        {
+          if( ! $this->wrx_shopee_api->ship_order($reference, $pickup_data))
+          {
+            $sc = FALSE;
+            $this->error = $this->wrx_shopee_api->error;
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Pickup data not found";
+        }
+
+        $logs['ship_order'] = $sc === TRUE ? 'success' : $this->error;
+      }
+
+      //--- get tracking_number
+      if($sc === TRUE)
+      {
+        $tracking_number = $this->wrx_shopee_api->get_tracking_number($reference);
+
+        if(empty($tracking_number))
+        {
+          $retry = 5;
+
+          while($retry > 0)
+          {
+            sleep(1);
+
+            $tracking_number = $this->wrx_shopee_api->get_tracking_number($reference);
+
+            if( ! empty($tracking_number))
+            {
+              break;
+            }
+
+            $retry--;
+          }
+
+          if(empty($tracking_number))
+          {
+            $sc = FALSE;
+            $this->error = "Cannot get tracking number after try {$retry} times";
+          }
+        }
+
+        if( ! empty($tracking_number))
+        {
+          $tracking = $tracking_number;
+          $this->orders_model->update($order->code, ['shipping_code' => $tracking_number]);
+        }
+
+        $logs['get_tracking'] = $sc === TRUE ? $tracking : $this->error;
+      }
+
+
+      //--- cereate shipping document
+      if($sc === TRUE)
+      {
+        if( ! $this->wrx_shopee_api->create_shipping_document($reference, $tracking))
+        {
+          $sc = FALSE;
+          $this->error = $this->wrx_shopee_api->error;
+        }
+
+        $logs['create'] = $sc === TRUE ? 'success' : $this->error;
+      }
+
+      //--- get create document result
+      if($sc === TRUE)
+      {
+        if( ! $this->wrx_shopee_api->shipping_document_result($reference))
+        {
+          sleep(1);
+
+          if( ! $this->wrx_shopee_api->shipping_document_result($reference))
+          {
+            $sc = FALSE;
+            $this->error = $this->wrx_shopee_api->error;
+          }
+        }
+
+        $logs[] = $sc === TRUE ? 'success' : $this->error;
+      }
+
+      //--- download_shipping_document
+      if($sc === TRUE)
+      {
+        $res = $this->wrx_shopee_api->shipping_document_download($reference);
+
+        if( ! empty($res))
+        {
+          $shipment = $res;
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Failed to download shipping label";
+        }
+
+        $logs[] = $sc === TRUE ? $res : $this->error;
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Order {$reference} not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $shipment,
+      'logs' => $logs
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function ship_order_lazada($reference)
+  {
+    $sc = TRUE;
+    $shipment = NULL;
+    $this->load->library('wrx_lazada_api');
+    $order = $this->orders_model->get_order_by_reference($reference);
+
+    if( ! empty($order))
+    {
+      $status = $this->wrx_lazada_api->get_order_status($reference);
+
+      $logs['status'] = $status;
+
+      if($status === 'canceled')
+      {
+        $sc = FALSE;
+        $this->error = "ออเดอร์ถูกยกเลิกในระบบ Lazada แล้ว";
+      }
+
+      if($sc === TRUE)
+      {
+        $order_item_ids = $this->wrx_lazada_api->get_order_item_id($reference);
+
+        if( ! empty($order_item_ids))
+        {
+          //---- change order status to packed and retrive pack data include tracking number
+          $pk = $this->wrx_lazada_api->packed($reference, $order_item_ids);
+          $packages = [];
+
+          if( ! empty($pk))
+          {
+            foreach($pk as $p)
+            {
+              $packages[] = array('packageID' => $p->package_id);
+              //---- update tracking number
+              if( ! empty($p->tracking_number))
+              {
+                $this->orders_model->update($order->code, ['shipping_code' => $p->tracking_number, 'package_id' => $p->package_id]);
+              }
+            }
+
+            //---- ready to ship order
+            if( ! empty($packages))
+            {
+              if($this->wrx_lazada_api->ship_package($packages) === TRUE)
+              {
+                //---- download document
+                $data = $this->wrx_lazada_api->get_shipping_label($packages);
+
+                if( ! empty($data))
+                {
+                  $shipment = $data;
+                }
+                else
+                {
+                  $sc = FALSE;
+                  $this->error = "Cannt get file from api";
+                }
+              }
+              else
+              {
+                $sc = FALSE;
+                $this->error = "Failed to set order status to ready to ship : {$this->wrx_lazada_api->error}";
+              }
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "Failed to set ordet status to packed";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Cannot Get Order Item ID from Lazada";
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Order {$reference} not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $shipment
+    );
+
+    echo json_encode($arr);
+  }
+
 
   public function ship_order_tiktok($reference)
   {
@@ -445,7 +704,7 @@ class Qc extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == '0009')
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -455,6 +714,36 @@ class Qc extends PS_Controller
       {
         $is_cancel = TRUE;
       }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_shopee_api');
+
+      $order_status = $this->wrx_shopee_api->get_order_status($reference);
+
+      if($order_status == 'CANCELLED' OR $order_status == 'IN_CANCEL')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
+    }
+
+    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    {
+      $this->load->library('wrx_lazada_api');
+
+      $order_status = $this->wrx_lazada_api->get_order_status($reference);
+
+      if($order_status == 'canceled' OR $order_status == 'CANCELED' OR $order_status == 'Canceled')
+      {
+        $is_cancel = TRUE;
+      }
+
+      return $is_cancel;
     }
 
     return $is_cancel;
@@ -466,6 +755,10 @@ class Qc extends PS_Controller
     $this->load->model('masters/customers_model');
     $this->load->model('masters/channels_model');
     $this->load->model('inventory/buffer_model');
+    $wrx_api = is_true(getConfig('WRX_API'));
+    $lazada_code = getConfig('LAZADA_CHANNELS_CODE');
+    $shopee_code = getConfig('SHOPEE_CHANNELS_CODE');
+    $tiktok_code = getConfig('TIKTOK_CHANNELS_CODE');
 
     $is_cancel = FALSE;
 
@@ -474,12 +767,18 @@ class Qc extends PS_Controller
     if( ! empty($order))
     {
       //--- check cancel request
-      // $is_cancel = $this->orders_model->is_cancel_request($order->code);
-      //
-      // if( ! $is_cancel && ! empty($order->reference) && ($order->channels_code == '0009'))
-      // {
-      //   $is_cancel = $this->is_cancel($order->reference, $order->channels_code);
-      // }
+      $is_cancel = $this->orders_model->is_cancel_request($order->code);
+
+      if($wrx_api)
+      {
+        if(! $is_cancel && ! empty($order->reference))
+        {
+          if($order->channels_code == $tiktok_code OR $order->channels_code == $shopee_code OR $order->channels_code == $lazada_code)
+          {
+            $is_cancel = $this->is_cancel($order->reference, $order->channels_code);
+          }
+        }
+      }
 
       if( ! $is_cancel)
       {

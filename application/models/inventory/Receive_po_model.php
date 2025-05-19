@@ -357,16 +357,16 @@ class Receive_po_model extends CI_Model
   public function get_on_order_qty($product_code, $po_code, $po_detail_id)
   {
     $rs = $this->db
-    ->select_sum('receive_qty')
+    ->select_sum('qty')
     ->where('po_code', $po_code)
     ->where('po_detail_id', $po_detail_id)
     ->where('product_code', $product_code)
-    ->where('line_status !=', 'D')
+    ->where('line_status', 'O')
     ->get($this->td);
 
     if($rs->num_rows() === 1)
     {
-      return $rs->row()->receive_qty > 0 ? $rs->row()->receive_qty : 0;
+      return $rs->row()->qty > 0 ? $rs->row()->qty : 0;
     }
 
     return 0;

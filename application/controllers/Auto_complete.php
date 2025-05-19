@@ -146,6 +146,7 @@ class Auto_complete extends CI_Controller
 		echo json_encode($ds);
 	}
 
+
 	public function get_wx_code()
 	{
 		$txt = trim($_REQUEST['term']);
@@ -337,26 +338,26 @@ class Auto_complete extends CI_Controller
   }
 
 
-  public function get_style_code()
+  public function get_model_code()
   {
     $sc = array();
     $this->db
-    ->select('code, old_code')
-    ->where('active', 1)
-    ->where('can_sell', 1)
-    ->where('is_deleted', 0)
+    ->select('code, name')
     ->group_start()
     ->like('code', $_REQUEST['term'])
-    ->or_like('old_code', $_REQUEST['term'])
+    ->or_like('name', $_REQUEST['term'])
     ->group_end()
     ->order_by('code', 'ASC')
-    ->limit(20);
-    $qs = $this->db->get('product_style');
+    ->limit(50);
+
+    $qs = $this->db->get('product_model');
 
     if($qs->num_rows() > 0)
     {
       foreach($qs->result() as $rs)
-      $sc[] = $rs->code .' | '.$rs->old_code;
+      {
+        $sc[] = $rs->code .' | '.$rs->name;
+      }
     }
 
     echo json_encode($sc);
@@ -401,7 +402,7 @@ class Auto_complete extends CI_Controller
 
 
 
-  public function get_style_code_and_name()
+  public function get_model_code_and_name()
   {
     $sc = array();
 
@@ -419,11 +420,10 @@ class Auto_complete extends CI_Controller
     }
 
     $this->db
-    ->where('is_deleted', 0)
     ->order_by('code', 'ASC')
-    ->limit(20);
+    ->limit(50);
 
-    $qs = $this->db->get('product_style');
+    $qs = $this->db->get('product_model');
 
     if($qs->num_rows() > 0)
     {
@@ -1099,6 +1099,37 @@ class Auto_complete extends CI_Controller
       }
     }
 
+
+    echo json_encode($sc);
+  }
+
+
+  public function get_product_code_and_name()
+  {
+    $sc = array();
+    $txt = $_REQUEST['term'];
+    $rs = $this->db
+    ->select('code, name')
+    ->where('active', 1)
+    ->group_start()
+    ->like('code', $txt)
+    ->or_like('name', $txt)
+    ->group_end()
+    ->order_by('code', 'ASC')
+    ->limit(50)
+    ->get('products');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $pd)
+      {
+        $sc[] = $pd->code." | ".$pd->name;
+      }
+    }
+    else
+    {
+      $sc[] = "notfound";
+    }
 
     echo json_encode($sc);
   }

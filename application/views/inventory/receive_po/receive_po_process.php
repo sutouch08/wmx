@@ -87,32 +87,26 @@
 <hr class="margin-top-15"/>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-bordered border-1" style="margin-bottom:0px; min-width:940px;">
+		<table class="table table-bordered border-1" style="margin-bottom:0px; min-width:700px;">
 			<thead>
 				<tr class="font-size-12">
 					<th class="fix-width-40 text-center">#</th>
 					<th class="fix-width-200">รหัสสินค้า</th>
 					<th class="min-width-250">ชื่อสินค้า</th>
-					<th class="fix-width-100 text-center">ราคา (PO)</th>
 					<th class="fix-width-100 text-center">จำนวน[ส่ง]</th>
 					<th class="fix-width-100 text-center">จำนวน[รับ]</th>
-					<th calss="fix-width-120 text-center">มูลค่า</th>
 				</tr>
 			</thead>
 			<tbody id="receive-table">
   <?php $no = 1; ?>
 	<?php $totalQty = 0; ?>
-	<?php $totalAmount = 0; ?>
 	<?php if( ! empty($details)) : ?>
 		<?php foreach($details as $rs) : ?>
-			<?php $uid = $rs->id.$rs->po_detail_id; ?>
+			<?php $uid = $rs->id."-".$rs->po_detail_id; ?>
 			<tr class="font-size-11" id="row-<?php echo $uid; ?>">
 				<td class="middle text-center no"><?php echo $no; ?></td>
 				<td class="middle"><?php echo $rs->product_code; ?></td>
 				<td class="middle"><?php echo $rs->product_name; ?></td>
-				<td class="middle">
-					<input type="text" class="form-control input-sm text-right text-label row-price e" id="row-price-<?php echo $uid; ?>" value="<?php echo number($rs->price, 2); ?>" readonly />
-				</td>
 				<td class="middle text-center">
 					<input type="text" class="form-control input-sm text-center text-label" id="qty-<?php echo $uid; ?>" value="<?php echo number($rs->qty); ?>" readonly />
 				</td>
@@ -123,16 +117,13 @@
 						data-id="<?php echo $rs->id; ?>"
 						data-uid="<?php echo $uid; ?>"
 						data-limit="<?php echo $rs->qty; ?>"
-						data-price="<?php echo $rs->price; ?>"
 						data-basecode="<?php echo $rs->po_code; ?>"
 						data-baseline="<?php echo $rs->po_detail_id; ?>"
 						data-code="<?php echo $rs->product_code; ?>"
 						data-name="<?php echo $rs->product_name; ?>"
 						value="" onchange="sumReceive()"/>
-				</td>
-				<td class="fix-width-120 middle">
-					<input type="text" class="form-control input-sm text-right text-label" id="line-total-<?php echo $uid; ?>" value="0" readonly/>
-					<input type="hidden"
+
+						<input type="hidden"
 						class="<?php echo $rs->barcode; ?>"
 						data-code="<?php echo $rs->product_code; ?>"
 						data-limit="<?php echo $rs->qty; ?>"
@@ -142,13 +133,11 @@
 			</tr>
 			<?php $no++; ?>
 			<?php $totalQty += $rs->qty; ?>
-			<?php $totalAmount += $rs->amount; ?>
 		<?php endforeach; ?>
 			<tr>
-				<td colspan="4" class="text-right">รวม</td>
+				<td colspan="3" class="text-right">รวม</td>
 				<td class=""><input type="text" class="form-control input-sm text-center text-label" id="total-qty" value="<?php echo number($totalQty); ?>" readonly/></td>
 				<td class=""><input type="text" class="form-control input-sm text-center text-label" id="total-receive" value="0" readonly/></td>
-				<td class=""><input type="text" class="form-control input-sm text-right text-label" id="total-amount" value="0.0000" readonly/></td>
 			</tr>
 	<?php endif; ?>
 			</tbody>
