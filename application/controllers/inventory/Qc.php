@@ -54,11 +54,6 @@ class Qc extends PS_Controller
   }
 
 
-  public function test()
-  {
-
-  }
-
   public function ship_order_shopee($reference)
   {
     $sc = TRUE;
@@ -852,6 +847,12 @@ class Qc extends PS_Controller
           }
         }
 
+        if(is_true(getConfig('WRX_OB_INTERFACE')))
+        {
+          $this->load->library('wrx_ob_api');
+          $this->wrx_ob_api->update_status($code);
+        }
+
         $ds = array(
           'order' => $order,
           'uncomplete_details' => $uncomplete,
@@ -1079,7 +1080,8 @@ class Qc extends PS_Controller
           'id_qc' => $rs->id,
           'barcode' => $rs->barcode,
           'box_no' => $rs->box_no,
-          'qty' => $rs->qty
+          'qty' => $rs->qty,
+          'product_code' => $item_code
         );
 
         array_push($ds, $arr);
@@ -1163,6 +1165,68 @@ class Qc extends PS_Controller
     $this->_response($sc);
   }
 
+
+  public function remove_check_qty()
+  {
+    $sc = TRUE;
+
+    $id = $this->input->post('id');
+    $remove_qty = $this->input->post('qty');
+    $product_code = $this->input->post('product_code');
+
+    if( ! empty($id) && ! empty($remove_qty))
+    {
+      $this->db->trans_begin();
+
+      $qc = $this->qc_model->get($id);
+
+      if( ! empty($qc))
+      {
+        if($remove_qty == $qc->qty)
+        {
+          if( ! $this->qc_model->delete_qc($id))
+          {
+            $sc = FALSE;
+            $this->error = "ลบรายการตรวจนับไม่สำเร็จ";
+          }
+        }
+        else
+        {
+          if( ! $this->qc_model->update_qty($id, (-1) * $remove_qty))
+          {
+            $sc = FALSE;
+            $this->error = "ปรับปรุงยอดตรวจนับไม่สำเร็จ";
+          }
+        }
+
+        if($sc === TRUE)
+        {
+          $this->orders_model->unvalid_qc($qc->order_detail_id);
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "ไม่พบรายการตรวจนับ : {$product_code}";
+      }
+
+      if($sc === TRUE)
+      {
+        $this->db->trans_commit();
+      }
+      else
+      {
+        $this->db->trans_rollback();
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
 
   public function remove_checked_box()
   {

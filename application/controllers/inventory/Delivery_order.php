@@ -329,41 +329,37 @@ class Delivery_order extends PS_Controller
                     }
 
                     $total_amount = $rs->final_price * $buffer_qty;
-                    $total_cost = $rs->cost * $buffer_qty;
                     $docTotal += $total_amount;
 
                     //--- ข้อมูลสำหรับบันทึกยอดขาย
                     $arr = array(
-                      'reference' => $order->code,
                       'role' => $order->role,
+                      'reference' => $order->code,
+                      'so_no' => $order->so_no,
+                      'fulfillment_code' => $order->fulfillment_code,
+                      'oracle_id' => $order->oracle_id,
                       'payment_code' => $order->payment_code,
                       'channels_code' => $order->channels_code,
                       'product_code' => $rs->product_code,
                       'product_name' => $rs->product_name,
-                      'product_style' => $rs->style_code,
+                      'product_model' => $rs->model_code,
                       'cost' => $rs->cost,
                       'price' => $rs->price,
                       'sell' => $rs->final_price,
                       'qty' => $buffer_qty,
-                      'discount_label' => discountLabel($rs->discount1, $rs->discount2, $rs->discount3),
+                      'discount_label' => discountLabel($rs->discount1),
                       'discount_amount' => ($rs->discount_amount * $buffer_qty),
                       'total_amount' => $total_amount,
-                      'total_cost' => $total_cost,
-                      'margin' => $total_amount - $total_cost,
-                      'id_policy' => $rs->id_policy,
-                      'id_rule' => $rs->id_rule,
                       'customer_code' => $order->customer_code,
                       'customer_ref' => $order->customer_ref,
                       'user' => $order->user,
                       'date_add' => $date_add,
                       'zone_code' => $rm->zone_code,
                       'warehouse_code' => $rm->warehouse_code,
-                      'update_user' => get_cookie('uname'),
+                      'update_user' => $this->_user->uname,
                       'budget_id' => $order->budget_id,
                       'budget_code' => $order->budget_code,
-                      'empID' => $order->empID,
-                      'empName' => $order->empName,
-                      'approver' => $order->approver,
+                      'is_count' => $rs->is_count,
                       'order_detail_id' => $rs->id
                     );
 
@@ -487,42 +483,38 @@ class Delivery_order extends PS_Controller
           foreach($bill as $rs)
           {
             $total_amount = $rs->final_price * $rs->qty;
-            $total_cost = $rs->cost * $rs->qty;
             $docTotal += $total_amount;
 
             //--- ข้อมูลสำหรับบันทึกยอดขาย
             $arr = array(
-              'reference' => $order->code,
               'role' => $order->role,
+              'reference' => $order->code,
+              'so_no' => $order->so_no,
+              'fulfillment_code' => $order->fulfillment_code,
+              'oracle_id' => $order->oracle_id,
               'payment_code' => $order->payment_code,
               'channels_code' => $order->channels_code,
               'product_code' => $rs->product_code,
               'product_name' => $rs->product_name,
-              'product_style' => $rs->style_code,
+              'product_model' => $rs->model_code,
               'cost' => $rs->cost,
               'price' => $rs->price,
               'sell' => $rs->final_price,
               'qty' => $rs->qty,
-              'discount_label' => discountLabel($rs->discount1, $rs->discount2, $rs->discount3),
+              'discount_label' => discountLabel($rs->discount1),
               'discount_amount' => ($rs->discount_amount * $rs->qty),
               'total_amount' => $total_amount,
-              'total_cost' => $total_cost,
-              'margin' => $total_amount - $total_cost,
-              'id_policy' => $rs->id_policy,
-              'id_rule' => $rs->id_rule,
               'customer_code' => $order->customer_code,
               'customer_ref' => $order->customer_ref,
               'user' => $order->user,
               'date_add' => $date_add,
               'zone_code' => NULL,
               'warehouse_code' => NULL,
-              'update_user' => get_cookie('uname'),
+              'update_user' => $this->_user->uname,
               'budget_id' => $order->budget_id,
               'budget_code' => $order->budget_code,
-              'is_count' => 0,
-              'empID' => $order->empID,
-              'empName' => $order->empName,
-              'approver' => $order->approver
+              'is_count' => $rs->is_count,
+              'order_detail_id' => $rs->id
             );
 
             //--- 3. บันทึกยอดขาย
@@ -580,6 +572,12 @@ class Delivery_order extends PS_Controller
         if($sc === TRUE)
         {
           $this->db->trans_commit();
+
+          if(is_true(getConfig('WRX_OB_INTERFACE')))
+          {
+            $this->load->library('wrx_ob_api');
+            $this->wrx_ob_api->update_status($code);
+          }
         }
         else
         {

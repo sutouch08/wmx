@@ -1,7 +1,4 @@
 <?php $this->load->view('include/header'); ?>
-<?php $allow_upload = getConfig('ALLOW_UPLOAD_ORDER'); ?>
-<?php $cim = get_permission('SOIMOR', $this->_user->uid, $this->_user->id_profile); ?>
-<?php $can_upload = (is_true($allow_upload) && can_do($cim)) ? TRUE : FALSE; ?>
 <style>
 	.backorder {
 		color:#811818 !important;
@@ -209,12 +206,6 @@
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">	<?php	echo "Start @ {$start} <br/> End&nbsp; @ {$end}";	?></div>
 	<?php endif; ?>
 </div>
-
-<?php
-if($can_upload) :
-	 $this->load->view('orders/import_order');
-endif;
-?>
 
 <script>
 	$('#channels').select2();

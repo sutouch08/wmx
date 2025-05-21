@@ -84,74 +84,74 @@ class Items extends PS_Controller
   }
 
 
-  // public function add_new()
-  // {
-  //   $this->load->view('masters/product_items/items_add_view');
-  // }
-  //
-  //
-  // public function add()
-  // {
-  //   $sc = TRUE;
-  //   $ds = json_decode($this->input->post('data'));
-  //
-  //   if( ! empty($ds))
-  //   {
-  //     $code = trim($ds->code);
-  //
-  //     if($this->products_model->is_exists($code))
-  //     {
-  //       $sc = FALSE;
-  //       $this->error = "{$code} already exists";
-  //     }
-  //
-  //     if($sc === TRUE)
-  //     {
-  //       $user = $this->_user->uname;
-  //
-  //       $arr = array(
-  //         'code' => $code,
-  //         'name' => trim($ds->name),
-  //         'barcode' => get_null(trim($ds->barcode)),
-  //         'style_code' => get_null($ds->style),
-  //         'color_code' => get_null($ds->color_code),
-  //         'size_code' => get_null($ds->size_code),
-  //         'group_code' => get_null($ds->group_code),
-	// 				'main_group_code' => get_null($ds->main_group_code),
-  //         'sub_group_code' => get_null($ds->sub_group_code),
-  //         'category_code' => get_null($ds->category_code),
-  //         'kind_code' => get_null($ds->kind_code),
-  //         'type_code' => get_null($ds->type_code),
-  //         'brand_code' => get_null($ds->brand_code),
-  //         'collection_code' => get_null($ds->collection_code),
-  //         'year' => $ds->year,
-  //         'cost' => round($ds->cost, 2),
-  //         'price' => round($ds->price, 2),
-  //         'unit_code' => $ds->unit_code,
-  //         'count_stock' => $ds->count_stock == 0 ? 0 : 1,
-  //         'can_sell' => $ds->can_sell == 0 ? 0 : 1,
-  //         'active' => $ds->active == 0 ? 0 : 1,
-  //         'is_api' => $ds->is_api == 0 ? 0 : 1,
-  //         'update_user' => $user,
-  //         'old_style' => get_null($ds->old_style),
-  //         'old_code' => get_null($ds->old_code)
-  //       );
-  //
-  //       if( ! $this->products_model->add($arr))
-  //       {
-  //         $sc = FALSE;
-  //         $this->error = "Failed to add new item";
-  //       }
-  //     }
-  //   }
-  //   else
-  //   {
-  //     $sc = FALSE;
-  //     $this->error = "Missing required parameter";
-  //   }
-  //
-  //   echo $sc === TRUE ? 'success' : $this->error;
-  // }
+  public function add_new()
+  {
+    $this->load->view('masters/product_items/items_add_view');
+  }
+
+
+  public function add()
+  {
+    $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
+    {
+      $code = trim($ds->code);
+
+      if($this->products_model->is_exists($code))
+      {
+        $sc = FALSE;
+        $this->error = "{$code} already exists";
+      }
+
+      if($sc === TRUE)
+      {
+        $user = $this->_user->uname;
+
+        $arr = array(
+          'code' => $code,
+          'name' => trim($ds->name),
+          'barcode' => get_null(trim($ds->barcode)),
+          'style_code' => get_null($ds->style),
+          'color_code' => get_null($ds->color_code),
+          'size_code' => get_null($ds->size_code),
+          'group_code' => get_null($ds->group_code),
+					'main_group_code' => get_null($ds->main_group_code),
+          'sub_group_code' => get_null($ds->sub_group_code),
+          'category_code' => get_null($ds->category_code),
+          'kind_code' => get_null($ds->kind_code),
+          'type_code' => get_null($ds->type_code),
+          'brand_code' => get_null($ds->brand_code),
+          'collection_code' => get_null($ds->collection_code),
+          'year' => $ds->year,
+          'cost' => round($ds->cost, 2),
+          'price' => round($ds->price, 2),
+          'unit_code' => $ds->unit_code,
+          'count_stock' => $ds->count_stock == 0 ? 0 : 1,
+          'can_sell' => $ds->can_sell == 0 ? 0 : 1,
+          'active' => $ds->active == 0 ? 0 : 1,
+          'is_api' => $ds->is_api == 0 ? 0 : 1,
+          'update_user' => $user,
+          'old_style' => get_null($ds->old_style),
+          'old_code' => get_null($ds->old_code)
+        );
+
+        if( ! $this->products_model->add($arr))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to add new item";
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Missing required parameter";
+    }
+
+    echo $sc === TRUE ? 'success' : $this->error;
+  }
 
 
 

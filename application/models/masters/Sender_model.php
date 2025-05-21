@@ -1,6 +1,8 @@
 <?php
 class Sender_model extends CI_Model
 {
+  private $tb = "address_sender";
+
   public function __construct()
   {
     parent::__construct();
@@ -10,7 +12,7 @@ class Sender_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return $this->db->insert('address_sender', $ds);
+      return $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -21,7 +23,7 @@ class Sender_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return $this->db->where('id', $id)->update('address_sender', $ds);
+      return $this->db->where('id', $id)->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -31,25 +33,25 @@ class Sender_model extends CI_Model
 
   public function delete($id)
   {
-    return $this->db->where('id', $id)->delete('address_sender');
+    return $this->db->where('id', $id)->delete($this->tb);
   }
 
 
   public function get($id)
   {
-    $rs = $this->db->where('id', $id)->get('address_sender');
+    $rs = $this->db->where('id', $id)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
 	public function get_id($code)
 	{
-		$rs = $this->db->select('id')->where('code', $code)->get('address_sender');
+		$rs = $this->db->select('id')->where('code', $code)->get($this->tb);
 
 		if($rs->num_rows() === 1)
 		{
@@ -62,7 +64,7 @@ class Sender_model extends CI_Model
 
   public function get_all()
   {
-    $rs = $this->db->get('address_sender');
+    $rs = $this->db->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -71,7 +73,7 @@ class Sender_model extends CI_Model
 
     return NULL;
   }
-  
+
 
 	public function get_common_list($list =  array())
 	{
@@ -83,7 +85,7 @@ class Sender_model extends CI_Model
 			$this->db->where_not_in('id', $list);
 		}
 
-		$rs = $this->db->get('address_sender');
+		$rs = $this->db->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -111,7 +113,7 @@ class Sender_model extends CI_Model
 
 	public function get_sender_in($arr)
 	{
-		$rs = $this->db->where_in('id', $arr)->get('address_sender');
+		$rs = $this->db->where_in('id', $arr)->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -123,7 +125,7 @@ class Sender_model extends CI_Model
 
   public function get_sender($id)
   {
-    $rs = $this->db->where('id', $id)->get('address_sender');
+    $rs = $this->db->where('id', $id)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -133,9 +135,25 @@ class Sender_model extends CI_Model
   }
 
 
+  public function get_code($id)
+  {
+    if( ! empty($id))
+    {
+      $rs = $this->db->where('id', $id)->get($this->tb);
+
+      if($rs->num_rows() === 1)
+      {
+        return $rs->row()->code;
+      }      
+    }
+
+    return NULL;
+  }
+
+
   public function get_name($id)
   {
-    $rs = $this->db->where('id', $id)->get('address_sender');
+    $rs = $this->db->where('id', $id)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row()->name;
@@ -155,7 +173,7 @@ class Sender_model extends CI_Model
 			$this->db->where('id !=', $id);
 		}
 
-		$rs = $this->db->count_all_results('address_sender');
+		$rs = $this->db->count_all_results($this->tb);
 
 		if($rs > 0)
 		{
@@ -174,7 +192,7 @@ class Sender_model extends CI_Model
 			$this->db->where('id !=', $id);
 		}
 
-		$rs = $this->db->count_all_results('address_sender');
+		$rs = $this->db->count_all_results($this->tb);
 
 		if($rs > 0)
 		{
@@ -190,11 +208,11 @@ class Sender_model extends CI_Model
   {
     if(! empty($id))
     {
-      $rs = $this->db->where('name', $name)->where('id !=',$id)->get('address_sender');
+      $rs = $this->db->where('name', $name)->where('id !=',$id)->get($this->tb);
     }
     else
     {
-      $rs = $this->db->where('name', $name)->get('address_sender');
+      $rs = $this->db->where('name', $name)->get($this->tb);
     }
 
     if($rs->num_rows() > 0)
@@ -236,7 +254,7 @@ class Sender_model extends CI_Model
 			$this->db->where('type', $ds['type']);
 		}
 
-		return $this->db->count_all_results('address_sender');
+		return $this->db->count_all_results($this->tb);
 
   }
 
@@ -275,7 +293,7 @@ class Sender_model extends CI_Model
 
 			$this->db->order_by('code', 'DESC')->limit($perpage, $offset);
 
-			$rs = $this->db->get('address_sender');
+			$rs = $this->db->get($this->tb);
 
       if($rs->num_rows() > 0)
       {

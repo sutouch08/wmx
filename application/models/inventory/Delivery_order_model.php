@@ -291,13 +291,11 @@ class Delivery_order_model extends CI_Model
     //--- ผลลัพธ์จะไม่ได้ยอดที่มีการสั่งซื้อแต่ไม่มียอดตรวจ หรือ มียอดตรวจแต่ไม่มียอดสั่งซื้อ (กรณีมีการแก้ไขออเดอร์)
     public function get_bill_detail($code)
     {
-      $qr = "SELECT o.id, o.style_code, o.product_code, o.product_name, o.qty AS order_qty, ";
-      $qr .= "o.cost, o.price, o.discount1, o.discount2, o.discount3, ";
-      $qr .= "o.id_rule, ru.id_policy, o.is_count, ";
+      $qr = "SELECT o.id, o.model_code, o.product_code, o.product_name, o.qty AS order_qty, ";
+      $qr .= "o.cost, o.price, o.discount1, o.is_count, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
       $qr .= "(o.total_amount/o.qty) AS final_price ";
       $qr .= "FROM order_details AS o ";
-      $qr .= "LEFT JOIN discount_rule AS ru ON ru.id = o.id_rule ";
       $qr .= "WHERE o.order_code = '{$code}' ";
       $qr .= "AND o.is_count = 1 ";
 
@@ -314,13 +312,11 @@ class Delivery_order_model extends CI_Model
 
     public function get_non_count_bill_detail($code)
     {
-      $qr  = "SELECT o.id, o.product_code, o.product_name, o.style_code, o.qty, ";
-      $qr .= "o.cost, o.price, o.discount1, o.discount2, o.discount3, ";
-      $qr .= "o.id_rule, ru.id_policy, o.is_count, ";
+      $qr  = "SELECT o.id, o.product_code, o.product_name, o.model_code, o.qty, ";
+      $qr .= "o.cost, o.price, o.discount1, o.is_count, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
       $qr .= "(o.total_amount/o.qty) AS final_price ";
       $qr .= "FROM order_details AS o ";
-      $qr .= "LEFT JOIN discount_rule AS ru ON ru.id = o.id_rule ";
       $qr .= "WHERE o.order_code = '{$code}' ";
       $qr .= "AND o.is_count = 0 ";
 
@@ -346,7 +342,7 @@ class Delivery_order_model extends CI_Model
 
 
     private function get_max_id()
-    {            
+    {
       $rs = $this->db->query("SELECT MAX(id) AS id FROM orders");
 
       if($rs->num_rows() === 1)

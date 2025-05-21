@@ -5,7 +5,7 @@
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
     <button type="button" class="btn btn-white btn-warning" onclick="goBack()"><i class="fa fa-server"></i> ออเดอร์รอจัด</button>
-    <button type="button" class="btn btn-white btn-info" onclick="goProcess()"><i class="fa fa-shopping-basket"></i> ออเดอร์กำลังจัด</button>
+    <button type="button" class="btn btn-white btn-info" onclick="goProcess()"><i class="fa fa-shopping-basket"></i> ออเดอร์กำลังจัด</button>    
   </div>
 </div>
 

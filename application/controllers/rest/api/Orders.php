@@ -23,6 +23,7 @@ class Orders extends REST_Controller
 
 	    $this->load->model('orders/orders_model');
 	    $this->load->model('orders/order_state_model');
+      $this->load->model('orders/reserv_stock_model');
 	    $this->load->model('masters/products_model');
 	    $this->load->model('masters/customers_model');
 	    $this->load->model('masters/channels_model');
@@ -115,36 +116,6 @@ class Orders extends REST_Controller
       $this->response($arr, 400);
     }
 
-    if(! property_exists($data, 'order_number') OR $data->order_number == '')
-    {
-      $this->error = 'order_number is required';
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
     $sc = $this->verify_data($data);
 
     //---- if any error return
@@ -217,7 +188,6 @@ class Orders extends REST_Controller
       {
         //---- check valid items
         $item = $this->products_model->get($rs->item);
-        $item = empty($item) ? $this->products_model->get_by_old_code($rs->item) : $item;
 
         if(empty($item))
         {
@@ -265,8 +235,8 @@ class Orders extends REST_Controller
     if($sc === TRUE)
     {
       //---- check duplicate order number
-      $order = $this->orders_model->get_active_order_by_so($data->order_number);
-        
+      $order = $this->orders_model->get_active_order_by_oracle_id($data->headerInternalId);
+
       $role = 'S';
 
       $date_add = date('Y-m-d H:i:s');
@@ -276,8 +246,6 @@ class Orders extends REST_Controller
       $ref_code = $data->order_number;
 
       $customer = $this->customers_model->get($data->customer_code);
-
-      $sale_code = empty($customer) ? -1 : $customer->sale_code;
 
       $state = 3;
 
@@ -295,7 +263,6 @@ class Orders extends REST_Controller
 
       $total_amount = 0;
       $is_hold = empty($data->on_hold) ? 0 : ($data->on_hold == 'Y' ? 1 : 0);
-      $is_pre_order = empty($data->is_pre_order) ? FALSE : (($data->is_pre_order == 'Y' OR $data->is_pre_order == 'y') ? TRUE : FALSE);
       $is_backorder = FALSE;
       $backorderList = [];
 
@@ -309,6 +276,8 @@ class Orders extends REST_Controller
           'code' => $order_code,
           'role' => $role,
           'so_no' => $data->order_number,
+          'oracle_id' => $data->headerInternalId,
+          'fulfillment_code' => $data->fulfillment,
           'reference' => get_null($data->reference),
           'customer_code' => $data->customer_code,
           'customer_name' => $data->customer_name,
@@ -316,9 +285,7 @@ class Orders extends REST_Controller
           'channels_code' => $data->channel,
           'payment_code' => $data->payment_method,
           'cod_amount' => $data->cod_amount,
-          'sale_code' => $sale_code,
           'state' => 3,
-          'is_term' => $data->payment_method === "COD" ? 1 : 0,
           'status' => 1,
           'shipping_code' => $tracking,
           'user' => $this->user,
@@ -326,8 +293,6 @@ class Orders extends REST_Controller
           'doc_date' => $doc_date,
           'due_date' => $due_date,
           'warehouse_code' => $warehouse_code,
-          'is_api' => 1,
-          'is_pre_order' => $is_pre_order ? 1 : 0,
           'id_sender' => $id_sender
         );
       }
@@ -342,17 +307,13 @@ class Orders extends REST_Controller
           'channels_code' => $data->channel,
           'payment_code' => $data->payment_method,
           'cod_amount' => $data->cod_amount,
-          'sale_code' => $sale_code,
           'state' => 3,
-          'is_term' => $data->payment_method === "COD" ? 1 : 0,
           'shipping_code' => $tracking,
           'user' => $this->user,
           'date_add' => $date_add,
           'doc_date' => $doc_date,
           'due_date' => $due_date,
           'warehouse_code' => $warehouse_code,
-          'is_api' => 1,
-          'is_pre_order' => $is_pre_order ? 1 : 0,
           'id_sender' => $id_sender
         );
       }
@@ -451,21 +412,139 @@ class Orders extends REST_Controller
         {
           if( ! empty($order))
           {
-            if( ! $this->orders_model->remove_all_details($order->code))
-            {
-              $sc = FALSE;
-              $this->error = "Failed to delete previous order items";
-            }
-          }
+            $rows_id = []; //--- rows ids must update or ignore change use to  get row to delete by exclude this ids in query
+            $del_rows_id = []; //--- row must delete
 
-          if($sc === TRUE)
+            foreach($details as $rs)
+            {
+              if($sc === FALSE) { break; }
+
+              $item = $rs->item;
+              $disc = $rs->discount > 0 ? $rs->discount/$rs->qty : 0;
+
+              if($data->channel == 'SHOPEE' && $rs->price == 0)
+              {
+                $is_hold = 1;
+              }
+
+              //--- ถ้ายังไม่มีรายการอยู่ เพิ่มใหม่
+              $arr = array(
+                "line_id" => $rs->line_item_id,
+                "order_code" => $order_code,
+                "model_code" => $item->model_code,
+                "product_code" => $item->code,
+                "product_name" => $item->name,
+                "cost"  => $item->cost,
+                "price"	=> $rs->price, //--- price bef disc
+                "qty" => $rs->qty,
+                "discount1"	=> round($disc, 2),
+                "discount2" => 0,
+                "discount3" => 0,
+                "discount_amount" => $rs->discount, //--- discount per item * qty
+                "total_amount"	=> round($rs->amount, 2),
+                "is_count" => $item->count_stock,
+                "is_api" => 1
+              );
+
+              $row = $this->orders_model->get_detail_by_product_and_line_id($order->code, $item->code, $rs->line_item_id);
+
+              if( ! empty($row))
+              {
+                // ถ้าสินค้าเหมือนกัน  update row
+                if($row->product_code == $item->code)
+                {
+                  $rows_id[] = $row->id;
+
+                  if( ! $this->orders_model->update_detail($row->id, $arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to update item at Line {$rs->line_item_id}";
+                  }
+                }
+
+                //--- if item not match add new row
+                if($row->product_code != $item->code)
+                {
+                  $order_detail_id = $this->orders_model->add_detail($arr);
+
+                  if( ! $order_detail_id)
+                  {
+                    $sc = FALSE;
+                    $this->error = "Order item insert failed : {$item->code}";
+                  }
+                  else
+                  {
+                    $rows_id[] = $order_detail_id; //--- use to get row id to delete
+                  }
+                }
+              }
+              else
+              {
+                $order_detail_id = $this->orders_model->add_detail($arr);
+
+                if( ! $order_detail_id)
+                {
+                  $sc = FALSE;
+                  $this->error = "Order item insert failed : {$item->code}";
+                }
+                else
+                {
+                  $rows_id[] = $order_detail_id; //--- use to get row id to delete
+                }
+              }
+
+              if($sc === TRUE)
+              {
+                $total_amount += round($rs->amount, 2);
+
+                if($this->checkBackorder && $item->count_stock)
+                {
+                  $available = $this->get_available_stock($item->code, $warehouse_code);
+
+                  if($available < $rs->qty)
+                  {
+                    $is_backorder = TRUE;
+
+                    $backorderList[] = (object) array(
+                      'order_code' => $order_code,
+                      'product_code' => $item->code,
+                      'order_qty' => $rs->qty,
+                      'available_qty' => $available
+                    );
+                  }
+                }
+              }
+            } // end foreach
+
+            //--- check row to delete
+            if($sc === TRUE && ! empty($rows_id))
+            {
+              $rows_to_delete = $this->orders_model->get_exclude_details_ids($order->code, $rows_id);
+
+              if( ! empty($rows_to_delete))
+              {
+                foreach($rows_to_delete as $rd)
+                {
+                  $del_rows_id[] = $rd->id;
+                }
+              }
+
+              //--- delete previous rows that remove by api
+              if( ! empty($del_rows_id))
+              {
+                if( ! $this->orders_model->remove_details_by_ids($del_rows_id))
+                {
+                  $sc = FALSE;
+                  $this->error = "Failed to delete item rows";
+                }
+              } //--- end delete rows
+            } //--- end if rows_id
+          }
+          else //-- empty $order
           {
             foreach($details as $rs)
             {
-              if($sc === FALSE)
-              {
-                break;
-              }
+              if($sc === FALSE) { break; }
 
               if( ! empty($rs->item))
               {
@@ -480,19 +559,19 @@ class Orders extends REST_Controller
 
                 //--- ถ้ายังไม่มีรายการอยู่ เพิ่มใหม่
                 $arr = array(
-                  "order_code"	=> $order_code,
-                  "style_code"		=> $item->style_code,
-                  "product_code"	=> $item->code,
-                  "product_name"	=> $item->name,
+                  "line_id" => $rs->line_item_id,
+                  "order_code" => $order_code,
+                  "product_code" => $item->code,
+                  "product_name" => $item->name,
+                  "model_code" => $item->model_code,
                   "cost"  => $item->cost,
                   "price"	=> $rs->price, //--- price bef disc
-                  "qty"		=> $rs->qty,
+                  "qty" => $rs->qty,
                   "discount1"	=> round($disc, 2),
                   "discount2" => 0,
                   "discount3" => 0,
                   "discount_amount" => $rs->discount, //--- discount per item * qty
                   "total_amount"	=> round($rs->amount, 2),
-                  "id_rule"	=> NULL,
                   "is_count" => $item->count_stock,
                   "is_api" => 1
                 );
@@ -507,7 +586,7 @@ class Orders extends REST_Controller
                 {
                   $total_amount += round($rs->amount, 2);
 
-                  if($this->checkBackorder && $item->count_stock && ! $is_pre_order)
+                  if($this->checkBackorder && $item->count_stock)
                   {
                     $available = $this->get_available_stock($item->code, $warehouse_code);
 
@@ -1110,541 +1189,6 @@ class Orders extends REST_Controller
   } //--- end cancel
 
 
-  public function update_price_put()
-  {
-    $sc = TRUE;
-
-    $action = 'update';
-
-    $this->api_path = $this->api_path."/update_price";
-    //--- Get raw post data
-    $json = file_get_contents("php://input");
-
-    if( ! $this->api)
-    {
-      $arr = array(
-        'status' => FALSE,
-        'error' => 'API Not Enabled',
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'API Not Enabled',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    $data = json_decode($json);
-
-    if(empty($data))
-    {
-      $arr = array(
-        'status' => FALSE,
-        'error' => 'empty data',
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    if(! property_exists($data, 'order_number') OR $data->order_number == '')
-    {
-      $this->error = 'order_number is required';
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    // $order = $this->orders_model->get($data->order_number); //--- WO
-    // $order_code = empty($order) ? NULL : $order->code;
-    $order_code = $this->orders_model->get_active_order_code_by_reference($data->order_number);
-
-    if(empty($order_code))
-    {
-      $this->error = "Active order number not found for {$data->order_number}";
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $data->order_number,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- check each item code
-    $details = $data->details;
-
-    if(empty($details))
-    {
-      $sc = FALSE;
-      $this->error = "Items not found";
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-        'trans_id' => genUid(),
-        'api_path' => $this->api_path,
-        'type' => $this->type,
-        'code' => $data->order_number,
-        'action' => $action,
-        'status' => 'failed',
-        'message' => $this->error,
-        'request_json' => $json,
-        'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    $this->db->trans_begin();
-
-    if( ! empty($details))
-    {
-      $row_change = 0;
-
-      foreach($details as $rs)
-      {
-        if($sc === FALSE) { break; }
-
-        $row = $this->orders_model->get_detail_by_product($order_code, $rs->item);
-
-        if(empty($row))
-        {
-          $sc = FALSE;
-          $this->error = "Order item {$rs->item} not found in {$order_code}";
-        }
-
-        if($sc === TRUE)
-        {
-          if($row->qty != $rs->qty)
-          {
-            $sc = FALSE;
-            $this->error = "Quantity mismatch - try to update price with Qty : {$rs->qty} but order qty is {$row->qty} on {$rs->item}";
-          }
-        }
-
-        if($sc === TRUE && $rs->price != $row->price)
-        {
-          $disc = $rs->discount > 0 ? $rs->discount/$rs->qty : 0;
-
-          $arr = array(
-            'price' => $rs->price,
-            'discount1' => round($disc, 2),
-            'discount_amount' => $rs->discount,
-            'total_amount' => round($rs->amount)
-          );
-
-          if( ! $this->orders_model->update_detail($row->id, $arr))
-          {
-            $sc = FALSE;
-            $this->error = "Failed to update order row";
-          }
-
-          $row_change++;
-        }
-      }
-
-      if($sc === TRUE && $row_change > 0)
-      {
-        $doc_total = $this->orders_model->get_order_total_amount($order_code);
-        $arr = array(
-          'doc_total' => $doc_total,
-          'is_hold' => 0,
-          'update_user' =>  $this->user
-        );
-
-        $this->orders_model->update($order_code, $arr);
-      }
-    }
-
-    if($sc === TRUE)
-    {
-      $this->db->trans_commit();
-
-      $arr = array(
-      'status' => 'success',
-      'message' => 'success',
-      'order_code' => $order_code
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $data->order_number,
-          'action' => $action,
-          'status' => 'success',
-          'message' => 'success',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 200);
-    }
-    else
-    {
-      $this->db->trans_rollback();
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => TRUE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $data->order_number,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 200);
-    }
-  } //--- end update price
-
-
-  public function complete_order_get($order_number)
-  {
-    $sc = TRUE;
-
-    $action = 'complete';
-
-    $this->api_path = $this->api_path."/complete_order/{$order_number}";
-    //--- Get raw post data
-    $json = NULL;
-
-    if( ! $this->api)
-    {
-      $arr = array(
-        'status' => FALSE,
-        'error' => 'API Not Enabled',
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'API Not Enabled',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    $data = json_decode($json);
-
-    if(empty($order_number))
-    {
-      $this->error = 'Missing required parameter : order_number';
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    $order_code = $this->orders_model->get_active_order_code_by_reference($order_number);
-
-    if(empty($order_code))
-    {
-      $this->error = "Active order number not found for {$order_number}";
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $order_number,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 200);
-    }
-
-    $order = $this->orders_model->get($order_code);
-
-    if(empty($order))
-    {
-      $sc = FALSE;
-      $this->error = "Oredr not found";
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $order_number,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    if($order->state != 7)
-    {
-      $sc = FALSE;
-
-      $err = $order->state < 7 ? 'Order has been roll back' : ($order->state == 9 ? 'Order already Cancelled' : ($order->state == '8' ? 'Order already shipped' : 'Unknow order state'));
-      $this->error = "Invalid order state : ".$err;
-
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => FALSE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-        'trans_id' => genUid(),
-        'api_path' => $this->api_path,
-        'type' => $this->type,
-        'code' => $data->order_number,
-        'action' => $action,
-        'status' => 'failed',
-        'message' => $this->error,
-        'request_json' => $json,
-        'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    if($sc === TRUE && ! empty($order))
-    {
-      //--- remove on hold
-      $arr = array(
-        'is_hold' => 0,
-        'update_user' => $this->user
-      );
-
-      if( ! $this->orders_model->update($order_code, $arr))
-      {
-        $sc = FALSE;
-        $this->error = "Failed to update order state";
-      }
-
-      //--- if update success try to Delivery order
-      if($sc === TRUE)
-      {
-        //---- delivery order here
-        // $this->load->library('confirm_order');
-        // $this->confirm_order->confirm($order_code);
-      }
-    }
-
-    if($sc === TRUE)
-    {
-      $arr = array(
-        'status' => 'success',
-        'message' => 'success',
-        'order_code' => $order_code
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $order_number,
-          'action' => $action,
-          'status' => 'success',
-          'message' => 'success',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 200);
-    }
-    else
-    {
-      $arr = array(
-        'status' => FALSE,
-        'error' => $this->error,
-        'retry' => TRUE
-      );
-
-      if($this->logs_json)
-      {
-        $logs = array(
-          'trans_id' => genUid(),
-          'api_path' => $this->api_path,
-          'type' => $this->type,
-          'code' => $order_number,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => $this->error,
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 200);
-    }
-  } //--- end confirm_order
-
-
   public function get_new_code($date, $prefix = 'WO', $run_digit = 5)
   {
     $date = empty($date) ? date('Y-m-d') : $date;
@@ -1673,31 +1217,37 @@ class Orders extends REST_Controller
 
   public function verify_data($data)
 	{
-    // if($this->orders_model->is_active_order_reference($data->order_number) !== FALSE)
-    // {
-    //   $this->error = 'Order number already exists';
-		// 	return FALSE;
-    // }
-
-    if($this->orders_model->is_active_order_so($data->order_number) !== FALSE)
+    if(! property_exists($data, 'order_number') OR $data->order_number == '')
     {
-      $this->error = 'Order number already exists';
-			return FALSE;
+      $this->error = 'order_number is required';
+      return FALSE;
     }
 
-    if(! property_exists($data, 'customer_code') OR $data->customer_code == '')
+    if( ! property_exists($data, 'headerInternalId') OR empty($data->headerInternalId))
+    {
+      $this->error = 'headerInternalId is required';
+      return FALSE;
+    }
+
+    if( ! property_exists($data, 'fulfillment') OR empty($data->fulfillment))
+    {
+      $this->error = 'fulfillment is required';
+      return FALSE;
+    }
+
+    if( ! property_exists($data, 'customer_code') OR $data->customer_code == '')
     {
       $this->error = 'customer_code is required';
-			return FALSE;
+      return FALSE;
     }
 
     if( ! empty($data->customer_code) && ! $this->customers_model->is_exists($data->customer_code))
-		{
+    {
       $this->error = "Invalid Customer Code";
       return FALSE;
-		}
+    }
 
-    if(! property_exists($data, 'channel') OR ! $this->channels_model->is_exists($data->channel))
+    if( ! property_exists($data, 'channel') OR ! $this->channels_model->is_exists($data->channel))
     {
       $this->error = "Invalid channels code : {$data->channel}";
       return FALSE;
@@ -1706,6 +1256,18 @@ class Orders extends REST_Controller
     if( ! property_exists($data, 'payment_method') OR ! $this->payment_methods_model->is_exists($data->payment_method))
     {
       $this->error = 'Invalid payment_method code';
+      return FALSE;
+    }
+
+    if(property_exists($data, 'headerInternalId') && $this->orders_model->is_active_order_fulfillment($data->headerInternalId))
+    {
+      $this->error = 'Order number already exists';
+			return FALSE;
+    }
+
+    if(property_exists($data, 'reference') && $this->orders_model->is_active_order_reference($data->reference))
+    {
+      $this->error = 'Marketplace order number '.$data->reference.' already exists';
 			return FALSE;
     }
 
@@ -1719,9 +1281,12 @@ class Orders extends REST_Controller
     $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse_code);
 
     //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
-    $reserv_stock = $this->orders_model->get_reserv_stock($item_code, $warehouse_code);
+    $ordered = $this->orders_model->get_reserv_stock($item_code, $warehouse_code);
 
-    $available = $sell_stock - $reserv_stock;
+    //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
+    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item_code, $warehouse_code);
+
+    $available = $sell_stock - $ordered - $reserv_stock;
 
     return $available < 0 ? 0 : $available;
   }

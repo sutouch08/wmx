@@ -22,62 +22,36 @@ class Products_model extends CI_Model
 
   public function count_rows(array $ds = array())
   {
-    $this->db
-    ->from('products')
-    ->join('product_color', 'products.color_code = product_color.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left');
-
     if( ! empty($ds))
     {
       if( ! empty($ds['code']))
       {
-        $this->db->like('products.code', $ds['code']);
+        $this->db->like('code', $ds['code']);
       }
 
       if( ! empty($ds['name']))
       {
-        $this->db->like('products.name', $ds['name']);
+        $this->db->like('name', $ds['name']);
       }
 
       if( ! empty($ds['barcode']))
       {
-        $this->db->like('products.barcode', $ds['barcode']);
+        $this->db->like('barcode', $ds['barcode']);
       }
 
       if( ! empty($ds['color']))
       {
-        if($ds['color'] === 'NULL')
-        {
-          $this->db->where('products.color_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->group_start();
-          $this->db->like('product_color.code', $ds['color'])->or_like('product_color.name', $ds['color']);
-          $this->db->group_end();
-        }
-      }
-
-      if( isset($ds['color_group']) && $ds['color_group'] != 'all')
-      {
-        $this->db->where('product_color.id_group', $ds['color_group']);
+        $this->db->like('color_code', $ds['color']);
       }
 
       if( ! empty($ds['size']))
       {
-        if($ds['size'] === 'NULL')
-        {
-          $this->db->where('products.size_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('product_size.code', $ds['size']);
-        }
+        $this->db->like('size_code', $ds['size']);
       }
 
       if( ! empty($ds['price']))
       {
-        $operater = !empty($ds['operater']) ? $ds['operater'] : 'less_than';
+        $operater = ! empty($ds['operater']) ? $ds['operater'] : 'less_than';
 
         if($operater === 'more_than')
         {
@@ -146,73 +120,46 @@ class Products_model extends CI_Model
 
       if(isset($ds['active']) && $ds['active'] != 'all')
       {
-        $this->db->where('products.active', $ds['active']);
+        $this->db->where('active', $ds['active']);
       }
     }
 
-    return $this->db->count_all_results();
+    return $this->db->count_all_results($this->tb);
   }
 
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
-    $this->db
-    ->select('products.*')
-    ->from('products')
-    ->join('product_color', 'products.color_code = product_color.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left');
-
     if( ! empty($ds))
     {
       if( ! empty($ds['code']))
       {
-        $this->db->like('products.code', $ds['code']);
+        $this->db->like('code', $ds['code']);
       }
 
       if( ! empty($ds['name']))
       {
-        $this->db->like('products.name', $ds['name']);
+        $this->db->like('name', $ds['name']);
       }
 
       if( ! empty($ds['barcode']))
       {
-        $this->db->like('products.barcode', $ds['barcode']);
+        $this->db->like('barcode', $ds['barcode']);
       }
 
       if( ! empty($ds['color']))
       {
-        if($ds['color'] === 'NULL')
-        {
-          $this->db->where('products.color_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->group_start();
-          $this->db->like('product_color.code', $ds['color'])->or_like('product_color.name', $ds['color']);
-          $this->db->group_end();
-        }
-      }
-
-      if( isset($ds['color_group']) && $ds['color_group'] != 'all')
-      {
-        $this->db->where('product_color.id_group', $ds['color_group']);
+        $this->db->like('color_code', $ds['color']);
       }
 
       if( ! empty($ds['size']))
       {
-        if($ds['size'] === 'NULL')
-        {
-          $this->db->where('products.size_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('product_size.code', $ds['size']);
-        }
+        $this->db->like('size_code', $ds['size']);
       }
 
       if( ! empty($ds['price']))
       {
-        $operater = !empty($ds['operater']) ? $ds['operater'] : 'less_than';
+        $operater = ! empty($ds['operater']) ? $ds['operater'] : 'less_than';
 
         if($operater === 'more_than')
         {
@@ -281,148 +228,14 @@ class Products_model extends CI_Model
 
       if(isset($ds['active']) && $ds['active'] != 'all')
       {
-        $this->db->where('products.active', $ds['active']);
+        $this->db->where('active', $ds['active']);
       }
     }
 
-    $this->db->order_by('products.id','DESC');
+    $this->db->order_by('id','DESC');
     $this->db->limit($perpage, $offset);
 
-    $rs = $this->db->get();
-
-    return $rs->result();
-  }
-
-
-  public function get_products_list(array $ds = array())
-  {
-    $this->db
-    ->select('products.*')
-    ->from('products')
-    ->join('product_color', 'products.color_code = product_color.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left');
-
-    if( ! empty($ds))
-    {
-      if(! empty($ds['code']))
-      {
-        $this->db->group_start();
-        $this->db->like('products.code', $ds['code']);
-        $this->db->or_like('products.old_code', $ds['code']);
-        $this->db->group_end();
-      }
-
-      if(! empty($ds['name']))
-      {
-        $this->db->like('products.name', $ds['name']);
-      }
-
-
-      if($ds['group'] != 'all')
-      {
-        if($ds['group'] == 'NULL')
-        {
-          $this->db->where('group_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('group_code', $ds['group']);
-        }
-      }
-
-			if($ds['main_group'] != 'all')
-			{
-        if($ds['main_group'] == 'NULL')
-        {
-          $this->db->where('main_group_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('main_group_code', $ds['main_group']);
-        }
-			}
-
-      if($ds['sub_group'] != 'all')
-      {
-        if($ds['sub_group'] == 'NULL')
-        {
-          $this->db->where('sub_group_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('sub_group_code', $ds['sub_group']);
-        }
-      }
-
-      if($ds['category'] != 'all')
-      {
-        if($ds['category'] == 'NULL')
-        {
-          $this->db->where('category_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('category_code', $ds['category']);
-        }
-      }
-
-      if($ds['kind'] != 'all')
-      {
-        if($ds['kind'] == 'NULL')
-        {
-          $this->db->where('kind_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('kind_code', $ds['kind']);
-        }
-      }
-
-      if($ds['type'] != 'all')
-      {
-        if($ds['type'] == 'NULL')
-        {
-          $this->db->where('type_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('type_code', $ds['type']);
-        }
-      }
-
-      if($ds['brand'] != 'all')
-      {
-        if($ds['brand'] == 'NULL')
-        {
-          $this->db->where('brand_code IS NULL', NULL, FALSE);
-        }
-        else
-        {
-          $this->db->where('brand_code', $ds['brand']);
-        }
-      }
-
-      if($ds['year'] != 'all')
-      {
-        $this->db->where('year', $ds['year']);
-      }
-
-      if($ds['sell'] != 'all')
-      {
-        $this->db->where('can_sell', $ds['sell']);
-      }
-
-      if($ds['active'] != 'all')
-      {
-        $this->db->where('products.active', $ds['active']);
-      }
-    }
-
-    $this->db->order_by('style_code', 'ASC');
-    $this->db->order_by('color_code', 'ASC');
-    $this->db->order_by('product_size.position', 'ASC');
-
-    $rs = $this->db->get();
+    $rs = $this->db->get($this->tb);
 
     if($rs->num_rows() > 0)
     {

@@ -5,8 +5,8 @@
     <table class="table table-striped border-1">
       <thead>
         <tr><td colspan="6" align="center">รายการที่ครบแล้ว</td></tr>
-        <tr>          
-          <th class="fix-width-150 middle">บาร์โค้ด</th>
+        <tr>
+          <th class="fix-width-150 middle text-center">บาร์โค้ด</th>
           <th class="min-width-300 middle">สินค้า</th>
           <th class="fix-width-100 middle text-center">จำนวน</th>
           <th class="fix-width-100 middle text-center">จัดแล้ว</th>
@@ -20,17 +20,7 @@
 <?php   foreach($complete_details as $rs) : ?>
     <tr class="font-size-12">
       <td class="middle text-center"><?php echo $rs->barcode; ?></td>
-      <td class="middle">
-        <b class="blue">
-        <?php echo (empty($rs->old_code) ? $rs->product_code : $rs->old_code); ?>
-        </b>
-          |
-        <?php if($rs->old_code == $rs->product_code) : ?>
-        <?php     echo $rs->product_name; ?>
-        <?php else : ?>
-        <?php     echo $rs->product_code; ?>
-        <?php endif; ?>
-      </td>
+      <td class="middle"><b class="blue"><?php echo $rs->product_code; ?></b>  | <?php echo $rs->product_name; ?></td>
       <td class="middle text-center"><?php echo number($rs->qty); ?></td>
       <td class="middle text-center"><?php echo number($rs->prepared); ?></td>
       <td class="middle text-center"><?php echo number($rs->qty - $rs->prepared); ?></td>

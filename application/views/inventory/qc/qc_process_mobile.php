@@ -113,16 +113,16 @@
     <div class="font-size-18 text-center">{{title}}</div>
   </div>
   {{#each items}}
-    <div class="item-in-box">
+    <div class="item-in-box" id="edit-{{id_qc}}">
       <table class="table" style="margin-bottom:0px;">
         <tr>
           <td class="width-50" style="border:0px;">
             กล่องที่ : {{box_no}} <br/>
-            จำนวน : {{qty}} pcs.
+            จำนวน : <span id="label-{{id_qc}}">{{qty}}</span> pcs.
           </td>
           <td class="width-50" style="border:0px;">
             <div class="input-group">
-              <input type="number" class="form-control text-center focus e" data-qty="{{qty}}" inputmode="numeric" id="input-{{id_qc}}" />
+              <input type="number" class="form-control text-center focus e" data-qty="{{qty}}" data-code="{{product_code}}" inputmode="numeric" id="input-{{id_qc}}" />
               <span class="input-group-btn">
               <button class="btn btn-sm btn-danger" onclick="updateQty({{id_qc}})">เอาออก</button>
               </span>

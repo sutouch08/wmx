@@ -70,7 +70,6 @@ class Prepare extends PS_Controller
     }
   }
 
-
   public function view_process()
   {
     $this->title = "รายการกำลังจัด";
@@ -309,7 +308,7 @@ class Prepare extends PS_Controller
 
       if($wrx_api)
       {
-        if(! $is_cancel && ! empty($order->reference))
+        if( ! $is_cancel && ! empty($order->reference))
         {
           if($order->channels_code == $tiktok_code OR $order->channels_code == $shopee_code OR $order->channels_code == $lazada_code)
           {
@@ -382,6 +381,12 @@ class Prepare extends PS_Controller
 
             $rs->from_zone = $this->get_prepared_from_zone($arr);
           }
+        }
+
+        if(is_true(getConfig('WRX_OB_INTERFACE')))
+        {
+          $this->load->library('wrx_ob_api');
+          $this->wrx_ob_api->update_status($code);
         }
 
         $ds = array(

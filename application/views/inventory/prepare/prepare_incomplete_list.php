@@ -8,7 +8,7 @@
       <thead>
         <tr><td colspan="6" align="center">รายการรอจัด</td></tr>
         <tr>
-          <th class="fix-width-150 middle">บาร์โค้ด</th>
+          <th class="fix-width-150 middle text-center">บาร์โค้ด</th>
           <th class="min-width-300 middle">สินค้า</th>
           <th class="fix-width-100 middle text-center">จำนวน</th>
           <th class="fix-width-100 middle text-center">จัดแล้ว</th>
@@ -26,16 +26,7 @@
       <td class="middle text-center b-click">
         <?php echo (empty($rs->barcode) ? $rs->product_code : $rs->barcode); ?>
       </td>
-      <td class="middle">
-        <b class="blue">
-        <?php echo (empty($rs->old_code) ? $rs->product_code : $rs->old_code); ?>
-        </b>  |
-        <?php if($rs->old_code == $rs->product_code) : ?>
-        <?php     echo $rs->product_name; ?>
-        <?php else : ?>
-        <?php     echo $rs->product_code; ?>
-        <?php endif; ?>
-      </td>
+      <td class="middle"><b class="blue"><?php echo $rs->product_code; ?></b>  | <?php echo $rs->product_name; ?></td>
       <td class="middle text-center" id="order-qty-<?php echo $rs->id; ?>"><?php echo number($rs->qty); ?></td>
       <td class="middle text-center" id="prepared-qty-<?php echo $rs->id; ?>"><?php echo number($rs->prepared); ?></td>
       <td class="middle text-center" id="balance-qty-<?php echo $rs->id; ?>"><?php echo number($rs->qty - $rs->prepared); ?></td>

@@ -72,7 +72,10 @@ class Orders_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return $this->db->insert($this->td, $ds);
+      if($this->db->insert($this->td, $ds))
+      {
+        return $this->db->insert_id();
+      }
     }
 
     return FALSE;
@@ -101,9 +104,21 @@ class Orders_model extends CI_Model
     return $this->db->where('id', $id)->delete($this->td);
   }
 
+
   public function remove_all_details($order_code)
   {
     return $this->db->where('order_code', $order_code)->delete($this->td);
+  }
+
+
+  public function remove_details_by_ids(array $ids = array())
+  {
+    if( ! empty($ids))
+    {
+      return $this->db->where_in('id', $ids)->delete($this->td);
+    }
+
+    return FALSE;
   }
 
 
@@ -177,6 +192,26 @@ class Orders_model extends CI_Model
     return NULL;
   }
 
+
+  //--- get exclude detail_ids to delete
+  public function get_exclude_details_ids($order_code, array $ids = array())
+  {
+    if( ! empty($ids))
+    {
+      $rs = $this->db
+      ->select('id')
+      ->where('order_code', $order_code)
+      ->where_not_in('id', $ids)
+      ->get($this->td);
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
 
   public function get_exists_detail($order_code, $item_code, $price)
   {
@@ -305,6 +340,23 @@ class Orders_model extends CI_Model
   }
 
 
+  public function get_detail_by_product_and_line_id($order_code, $product_code, $line_id)
+  {
+    $rs = $this->db
+    ->where('order_code', $order_code)
+    ->where('product_code', $product_code)
+    ->where('line_id', $line_id)
+    ->get($this->td);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
 	public function get_only_count_stock_details($order_code)
 	{
 		$rs = $this->db
@@ -329,11 +381,10 @@ class Orders_model extends CI_Model
     ->select('order_details.*, products.unit_code')
     ->from('order_details')
     ->join('products', 'order_details.product_code = products.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left')
     ->where('order_code', $code)
-    ->order_by('products.style_code', 'ASC')
+    ->order_by('products.model_code', 'ASC')
     ->order_by('products.color_code', 'ASC')
-    ->order_by('product_size.position', 'ASC')
+    ->order_by('products.size_code', 'ASC')
     ->get();
 
     if($rs->num_rows() > 0)
@@ -348,38 +399,31 @@ class Orders_model extends CI_Model
   public function get_unvalid_details($code)
   {
     $rs = $this->db
-    ->select('ods.*, pd.old_code')
-    ->from('order_details AS ods')
-    ->join('products AS pd', 'ods.product_code = pd.code', 'left')
-    ->join('product_size AS size', 'pd.size_code = size.code', 'left')
-    ->where('ods.order_code', $code)
-    ->where('ods.valid', 0)
-    ->where('ods.is_count', 1)
-    ->order_by('pd.color_code', 'ASC')
-    ->order_by('size.position', 'ASC')
-    ->get();
+    ->where('order_code', $code)
+    ->where('valid', 0)
+    ->where('is_count', 1)
+    ->order_by('product_code', 'ASC')
+    ->get($this->td);
 
     if($rs->num_rows() > 0)
     {
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
   public function get_valid_details($code)
   {
     $rs = $this->db
-    ->select('ods.*, pd.old_code')
-    ->from('order_details AS ods')
-    ->join('products AS pd', 'ods.product_code = pd.code', 'left')
-    ->where('ods.order_code', $code)
+    ->where('order_code', $code)
     ->group_start()
-    ->where('ods.valid', 1)
-    ->or_where('ods.is_count', 0)
+    ->where('valid', 1)
+    ->or_where('is_count', 0)
     ->group_end()
-    ->get();
+    ->order_by('product_code', 'ASC')
+    ->get($this->td);
 
     if($rs->num_rows() > 0)
     {
@@ -493,39 +537,45 @@ class Orders_model extends CI_Model
   }
 
 
-  //--- เช็คว่า reference นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ reference ได้ (chatbot api)
+  //--- เช็คว่า reference นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ reference ได้
   public function is_active_order_reference($reference)
   {
-    $rs = $this->db
-    ->select('code')
+    $count = $this->db
+    ->where('reference IS NOT NULL', NULL, FALSE)
     ->where('reference', $reference)
-    ->where_in('state', [4, 5, 6, 7,8])
-    ->get($this->tb);
+    ->where('is_cancled', 0)
+    ->where_in('state', [4, 5, 6, 7, 8])
+    ->count_all_results($this->tb);
 
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $count > 0 ? TRUE : FALSE;
   }
 
 
   //--- เช็คว่า reference นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ reference ได้
   public function is_active_order_so($so_no)
   {
-    $rs = $this->db
-    ->select('code')
+    $count = $this->db
+    ->where('so_no IS NOT NULL', NULL, FALSE)
     ->where('so_no', $so_no)
-    ->where_in('state', [4, 5, 6, 7,8])
-    ->get($this->tb);
+    ->where('is_cancled', 0)
+    ->where_in('state', [4, 5, 6, 7, 8])
+    ->count_all_results($this->tb);
 
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
+    return $count > 0 ? TRUE : FALSE;
+  }
 
-    return FALSE;
+
+  //--- เช็คว่า oracle_id นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ oracle_id ได้
+  public function is_active_order_fulfillment($oracle_id)
+  {
+    $count = $this->db
+    ->where('oracle_id IS NOT NULL', NULL, FALSE)
+    ->where('oracle_id', $oracle_id)
+    ->where('is_cancled', 0)
+    ->where_in('state', [4, 5, 6, 7, 8])
+    ->count_all_results($this->tb);
+
+    return $count > 0 ? TRUE : FALSE;
   }
 
 
@@ -545,6 +595,25 @@ class Orders_model extends CI_Model
   public function get_active_order_by_so($so_no)
   {
     $rs = $this->db->where('so_no', $so_no)->where('state <=', 7)->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_active_order_by_oracle_id($oracle_id)
+  {
+    $rs = $this->db
+    ->where('oracle_id IS NOT NULL', NULL, FALSE)
+    ->where('oracle_id', $oracle_id)
+    ->where('state <=', 7)
+    ->order_by('state', 'ASC')
+    ->limit(1)
+    ->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -1338,11 +1407,11 @@ class Orders_model extends CI_Model
   }
 
 
-  public function get_sum_style_qty($order_code, $style_code)
+  public function get_sum_style_qty($order_code, $model_code)
   {
     $rs = $this->db->select_sum('qty')
     ->where('order_code', $order_code)
-    ->where('style_code', $style_code)
+    ->where('model_code', $model_code)
     ->get('order_detils');
 
     return $rs->row()->qty;

@@ -23,9 +23,8 @@ class Orders extends PS_Controller
     $this->load->model('masters/payment_methods_model');
     $this->load->model('masters/customers_model');
     $this->load->model('orders/order_state_model');
-    $this->load->model('masters/product_tab_model');
     $this->load->model('stock/stock_model');
-    $this->load->model('masters/product_style_model');
+    $this->load->model('masters/product_model_model');
     $this->load->model('masters/products_model');
     $this->load->model('orders/discount_model');
     $this->load->model('orders/reserv_stock_model');
@@ -1004,7 +1003,6 @@ class Orders extends PS_Controller
 
 	    $details = $this->orders_model->get_order_details($code);
 	    $ship_to = $this->address_model->get_ship_to_address($code);
-	    $banks = $this->bank_model->get_active_bank();
       $tracking = $this->orders_model->get_order_tracking($code);
       $backlogs = $rs->is_backorder == 1 ? $this->orders_model->get_backlogs_details($rs->code) : NULL;
 
@@ -1029,13 +1027,9 @@ class Orders extends PS_Controller
 	    $ds['order'] = $rs;
 	    $ds['details'] = $details;
 	    $ds['ship_to']  = $ship_to;
-	    $ds['banks'] = $banks;
       $ds['tracking'] = $tracking;
       $ds['backlogs'] = $backlogs;
 			$ds['cancle_reason'] = ($rs->state == 9 ? $this->orders_model->get_cancle_reason($code) : NULL);
-	    $ds['allowEditDisc'] = getConfig('ALLOW_EDIT_DISCOUNT') == 1 ? TRUE : FALSE;
-	    $ds['allowEditPrice'] = getConfig('ALLOW_EDIT_PRICE') == 1 ? TRUE : FALSE;
-	    $ds['edit_order'] = TRUE; //--- ใช้เปิดปิดปุ่มแก้ไขราคาสินค้าไม่นับสต็อก
 	    $this->load->view('orders/order_edit', $ds);
     }
 		else
@@ -2412,6 +2406,7 @@ class Orders extends PS_Controller
   public function order_state_change()
   {
     $sc = TRUE;
+
     if($this->input->post('order_code'))
     {
       $code = $this->input->post('order_code');
@@ -2526,6 +2521,15 @@ class Orders extends PS_Controller
           if($sc === TRUE)
           {
             $this->db->trans_commit();
+
+            if($state != 9)
+            {
+              if(is_true(getConfig('WRX_OB_INTERFACE')))
+              {
+                $this->load->library('wrx_ob_api');
+                $this->wrx_ob_api->update_status($code);
+              }              
+            }
           }
           else
           {

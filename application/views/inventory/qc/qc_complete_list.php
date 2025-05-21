@@ -18,10 +18,7 @@
 <?php   foreach($complete_details as $rs) : ?>
       <tr class="font-size-12" id="row-<?php echo $rs->id; ?>">
         <td class="middle text-center"><?php echo $rs->barcode; ?></td>
-        <td class="middle">
-          <?php echo $rs->product_code; ?> :
-          <?php echo $rs->product_name; ?>
-        </td>
+        <td class="middle"><b class="blue"><?php echo $rs->product_code; ?></b>  | <?php echo $rs->product_name; ?></td>
         <td class="middle text-center"><?php echo number($rs->order_qty); ?></td>
         <td class="middle text-center" id="prepared-<?php echo $rs->id; ?>"><?php echo number($rs->prepared); ?></td>
         <td class="middle text-center" id="qc-<?php echo $rs->id; ?>"><?php echo number($rs->qc); ?></td>
@@ -40,7 +37,7 @@
             data-trigger="focus"
             data-content="<?php echo $rs->from_zone; ?>"
             data-original-title=""
-            title=""><i class="fa fa-external-link"></i> 
+            title=""><i class="fa fa-external-link"></i>
             ที่เก็บ
           </button>
           <input type="hidden" id="id-<?php echo $rs->id; ?>" value="<?php echo $rs->id; ?>" />

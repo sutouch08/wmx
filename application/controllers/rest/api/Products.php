@@ -117,7 +117,7 @@ class Products extends REST_Controller
 
     if($sc === TRUE)
     {
-      $id = $this->products_model->get_id(trim($ds->code));    
+      $id = $this->products_model->get_id(trim($ds->code));
 
       if( ! empty($ds->barcode))
       {
@@ -152,6 +152,11 @@ class Products extends REST_Controller
 
           $this->response($arr, 200);
         }
+      }
+
+      if($sc === TRUE)
+      {
+        $this->update_product_attribute($ds);
       }
 
 
@@ -298,1714 +303,191 @@ class Products extends REST_Controller
   }
 
 
-  public function model_post()
+  private function update_product_attribute($ds)
   {
-    $sc = TRUE;
-    $this->load->model('masters/product_style_model');
-    $this->api_path = "rest/api/products/model";
-    $type = "ITEM MODEL";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
+    if( ! empty($ds))
     {
-      if($this->logs_json)
+      //--- model
+      if( ! empty($ds->model_code && ! empty($ds->model_name)))
       {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
+        $this->load->model('masters/product_model_model');
 
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
+        if( ! $this->product_model_model->is_exists($ds->model_code))
         {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
+          $this->product_model_model->add(['code' => $ds->model_code, 'name' => $ds->model_name]);
         }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_style_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_style_model->add($arr))
+        else
         {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_style_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
+          $this->product_model_model->update($ds->model_code, ['name' => $ds->model_name]);
         }
       }
 
-      //--- if insert or update success
-      if($sc === TRUE)
+      //--- main group
+      if( ! empty($ds->main_group_code) && ! empty($ds->main_group_name))
       {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
+        $this->load->model('masters/product_main_group_model');
 
-        if($this->logs_json)
+        if( ! $this->product_main_group_model->is_exists($ds->main_group_code))
         {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
+          $this->product_main_group_model->add(['code' => $ds->main_group_code, 'name' => $ds->main_group_name]);
         }
+        else
+        {
+          $this->product_main_group_model->update($ds->main_group_code, ['name' => $ds->main_group_name]);
+        }
+      }
 
-        $this->response($arr, 200);
+      //--- group
+      if( ! empty($ds->group_code) && ! empty($ds->group_code))
+      {
+        $this->load->model('masters/product_group_model');
+
+        if( ! $this->product_group_model->is_exists($ds->group_code))
+        {
+          $this->product_group_model->add(['code' => $ds->group_code, 'name' => $ds->group_name]);
+        }
+        else
+        {
+          $this->product_group_model->update($ds->group_code, ['name' => $ds->group_name]);
+        }
+      }
+
+      //--- segment
+      if( ! empty($ds->segment_code) && ! empty($ds->segment_name))
+      {
+        $this->load->model('masters/product_segment_model');
+
+        if( ! $this->product_segment_model->is_exists($ds->segment_code))
+        {
+          $this->product_segment_model->add(['code' => $ds->segment_code, 'name' => $ds->segment_name]);
+        }
+        else
+        {
+          $this->product_segment_model->update($ds->segment_code, ['name' => $ds->segment_name]);
+        }
+      }
+
+      //-- class
+      if( ! empty($ds->class_code) && ! empty($ds->class_name))
+      {
+        $this->load->model('masters/product_class_model');
+
+        if( ! $this->product_class_model->is_exists($ds->class_code))
+        {
+          $this->product_class_model->add(['code' => $ds->class_code, 'name' => $ds->class_name]);
+        }
+        else
+        {
+          $this->product_class_model->update($ds->class_code, ['name' => $ds->class_name]);
+        }
+      }
+
+      //--- family
+      if( ! empty($ds->family_code) && ! empty($ds->family_name))
+      {
+        $this->load->model('masters/product_family_model');
+
+        if( ! $this->product_family_model->is_exists($ds->family_code))
+        {
+          $this->product_family_model->add(['code' => $ds->family_code, 'name' => $ds->family_name]);
+        }
+        else
+        {
+          $this->product_family_model->update($ds->family_code, ['name' => $ds->family_name]);
+        }
+      }
+
+      //--- type
+      if( ! empty($ds->type_code) && ! empty($ds->type_name))
+      {
+        $this->load->model('masters/product_type_model');
+
+        if( ! $this->product_type_model->is_exists($ds->type_code))
+        {
+          $this->product_type_model->add(['code' => $ds->type_code, 'name' => $ds->type_name]);
+        }
+        else
+        {
+          $this->product_type_model->update($ds->type_code, ['name' => $ds->type_name]);
+        }
+      }
+
+      //--- kind
+      if( ! empty($ds->kind_code) && ! empty($ds->kind_name))
+      {
+        $this->load->model('masters/product_kind_model');
+
+        if( ! $this->product_kind_model->is_exists($ds->kind_code))
+        {
+          $this->product_kind_model->add(['code' => $ds->kind_code, 'name' => $ds->kind_name]);
+        }
+        else
+        {
+          $this->product_kind_model->update($ds->kind_code, ['name' => $ds->kind_name]);
+        }
+      }
+
+      //--- gender
+      if( ! empty($ds->gender_code) && ! empty($ds->gender_name))
+      {
+        $this->load->model('masters/product_gender_model');
+
+        if( ! $this->product_gender_model->is_exists($ds->gender_code))
+        {
+          $this->product_gender_model->add(['code' => $ds->gender_code, 'name' => $ds->gender_name]);
+        }
+        else
+        {
+          $this->product_gender_model->update($ds->gender_code, ['name' => $ds->gender_name]);
+        }
+      }
+
+      //--- sport type
+      if( ! empty($ds->sport_type_code) && ! empty($ds->sport_type_name))
+      {
+        $this->load->model('masters/product_sport_type_model');
+
+        if( ! $this->product_sport_type_model->is_exists($ds->sport_type_code))
+        {
+          $this->product_sport_type_model->add(['code' => $ds->sport_type_code, 'name' => $ds->sport_type_name]);
+        }
+        else
+        {
+          $this->product_sport_type_model->update($ds->sport_type_code, ['name' => $ds->sport_type_name]);
+        }
+      }
+
+      //--- collection
+      if( ! empty($ds->collection_code) && ! empty($ds->collection_name))
+      {
+        $this->load->model('masters/product_collection_model');
+
+        if( ! $this->product_collection_model->is_exists($ds->collection_code))
+        {
+          $this->product_collection_model->add(['code' => $ds->collection_code, 'name' => $ds->collection_name]);
+        }
+        else
+        {
+          $this->product_collection_model->update($ds->collection_code, ['name' => $ds->collection_name]);
+        }
+      }
+
+      //--- brand
+      if( ! empty($ds->brand_code) && ! empty($ds->brand_name))
+      {
+        $this->load->model('masters/product_brand_model');
+
+        if( ! $this->product_brand_model->is_exists($ds->brand_code))
+        {
+          $this->product_brand_model->add(['code' => $ds->brand_code, 'name' => $ds->brand_name]);
+        }
+        else
+        {
+          $this->product_brand_model->update($ds->brand_code, ['name' => $ds->brand_name]);
+        }
       }
     }
-  } //--- end method
-
-
-  public function brand_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_brand_model');
-    $this->api_path = "rest/api/products/brand";
-    $type = "ITEM BRAND";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_brand_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_brand_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_brand_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function category_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_category_model');
-    $this->api_path = "rest/api/products/category";
-    $type = "ITEM CATEGORY";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_category_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_category_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_category_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function collection_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_collection_model');
-    $this->api_path = "rest/api/products/collection";
-    $type = "ITEM COLLECTION";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_collection_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_collection_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_collection_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function group_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_group_model');
-    $this->api_path = "rest/api/products/group";
-    $type = "ITEM GROUP";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_group_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_group_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_group_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function main_group_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_main_group_model');
-    $this->api_path = "rest/api/products/main_group";
-    $type = "ITEM MAIN GROUP";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_main_group_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_main_group_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_main_group_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function sub_group_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_sub_group_model');
-    $this->api_path = "rest/api/products/sub_group";
-    $type = "ITEM SUB GROUP";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_sub_group_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_sub_group_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_sub_group_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function kind_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_kind_model');
-    $this->api_path = "rest/api/products/kind";
-    $type = "ITEM KIND";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_kind_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_kind_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_kind_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
-
-
-  public function type_post()
-  {
-    $sc = TRUE;
-    $this->load->model('masters/product_type_model');
-    $this->api_path = "rest/api/products/type";
-    $type = "ITEM TYPE";
-    $trans_id = genUid();
-    $action = "create";
-
-    $json = file_get_contents('php://input');
-
-    $ds = json_decode($json);
-
-    if(empty($ds))
-    {
-      if($this->logs_json)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => 'empty data'
-        );
-
-        $logs = array(
-          'trans_id' => $trans_id,
-          'api_path' => $this->api_path,
-          'type' => $type,
-          'code' => NULL,
-          'action' => $action,
-          'status' => 'failed',
-          'message' => 'empty data',
-          'request_json' => $json,
-          'response_json' => json_encode($arr)
-        );
-
-        $this->api_logs_model->add_logs($logs);
-      }
-
-      $this->response($arr, 400);
-    }
-
-    //--- required fields
-    $fields = ['code', 'name'];
-
-    //--- check required fields
-    foreach($fields as $field)
-    {
-      if( ! property_exists($ds, $field) OR $ds->$field == '')
-      {
-        $sc = FALSE;
-
-        $this->error = "Missing required parameter : '{$field}'";
-
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => FALSE,
-          'error' => $this->error
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => NULL,
-            'action' => $action,
-            'status' => 'failed',
-            'message' => $this->error,
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 400);
-      }
-    } //--- end forech check required fields
-
-    if($sc === TRUE)
-    {
-      $cs = $this->product_type_model->get(trim($ds->code));
-
-      $arr = array(
-        'name' => trim($ds->name)
-      );
-
-      if(empty($cs))
-      {
-        $arr['code'] = trim($ds->code);
-
-        if( ! $this->product_type_model->add($arr))
-        {
-          $sc = FALSE;
-          $this->error = "Insert failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-      else
-      {
-        if( ! $this->product_type_model->update($cs->code, $arr))
-        {
-          $sc = FALSE;
-          $this->error = "Update failed";
-
-          $arr = array(
-            'trans_id' => $trans_id,
-            'status' => FALSE,
-            'error' => $this->error
-          );
-
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => $trans_id,
-              'api_path' => $this->api_path,
-              'type' => $type,
-              'code' => $ds->code,
-              'action' => $action,
-              'status' => 'failed',
-              'message' => $this->error,
-              'request_json' => $json,
-              'response_json' => json_encode($arr)
-            );
-
-            $this->api_logs_model->add_logs($logs);
-          }
-
-          $this->response($arr, 200);
-        }
-      }
-
-      //--- if insert or update success
-      if($sc === TRUE)
-      {
-        $arr = array(
-          'trans_id' => $trans_id,
-          'status' => TRUE,
-          'message' => 'success',
-          'code' => $ds->code
-        );
-
-        if($this->logs_json)
-        {
-          $logs = array(
-            'trans_id' => $trans_id,
-            'api_path' => $this->api_path,
-            'type' => $type,
-            'code' => $ds->code,
-            'action' => $action,
-            'status' => 'success',
-            'message' => 'success',
-            'request_json' => $json,
-            'response_json' => json_encode($arr)
-          );
-
-          $this->api_logs_model->add_logs($logs);
-        }
-
-        $this->response($arr, 200);
-      }
-    }
-  } //--- end method
+  }
 
 
 }

@@ -549,6 +549,7 @@ function updateQty(id_qc) {
 
   let remove_qty = parseDefault(parseInt($('#input-'+id_qc).val()), 0);
   let limit = parseDefault(parseInt($('#input-'+id_qc).data('qty')), 0);
+  let product_code = $('#input-'+id_qc).data('code');
 
   if(remove_qty > 0) {
 
@@ -567,7 +568,8 @@ function updateQty(id_qc) {
         cache:'false',
         data:{
           'id' : id_qc,
-          'qty' : remove_qty
+          'qty' : remove_qty,
+          'product_code' : product_code
         },
         success:function(rs){
           load_out();
