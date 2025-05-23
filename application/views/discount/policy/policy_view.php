@@ -26,9 +26,9 @@
   <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
     <label>สถานะ</label>
     <select class="form-control input-sm" name="active" id="active" onchange="getSearch()">
-      <option value="2" <?php echo is_selected(2, $active); ?>>ทั้งหมด</option>
-      <option value="1" <?php echo is_selected(1, $active); ?>>ใช้งาน</option>
-      <option value="0" <?php echo is_selected(0, $active); ?>>ไม่ใช้งาน</option>
+      <option value="all" <?php echo is_selected('all', $active); ?>>ทั้งหมด</option>
+      <option value="1" <?php echo is_selected('1', $active); ?>>ใช้งาน</option>
+      <option value="0" <?php echo is_selected('0', $active); ?>>ไม่ใช้งาน</option>
     </select>
   </div>
 

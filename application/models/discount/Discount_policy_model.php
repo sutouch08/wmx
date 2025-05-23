@@ -1,6 +1,8 @@
 <?php
 class Discount_policy_model extends CI_Model
 {
+  private $tb = "discount_policy";
+  
   public function __construct()
   {
     parent::__construct();
@@ -9,7 +11,7 @@ class Discount_policy_model extends CI_Model
 
   public function add(array $ds = array())
   {
-    return $this->db->insert('discount_policy', $ds);
+    return $this->db->insert($this->tb, $ds);
   }
 
 
@@ -18,7 +20,7 @@ class Discount_policy_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return $this->db->where('id', $id)->update('discount_policy', $ds);
+      return $this->db->where('id', $id)->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -37,7 +39,7 @@ class Discount_policy_model extends CI_Model
     $this->db->set('id_policy', NULL)->where('id_policy', $id)->update('discount_rule');
 
     //--- delete policy
-    $this->db->where('id', $id)->delete('discount_policy');
+    $this->db->where('id', $id)->delete($this->tb);
 
     $this->db->trans_complete();
 
@@ -56,7 +58,7 @@ class Discount_policy_model extends CI_Model
 
   public function get($id)
   {
-    $rs = $this->db->where('id', $id)->get('discount_policy');
+    $rs = $this->db->where('id', $id)->get($this->tb);
     if($rs->num_rows() == 1)
     {
       return $rs->row();
@@ -70,7 +72,7 @@ class Discount_policy_model extends CI_Model
   {
     $rs = $this->db->select('code')
     ->where('id', $id)
-    ->get('discount_policy');
+    ->get($this->tb);
     if($rs->num_rows() == 1)
     {
       return $rs->row()->code;
@@ -84,7 +86,7 @@ class Discount_policy_model extends CI_Model
   {
     $rs = $this->db->select('name')
     ->where('id', $id)
-    ->get('discount_policy');
+    ->get($this->tb);
     if($rs->num_rows() == 1)
     {
       return $rs->row()->name;
@@ -94,44 +96,73 @@ class Discount_policy_model extends CI_Model
   }
 
 
-
-
-
-  public function count_rows($code, $name, $active, $start, $end)
+  public function count_rows(array $ds = array())
   {
-    $qr = "SELECT id FROM discount_policy WHERE code != '' ";
-
-    if($code != "")
+    if( ! empty($ds['code']))
     {
-      $qr .= "AND code LIKE '%".$code."%' ";
+      $this->db->like('code', $ds['code']);
     }
 
-    if($name != "")
+    if( ! empty($ds['name']))
     {
-      $qr .= "AND name LIKE '%".$name."%' ";
+      $this->db->like('name', $ds['name']);
     }
 
-    if($active != 2)
+    if( isset($ds['active']) && $ds['active'] != 'all')
     {
-      $qr .= "AND active = ".$active." ";
+      $this->db->where('active', $ds['active']);
     }
 
-    if($start != "" && $end != "")
+    if( ! empty($ds['start_date']))
     {
-      $qr .= "AND (start_date >= '".db_date($start)."' OR end_date <= '".db_date($end)."') ";
-
+      $this->db->where('start_date >=', from_date($ds['start_date']));
     }
 
-    $rs = $this->db->query($qr);
+    if( ! empty($ds['end_date']))
+    {
+      $this->db->where('end_date <=', to_date($ds['end_date']));
+    }
+
+    return $this->db->count_all_results($this->tb);
+  }
+
+
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+  {
+    if( ! empty($ds['code']))
+    {
+      $this->db->like('code', $ds['code']);
+    }
+
+    if( ! empty($ds['name']))
+    {
+      $this->db->like('name', $ds['name']);
+    }
+
+    if( isset($ds['active']) && $ds['active'] != 'all')
+    {
+      $this->db->where('active', $ds['active']);
+    }
+
+    if( ! empty($ds['start_date']))
+    {
+      $this->db->where('start_date >=', from_date($ds['start_date']));
+    }
+
+    if( ! empty($ds['end_date']))
+    {
+      $this->db->where('end_date <=', to_date($ds['end_date']));
+    }
+
+    $rs = $this->db->order_by('code', 'DESC')->limit($perpage, $offset)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
-      return $rs->num_rows();
+      return $rs->result();
     }
 
-    return 0;
+    return NULL;
   }
-
 
 
   public function get_data($code, $name, $active, $start, $end, $perpage = '', $offset = '')
@@ -177,7 +208,7 @@ class Discount_policy_model extends CI_Model
 
   public function get_policy_by_code($code)
   {
-    $rs = $this->db->where('code', $code)->get('discount_policy');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() == 1)
     {
       return $rs->row();
@@ -203,7 +234,7 @@ class Discount_policy_model extends CI_Model
     $rs = $this->db->select('id')
     ->like('code', $txt)
     ->like('name', $txt)
-    ->get('discount_policy');
+    ->get($this->tb);
     if($rs->num_rows() > 0)
     {
       return $rs->result();

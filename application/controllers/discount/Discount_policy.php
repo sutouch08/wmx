@@ -18,40 +18,29 @@ class Discount_policy extends PS_Controller
 
   public function index()
   {
-		$code = get_filter('policy_code', 'policy_code', '');
-    $name = get_filter('policy_name', 'policy_name', '');
-    $active = get_filter('active', 'active', 2); //-- 0 = not active , 1 = active , 2 = all
-    $start_date = get_filter('start_date', 'start_date', '');
-    $end_date = get_filter('end_date', 'end_date', '');
+    $filter = array(
+      'code' => get_filter('policy_code', 'policy_code', ''),
+      'name' => get_filter('policy_name', 'policy_name', ''),
+      'active' => get_filter('active', 'active', 'all'),
+      'start_date' => get_filter('start_date', 'start_date', ''),
+      'end_date' => get_filter('end_date', 'end_date', '')
+    );
+
 
 		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		if($perpage > 300)
-		{
-			$perpage = get_filter('rows', 'rows', 300);
-		}
+		$perpage = get_rows();
 
 		$segment = 4; //-- url segment
-		$rows = $this->discount_policy_model->count_rows($code, $name, $active, $start_date, $end_date);
+		$rows = $this->discount_policy_model->count_rows($filter);
 
 		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
 		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
 
-		$result = $this->discount_policy_model->get_data($code, $name, $active, $start_date, $end_date, $perpage, $this->uri->segment($segment));
-
-    $ds = array(
-      'code' => $code,
-      'name' => $name,
-      'active' => $active,
-      'start_date' => $start_date,
-      'end_date' => $end_date,
-			'data' => $result
-    );
+		$filter['data'] = $this->discount_policy_model->get_list($filter, $perpage, $this->uri->segment($segment));
 
 		$this->pagination->initialize($init);
 
-    $this->load->view('discount/policy/policy_view', $ds);
+    $this->load->view('discount/policy/policy_view', $filter);
   }
 
 
