@@ -57,8 +57,6 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 //--- กำหนดปีสินค้า
 $pdYearNo = count($pdYear);
 $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
-
-print_r($pdFamily);
  ?>
 
  <div class="row">
