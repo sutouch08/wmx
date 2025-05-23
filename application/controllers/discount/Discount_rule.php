@@ -113,18 +113,23 @@ class Discount_rule extends PS_Controller
     $this->load->model('masters/channels_model');
     $this->load->model('masters/payment_methods_model');
     $this->load->model('masters/customers_model');
-    $this->load->model('masters/products_model');
     $this->load->model('masters/customer_group_model');
     $this->load->model('masters/customer_type_model');
     $this->load->model('masters/customer_kind_model');
     $this->load->model('masters/customer_area_model');
     $this->load->model('masters/customer_class_model');
     $this->load->model('masters/products_model');
+    $this->load->model('masters/product_model_model');
+    $this->load->model('masters/product_main_group_model');
     $this->load->model('masters/product_group_model');
-    $this->load->model('masters/product_sub_group_model');
-    $this->load->model('masters/product_kind_model');
+    $this->load->model('masters/product_segment_model');
+    $this->load->model('masters/product_class_model');
+    $this->load->model('masters/product_family_model');
     $this->load->model('masters/product_type_model');
-    $this->load->model('masters/product_category_model');
+    $this->load->model('masters/product_kind_model');
+    $this->load->model('masters/product_gender_model');
+    $this->load->model('masters/product_sport_type_model');
+    $this->load->model('masters/product_collection_model');
     $this->load->model('masters/product_brand_model');
 
     $data = array(
@@ -145,19 +150,29 @@ class Discount_rule extends PS_Controller
       "customer_areas" => $this->customer_area_model->get_all(),
       "customer_grades" => $this->customer_class_model->get_all(),
       "pdList" => $this->discount_rule_model->getRuleProduct($id),
-      "pdModel" => $this->discount_rule_model->getRuleProductStyle($id),
+      "pdModel" => $this->discount_rule_model->getRuleProductModel($id),
+      "pdMainGroup" => $this->discount_rule_model->getRuleProductMainGroup($id),
       "pdGroup" => $this->discount_rule_model->getRuleProductGroup($id),
-      "pdSubGroup" => $this->discount_rule_model->getRuleProductSubGroup($id),
-      "pdKind" => $this->discount_rule_model->getRuleProductKind($id),
+      "pdSegment" => $this->discount_rule_model->getRuleProductSegment($id),
+      "pdClass" => $this->discount_rule_model->getRuleProductClass($id),
+      "pdFamily" => $this->discount_rule_model->getRuleProductFamily($id),
       "pdType" => $this->discount_rule_model->getRuleProductType($id),
-      "pdCategory" => $this->discount_rule_model->getRuleProductCategory($id),
+      "pdKind" => $this->discount_rule_model->getRuleProductKind($id),
+      "pdGender" => $this->discount_rule_model->getRuleProductGender($id),
+      "pdSportType" => $this->discount_rule_model->getRuleProductSportType($id),
+      "pdCollection" => $this->discount_rule_model->getRuleProductCollection($id),
       "pdBrand" => $this->discount_rule_model->getRuleProductBrand($id),
       "pdYear" => $this->discount_rule_model->getRuleProductYear($id),
+      "product_main_groups" => $this->product_main_group_model->get_all(),
       "product_groups" => $this->product_group_model->get_all(),
-      "product_sub_groups" => $this->product_sub_group_model->get_all(),
-      "product_categorys" => $this->product_category_model->get_all(),
-      "product_kinds" => $this->product_kind_model->get_all(),
+      "product_segments" => $this->product_segment_model->get_all(),
+      "product_classes" => $this->product_class_model->get_all(),
+      "product_families" => $this->product_family_model->get_all(),
       "product_types" => $this->product_type_model->get_all(),
+      "product_kinds" => $this->product_kind_model->get_all(),
+      "product_genders" => $this->product_gender_model->get_all(),
+      "product_sport_types" => $this->product_sport_type_model->get_all(),
+      "product_collections" => $this->product_collection_model->get_all(),
       "product_brands" => $this->product_brand_model->get_all(),
       "product_years" => $this->products_model->get_all_year(),
       "free_items" => $this->discount_rule_model->getRuleFreeProduct($id),
@@ -523,11 +538,11 @@ class Discount_rule extends PS_Controller
 
                   $arr = array(
                     'id_rule' => $id,
-                    'style_id' => $rs->id,
-                    'style_code' => $rs->code
+                    'model_id' => $rs->id,
+                    'model_code' => $rs->code
                   );
 
-                  if( ! $this->discount_rule_model->add_style($arr))
+                  if( ! $this->discount_rule_model->add_model($arr))
                   {
                     $sc = FALSE;
                     $this->error = "Failed to insert Model setting";
@@ -542,6 +557,26 @@ class Discount_rule extends PS_Controller
             }
             else
             {
+
+              if($ds->main_group == 'Y' && ! empty($ds->mainGroupList))
+              {
+                foreach($ds->mainGroupList as $code)
+                {
+                  if($sc === FALSE) { break; }
+
+                  $arr = array(
+                    'id_rule' => $id,
+                    'main_group_code' => $code
+                  );
+
+                  if( ! $this->discount_rule_model->add_product_main_group($arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to insert product main group setting";
+                  }
+                }
+              }
+
               if($ds->group == 'Y' && ! empty($ds->groupList))
               {
                 foreach($ds->groupList as $code)
@@ -561,40 +596,59 @@ class Discount_rule extends PS_Controller
                 }
               }
 
-              if($ds->sub_group == 'Y' && ! empty($ds->subGroupList))
+              if($ds->segment == 'Y' && ! empty($ds->segmentList))
               {
-                foreach($ds->subGroupList as $code)
+                foreach($ds->segmentList as $code)
                 {
                   if($sc === FALSE) { break; }
 
                   $arr = array(
                     'id_rule' => $id,
-                    'sub_group_code' => $code
+                    'segment_code' => $code
                   );
 
-                  if( ! $this->discount_rule_model->add_product_sub_group($arr))
+                  if( ! $this->discount_rule_model->add_product_segment($arr))
                   {
                     $sc = FALSE;
-                    $this->error = "Failed to insert product sub group setting";
+                    $this->error = "Failed to insert product segment setting";
                   }
                 }
               }
 
-              if($ds->kind == 'Y' && ! empty($ds->kindList))
+              if($ds->class == 'Y' && ! empty($ds->classList))
               {
-                foreach($ds->kindList as $code)
+                foreach($ds->classList as $code)
                 {
                   if($sc === FALSE) { break; }
 
                   $arr = array(
                     'id_rule' => $id,
-                    'kind_code' => $code
+                    'class_code' => $code
                   );
 
-                  if( ! $this->discount_rule_model->add_product_kind($arr))
+                  if( ! $this->discount_rule_model->add_product_class($arr))
                   {
                     $sc = FALSE;
-                    $this->error = "Failed to insert product kind setting";
+                    $this->error = "Failed to insert product class setting";
+                  }
+                }
+              }
+
+              if($ds->family == 'Y' && ! empty($ds->familyList))
+              {
+                foreach($ds->familyList as $code)
+                {
+                  if($sc === FALSE) { break; }
+
+                  $arr = array(
+                    'id_rule' => $id,
+                    'family_code' => $code
+                  );
+
+                  if( ! $this->discount_rule_model->add_product_family($arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to insert product family setting";
                   }
                 }
               }
@@ -618,21 +672,78 @@ class Discount_rule extends PS_Controller
                 }
               }
 
-              if($ds->category == 'Y' && ! empty($ds->categoryList))
+              if($ds->kind == 'Y' && ! empty($ds->kindList))
               {
-                foreach($ds->categoryList as $code)
+                foreach($ds->kindList as $code)
                 {
                   if($sc === FALSE) { break; }
 
                   $arr = array(
                     'id_rule' => $id,
-                    'category_code' => $code
+                    'kind_code' => $code
                   );
 
-                  if( ! $this->discount_rule_model->add_product_category($arr))
+                  if( ! $this->discount_rule_model->add_product_kind($arr))
                   {
                     $sc = FALSE;
-                    $this->error = "Failed to insert product category setting";
+                    $this->error = "Failed to insert product kind setting";
+                  }
+                }
+              }
+
+              if($ds->gender == 'Y' && ! empty($ds->genderList))
+              {
+                foreach($ds->genderList as $code)
+                {
+                  if($sc === FALSE) { break; }
+
+                  $arr = array(
+                    'id_rule' => $id,
+                    'gender_code' => $code
+                  );
+
+                  if( ! $this->discount_rule_model->add_product_gender($arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to insert product gender setting";
+                  }
+                }
+              }
+
+              if($ds->sport_type == 'Y' && ! empty($ds->sportTypeList))
+              {
+                foreach($ds->sportTypeList as $code)
+                {
+                  if($sc === FALSE) { break; }
+
+                  $arr = array(
+                    'id_rule' => $id,
+                    'sport_type_code' => $code
+                  );
+
+                  if( ! $this->discount_rule_model->add_product_sport_type($arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to insert product sport type setting";
+                  }
+                }
+              }
+
+              if($ds->collection == 'Y' && ! empty($ds->collectionList))
+              {
+                foreach($ds->collectionList as $code)
+                {
+                  if($sc === FALSE) { break; }
+
+                  $arr = array(
+                    'id_rule' => $id,
+                    'collection_code' => $code
+                  );
+
+                  if( ! $this->discount_rule_model->add_product_collection($arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to insert product club/collection setting";
                   }
                 }
               }
@@ -851,8 +962,6 @@ class Discount_rule extends PS_Controller
   }
 
 
-
-
   public function add_policy_rule()
   {
     $sc = TRUE;
@@ -874,7 +983,6 @@ class Discount_rule extends PS_Controller
 
   	echo $sc === TRUE ? 'success' : $message;
   }
-
 
 
   public function unlink_rule()
@@ -922,7 +1030,6 @@ class Discount_rule extends PS_Controller
 
     echo $sc === TRUE ? 'success' : $this->error;
   }
-
 
 
   public function view_rule_detail($id)
@@ -998,16 +1105,34 @@ class Discount_rule extends PS_Controller
       $this->error = "Failed to delete previous Model setting";
     }
 
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_main_group($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to delete previous product main group setting";
+    }
+
     if($sc === TRUE && ! $this->discount_rule_model->drop_product_group($id))
     {
       $sc = FALSE;
-      $this->error = "Failed to delete previous product group setting";
+      $this->error = "Failed to delete previous product sub group setting";
     }
 
-    if($sc === TRUE && ! $this->discount_rule_model->drop_product_sub_group($id))
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_segment($id))
     {
       $sc = FALSE;
-      $this->error = "Failed to delete previous product sub group setting";
+      $this->error = "Failed to delete previous product segment setting";
+    }
+
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_class($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to delete previous product class setting";
+    }
+
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_family($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to delete previous product family setting";
     }
 
     if($sc === TRUE && ! $this->discount_rule_model->drop_product_kind($id))
@@ -1022,10 +1147,22 @@ class Discount_rule extends PS_Controller
       $this->error = "Failed to delete previous product type setting";
     }
 
-    if($sc === TRUE && ! $this->discount_rule_model->drop_product_category($id))
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_gender($id))
     {
       $sc = FALSE;
-      $this->error = "Failed to delete previous product category setting";
+      $this->error = "Failed to delete previous product gender setting";
+    }
+
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_sport_type($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to delete previous product sport type setting";
+    }
+
+    if($sc === TRUE && ! $this->discount_rule_model->drop_product_collection($id))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to delete previous product club/collection setting";
     }
 
     if($sc === TRUE &&! $this->discount_rule_model->drop_product_brand($id))
@@ -1065,8 +1202,6 @@ class Discount_rule extends PS_Controller
 
     return $new_code;
   }
-
-
 
 
   public function clear_filter()

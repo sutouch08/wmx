@@ -339,12 +339,12 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function getRuleProductStyle($id)
+  public function getRuleProductModel($id)
   {
     $rs = $this->db
-    ->select('r.*, p.name AS style_name')
-    ->from('discount_rule_product_style AS r')
-    ->join('product_style AS p', 'r.style_id = p.id', 'left')
+    ->select('r.*, p.name AS model_name')
+    ->from('discount_rule_product_model AS r')
+    ->join('product_model AS p', 'r.model_id = p.id', 'left')
     ->where('r.id_rule', $id)
     ->get();
 
@@ -354,6 +354,22 @@ class Discount_rule_model extends CI_Model
     }
 
     return NULL;
+  }
+
+
+  public function getRuleProductMainGroup($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_main_group');
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->main_group_code] = $rd->main_group_code;
+      }
+    }
+
+    return $sc;
   }
 
 
@@ -372,16 +388,48 @@ class Discount_rule_model extends CI_Model
     return $sc;
   }
 
-
-  public function getRuleProductSubGroup($id)
+  public function getRuleProductSegment($id)
   {
     $sc = array();
-    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_sub_group');
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_segment');
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $rd)
       {
-        $sc[$rd->sub_group_code] = $rd->sub_group_code;
+        $sc[$rd->segment_code] = $rd->segment_code;
+      }
+    }
+
+    return $sc;
+  }
+
+
+  public function getRuleProductClass($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_class');
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->class_code] = $rd->class_code;
+      }
+    }
+
+    return $sc;
+  }
+
+
+  public function getRuleProductFamily($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_family');
+    
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->family_code] = $rd->family_code;
       }
     }
 
@@ -421,15 +469,47 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function getRuleProductCategory($id)
+  public function getRuleProductGender($id)
   {
     $sc = array();
-    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_category');
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_gender');
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $rd)
       {
-        $sc[$rd->category_code] = $rd->category_code;
+        $sc[$rd->gender_code] = $rd->gender_code;
+      }
+    }
+
+    return $sc;
+  }
+
+
+  public function getRuleProductSportType($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_Sport_type');
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->sport_type_code] = $rd->sport_type_code;
+      }
+    }
+
+    return $sc;
+  }
+
+
+  public function getRuleProductCollection($id)
+  {
+    $sc = array();
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_collection');
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[$rd->collection_code] = $rd->collection_code;
       }
     }
 
@@ -652,11 +732,22 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function add_style(array $ds = array())
+  public function add_model(array $ds = array())
   {
     if( ! empty($ds))
     {
-      return $this->db->insert('discount_rule_product_style', $ds);
+      return $this->db->insert('discount_rule_product_model', $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_product_main_group(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert('discount_rule_product_main_group', $ds);
     }
 
     return FALSE;
@@ -674,11 +765,33 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function add_product_sub_group(array $ds = array())
+  public function add_product_segment(array $ds = array())
   {
     if( ! empty($ds))
     {
-      return $this->db->insert('discount_rule_product_sub_group', $ds);
+      return $this->db->insert('discount_rule_product_segment', $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_product_class(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert('discount_rule_product_class', $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_product_family(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert('discount_rule_product_family', $ds);
     }
 
     return FALSE;
@@ -707,11 +820,33 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function add_product_category(array $ds = array())
+  public function add_product_gender(array $ds = array())
   {
     if( ! empty($ds))
     {
-      return $this->db->insert('discount_rule_product_category', $ds);
+      return $this->db->insert('discount_rule_product_gender', $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_product_sport_type(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert('discount_rule_product_sport_type', $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_product_collection(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert('discount_rule_product_collection', $ds);
     }
 
     return FALSE;
@@ -748,7 +883,13 @@ class Discount_rule_model extends CI_Model
 
   public function drop_model($id)
   {
-    return $this->db->where('id_rule', $id)->delete('discount_rule_product_style');
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_model');
+  }
+
+
+  public function drop_product_main_group($id)
+  {
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_main_group');
   }
 
 
@@ -758,9 +899,21 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function drop_product_sub_group($id)
+  public function drop_product_segment($id)
   {
-    return $this->db->where('id_rule', $id)->delete('discount_rule_product_sub_group');
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_segment');
+  }
+
+
+  public function drop_product_class($id)
+  {
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_class');
+  }
+
+
+  public function drop_product_family($id)
+  {
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_family');
   }
 
 
@@ -776,9 +929,21 @@ class Discount_rule_model extends CI_Model
   }
 
 
-  public function drop_product_category($id)
+  public function drop_product_gender($id)
   {
-    return $this->db->where('id_rule', $id)->delete('discount_rule_product_category');
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_gender');
+  }
+
+
+  public function drop_product_sport_type($id)
+  {
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_sport_type');
+  }
+
+
+  public function drop_product_collection($id)
+  {
+    return $this->db->where('id_rule', $id)->delete('discount_rule_product_collection');
   }
 
 

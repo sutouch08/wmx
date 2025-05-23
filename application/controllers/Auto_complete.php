@@ -383,7 +383,7 @@ class Auto_complete extends CI_Controller
     }
 
     $this->db->order_by('code', 'ASC')->limit(50);
-    $rs = $this->db->get('product_style');
+    $rs = $this->db->get('product_model');
 
     if($rs->num_rows() > 0)
     {
@@ -455,7 +455,7 @@ class Auto_complete extends CI_Controller
     ->group_end()
     ->order_by('code', 'ASC')
     ->limit(20);
-    $qs = $this->db->get('product_style');
+    $qs = $this->db->get('product_model');
 
     if($qs->num_rows() > 0)
     {

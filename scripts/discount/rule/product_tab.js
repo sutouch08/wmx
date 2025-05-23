@@ -8,23 +8,33 @@ function saveProduct() {
     'all' : $('#all_product').val(), //--- Y, N
     'sku' : $('#product_id').val(), // -- Y, N
     'model' : $('#product_model').val(), //=- Y, N
+    'main_group' : $('#product_main_group').val(),
     'group' : $('#product_group').val(),
-    'sub_group' : $('#product_sub_group').val(), //-- Y, N
-    'kind' : $('#product_kind').val(),
+    'segment' : $('#product_segment').val(),
+    'class' : $('#product_class').val(),
+    'family' : $('#product_family').val(),
     'type' : $('#product_type').val(),
-    'category' : $('#product_category').val(),
+    'kind' : $('#product_kind').val(),
+    'gender' : $('#product_gender').val(),
+    'sport_type' : $('#product_sport_type').val(),
+    'collection' : $('#product_collection').val(),
     'brand': $('#product_brand').val(),
     'year' : $('#product_year').val(),
     'skuList' : [],
     'modelList' : [],
+    'mainGroupList' : [],
     'groupList' : [],
-    'subGroupList' : [],
-    'kindList' : [],
+    'segmentList' : [],
+    'classList' : [],
+    'familyList' : [],
     'typeList' : [],
-    'categoryList' : [],
+    'kindList' : [],
+    'genderList' : [],
+    'sportTypeList' : [],
+    'collectionList' : [],
     'brandList' : [],
     'yearList' : []
-  }
+  };
 
   //--- ถ้าเลือกสินค้าทั้งหมดจะไม่สนใจเงื่อนไขอื่นๆ
   if(h.all == 'N') {
@@ -39,33 +49,49 @@ function saveProduct() {
     }
 
     if(h.sku == 'N' && h.model == 'N') {
+      let mainGroupCount = $('.chk-pd-main-group:checked').length;
       let groupCount = $('.chk-pd-group:checked').length;
-      let subGroupCount = $('.chk-pd-subgroup:checked').length;
-      let kindCount = $('.chk-pd-kind:checked').length;
+      let segmentCount = $('.chk-pd-segment:checked').length;
+      let classCount = $('.chk-pd-class:checked').length;
+      let familyCount = $('.chk-pd-family:checked').length;
       let typeCount = $('.chk-pd-type:checked').length;
-      let cateCount = $('.chk-pd-cat:checked').length;
+      let kindCount = $('.chk-pd-kind:checked').length;
+      let genderCount = $('.chk-pd-gender:checked').length;
+      let sportTypeCount = $('.chk-pd-sport-type:checked').length;
+      let collectionCount = $('.chk-pd-collection:checked').length;
       let brandCount = $('.chk-pd-brand:checked').length;
       let yearCount = $('.chk-pd-year:checked').length;
 
-      let allCount = groupCount + subGroupCount + kindCount + typeCount + cateCount + brandCount + yearCount;
+      let allCount = mainGroupCount + groupCount + segmentCount + classCount + familyCount + kindCount + typeCount + genderCount + sportTypeCount + collectionCount + brandCount + yearCount;
 
       if(allCount == 0) {
         swal('Warning', 'Please select at least 1 of attributes', 'warning');
         return false;
       }
 
-      if(h.group == 'Y' && groupCount == 0) {
-        swal('Warning', 'Please select product group', 'warning');
+      if(h.main_group == 'Y' && mainGroupCount == 0) {
+        swal('Warning', 'Please select product main group', 'warning');
         return false;
       }
 
-      if(h.sub_group == 'Y' && subGroupCount == 0) {
+
+      if(h.group == 'Y' && groupCount == 0) {
         swal('Warning', 'Please select product sub group', 'warning');
         return false;
       }
 
-      if(h.kind == 'Y' && kindCount == 0) {
-        swal('Warning', 'Please select product kind', 'warning');
+      if(h.segment == 'Y' && segmentCount == 0) {
+        swal('Warning', 'Please select product segment', 'warning');
+        return false;
+      }
+
+      if(h.class == 'Y' && classCount == 0) {
+        swal('Warning', 'Please select product class', 'warning');
+        return false;
+      }
+
+      if(h.family == 'Y' && familyCount == 0) {
+        swal('Warning', 'Please select product family', 'warning');
         return false;
       }
 
@@ -74,8 +100,23 @@ function saveProduct() {
         return false;
       }
 
-      if(h.category == 'Y' && cateCount == 0) {
-        swal('Warning', 'Please select product category', 'warning');
+      if(h.kind == 'Y' && kindCount == 0) {
+        swal('Warning', 'Please select product kind', 'warning');
+        return false;
+      }
+
+      if(h.gender == 'Y' && genderCount == 0) {
+        swal('Warning', 'Please select product Gender', 'warning');
+        return false;
+      }
+
+      if(h.sport_type == 'Y' && sportTypeCount == 0) {
+        swal('Warning', 'Please select product sport type', 'warning');
+        return false;
+      }
+
+      if(h.collection == 'Y' && collectionCount == 0) {
+        swal('Warning', 'Please select product clbu/collection', 'warning');
         return false;
       }
 
@@ -105,21 +146,33 @@ function saveProduct() {
     })
   }
 
+  if(h.main_group == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-main-group:checked').each(function() {
+      h.mainGroupList.push($(this).val());
+    })
+  }
+
   if(h.group == 'Y' && h.sku == 'N' && h.model == 'N') {
     $('.chk-pd-group:checked').each(function() {
       h.groupList.push($(this).val());
     })
   }
 
-  if(h.sub_group == 'Y' && h.sku == 'N' && h.model == 'N') {
-    $('.chk-pd-subgroup:checked').each(function() {
-      h.subGroupList.push($(this).val());
+  if(h.segment == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-segment:checked').each(function() {
+      h.segmentList.push($(this).val());
     })
   }
 
-  if(h.kind == 'Y' && h.sku == 'N' && h.model == 'N') {
-    $('.chk-pd-kind:checked').each(function() {
-      h.kindList.push($(this).val());
+  if(h.class == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-class:checked').each(function() {
+      h.classList.push($(this).val());
+    })
+  }
+
+  if(h.family == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-family:checked').each(function() {
+      h.familyList.push($(this).val());
     })
   }
 
@@ -129,9 +182,27 @@ function saveProduct() {
     })
   }
 
-  if(h.category == 'Y' && h.sku == 'N' && h.model == 'N') {
-    $('.chk-pd-cat:checked').each(function() {
-      h.categoryList.push($(this).val());
+  if(h.kind == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-kind:checked').each(function() {
+      h.kindList.push($(this).val());
+    })
+  }
+
+  if(h.gender == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-gender:checked').each(function() {
+      h.genderList.push($(this).val());
+    })
+  }
+
+  if(h.sport_type == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-sport-type:checked').each(function() {
+      h.sportTypeList.push($(this).val());
+    })
+  }
+
+  if(h.collection == 'Y' && h.sku == 'N' && h.model == 'N') {
+    $('.chk-pd-collection:checked').each(function() {
+      h.collectionList.push($(this).val());
     })
   }
 
@@ -200,18 +271,28 @@ function checkModelAll(el) {
 }
 
 
+function showProductMainGroup(){
+  $('#pd-main-group-modal').modal('show');
+}
+
+
 function showProductGroup(){
   $('#pd-group-modal').modal('show');
 }
 
 
-function showProductSubGroup(){
-  $('#pd-subgroup-modal').modal('show');
+function showProductSegment(){
+  $('#pd-segment-modal').modal('show');
 }
 
 
-function showProductKind(){
-  $('#pd-kind-modal').modal('show');
+function showProductClass(){
+  $('#pd-class-modal').modal('show');
+}
+
+
+function showProductFamily(){
+  $('#pd-family-modal').modal('show');
 }
 
 
@@ -220,8 +301,23 @@ function showProductType(){
 }
 
 
-function showProductCategory(){
-  $('#pd-cat-modal').modal('show');
+function showProductKind(){
+  $('#pd-kind-modal').modal('show');
+}
+
+
+function showProductGender(){
+  $('#pd-gender-modal').modal('show');
+}
+
+
+function showProductSportType(){
+  $('#pd-sport-type-modal').modal('show');
+}
+
+
+function showProductCollection(){
+  $('#pd-collection-modal').modal('show');
 }
 
 
@@ -253,6 +349,17 @@ $('#txt-model-id-box').keyup(function(e){
 });
 
 
+$('.chk-pd-main-group').change(function(e){
+  count = 0;
+  $('.chk-pd-main-group').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-main-group').text(count);
+});
+
+
 $('.chk-pd-group').change(function(e){
   count = 0;
   $('.chk-pd-group').each(function(index, el) {
@@ -264,36 +371,36 @@ $('.chk-pd-group').change(function(e){
 });
 
 
-$('.chk-pd-subgroup').change(function(e){
+$('.chk-pd-segment').change(function(e){
   count = 0;
-  $('.chk-pd-subgroup').each(function(index, el) {
+  $('.chk-pd-segment').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-pd-subgroup').text(count);
+  $('#badge-pd-segment').text(count);
 });
 
 
-$('.chk-pd-kind').change(function(e){
+$('.chk-pd-class').change(function(e){
   count = 0;
-  $('.chk-pd-kind').each(function(index, el) {
+  $('.chk-pd-class').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-pd-kind').text(count);
+  $('#badge-pd-class').text(count);
 });
 
 
-$('.chk-pd-year').change(function(e){
+$('.chk-pd-family').change(function(e){
   count = 0;
-  $('.chk-pd-year').each(function(index, el) {
+  $('.chk-pd-family').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-pd-year').text(count);
+  $('#badge-pd-family').text(count);
 });
 
 
@@ -308,14 +415,47 @@ $('.chk-pd-type').change(function(e){
 });
 
 
-$('.chk-pd-cat').change(function(e){
+$('.chk-pd-kind').change(function(e){
   count = 0;
-  $('.chk-pd-cat').each(function(index, el) {
+  $('.chk-pd-kind').each(function(index, el) {
     if($(this).is(':checked')){
       count++;
     }
   });
-  $('#badge-pd-cat').text(count);
+  $('#badge-pd-kind').text(count);
+});
+
+
+$('.chk-pd-gender').change(function(e){
+  count = 0;
+  $('.chk-pd-gender').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-gender').text(count);
+});
+
+
+$('.chk-pd-sport-type').change(function(e){
+  count = 0;
+  $('.chk-pd-sport-type').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-sport-type').text(count);
+});
+
+
+$('.chk-pd-collection').change(function(e){
+  count = 0;
+  $('.chk-pd-collection').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-collection').text(count);
 });
 
 
@@ -327,6 +467,17 @@ $('.chk-pd-brand').change(function(e){
     }
   });
   $('#badge-pd-brand').text(count);
+});
+
+
+$('.chk-pd-year').change(function(e){
+  count = 0;
+  $('.chk-pd-year').each(function(index, el) {
+    if($(this).is(':checked')){
+      count++;
+    }
+  });
+  $('#badge-pd-year').text(count);
 });
 
 
@@ -481,21 +632,31 @@ function activeProductControl(){
   product_model = $('#product_model').val();
 
   if(product_model == 'Y' || product_id == 'Y') {
+    toggleProductMainGroup();
     toggleProductGroup();
-    toggleProductSubGroup();
-    toggleProductKind();
-    toggleProductCategory();
+    toggleProductSegment();
+    toggleProductClass();
+    toggleProductFamily();
     toggleProductType();
+    toggleProductKind();
+    toggleProductGender();
+    toggleProductSportType();
+    toggleProductCollection();
     toggleProductBrand();
     toggleProductYear();
     return;
   }
 
+  toggleProductMainGroup($('#product_main_group').val());
   toggleProductGroup($('#product_group').val());
-  toggleProductSubGroup($('#product_sub_group').val());
-  toggleProductKind($('#product_kind').val());
-  toggleProductCategory($('#product_category').val());
+  toggleProductSegment($('#product_segment').val());
+  toggleProductClass($('#product_class').val());
+  toggleProductFamily($('#product_family').val());
   toggleProductType($('#product_type').val());
+  toggleProductKind($('#product_kind').val());
+  toggleProductGender($('#product_gender').val());
+  toggleProductSportType($('#product_sport_type').val());
+  toggleProductCollection($('#product_collection').val());
   toggleProductBrand($('#product_brand').val());
   toggleProductYear($('#product_year').val());
 }
@@ -580,6 +741,42 @@ function toggleModelId(option){
 }
 
 
+function toggleProductMainGroup(option) {
+  if(option == '' || option == undefined) {
+    option = $('#product_main_group').val();
+  }
+
+  $('#product_main_group').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
+    $('#btn-pd-main-group-no').removeClass('btn-primary');
+    $('#btn-pd-main-group-yes').addClass('btn-primary');
+    $('#btn-pd-main-group-no').removeAttr('disabled');
+    $('#btn-pd-main-group-yes').removeAttr('disabled');
+    $('#btn-select-pd-main-group').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-main-group-yes').removeClass('btn-primary');
+    $('#btn-pd-main-group-no').addClass('btn-primary');
+    $('#btn-pd-main-group-no').removeAttr('disabled');
+    $('#btn-pd-main-group-yes').removeAttr('disabled');
+    $('#btn-select-pd-main-group').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-main-group-yes').attr('disabled', 'disabled');
+    $('#btn-pd-main-group-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-main-group').attr('disabled', 'disabled');
+  }
+}
+
+
 function toggleProductGroup(option) {
   if(option == '' || option == undefined) {
     option = $('#product_group').val();
@@ -616,111 +813,110 @@ function toggleProductGroup(option) {
 }
 
 
-function toggleProductSubGroup(option) {
+function toggleProductSegment(option) {
   if(option == '' || option == undefined) {
-    option = $('#product_sub_group').val();
+    option = $('#product_segment').val();
   }
 
-  $('#product_sub_group').val(option);
+  $('#product_segment').val(option);
   sc = $('#product_model').val();
   pd = $('#product_id').val();
   all = $('#all_product').val();
 
   if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
-    $('#btn-pd-subgroup-no').removeClass('btn-primary');
-    $('#btn-pd-subgroup-yes').addClass('btn-primary');
-    $('#btn-pd-subgroup-no').removeAttr('disabled');
-    $('#btn-pd-subgroup-yes').removeAttr('disabled');
-    $('#btn-select-pd-subgroup').removeAttr('disabled');
+    $('#btn-pd-segment-no').removeClass('btn-primary');
+    $('#btn-pd-segment-yes').addClass('btn-primary');
+    $('#btn-pd-segment-no').removeAttr('disabled');
+    $('#btn-pd-segment-yes').removeAttr('disabled');
+    $('#btn-select-pd-segment').removeAttr('disabled');
     return;
   }
 
   if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
-    $('#btn-pd-subgroup-yes').removeClass('btn-primary');
-    $('#btn-pd-subgroup-no').addClass('btn-primary');
-    $('#btn-pd-subgroup-no').removeAttr('disabled');
-    $('#btn-pd-subgroup-yes').removeAttr('disabled');
-    $('#btn-select-pd-subgroup').attr('disabled', 'disabled');
+    $('#btn-pd-segment-yes').removeClass('btn-primary');
+    $('#btn-pd-segment-no').addClass('btn-primary');
+    $('#btn-pd-segment-no').removeAttr('disabled');
+    $('#btn-pd-segment-yes').removeAttr('disabled');
+    $('#btn-select-pd-segment').attr('disabled', 'disabled');
     return;
   }
 
   if(all == 'Y' || sc == 'Y' || pd == 'Y'){
-    $('#btn-pd-subgroup-yes').attr('disabled', 'disabled');
-    $('#btn-pd-subgroup-no').attr('disabled', 'disabled');
-    $('#btn-select-pd-subgroup').attr('disabled', 'disabled');
+    $('#btn-pd-segment-yes').attr('disabled', 'disabled');
+    $('#btn-pd-segment-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-segment').attr('disabled', 'disabled');
   }
 }
 
 
-function toggleProductKind(option) {
+function toggleProductClass(option) {
   if(option == '' || option == undefined) {
-    option = $('#product_kind').val();
+    option = $('#product_class').val();
   }
 
-  $('#product_kind').val(option);
+  $('#product_class').val(option);
   sc = $('#product_model').val();
   pd = $('#product_id').val();
   all = $('#all_product').val();
 
   if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
-    $('#btn-pd-kind-no').removeClass('btn-primary');
-    $('#btn-pd-kind-yes').addClass('btn-primary');
-    $('#btn-pd-kind-no').removeAttr('disabled');
-    $('#btn-pd-kind-yes').removeAttr('disabled');
-    $('#btn-select-pd-kind').removeAttr('disabled');
+    $('#btn-pd-class-no').removeClass('btn-primary');
+    $('#btn-pd-class-yes').addClass('btn-primary');
+    $('#btn-pd-class-no').removeAttr('disabled');
+    $('#btn-pd-class-yes').removeAttr('disabled');
+    $('#btn-select-pd-class').removeAttr('disabled');
     return;
   }
 
   if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
-    $('#btn-pd-kind-yes').removeClass('btn-primary');
-    $('#btn-pd-kind-no').addClass('btn-primary');
-    $('#btn-pd-kind-no').removeAttr('disabled');
-    $('#btn-pd-kind-yes').removeAttr('disabled');
-    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+    $('#btn-pd-class-yes').removeClass('btn-primary');
+    $('#btn-pd-class-no').addClass('btn-primary');
+    $('#btn-pd-class-no').removeAttr('disabled');
+    $('#btn-pd-class-yes').removeAttr('disabled');
+    $('#btn-select-pd-class').attr('disabled', 'disabled');
     return;
   }
 
   if(all == 'Y' || sc == 'Y' || pd == 'Y'){
-    $('#btn-pd-kind-yes').attr('disabled', 'disabled');
-    $('#btn-pd-kind-no').attr('disabled', 'disabled');
-    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+    $('#btn-pd-class-yes').attr('disabled', 'disabled');
+    $('#btn-pd-class-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-class').attr('disabled', 'disabled');
   }
 }
 
 
-function toggleProductCategory(option){
-  if(option == '' || option == undefined){
-    option = $('#product_category').val();
+function toggleProductFamily(option) {
+  if(option == '' || option == undefined) {
+    option = $('#product_family').val();
   }
 
-
-  $('#product_category').val(option);
+  $('#product_family').val(option);
   sc = $('#product_model').val();
   pd = $('#product_id').val();
   all = $('#all_product').val();
 
-  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ){
-    $('#btn-pd-cat-no').removeClass('btn-primary');
-    $('#btn-pd-cat-yes').addClass('btn-primary');
-    $('#btn-pd-cat-no').removeAttr('disabled');
-    $('#btn-pd-cat-yes').removeAttr('disabled');
-    $('#btn-select-pd-cat').removeAttr('disabled');
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
+    $('#btn-pd-family-no').removeClass('btn-primary');
+    $('#btn-pd-family-yes').addClass('btn-primary');
+    $('#btn-pd-family-no').removeAttr('disabled');
+    $('#btn-pd-family-yes').removeAttr('disabled');
+    $('#btn-select-pd-family').removeAttr('disabled');
     return;
   }
 
   if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
-    $('#btn-pd-cat-yes').removeClass('btn-primary');
-    $('#btn-pd-cat-no').addClass('btn-primary');
-    $('#btn-pd-cat-no').removeAttr('disabled');
-    $('#btn-pd-cat-yes').removeAttr('disabled');
-    $('#btn-select-pd-cat').attr('disabled', 'disabled');
+    $('#btn-pd-family-yes').removeClass('btn-primary');
+    $('#btn-pd-family-no').addClass('btn-primary');
+    $('#btn-pd-family-no').removeAttr('disabled');
+    $('#btn-pd-family-yes').removeAttr('disabled');
+    $('#btn-select-pd-family').attr('disabled', 'disabled');
     return;
   }
 
   if(all == 'Y' || sc == 'Y' || pd == 'Y'){
-    $('#btn-pd-cat-yes').attr('disabled', 'disabled');
-    $('#btn-pd-cat-no').attr('disabled', 'disabled');
-    $('#btn-select-pd-cat').attr('disabled', 'disabled');
+    $('#btn-pd-family-yes').attr('disabled', 'disabled');
+    $('#btn-pd-family-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-family').attr('disabled', 'disabled');
   }
 }
 
@@ -761,11 +957,154 @@ function toggleProductType(option){
 }
 
 
+function toggleProductKind(option) {
+  if(option == '' || option == undefined) {
+    option = $('#product_kind').val();
+  }
+
+  $('#product_kind').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ) {
+    $('#btn-pd-kind-no').removeClass('btn-primary');
+    $('#btn-pd-kind-yes').addClass('btn-primary');
+    $('#btn-pd-kind-no').removeAttr('disabled');
+    $('#btn-pd-kind-yes').removeAttr('disabled');
+    $('#btn-select-pd-kind').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-kind-yes').removeClass('btn-primary');
+    $('#btn-pd-kind-no').addClass('btn-primary');
+    $('#btn-pd-kind-no').removeAttr('disabled');
+    $('#btn-pd-kind-yes').removeAttr('disabled');
+    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-kind-yes').attr('disabled', 'disabled');
+    $('#btn-pd-kind-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-kind').attr('disabled', 'disabled');
+  }
+}
+
+
+function toggleProductGender(option){
+  if(option == '' || option == undefined){
+    option = $('#product_gender').val();
+  }
+
+  $('#product_gender').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ){
+    $('#btn-pd-gender-no').removeClass('btn-primary');
+    $('#btn-pd-gender-yes').addClass('btn-primary');
+    $('#btn-pd-gender-no').removeAttr('disabled');
+    $('#btn-pd-gender-yes').removeAttr('disabled');
+    $('#btn-select-pd-gender').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-gender-yes').removeClass('btn-primary');
+    $('#btn-pd-gender-no').addClass('btn-primary');
+    $('#btn-pd-gender-no').removeAttr('disabled');
+    $('#btn-pd-gender-yes').removeAttr('disabled');
+    $('#btn-select-pd-gender').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-gender-yes').attr('disabled', 'disabled');
+    $('#btn-pd-gender-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-gender').attr('disabled', 'disabled');
+  }
+}
+
+
+function toggleProductSportType(option){
+  if(option == '' || option == undefined){
+    option = $('#product_sport_type').val();
+  }
+
+  $('#product_sport_type').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ){
+    $('#btn-pd-sport-type-no').removeClass('btn-primary');
+    $('#btn-pd-sport-type-yes').addClass('btn-primary');
+    $('#btn-pd-sport-type-no').removeAttr('disabled');
+    $('#btn-pd-sport-type-yes').removeAttr('disabled');
+    $('#btn-select-pd-sport-type').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-sport-type-yes').removeClass('btn-primary');
+    $('#btn-pd-sport-type-no').addClass('btn-primary');
+    $('#btn-pd-sport-type-no').removeAttr('disabled');
+    $('#btn-pd-sport-type-yes').removeAttr('disabled');
+    $('#btn-select-pd-sport-type').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-sport-type-yes').attr('disabled', 'disabled');
+    $('#btn-pd-sport-type-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-sport-type').attr('disabled', 'disabled');
+  }
+}
+
+
+function toggleProductCollection(option){
+  if(option == '' || option == undefined){
+    option = $('#product_collection').val();
+  }
+
+  $('#product_collection').val(option);
+  sc = $('#product_model').val();
+  pd = $('#product_id').val();
+  all = $('#all_product').val();
+
+  if(option == 'Y' && all == 'N' && sc == 'N' && pd == 'N' ){
+    $('#btn-pd-collection-no').removeClass('btn-primary');
+    $('#btn-pd-collection-yes').addClass('btn-primary');
+    $('#btn-pd-collection-no').removeAttr('disabled');
+    $('#btn-pd-collection-yes').removeAttr('disabled');
+    $('#btn-select-pd-collection').removeAttr('disabled');
+    return;
+  }
+
+  if(option == 'N' && sc == 'N' && pd == 'N' && all == 'N'){
+    $('#btn-pd-collection-yes').removeClass('btn-primary');
+    $('#btn-pd-collection-no').addClass('btn-primary');
+    $('#btn-pd-collection-no').removeAttr('disabled');
+    $('#btn-pd-collection-yes').removeAttr('disabled');
+    $('#btn-select-pd-collection').attr('disabled', 'disabled');
+    return;
+  }
+
+  if(all == 'Y' || sc == 'Y' || pd == 'Y'){
+    $('#btn-pd-collection-yes').attr('disabled', 'disabled');
+    $('#btn-pd-collection-no').attr('disabled', 'disabled');
+    $('#btn-select-pd-collection').attr('disabled', 'disabled');
+  }
+}
+
+
 function toggleProductBrand(option){
   if(option == '' || option == undefined){
     option = $('#product_brand').val();
   }
-
 
   $('#product_brand').val(option);
   sc = $('#product_model').val();

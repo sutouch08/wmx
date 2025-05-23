@@ -9,27 +9,46 @@ $product_id = ($allProduct == 'N' && $pdListNo > 0 ) ? 'Y' : 'N';
 $pdModelNo = empty($pdModel) ? 0 : count($pdModel);
 $product_model = ($pdModelNo > 0 && $allProduct == 'N') ? 'Y' : 'N';
 
+//--- กำหนดกลุ่มสินค้าหลัก
+$pdMainGroupNo = count($pdMainGroup);
+$product_main_group = ($pdMainGroupNo > 0 && $allProduct == 'N' && $product_id == 'N' && $product_model == 'N') ? 'Y' : 'N';
+
 //--- กำหนดกลุ่มสินค้า
 $pdGroupNo = count($pdGroup);
 $product_group = ($pdGroupNo > 0 && $allProduct == 'N' && $product_id == 'N' && $product_model == 'N') ? 'Y' : 'N';
 
-//--- กำหนดกลุ่มสินค้าย่อย
-$pdSubGroupNo = count($pdSubGroup);
-$product_sub_group = ($pdSubGroupNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+//--- กำหนด Segment
+$pdSegmentNo = count($pdSegment);
+$product_segment = ($pdSegmentNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
-//--- กำหนดประเภทสินค้า
-$pdKindNo = count($pdKind);
-$product_kind = ($pdKindNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+//--- กำหนด Class
+$pdClassNo = count($pdClass);
+$product_class = ($pdClassNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+//--- กำหนด Family
+$pdFamilyNo = count($pdFamily);
+$product_family = ($pdFamilyNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดชนิดสินค้า
 $pdTypeNo = count($pdType);
 $product_type = ($pdTypeNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
+//--- กำหนดประเภทสินค้า
+$pdKindNo = count($pdKind);
+$product_kind = ($pdKindNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+
+//--- กำหนด Gender
+$pdGenderNo = count($pdGender);
+$product_gender = ($pdGenderNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+//--- กำหนด Sport type
+$pdSportTypeNo = count($pdSportType);
+$product_sport_type = ($pdSportTypeNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดหมวดหมู่สินค้า
-$pdCategoryNo = count($pdCategory);
-$product_category = ($pdCategoryNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
-
+$pdCollectionNo = count($pdCollection);
+$product_collection = ($pdCollectionNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
 
 //--- กำหนดยี่ห้อสินค้า
 $pdBrandNo = count($pdBrand);
@@ -38,6 +57,8 @@ $product_brand = ($pdBrandNo > 0 && $allProduct == 'N' && $product_model == 'N' 
 //--- กำหนดปีสินค้า
 $pdYearNo = count($pdYear);
 $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' && $product_id == 'N') ? 'Y' : 'N';
+
+print_r($pdFamily);
  ?>
 
  <div class="row">
@@ -168,18 +189,18 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
        <tbody id="modelList">
          <?php if(!empty($pdModel)) : ?>
            <?php foreach($pdModel as $item) : ?>
-             <tr class="font-size-11" id="model-row-<?php echo $item->style_id; ?>">
+             <tr class="font-size-11" id="model-row-<?php echo $item->model_id; ?>">
                <td class="middle text-center">
                  <label>
                    <input type="checkbox" class="ace model-chk"
-                   id="model-<?php echo $item->style_id; ?>"
-                   value="<?php echo $item->style_id; ?>"
-                   data-code="<?php echo $item->style_code; ?>"  />
+                   id="model-<?php echo $item->model_id; ?>"
+                   value="<?php echo $item->model_id; ?>"
+                   data-code="<?php echo $item->model_code; ?>"  />
                    <span class="lbl"></span>
                  </label>
                </td>
-               <td class="middle"><?php echo $item->style_code; ?></td>
-               <td class="middle" colspan="2"><?php echo $item->style_name; ?></td>
+               <td class="middle"><?php echo $item->model_code; ?></td>
+               <td class="middle" colspan="2"><?php echo $item->model_name; ?></td>
              </tr>
            <?php endforeach; ?>
          <?php endif; ?>
@@ -189,17 +210,17 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control text-label text-right">Group</span>
+     <span class="form-control text-label text-right">Main Group</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
-       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-group-yes" onclick="toggleProductGroup('Y')" disabled>YES</button>
-       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-group-no" onclick="toggleProductGroup('N')" disabled>NO</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-main-group-yes" onclick="toggleProductMainGroup('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-main-group-no" onclick="toggleProductMainGroup('N')" disabled>NO</button>
      </div>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
-     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-group" onclick="showProductGroup()" disabled>
-       Select Group <span class="badge pull-right" id="badge-pd-group"><?php echo $pdGroupNo; ?></span>
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-main-group" onclick="showProductMainGroup()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-main-group"><?php echo $pdMainGroupNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -209,32 +230,68 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
-       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-subgroup-yes" onclick="toggleProductSubGroup('Y')" disabled>YES</button>
-       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-subgroup-no" onclick="toggleProductSubGroup('N')" disabled>NO</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-group-yes" onclick="toggleProductGroup('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-group-no" onclick="toggleProductGroup('N')" disabled>NO</button>
      </div>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
-     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-subgroup" onclick="showProductSubGroup()" disabled>
-       Select Sub Group <span class="badge pull-right" id="badge-pd-subgroup"><?php echo $pdSubGroupNo; ?></span>
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-group" onclick="showProductGroup()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-group"><?php echo $pdGroupNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
 
+
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control text-label text-right">Kind</span>
+     <span class="form-control text-label text-right">Segment</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
-       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-kind-yes" onclick="toggleProductKind('Y')" disabled>YES</button>
-       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-kind-no" onclick="toggleProductKind('N')" disabled>NO</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-segment-yes" onclick="toggleProductSegment('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-segment-no" onclick="toggleProductSegment('N')" disabled>NO</button>
      </div>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
-     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-kind" onclick="showProductKind()" disabled>
-       Select Kind <span class="badge pull-right" id="badge-pd-kind"><?php echo $pdKindNo; ?></span>
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-segment" onclick="showProductSegment()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-segment"><?php echo $pdSegmentNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
+
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Class</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-class-yes" onclick="toggleProductClass('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-class-no" onclick="toggleProductClass('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-class" onclick="showProductClass()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-class"><?php echo $pdClassNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Family</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-family-yes" onclick="toggleProductFamily('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-family-no" onclick="toggleProductFamily('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-family" onclick="showProductFamily()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-family"><?php echo $pdFamilyNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
      <span class="form-control text-label text-right">Type</span>
@@ -247,24 +304,75 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-type" onclick="showProductType()" disabled>
-       Select Type <span class="badge pull-right" id="badge-pd-type"><?php echo $pdTypeNo; ?></span>
+       Select <span class="badge pull-right" id="badge-pd-type"><?php echo $pdTypeNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control text-label text-right">Category</span>
+     <span class="form-control text-label text-right">Kind</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
-       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-cat-yes" onclick="toggleProductCategory('Y')" disabled>YES</button>
-       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-cat-no" onclick="toggleProductCategory('N')" disabled>NO</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-kind-yes" onclick="toggleProductKind('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-kind-no" onclick="toggleProductKind('N')" disabled>NO</button>
      </div>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
-     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-cat" onclick="showProductCategory()" disabled>
-       Select Category <span class="badge pull-right" id="badge-pd-cat"><?php echo $pdCategoryNo; ?></span>
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-kind" onclick="showProductKind()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-kind"><?php echo $pdKindNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Gender</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-gender-yes" onclick="toggleProductGender('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-gender-no" onclick="toggleProductGender('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-gender" onclick="showProductGender()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-gender"><?php echo $pdGenderNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Sport Type</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-sport-type-yes" onclick="toggleProductSportType('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-sport-type-no" onclick="toggleProductSportType('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-sport-type" onclick="showProductSportType()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-sport-type"><?php echo $pdSportTypeNo; ?></span>
+     </button>
+   </div>
+   <div class="divider-hidden"></div>
+
+
+   <div class="col-lg-2 col-md-2-harf col-sm-3">
+     <span class="form-control text-label text-right">Club/Collection</span>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <div class="btn-group width-100">
+       <button type="button" class="not-pd-all btn btn-sm width-50" id="btn-pd-collection-yes" onclick="toggleProductCollection('Y')" disabled>YES</button>
+       <button type="button" class="not-pd-all btn btn-sm width-50 btn-primary" id="btn-pd-collection-no" onclick="toggleProductCollection('N')" disabled>NO</button>
+     </div>
+   </div>
+   <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
+     <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-collection" onclick="showProductCollection()" disabled>
+       Select <span class="badge pull-right" id="badge-pd-collection"><?php echo $pdCollectionNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -281,7 +389,7 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-brand" onclick="showProductBrand()" disabled>
-       Select Brand <span class="badge pull-right" id="badge-pd-brand"><?php echo $pdBrandNo; ?></span>
+       Select <span class="badge pull-right" id="badge-pd-brand"><?php echo $pdBrandNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -297,7 +405,7 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-pd-year" onclick="showProductYear()" disabled>
-       Select Brand <span class="badge pull-right" id="badge-pd-year"><?php echo $pdYearNo; ?></span>
+       Select <span class="badge pull-right" id="badge-pd-year"><?php echo $pdYearNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>
@@ -314,11 +422,16 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
  <input type="hidden" id="all_product" value="<?php echo $allProduct; ?>" />
  <input type="hidden" id="product_id" value="<?php echo $product_id; ?>" />
  <input type="hidden" id="product_model" value="<?php echo $product_model; ?>" />
+ <input type="hidden" id="product_main_group" value="<?php echo $product_main_group; ?>" />
  <input type="hidden" id="product_group" value="<?php echo $product_group; ?>" />
- <input type="hidden" id="product_sub_group" value="<?php echo $product_sub_group; ?>" />
- <input type="hidden" id="product_kind" value="<?php echo $product_kind; ?>" />
+ <input type="hidden" id="product_segment" value="<?php echo $product_segment; ?>" />
+ <input type="hidden" id="product_class" value="<?php echo $product_class; ?>" />
+ <input type="hidden" id="product_family" value="<?php echo $product_family; ?>" />
  <input type="hidden" id="product_type" value="<?php echo $product_type; ?>" />
- <input type="hidden" id="product_category" value="<?php echo $product_category; ?>" />
+ <input type="hidden" id="product_kind" value="<?php echo $product_kind; ?>" />
+ <input type="hidden" id="product_gender" value="<?php echo $product_gender; ?>" />
+ <input type="hidden" id="product_sport_type" value="<?php echo $product_sport_type; ?>" />
+ <input type="hidden" id="product_collection" value="<?php echo $product_collection; ?>" />
  <input type="hidden" id="product_brand" value="<?php echo $product_brand; ?>" />
  <input type="hidden" id="product_year" value="<?php echo $product_year; ?>" />
 
