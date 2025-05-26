@@ -84,7 +84,7 @@ class Auto_complete extends CI_Controller
     //---- receive product if over due date or not
     $receive_due = getConfig('RECEIVE_OVER_DUE'); //--- 1 = receive , 0 = not receive
 
-    $this->db->select('code, vender_code, vender_name')->where('status', 'O');
+    $this->db->select('code, vender_code, vender_name')->where_in('status', ['O', 'P']);
 
     if( ! empty($vendor))
     {

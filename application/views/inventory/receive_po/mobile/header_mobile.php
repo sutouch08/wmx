@@ -30,11 +30,11 @@
   <div class="form-group">
     <div class="col-xs-4 padding-5">
       <label>ผู้จำหน่าย</label>
-  		<input type="text" class="width-100 text-center h" name="vendor_code" id="vendor_code" value="<?php echo $doc->vendor_code; ?>" placeholder="รหัสผู้จำหน่าย" disabled/>
+  		<input type="text" class="width-100 text-center h" name="vendor_code" id="vendor_code" value="<?php echo $doc->vender_code; ?>" placeholder="รหัสผู้จำหน่าย" disabled/>
     </div>
     <div class="col-xs-8 padding-5">
       <label class="not-show">vendor</label>
-  		<input type="text" class="form-control input-sm h" name="vendorName" id="vendorName" value="<?php echo $doc->vendor_name; ?>" placeholder="ระบุผู้จำหน่าย" disabled/>
+  		<input type="text" class="form-control input-sm h" name="vendorName" id="vendorName" value="<?php echo $doc->vender_name; ?>" placeholder="ระบุผู้จำหน่าย" disabled/>
     </div>
   </div>
 
