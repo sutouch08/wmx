@@ -25,13 +25,21 @@ function updateConfig(formName)
 	});
 }
 
+
+function toggleOption(el) {
+	let name = el.data('name');
+	let option = el.is(':checked') ? 1 : 0;
+	$("input[name='"+name+"']").val(option);
+	console.log(name+' : ' + $("input[name='"+name+"']").val());
+}
+
+
 function changeURL(tab)
 {
 	var url = BASE_URL + 'setting/configs/index/'+ tab;
 	var stObj = { stage: 'stage' };
 	window.history.pushState(stObj, 'configs', url);
 }
-
 
 
 function openSystem()
@@ -41,7 +49,6 @@ function openSystem()
 	$('#btn-freze').removeClass('btn-warning');
 	$("#btn-open").addClass('btn-success');
 }
-
 
 
 function closeSystem()
@@ -60,7 +67,6 @@ function frezeSystem()
 	$("#btn-close").removeClass('btn-danger');
 	$('#btn-freze').addClass('btn-warning');
 }
-
 
 
 function toggleManualCode(option)
@@ -97,8 +103,6 @@ function toggleUat(option)
 }
 
 
-
-
 function toggleNotiBars(option)
 {
 	$('#noti-bar').val(option);
@@ -113,8 +117,6 @@ function toggleNotiBars(option)
 		return;
 	}
 }
-
-
 
 
 //--- เปิด/ปิด การ sync ข้อมูลระหว่างเว็บไซต์กับระบบหลัก
@@ -1101,3 +1103,9 @@ function toggleWrxTest(option) {
 		return;
 	}
 }
+
+
+$('#web-site-channels-code').select2();
+$('#shopee-channels-code').select2();
+$('#tiktok-channels-code').select2();
+$('#lazada-channels-code').select2();

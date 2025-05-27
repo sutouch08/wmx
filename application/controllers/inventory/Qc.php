@@ -699,7 +699,7 @@ class Qc extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE') && is_true(getConfig('WRX_TIKTOK_API')))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -713,7 +713,7 @@ class Qc extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE') && is_true(getConfig('WRX_SHOPEE_API')))
     {
       $this->load->library('wrx_shopee_api');
 
@@ -727,7 +727,7 @@ class Qc extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    if($channels == getConfig('LAZADA_CHANNELS_CODE') && is_true(getConfig('WRX_LAZADA_API')))
     {
       $this->load->library('wrx_lazada_api');
 

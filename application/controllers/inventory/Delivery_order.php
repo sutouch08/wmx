@@ -74,7 +74,7 @@ class Delivery_order extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE') && is_true(getConfig('WRX_TIKTOK_API')))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -88,7 +88,7 @@ class Delivery_order extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE') && is_true(getConfig('WRX_SHOPEE_API')))
     {
       $this->load->library('wrx_shopee_api');
 
@@ -102,7 +102,7 @@ class Delivery_order extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    if($channels == getConfig('LAZADA_CHANNELS_CODE') && is_true(getConfig('WRX_LAZADA_API')))
     {
       $this->load->library('wrx_lazada_api');
 
@@ -338,11 +338,13 @@ class Delivery_order extends PS_Controller
                       'so_no' => $order->so_no,
                       'fulfillment_code' => $order->fulfillment_code,
                       'oracle_id' => $order->oracle_id,
+                      'line_id' => $rs->line_id,
                       'payment_code' => $order->payment_code,
                       'channels_code' => $order->channels_code,
                       'product_code' => $rs->product_code,
                       'product_name' => $rs->product_name,
                       'product_model' => $rs->model_code,
+                      'unit_code' => $rs->unit_code,
                       'cost' => $rs->cost,
                       'price' => $rs->price,
                       'sell' => $rs->final_price,
@@ -453,7 +455,7 @@ class Delivery_order extends PS_Controller
                 'warehouse_code' => $rs->warehouse_code,
                 'zone_code' => $rs->zone_code,
                 'qty' => $rs->qty,
-                'user' => get_cookie('uname'),
+                'user' => $this->_user->uname,
                 'order_detail_id' => $rs->order_detail_id
               );
 
@@ -492,11 +494,13 @@ class Delivery_order extends PS_Controller
               'so_no' => $order->so_no,
               'fulfillment_code' => $order->fulfillment_code,
               'oracle_id' => $order->oracle_id,
+              'line_id' => $rs->line_id,
               'payment_code' => $order->payment_code,
               'channels_code' => $order->channels_code,
               'product_code' => $rs->product_code,
               'product_name' => $rs->product_name,
               'product_model' => $rs->model_code,
+              'unit_code' => $rs->unit_code,
               'cost' => $rs->cost,
               'price' => $rs->price,
               'sell' => $rs->final_price,
@@ -576,7 +580,28 @@ class Delivery_order extends PS_Controller
           if(is_true(getConfig('WRX_OB_INTERFACE')))
           {
             $this->load->library('wrx_ob_api');
-            $this->wrx_ob_api->update_status($code);
+
+            if( ! $this->wrx_ob_api->update_status($code))
+            {
+              $sc = FALSE;
+              $this->error = "บันทึกขายสำเร็จแต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->wrx_ob_api->error;
+
+              $arr = array(
+                'is_exported' => 3,
+                'export_error' => $this->error
+              );
+
+              $this->orders_model->update($code, $arr);
+            }
+            else
+            {
+              $arr = array(
+                'is_exported' => 1,
+                'export_error' => NULL
+              );
+
+              $this->orders_model->update($code, $arr);
+            }
           }
         }
         else

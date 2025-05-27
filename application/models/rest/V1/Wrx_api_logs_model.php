@@ -3,17 +3,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Wrx_api_logs_model extends CI_Model
 {
 	private $td = 'wrx_api_logs';
-	public $wms;
+	public $logs;
 
   public function __construct()
   {
     parent::__construct();
-		$this->wms = $this->load->database('wms', TRUE);
+		$this->logs = $this->load->database('logs', TRUE);
   }
 
 	public function add_logs($ds = array())
 	{
-		return $this->wms->insert($this->td, $ds);
+		return $this->logs->insert($this->td, $ds);
 	}
 
 
@@ -21,34 +21,34 @@ class Wrx_api_logs_model extends CI_Model
 	{
 		if(!empty($ds['code']))
 		{
-			$this->wms->like('code', $ds['code'], 'after');
+			$this->logs->like('code', $ds['code'], 'after');
 		}
 
 		if(!empty($ds['status']) && $ds['status'] !== 'all')
 		{
-			$this->wms->where('status', $ds['status']);
+			$this->logs->where('status', $ds['status']);
 		}
 
 		if(! empty($ds['type']) && $ds['type'] !== 'all')
 		{
-			$this->wms->where('type', $ds['type']);
+			$this->logs->where('type', $ds['type']);
 		}
 
 		if(isset($ds['action']) && $ds['action'] != 'all')
 		{
-			$this->wms->where('action', $ds['action']);
+			$this->logs->where('action', $ds['action']);
 		}
 
 		if(!empty($ds['from_date']) && !empty($ds['to_date']))
 		{
-			$this->wms
+			$this->logs
 			->where('date_upd >=', from_date($ds['from_date']))
 			->where('date_upd <=', to_date($ds['to_date']));
 		}
 
-		$this->wms->order_by('id', 'DESC');
-		$this->wms->limit($perpage, $offset);
-		$rs = $this->wms->get($this->td);
+		$this->logs->order_by('id', 'DESC');
+		$this->logs->limit($perpage, $offset);
+		$rs = $this->logs->get($this->td);
 
 		if($rs->num_rows() > 0)
 		{
@@ -63,38 +63,38 @@ class Wrx_api_logs_model extends CI_Model
 	{
 		if(!empty($ds['code']))
 		{
-			$this->wms->like('code', $ds['code'], 'after');
+			$this->logs->like('code', $ds['code'], 'after');
 		}
 
 		if(!empty($ds['status']) && $ds['status'] !== 'all')
 		{
-			$this->wms->where('status', $ds['status']);
+			$this->logs->where('status', $ds['status']);
 		}
 
 		if(! empty($ds['type']) && $ds['type'] !== 'all')
 		{
-			$this->wms->where('type', $ds['type']);
+			$this->logs->where('type', $ds['type']);
 		}
 
 		if(isset($ds['action']) && $ds['action'] != 'all')
 		{
-			$this->wms->where('action', $ds['action']);
+			$this->logs->where('action', $ds['action']);
 		}
 
 		if(!empty($ds['from_date']) && !empty($ds['to_date']))
 		{
-			$this->wms
+			$this->logs
 			->where('date_upd >=', from_date($ds['from_date']))
 			->where('date_upd <=', to_date($ds['to_date']));
 		}
 
-		return $this->wms->count_all_results($this->td);
+		return $this->logs->count_all_results($this->td);
 	}
 
 
 	public function get_logs($id)
 	{
-		$rs = $this->wms->where('id', $id)->get($this->td);
+		$rs = $this->logs->where('id', $id)->get($this->td);
 
 		if($rs->num_rows() == 1)
 		{

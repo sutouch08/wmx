@@ -355,9 +355,10 @@ class Orders extends PS_Controller
 
                 $arr = array(
                   "order_code"	=> $order_code,
-                  "style_code"		=> $item->style_code,
+                  "model_code"		=> $item->model_code,
                   "product_code"	=> $item->code,
                   "product_name"	=> addslashes($item->name),
+                  "unit_code" => $item->unit_code,
                   "cost"  => $item->cost,
                   "price"	=> $item->price,
                   "qty"		=> $qty,
@@ -523,9 +524,10 @@ class Orders extends PS_Controller
               {
                 $arr = array(
                   "order_code" => $order_code,
-                  "style_code" => $item->style_code,
+                  "model_code" => $item->model_code,
                   "product_code" => $item->code,
                   "product_name" => addslashes($item->name),
+                  "unit_code" => $item->unit_code,
                   "cost"  => $item->cost,
                   "price"	=> $item->price,
                   "qty" => $qty,
@@ -796,9 +798,10 @@ class Orders extends PS_Controller
                 {
                   $arr = array(
                     "order_code" => $order_code,
-                    "style_code" => $item->style_code,
+                    "model_code" => $item->model_code,
                     "product_code" => $item->code,
                     "product_name" => addslashes($item->name),
+                    "unit_code" => $item->unit_code,
                     "cost"  => $item->cost,
                     "price"	=> $item->price,
                     "qty"	=> $qty,
@@ -1278,59 +1281,6 @@ class Orders extends PS_Controller
     }
 
     echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function get_product_order_tab()
-  {
-    $ds = "";
-  	$id_tab = $this->input->post('id');
-    $whCode = get_null($this->input->post('warehouse_code'));
-  	$qs     = $this->product_tab_model->getStyleInTab($id_tab);
-    $showStock = getConfig('SHOW_SUM_STOCK');
-  	if( $qs->num_rows() > 0 )
-  	{
-  		foreach( $qs->result() as $rs)
-  		{
-        $style = $this->product_style_model->get($rs->style_code);
-
-  			if( $style->active == 1 && $this->products_model->is_disactive_all($style->code) === FALSE)
-  			{
-  				$ds 	.= 	'<div class="col-lg-2 col-md-2 col-sm-3 col-xs-4"	style="text-align:center;">';
-  				$ds 	.= 		'<div class="product" style="padding:5px;">';
-  				$ds 	.= 			'<div class="image">';
-  				$ds 	.= 				'<a href="javascript:void(0)" onClick="getOrderGrid(\''.$style->code.'\')">';
-  				$ds 	.=					'<img class="img-responsive" src="'.get_cover_image($style->code, 'default').'" />';
-  				$ds 	.= 				'</a>';
-  				$ds	.= 			'</div>';
-  				$ds	.= 			'<div class="description" style="font-size:10px; min-height:50px;">';
-  				$ds	.= 				'<a href="javascript:void(0)" onClick="getOrderGrid(\''.$style->code.'\')">';
-  				$ds	.= 			$style->code.'<br/>'. number($style->price,2);
-  				$ds 	.=  		($style->count_stock && $showStock) ? ' | <span style="color:red;">'.$this->get_style_sell_stock($style->code, $whCode).'</span>' : '';
-  				$ds	.= 				'</a>';
-  				$ds 	.= 			'</div>';
-  				$ds	.= 		'</div>';
-  				$ds 	.=	'</div>';
-  			}
-  		}
-  	}
-  	else
-  	{
-  		$ds = "no_product";
-  	}
-
-  	echo $ds;
-  }
-
-
-  public function get_style_sell_stock($style_code, $warehouse = NULL)
-  {
-    $sell_stock = $this->stock_model->get_style_sell_stock($style_code, $warehouse);
-    $reserv_stock = $this->orders_model->get_reserv_stock_by_style($style_code, $warehouse);
-
-    $available = $sell_stock - $reserv_stock;
-
-    return $available >= 0 ? $available : 0;
   }
 
 
@@ -2521,14 +2471,11 @@ class Orders extends PS_Controller
           if($sc === TRUE)
           {
             $this->db->trans_commit();
-
-            if($state != 9)
+                        
+            if(is_true(getConfig('WRX_OB_INTERFACE')))
             {
-              if(is_true(getConfig('WRX_OB_INTERFACE')))
-              {
-                $this->load->library('wrx_ob_api');
-                $this->wrx_ob_api->update_status($code);
-              }              
+              $this->load->library('wrx_ob_api');
+              $this->wrx_ob_api->update_status($code);
             }
           }
           else

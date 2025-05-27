@@ -241,7 +241,7 @@ class Prepare extends PS_Controller
   {
     $is_cancel = FALSE;
 
-    if($channels == getConfig('TIKTOK_CHANNELS_CODE'))
+    if($channels == getConfig('TIKTOK_CHANNELS_CODE') && is_true(getConfig('WRX_TIKTOK_API')))
     {
       $this->load->library('wrx_tiktok_api');
 
@@ -255,7 +255,7 @@ class Prepare extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('SHOPEE_CHANNELS_CODE'))
+    if($channels == getConfig('SHOPEE_CHANNELS_CODE') && is_true(getConfig('WRX_SHOPEE_API')))
     {
       $this->load->library('wrx_shopee_api');
 
@@ -269,7 +269,7 @@ class Prepare extends PS_Controller
       return $is_cancel;
     }
 
-    if($channels == getConfig('LAZADA_CHANNELS_CODE'))
+    if($channels == getConfig('LAZADA_CHANNELS_CODE') && is_true(getConfig('WRX_LAZADA_API')))
     {
       $this->load->library('wrx_lazada_api');
 
@@ -383,7 +383,7 @@ class Prepare extends PS_Controller
           }
         }
 
-        if(is_true(getConfig('WRX_OB_INTERFACE')))
+        if(is_true(getConfig('WRX_OB_INTERFACE')) && $order->state == 3)
         {
           $this->load->library('wrx_ob_api');
           $this->wrx_ob_api->update_status($code);

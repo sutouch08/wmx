@@ -434,6 +434,7 @@ class Orders extends REST_Controller
                 "model_code" => $item->model_code,
                 "product_code" => $item->code,
                 "product_name" => $item->name,
+                "unit_code" => $item->unit_code,
                 "cost"  => $item->cost,
                 "price"	=> $rs->price, //--- price bef disc
                 "qty" => $rs->qty,
@@ -564,6 +565,7 @@ class Orders extends REST_Controller
                   "product_code" => $item->code,
                   "product_name" => $item->name,
                   "model_code" => $item->model_code,
+                  "unit_code" => $item->unit_code,
                   "cost"  => $item->cost,
                   "price"	=> $rs->price, //--- price bef disc
                   "qty" => $rs->qty,

@@ -7,7 +7,7 @@ class Wrx_ob_api
   public $error;
   public $logs_json = FALSE;
   public $test = FALSE;
-  public $url = "https://9724922-sb1.restlets.api.netsuite.com/";
+  public $url;
   public $company = "WARRIX SPORT PUBLIC COMPANY LIMITED";
 
   public function __construct()
@@ -22,17 +22,19 @@ class Wrx_ob_api
 
   public function update_status($code)
   {
+    $sc = TRUE;
     $this->ci->load->model('orders/orders_model');
+    $this->ci->load->model('inventory/delivery_order_model');
     $this->ci->load->model('masters/sender_model');
 
     $action = "INT021";
     $type = "INT021";
-    $url = $this->url; //$this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_OB_URL'); //"app/site/hosting/restlet.nl?script=customscript_xcust_rl_party_warehouse&deploy=customdeploy_xcust_rl_party_warehouse";
+    $url = $this->api['WRX_API_HOST'];
+    $url .= getConfig('WRX_OB_URL');
     $api_path = $url;
 
     $headers = array(
-      "Content-type:application:json",
+      "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
 
@@ -43,27 +45,27 @@ class Wrx_ob_api
     if( ! empty($order))
     {
       $playload = array(
-        'company' => $this->company,
-        'headerInternalId' => intval($order->oracle_id),
-        'fulfillment' => $order->fulfillment_code,
-        'status' => ($order->state > 7 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked')),
-        'shippingCarrier' => $this->ci->sender_model->get_code($order->id_sender),
-        'trackingNo'=> $order->shipping_code,
-        'updateBy' => 'WMS API',
-        'lineItems' => []
+        'Company' => $this->company,
+        'HeaderInternalId' => intval($order->oracle_id),
+        'Fulfillment' => $order->fulfillment_code,
+        'Status' => ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked')),
+        'ShippingCarrier' => $this->ci->sender_model->get_code($order->id_sender),
+        'TrackingNo'=> empty($order->shipping_code) ? "" : $order->shipping_code,
+        'UpdateBy' => 'WMS API',
+        'LineItems' => []
       );
 
-      $details = $this->ci->orders_model->get_order_details($code);
+      $details = $order->state == 8 ? $this->ci->delivery_order_model->get_sold_details($code) : $this->ci->orders_model->get_order_details($code);
 
       if( ! empty($details))
       {
         foreach($details as $rs)
         {
-          $playload['lineItems'][] = array(
-            'lineInternalId' => intval($rs->line_id),
-            'item' => $rs->product_code,
-            'qty' => intval($rs->qty),
-            'unit' => $rs->unit_code
+          $playload['LineItems'][] = array(
+            'LineInternalId' => intval($rs->line_id),
+            'Item' => $rs->product_code,
+            'Qty' => intval($rs->qty),
+            'Unit' => $rs->unit_code
           );
         }
       }
@@ -90,8 +92,6 @@ class Wrx_ob_api
 
             $this->ci->api_logs_model->add_logs($logs);
           }
-
-          return TRUE;
         }
         else
         {
@@ -107,8 +107,14 @@ class Wrx_ob_api
           curl_close($curl);
           $res = json_decode($response);
 
-          if( ! empty($res) && property_exists($res, 'status'))
+          if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
           {
+            if($res->status !== 'success')
+            {
+              $sc = FALSE;
+              $this->error = $res->serviceMessage;
+            }
+
             if($this->logs_json)
             {
               $logs = array(
@@ -117,8 +123,8 @@ class Wrx_ob_api
                 'api_path' => $api_path,
                 'code' => NULL,
                 'action' => $action,
-                'status' => $res->status == 'success' ? 'success' : 'failed',
-                'message' => "",
+                'status' => $sc === TRUE ? 'success' : 'failed',
+                'message' => $res->serviceMessage,
                 'request_json' => $json,
                 'response_json' => $response
               );
@@ -128,7 +134,8 @@ class Wrx_ob_api
           }
           else
           {
-            $this->error = "No response";
+            $sc = FALSE;
+            $this->error = "No response from ERP";
 
             if($this->logs_json)
             {
@@ -146,14 +153,20 @@ class Wrx_ob_api
 
               $this->ci->api_logs_model->add_logs($logs);
             }
-
-            return FALSE;
           }
         }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Invalid playload";
       }
     }
     else
     {
+      $sc = FALSE;
+      $this->error = "Order not found !";
+
       $logs = array(
         'trans_id' => genUid(),
         'type' => $type,
@@ -161,17 +174,15 @@ class Wrx_ob_api
         'code' => $code,
         'action' => $action,
         'status' => 'failed',
-        'message' => 'Order not found',
+        'message' => $this->error,
         'request_json' => NULL,
         'response_json' => NULL
       );
 
       $this->ci->api_logs_model->add_api_logs($logs);
-
-      return FALSE;
     }
 
-    return FALSE;
+    return $sc;
   }
 
 } //-- end class

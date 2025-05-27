@@ -76,7 +76,7 @@ class Invoice extends PS_Controller
     {
       $this->load->model('masters/zone_model');
 
-      $order->zone_name = $this->zone_model->get_name($order->zone_code);      
+      $order->zone_name = $this->zone_model->get_name($order->zone_code);
     }
 
     $details = $this->invoice_model->get_billed_detail($code);
@@ -113,6 +113,38 @@ class Invoice extends PS_Controller
     $this->load->view('print/print_invoice', $ds);
   }
 
+  public function send_to_erp($code)
+  {
+    $sc = TRUE;
+
+    if(is_true(getConfig('WRX_OB_INTERFACE')))
+    {
+      $this->load->library('wrx_ob_api');
+      if( ! $this->wrx_ob_api->update_status($code))
+      {
+        $sc = FALSE;
+        $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : Error - ".$this->wrx_ob_api->error;
+
+        $arr = array(
+          'is_exported' => 3,
+          'export_error' => $this->error
+        );
+
+        $this->orders_model->update($code, $arr);
+      }
+      else
+      {
+        $arr = array(
+          'is_exported' => 1,
+          'export_error' => NULL
+        );
+
+        $this->orders_model->update($code, $arr);
+      }
+    }
+
+    $this->_response($sc);
+  }
 
 
   public function clear_filter()

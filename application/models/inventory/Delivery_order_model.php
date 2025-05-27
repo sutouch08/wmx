@@ -258,7 +258,7 @@ class Delivery_order_model extends CI_Model
     //--- กรณีสินค้าเป็นสินค้าที่ไม่นับสต็อกจะบันทึกตามยอดที่สั่งมา
     public function get_billed_detail($code)
     {
-      $qr = "SELECT o.id, o.product_code, o.product_name, o.qty AS order_qty, o.is_count, ";
+      $qr = "SELECT o.id, o.line_id, o.product_code, o.product_name, o.unit_code, o.qty AS order_qty, o.is_count, ";
       $qr .= "o.price, o.discount1, o.discount2, o.discount3, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
       $qr .= "(o.total_amount/o.qty) AS final_price ";
@@ -291,7 +291,7 @@ class Delivery_order_model extends CI_Model
     //--- ผลลัพธ์จะไม่ได้ยอดที่มีการสั่งซื้อแต่ไม่มียอดตรวจ หรือ มียอดตรวจแต่ไม่มียอดสั่งซื้อ (กรณีมีการแก้ไขออเดอร์)
     public function get_bill_detail($code)
     {
-      $qr = "SELECT o.id, o.model_code, o.product_code, o.product_name, o.qty AS order_qty, ";
+      $qr = "SELECT o.id, o.line_id, o.model_code, o.product_code, o.product_name, o.unit_code, o.qty AS order_qty, ";
       $qr .= "o.cost, o.price, o.discount1, o.is_count, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
       $qr .= "(o.total_amount/o.qty) AS final_price ";
@@ -312,7 +312,7 @@ class Delivery_order_model extends CI_Model
 
     public function get_non_count_bill_detail($code)
     {
-      $qr  = "SELECT o.id, o.product_code, o.product_name, o.model_code, o.qty, ";
+      $qr  = "SELECT o.id, o.line_id, o.product_code, o.product_name, o.unit_code, o.model_code, o.qty, ";
       $qr .= "o.cost, o.price, o.discount1, o.is_count, ";
       $qr .= "(o.discount_amount / o.qty) AS discount_amount, ";
       $qr .= "(o.total_amount/o.qty) AS final_price ";

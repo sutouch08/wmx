@@ -13,11 +13,13 @@ class Wrx_shopee_api
   public function __construct()
   {
     $this->ci =& get_instance();
-		$this->ci->load->model('rest/V1/wrx_api_logs_model');
+		$this->ci->load->model('rest/api/api_logs_model');
     $this->ci->load->model('orders/orders_model');
     $this->ci->load->model('inventory/qc_model');
 
     $this->api = getWrxApiConfig();
+    $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
+    $this->test = is_true($this->api['WRX_API_TEST']);
   }
 
   public function test()
@@ -38,37 +40,76 @@ class Wrx_shopee_api
     $apiUrl = str_replace(" ","%20",$url);
     $method = 'GET';
 
-    $curl = curl_init();
-    curl_setopt($curl, CURLOPT_URL, $url);
-    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-    $response = curl_exec($curl);
-    curl_close($curl);
-    $res = json_decode($response);
-
-    if( ! empty($res) && ! empty($res->code))
+    if($this->test)
     {
-      if($res->code == 200 && $res->status == 'success')
+      if($this->logs_json)
       {
-        if( ! empty($res->data))
+        $logs = array(
+          'trans_id' => genUid(),
+          'type' => $type,
+          'api_path' => $api_path,
+          'code' => NULL,
+          'action' => 'test',
+          'status' => 'test',
+          'message' => 'test',
+          'request_json' => $json,
+          'response_json' => NULL
+        );
+
+        $this->ci->api_logs_model->add_logs($logs);
+      }
+    }
+    else
+    {
+      $curl = curl_init();
+      curl_setopt($curl, CURLOPT_URL, $url);
+      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+      curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+      $response = curl_exec($curl);
+      curl_close($curl);
+      $res = json_decode($response);
+
+      if( ! empty($res) && ! empty($res->code))
+      {
+        if($res->code == 200 && $res->status == 'success')
         {
-          /*
-            return status text
-            - UNPAID:Order is created, buyer has not paid yet.
-            - READY_TO_SHIP:Seller can arrange shipment.
-            - PROCESSED:Seller has arranged shipment online and got tracking number from 3PL.
-            - RETRY_SHIP:3PL pickup parcel fail. Need to re arrange shipment.
-            - SHIPPED:The parcel has been drop to 3PL or picked up by 3PL.
-            - TO_CONFIRM_RECEIVE:The order has been received by buyer.
-            - IN_CANCEL:The order's cancelation is under processing.
-            - CANCELLED:The order has been canceled.
-            - TO_RETURN:The buyer requested to return the order and order's return is processing.
-            - COMPLETED:The order has been completed.
-          */
-          return $res->data[0]->order_status;
+          if($this->logs_json)
+          {
+            $logs = array(
+              'trans_id' => genUid(),
+              'type' => $type,
+              'api_path' => $api_path,
+              'code' => NULL,
+              'action' => 'test',
+              'status' => 'test',
+              'message' => 'test',
+              'request_json' => $json,
+              'response_json' => NULL
+            );
+
+            $this->ci->api_logs_model->add_logs($logs);
+          }
+
+          if( ! empty($res->data))
+          {
+            /*
+              return status text
+              - UNPAID:Order is created, buyer has not paid yet.
+              - READY_TO_SHIP:Seller can arrange shipment.
+              - PROCESSED:Seller has arranged shipment online and got tracking number from 3PL.
+              - RETRY_SHIP:3PL pickup parcel fail. Need to re arrange shipment.
+              - SHIPPED:The parcel has been drop to 3PL or picked up by 3PL.
+              - TO_CONFIRM_RECEIVE:The order has been received by buyer.
+              - IN_CANCEL:The order's cancelation is under processing.
+              - CANCELLED:The order has been canceled.
+              - TO_RETURN:The buyer requested to return the order and order's return is processing.
+              - COMPLETED:The order has been completed.
+            */
+            return $res->data[0]->order_status;
+          }
         }
       }
     }
@@ -360,7 +401,7 @@ class Wrx_shopee_api
       "shippingDocumentType" => "NORMAL_AIR_WAYBILL",
       "orderList" => array(
         (object) array(
-          "orderSN" => $reference,        
+          "orderSN" => $reference,
         )
       )
     );

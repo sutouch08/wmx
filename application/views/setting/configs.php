@@ -20,37 +20,38 @@
 		$tab3 = $tab == 'system' ? 'active in' : '';
 		$tab4 = $tab == 'inventory' ? 'active in' : '';
 		$tab5 = $tab == 'order' ? 'active in' : '';
-		$tab6 = $tab == 'document' ? 'active in' : '';
+		$tab7 = $tab == 'wrx' ? 'active in' : '';
+		$tab8 = $tab == 'wmx' ? 'active in' : '';
 		?>
 		<ul id="myTab1" class="setting-tabs" style="margin-left:0;">
 			<li class="li-block <?php echo $tab2; ?>" onclick="changeURL('company')"><a href="#company" data-toggle="tab">ข้อมูลบริษัท</a></li>
 			<li class="li-block <?php echo $tab3; ?>" onclick="changeURL('system')"><a href="#system" data-toggle="tab">ระบบ</a></li>
 			<li class="li-block <?php echo $tab4; ?>" onclick="changeURL('inventory')"><a href="#inventory" data-toggle="tab">คลังสินค้า</a></li>
 			<li class="li-block <?php echo $tab5; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li>
-			<li class="li-block <?php echo $tab6; ?>" onclick="changeURL('document')"><a href="#document" data-toggle="tab">เลขที่เอกสาร</a></li>
+			<li class="li-block <?php echo $tab7; ?>" onclick="changeURL('wrx')"><a href="#wrx" data-toggle="tab">WRX API</a></li>
+			<li class="li-block <?php echo $tab8; ?>" onclick="changeURL('wmx')"><a href="#wmx" data-toggle="tab">WMS API</a></li>
 		</ul>
 	</div>
 	<div class="col-lg-10 col-md-10 col-sm-10 border-1" style="padding-top:15px; border-top:0px !important; height:600px; overflow:auto;">
 		<div class="tab-content" style="border:0px;">
-			<!---  ตั้งค่าบริษัท  ------------------------------------------------------>
 			<div class="tab-pane fade <?php echo $tab2; ?>" id="company">
 				<?php $this->load->view('setting/setting_company'); ?>
 			</div>
-			<!---  ตั้งค่าระบบ  ----------------------------------------------------->
 			<div class="tab-pane fade <?php echo $tab3; ?>" id="system">
 				<?php	$this->load->view('setting/setting_system'); ?>
 			</div>
 			<div class="tab-pane fade <?php echo $tab4; ?>" id="inventory">
 				<?php $this->load->view('setting/setting_inventory'); ?>
 			</div>
-			<!---  ตั้งค่าออเดอร์  --------------------------------------------------->
 			<div class="tab-pane fade <?php echo $tab5; ?>" id="order">
 				<?php $this->load->view('setting/setting_order'); ?>
 			</div>
-			<!---  ตั้งค่าเอกสาร  --------------------------------------------------->
-			<div class="tab-pane fade <?php echo $tab6; ?>" id="document">
-				<?php $this->load->view('setting/setting_document'); ?>
-			</div>			
+			<div class="tab-pane fade <?php echo $tab7; ?>" id="wrx">
+				<?php $this->load->view('setting/setting_wrx_api'); ?>
+			</div>
+			<div class="tab-pane fade <?php echo $tab8; ?>" id="wmx">
+				<?php $this->load->view('setting/setting_wmx_api'); ?>
+			</div>
 		</div><!--/ tab-content-->
 	</div><!--/ col-sm-9  -->
 </div><!--/ row  -->

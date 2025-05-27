@@ -60,7 +60,7 @@
       <div class="divider-hidden"></div>
 
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">ต้องอนุมัติก่อนรับสินค้าทุกครั้ง</span>
       </div>
       <div class="col-sm-9">
@@ -71,10 +71,10 @@
         <span class="help-block">หากระบุเป็น "ทุกครั้ง" จะไม่สามารถดึงใบสั่งซื้อมารับสินค้าตรงๆได้ ต้องรับสินค้าผ่านใบขออนุมัติรับสินค้าเท่านั้นและต้องได้รับอนุมัติก่อน</span>
         <input type="hidden" name="STRICT_RECEIVE_PO" id="strict-receive-po" value="<?php echo $STRICT_RECEIVE_PO; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">การรับสินค้าเกิน Due</span>
       </div>
       <div class="col-sm-9">
@@ -85,16 +85,16 @@
         <span class="help-block">รับหรือไม่รับสินค้าจากใบสั่งซื้อที่เกิน Due date ในใบสั่งซื้อ</span>
       	<input type="hidden" name="RECEIVE_OVER_DUE" id="receive-over-due" value="<?php echo $RECEIVE_OVER_DUE; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">เกินกำหนดรับได้(วัน)</span>
       </div>
       <div class="col-sm-9">
         <input type="text" class="form-control input-sm input-small text-center" name="PO_VALID_DAYS"  value="<?php echo $PO_VALID_DAYS; ?>" />
 				<span class="help-block">รับสินค้าเกิน Due date ในใบสั่งซื้อได้ไม่เกินจำนวนวันที่กำหนด เช่น กำหนด 30 วัน กำหนดรับวันที่ 30/09 จะรับสินค้าได้ไม่เกินวันที่ 30/10</span>
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
 			<div class="col-sm-3">
         <span class="form-control left-label">รหัสคลังซื้อ-ขาย เริ่มต้น</span>
@@ -121,7 +121,7 @@
       <div class="divider-hidden"></div>
 
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">คุมสต็อกฝากขายแท้</span>
       </div>
       <div class="col-sm-9">
@@ -145,10 +145,10 @@
         <span class="help-block">ควมคุมมูลค่า(ทุน)สินค้าคงเหลือในคลังฝากขายแท้ไม่ให้เกินกว่าที่กำหนด</span>
         <input type="hidden" name="LIMIT_CONSIGNMENT" id="limit-consignment" value="<?php echo $LIMIT_CONSIGNMENT; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">SYSTEM BIN LOCATION</span>
       </div>
       <div class="col-sm-9">
@@ -159,9 +159,9 @@
         <span class="help-block">ใช้งาน SYSTEM_BIN_LOCATION หรือไม่</span>
         <input type="hidden" name="SYSTEM_BIN_LOCATION" id="system-bin-location" value="<?php echo $SYSTEM_BIN_LOCATION; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">ต้องอนุมัติก่อนโอนสินค้าทุกครั้ง</span>
       </div>
       <div class="col-sm-9">
@@ -172,9 +172,9 @@
         <span class="help-block"></span>
         <input type="hidden" name="STRICT_TRANSFER" id="strict-transfer" value="<?php echo $STRICT_TRANSFER; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">เอกสารกลุ่มโอนคลังหมดอายุทุกสิ้นเดือน</span>
       </div>
       <div class="col-sm-9">
@@ -185,18 +185,18 @@
         <span class="help-block">กำหนดให้เอกสารหมดอายุทุกๆ สิ้นเดือนหรือไม่</span>
         <input type="hidden" name="TRANSFER_EXPIRE_EOM" id="transfer-eom" value="<?php echo $TRANSFER_EXPIRE_EOM; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">อายุเอกสารกลุ่มโอนคลัง(วัน)</span>
       </div>
       <div class="col-sm-9">
         <input type="number" class="form-control input-sm input-small text-center" name="TRANSFER_EXPIRATION"  value="<?php echo $TRANSFER_EXPIRATION; ?>" />
 				<span class="help-block">เอกสารจะหมดอายุภายในจำนวนวันที่กำหนด กำหนดเป็น 0 หากไม่ต้องการใช้งาน</span>
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3">
+			<!-- <div class="col-sm-3">
         <span class="form-control left-label">นำเข้ารายการโอนสินค้า</span>
       </div>
       <div class="col-sm-9">
@@ -207,9 +207,9 @@
         <span class="help-block">เปิด/ปิด การอนุญาติให้ นำเข้ารายการโอนสินค้าเข้าเอกสารโอนสินค้าระหว่างคลัง</span>
         <input type="hidden" name="ALLOW_IMPORT_TRANSFER" id="transfer-imp" value="<?php echo $ALLOW_IMPORT_TRANSFER; ?>" />
       </div>
-      <div class="divider-hidden"></div>
+      <div class="divider-hidden"></div> -->
 
-			<div class="col-sm-3"><span class="form-control left-label">การ Import SM ด้วยไฟล์ Excel</span></div>
+			<!-- <div class="col-sm-3"><span class="form-control left-label">การ Import SM ด้วยไฟล์ Excel</span></div>
 			<div class="col-sm-9">
 				<div class="btn-group input-medium">
 					<button type="button" class="btn btn-sm <?php echo $btn_import_sm_yes; ?>" style="width:50%;" id="btn-import-sm-yes" onClick="toggleImportSM(1)">เปิด</button>
@@ -218,7 +218,7 @@
 				<span class="help-block">กรณีปิดจะไม่สามารถ Import SM ด้วยไฟล์ Excel ได้</span>
 				<input type="hidden" name="ALLOW_IMPORT_RETURN" id="allow-import-sm" value="<?php echo $ALLOW_IMPORT_RETURN; ?>" />
 			</div>
-			<div class="divider-hidden"></div>
+			<div class="divider-hidden"></div> -->
 
 
       <div class="col-sm-9 col-sm-offset-3">
