@@ -1,5 +1,5 @@
 <?php
-class Wrx_ob_api
+class Wrx_ib_api
 {
   private $token;
   private $api;
@@ -30,7 +30,7 @@ class Wrx_ob_api
     $action = "INT021";
     $type = "INT021";
     $url = $this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_OB_URL');
+    $url .= getConfig('WRX_IB_URL');
     $api_path = $url;
 
     $headers = array(
@@ -82,7 +82,7 @@ class Wrx_ob_api
               'trans_id' => genUid(),
               'type' => $type,
               'api_path' => $api_path,
-              'code' => $code,
+              'code' => NULL,
               'action' => 'test',
               'status' => 'test',
               'message' => 'test',
@@ -121,7 +121,7 @@ class Wrx_ob_api
                 'trans_id' => genUid(),
                 'type' => $type,
                 'api_path' => $api_path,
-                'code' => $code,
+                'code' => NULL,
                 'action' => $action,
                 'status' => $sc === TRUE ? 'success' : 'failed',
                 'message' => $res->serviceMessage,
@@ -143,7 +143,7 @@ class Wrx_ob_api
                 'trans_id' => genUid(),
                 'type' => $type,
                 'api_path' => $api_path,
-                'code' => $code,
+                'code' => NULL,
                 'action' => $action,
                 'status' => 'failed',
                 'message' => 'No response',
