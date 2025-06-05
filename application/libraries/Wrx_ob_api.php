@@ -49,7 +49,7 @@ class Wrx_ob_api
         'HeaderInternalId' => intval($order->oracle_id),
         'Fulfillment' => $order->fulfillment_code,
         'Status' => ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked')),
-        'ShippingCarrier' => $this->ci->sender_model->get_code($order->id_sender),
+        'ShippingMethod' => $this->ci->sender_model->get_code($order->id_sender),
         'TrackingNo'=> empty($order->shipping_code) ? "" : $order->shipping_code,
         'UpdateBy' => 'WMS API',
         'LineItems' => []

@@ -95,7 +95,7 @@ function select_common_sender($customer_code = NULL, $id = NULL)
 			{
 				foreach($ds as $rs)
 				{
-					$sc .= '<option data-tracking="'.$rs->force_tracking.'" data-gen="'.$rs->auto_gen.'" data-prefix="'.$rs->prefix.'" value="'.$rs->id.'" '.(empty($id) ? is_selected($rs->id, $list[0]) : is_selected($rs->id, $id)).'>'.$rs->name.'</option>';
+					$sc .= '<option data-tracking="'.$rs->force_tracking.'" data-gen="'.$rs->auto_gen.'" data-prefix="'.$rs->prefix.'" value="'.$rs->id.'" '.(empty($id) ? is_selected($rs->id, $list[0]) : is_selected($rs->id, $id)).'>'.$rs->code.' : '.$rs->name.'</option>';
 				}
 			}
 		}
@@ -107,7 +107,7 @@ function select_common_sender($customer_code = NULL, $id = NULL)
 	{
 		foreach($common as $rs)
 		{
-			$sc .= '<option data-tracking="'.$rs->force_tracking.'" data-gen="'.$rs->auto_gen.'" data-prefix="'.$rs->prefix.'"value="'.$rs->id.'" '.is_selected($rs->id, $id).'>'.$rs->name.'</option>';
+			$sc .= '<option data-tracking="'.$rs->force_tracking.'" data-gen="'.$rs->auto_gen.'" data-prefix="'.$rs->prefix.'"value="'.$rs->id.'" '.is_selected($rs->id, $id).'>'.$rs->code.' : '.$rs->name.'</option>';
 		}
 	}
 

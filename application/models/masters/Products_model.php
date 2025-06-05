@@ -414,27 +414,27 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_style_code($code)
+  public function get_model_code($code)
   {
-    $rs = $this->db->select('style_code')->where('code', $code)->get($this->tb);
+    $rs = $this->db->select('model_code')->where('code', $code)->get($this->tb);
 
     if($rs->num_rows() == 1)
     {
-      return $rs->row()->style_code;
+      return $rs->row()->model_code;
     }
 
     return NULL;
   }
 
 
-  public function get_style_items($code)
+  public function get_model_items($code)
   {
     $this->db
     ->select('p.*')
     ->from('products AS p')
     ->join('product_color AS c', 'p.color_code = c.code', 'left')
     ->join('product_size AS s', 'p.size_code = s.code', 'left')
-    ->where('p.style_code', $code)
+    ->where('p.model_code', $code)
     ->order_by('c.code', 'ASC')
     ->order_by('s.position', 'ASC');
 
@@ -449,9 +449,9 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_items_by_color($style, $color)
+  public function get_items_by_color($model, $color)
   {
-    $rs = $this->db->where('style_code', $style)->where('color_code', $color)->get($this->tb);
+    $rs = $this->db->where('model_code', $model)->where('color_code', $color)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -462,10 +462,10 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_item_by_color_and_size($style, $color, $size)
+  public function get_item_by_color_and_size($model, $color, $size)
   {
     $rs = $this->db
-    ->where('style_code', $style)
+    ->where('model_code', $model)
     ->where('color_code', $color)
     ->where('size_code', $size)
     ->limit(1)
@@ -480,18 +480,18 @@ class Products_model extends CI_Model
   }
 
 
-  public function countAttribute($style_code)
+  public function countAttribute($model_code)
 	{
-		$color = $this->db->where('style_code', $style_code)->where('color_code is NOT NULL')->where('color_code !=', '')->group_by('style_code')->get($this->tb);
-		$size  = $this->db->where('style_code', $style_code)->where('size_code is NOT NULL')->where('size_code !=', '')->group_by('style_code')->get($this->tb);
+		$color = $this->db->where('model_code', $model_code)->where('color_code is NOT NULL')->where('color_code !=', '')->group_by('model_code')->get($this->tb);
+		$size  = $this->db->where('model_code', $model_code)->where('size_code is NOT NULL')->where('size_code !=', '')->group_by('model_code')->get($this->tb);
 		return $color->num_rows() + $size->num_rows();
 	}
 
 
-  public function get_unbarcode_items($style)
+  public function get_unbarcode_items($model)
   {
     $this->db->select('code');
-    $this->db->where('style_code', $style);
+    $this->db->where('model_code', $model);
     $this->db->where('barcode IS NULL', NULL, FALSE);
     $rs = $this->db->get($this->tb);
     if($rs->num_rows() > 0)
@@ -551,26 +551,26 @@ class Products_model extends CI_Model
   }
 
 
-  public function is_exists_style($style)
+  public function is_exists_model($model)
   {
-    $count = $this->db->where('style_code', $style)->count_all_results($this->tb);
+    $count = $this->db->where('model_code', $model)->count_all_results($this->tb);
 
     return $count > 0 ? TRUE : FALSE;
   }
 
 
-  public function is_disactive_all($style_code)
+  public function is_disactive_all($model_code)
   {
-    $count = $this->db->where('style_code', $style_code)->where('active', 1)->count_all_results($this->tb);
+    $count = $this->db->where('model_code', $model_code)->where('active', 1)->count_all_results($this->tb);
 
     return $count > 0 ? FALSE : TRUE;
   }
 
 
-  public function count_color($style_code)
+  public function count_color($model_code)
   {
     $count = $this->db
-    ->where('style_code', $style_code)
+    ->where('model_code', $model_code)
     ->where('color_code is NOT NULL')
     ->where('color_code != ', '')
     ->group_by('color_code')
@@ -580,10 +580,10 @@ class Products_model extends CI_Model
   }
 
 
-  public function count_size($style_code)
+  public function count_size($model_code)
   {
     $count = $this->db
-    ->where('style_code', $style_code)
+    ->where('model_code', $model_code)
     ->where('size_code is NOT NULL')
     ->where('size_code != ', '')
     ->group_by('size_code')
@@ -593,13 +593,13 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_all_colors($style_code)
+  public function get_all_colors($model_code)
   {
     $rs = $this->db
     ->select('c.code, c.name')
     ->from('products AS p')
     ->join('product_color AS c', 'p.color_code = c.code', 'left')
-    ->where('p.style_code', $style_code)
+    ->where('p.model_code', $model_code)
     ->group_by('p.color_code')
     ->order_by('p.color_code', 'ASC')
     ->get();
@@ -613,13 +613,13 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_all_sizes($style_code)
+  public function get_all_sizes($model_code)
   {
     $rs = $this->db
     ->select('s.code, s.name, s.position')
     ->from('products AS p')
     ->join('product_size AS s', 'p.size_code = s.code', 'left')
-    ->where('p.style_code', $style_code)
+    ->where('p.model_code', $model_code)
     ->group_by('p.size_code')
     ->order_by('s.position', 'ASC')
     ->get();
@@ -633,13 +633,13 @@ class Products_model extends CI_Model
   }
 
 
-  public function get_style_sizes_cost_price($style_code)
+  public function get_model_sizes_cost_price($model_code)
   {
     $rs = $this->db
     ->select('s.code, p.cost, p.price')
     ->from('products AS p')
     ->join('product_size AS s', 'p.size_code = s.code')
-    ->where('p.style_code', $style_code)
+    ->where('p.model_code', $model_code)
     ->group_by('s.code')
     ->order_by('s.position', 'ASC')
     ->get();
@@ -660,7 +660,7 @@ class Products_model extends CI_Model
       $this->db
       ->set('cost', $cost)
       ->set('price', $price)
-      ->where('style_code', $code)
+      ->where('model_code', $code)
       ->where('size_code', $size);
 
       return $this->db->update($this->tb);

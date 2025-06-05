@@ -1,46 +1,16 @@
-<?php
-$cn = get_permission("SOCNDO", get_cookie("uid"), get_cookie("id_profile"));
-$canCancleShipped = ($cn->can_add + $cn->can_edit + $cn->can_delete) > 0 ? TRUE : FALSE;
- ?>
-<?php if($order->role == "S") : ?>
-	<?php 	$paymentLabel = paymentLabel($order->code, paymentExists($order->code), $order->is_paid);	?>
-	<?php if(!empty($paymentLabel)) : ?>
-		<div class="row">
-		  <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
-		  	<?php echo $paymentLabel; ?>
-		  </div>
-		</div>
-		<hr class="padding-5"/>
-	<?php endif; ?>
-<?php endif; ?>
-
-<style>
-	@media(min-width:768px) {
-		#rc-div {
-			margin-bottom:-30px;
-		}
-	}
-</style>
-
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
     <div class="tabable">
-			<div class="col-lg-8 col-lg-offset-4 col-md-8 col-md-offset-4 col-sm-8 col-sm-offset-4 col-xs-12 padding-5 bottom-btn" id="rc-div" style="z-index:1;">
-        <?php if($order->is_backorder == 1) : ?>
-          <button type="button" class="btn btn-xs btn-default pull-right margin-left-5" onclick="showBacklogs()">Back order logs</button>
-        <?php endif; ?>
-			</div>
-
     	<ul class="nav nav-tabs" role="tablist">
         <li class="active">
-        	<a href="#state" aria-expanded="true" aria-controls="state" role="tab" data-toggle="tab">สถานะ</a>
+        	<a href="#state" aria-expanded="true" aria-controls="content" role="tab" data-toggle="tab">สถานะ</a>
         </li>
       	<li>
           <a href="#address" aria-expanded="false" aria-controls="address" role="tab" data-toggle="tab">ที่อยู่</a>
         </li>
 				<li>
           <a href="#sender" aria-expanded="false" aria-controls="sender" role="tab" data-toggle="tab">ผู้จัดส่ง</a>
-        </li>      
+        </li>
       </ul>
 
       <!-- Tab panes -->
@@ -101,10 +71,6 @@ $canCancleShipped = ($cn->can_add + $cn->can_edit + $cn->can_delete) > 0 ? TRUE 
             </div>
           </div>
         </div><!-- /row-->
-      </div>
-
-      <div role="tabpanel" class="tab-pane active" id="state">
-				<?php $this->load->view("orders/order_state"); ?>
       </div>
 
 			<div role="tabpanel" class="tab-pane fade" id="sender">

@@ -17,16 +17,16 @@
 
 		<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 			<label>วันที่</label>
-			<input type="text" class="form-control input-sm text-center e" id="date-add" value="<?php echo date('d-m-Y'); ?>" readonly/>
+			<input type="text" class="form-control input-sm text-center e" name="date" id="date" value="<?php echo date('d-m-Y'); ?>" required />
 		</div>
 
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-4 padding-5">
 			<label>รหัสผู้รับ</label>
-			<input type="text" class="form-control input-sm text-center e" id="customer-code" value="" />
+			<input type="text" class="form-control input-sm text-center e" name="customerCode" id="customerCode" value="" required />
 		</div>
 		<div class="col-lg-4 col-md-6-harf col-sm-6-harf col-xs-12 padding-5">
 			<label>ชื่อผู้รับ[สโมสร/ผู้รับการสนับสนุน]</label>
-			<input type="text" class="form-control input-sm e" name="customer" id="customer-name" value="" />
+			<input type="text" class="form-control input-sm e" name="customer" id="customer" value="" required />
 		</div>
 
 		<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-6 padding-5">
@@ -36,7 +36,7 @@
 
 		<div class="col-lg-2 col-md-4 col-sm-3-harf col-xs-6 padding-5">
 			<label>ผู้เบิก[พนักงาน/คนสั่ง]</label>
-			<input type="text" class="form-control input-sm e" id="customer-ref" value="" />
+			<input type="text" class="form-control input-sm e" name="empName" id="empName" value="" required />
 		</div>
 
 		<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12 padding-5">

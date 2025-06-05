@@ -1,6 +1,7 @@
 <form id="wrxForm" method="post" action="<?php echo $this->home; ?>/update_config">
 	<input type="hidden" name="WRX_API" value="<?php echo $WRX_API; ?>"/>
 	<input type="hidden" name="WRX_OB_INTERFACE" value="<?php echo $WRX_OB_INTERFACE; ?>"/>
+	<input type="hidden" name="WRX_IB_INTERFACE" value="<?php echo $WRX_IB_INTERFACE; ?>"/>
 	<input type="hidden" name="WRX_LOG_JSON" value="<?php echo $WRX_LOG_JSON; ?>"/>
 	<input type="hidden" name="WRX_API_TEST" value="<?php echo $WRX_API_TEST; ?>"/>
 	<input type="hidden" name="WRX_SHOPEE_API" value="<?php echo $WRX_SHOPEE_API; ?>"/>
@@ -83,6 +84,25 @@
 		</div>
 		<div class="col-sm-8">
 			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_OB_URL"  value="<?php echo $WRX_OB_URL; ?>" />
+		</div>
+		<div class="divider-hidden"></div>
+
+		<div class="col-sm-4">
+			<span class="form-control left-label">Inbound Interface</span>
+		</div>
+		<div class="col-sm-8">
+			<label style="padding-top:5px; margin-bottom:0px;">
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_IB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_IB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+			</label>
+		</div>
+		<div class="divider-hidden"></div>
+
+		<div class="col-sm-4">
+			<span class="form-control left-label">Inbound api endpoint</span>
+		</div>
+		<div class="col-sm-8">
+			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_IB_URL"  value="<?php echo $WRX_IB_URL; ?>" />
 		</div>
 		<div class="divider-hidden"></div>
 

@@ -1370,58 +1370,41 @@ class Orders extends PS_Controller
     $sc = TRUE;
     $ds = array();
     //----- Attribute Grid By Clicking image
-    $style = $this->product_style_model->get_with_old_code($this->input->get('style_code'));
+    $model = $this->product_model_model->get(trim($this->input->get('model_code')));
 
-    if( ! empty($style))
+    if( ! empty($model))
     {
-      //--- ถ้าได้ style เดียว จะเป็น object ไม่ใช่ array
-      if(! is_array($style))
+      if($model->active)
       {
-        if($style->active)
-        {
-          $warehouse = get_null($this->input->get('warehouse_code'));
-          $zone = get_null($this->input->get('zone_code'));
-          $view = $this->input->get('isView') == '0' ? FALSE : TRUE;
-          $table = $this->getOrderGrid($style->code, $view, $warehouse, $zone);
-          $tableWidth	= $this->products_model->countAttribute($style->code) == 1 ? 600 : $this->getOrderTableWidth($style->code);
+        $warehouse = get_null($this->input->get('warehouse_code'));
+        $zone = get_null($this->input->get('zone_code'));
+        $view = $this->input->get('isView') == '0' ? FALSE : TRUE;
+        $table = $this->getOrderGrid($model->code, $view, $warehouse, $zone);
+        $tableWidth	= $this->products_model->countAttribute($model->code) == 1 ? 600 : $this->getOrderTableWidth($model->code);
 
-          if($table == 'notfound') {
-            $sc = FALSE;
-            $this->error = "not found";
-          }
-          else
-          {
-            $tbs = '<table class="table table-bordered border-1" style="min-width:'.$tableWidth.'px;">';
-            $tbe = '</table>';
-            $ds = array(
-              'status' => 'success',
-              'message' => NULL,
-              'table' => $tbs.$table.$tbe,
-              'tableWidth' => $tableWidth + 20,
-              'styleCode' => $style->code,
-              'styleOldCode' => $style->old_code,
-              'styleName' => $style->name
-            );
-          }
+        if($table == 'notfound') {
+          $sc = FALSE;
+          $this->error = "not found";
         }
         else
         {
-          $sc = FALSE;
-          $this->error = "สินค้า Inactive";
+          $tbs = '<table class="table table-bordered border-1" style="min-width:'.$tableWidth.'px;">';
+          $tbe = '</table>';
+          $ds = array(
+            'status' => 'success',
+            'message' => NULL,
+            'table' => $tbs.$table.$tbe,
+            'tableWidth' => $tableWidth + 20,
+            'modelCode' => $model->code,
+            'modelName' => $model->name
+          );
         }
-
       }
       else
       {
         $sc = FALSE;
-        $this->error = "รหัสซ้ำ ";
-
-        foreach($style as $rs)
-        {
-          $this->error .= " : {$rs->code} : {$rs->old_code}";
-        }
+        $this->error = "สินค้า Inactive";
       }
-
     }
     else
     {
@@ -1471,24 +1454,24 @@ class Orders extends PS_Controller
   }
 
 
-  public function getOrderGrid($style_code, $view = FALSE, $warehouse = NULL, $zone = NULL)
+  public function getOrderGrid($model_code, $view = FALSE, $warehouse = NULL, $zone = NULL)
 	{
 		$sc = '';
-    $style = $this->product_style_model->get($style_code);
-    if( ! empty($style))
+    $model = $this->product_model_model->get($model_code);
+    if( ! empty($model))
     {
-      if($style->active)
+      if($model->active)
       {
-        $isVisual = $style->count_stock == 1 ? FALSE : TRUE;
-    		$attrs = $this->getAttribute($style->code);
+        $isVisual = FALSE;
+    		$attrs = $this->getAttribute($model->code);
 
     		if( count($attrs) == 1  )
     		{
-    			$sc .= $this->orderGridOneAttribute($style, $attrs[0], $isVisual, $view, $warehouse, $zone);
+    			$sc .= $this->orderGridOneAttribute($model, $attrs[0], $isVisual, $view, $warehouse, $zone);
     		}
     		else if( count( $attrs ) == 2 )
     		{
-    			$sc .= $this->orderGridTwoAttribute($style, $isVisual, $view, $warehouse, $zone);
+    			$sc .= $this->orderGridTwoAttribute($model, $isVisual, $view, $warehouse, $zone);
     		}
       }
       else
@@ -1512,7 +1495,7 @@ class Orders extends PS_Controller
 	}
 
 
-  public function orderGridOneAttribute($style, $attr, $isVisual, $view, $warehouse = NULL, $zone = NULL)
+  public function orderGridOneAttribute($model, $attr, $isVisual, $view, $warehouse = NULL, $zone = NULL)
 	{
     $auz = getConfig('ALLOW_UNDER_ZERO');
     if($auz == 1)
@@ -1520,8 +1503,8 @@ class Orders extends PS_Controller
       $isVisual = TRUE;
     }
 		$sc 		= '';
-		$data 	= $attr == 'color' ? $this->getAllColors($style->code) : $this->getAllSizes($style->code);
-		$items	= $this->products_model->get_style_items($style->code);
+		$data 	= $attr == 'color' ? $this->getAllColors($model->code) : $this->getAllSizes($model->code);
+		$items	= $this->products_model->get_model_items($model->code);
 		//$sc 	 .= "<table class='table table-bordered'>";
 		$i 		  = 0;
 
@@ -1581,7 +1564,7 @@ class Orders extends PS_Controller
 	}
 
 
-  public function orderGridTwoAttribute($style, $isVisual, $view, $warehouse = NULL, $zone = NULL)
+  public function orderGridTwoAttribute($model, $isVisual, $view, $warehouse = NULL, $zone = NULL)
   {
     $auz = getConfig('ALLOW_UNDER_ZERO');
     if($auz == 1)
@@ -1589,8 +1572,8 @@ class Orders extends PS_Controller
       $isVisual = $view === TRUE ? $isVisual : TRUE;
     }
 
-    $colors	= $this->getAllColors($style->code);
-    $sizes 	= $this->getAllSizes($style->code);
+    $colors	= $this->getAllColors($model->code);
+    $sizes 	= $this->getAllSizes($model->code);
     $sc 		= '';
     //$sc 		.= '<table class="table table-bordered">';
     $sc 		.= $this->gridHeader($colors);
@@ -1603,7 +1586,7 @@ class Orders extends PS_Controller
 
       foreach( $colors as $color_code => $color )
       {
-        $item = $this->products_model->get_item_by_color_and_size($style->code, $color_code, $size_code);
+        $item = $this->products_model->get_item_by_color_and_size($model->code, $color_code, $size_code);
 
         if( !empty($item) )
         {
@@ -1656,11 +1639,11 @@ class Orders extends PS_Controller
   }
 
 
-  public function getAttribute($style_code)
+  public function getAttribute($model_code)
   {
     $sc = array();
-    $color = $this->products_model->count_color($style_code);
-    $size  = $this->products_model->count_size($style_code);
+    $color = $this->products_model->count_color($model_code);
+    $size  = $this->products_model->count_size($model_code);
     if( $color > 0 )
     {
       $sc[] = "color";
@@ -1692,10 +1675,10 @@ class Orders extends PS_Controller
   }
 
 
-  public function getAllColors($style_code)
+  public function getAllColors($model_code)
 	{
 		$sc = array();
-    $colors = $this->products_model->get_all_colors($style_code);
+    $colors = $this->products_model->get_all_colors($model_code);
     if($colors !== FALSE)
     {
       foreach($colors as $color)
@@ -1708,10 +1691,10 @@ class Orders extends PS_Controller
 	}
 
 
-  public function getAllSizes($style_code)
+  public function getAllSizes($model_code)
 	{
 		$sc = array();
-		$sizes = $this->products_model->get_all_sizes($style_code);
+		$sizes = $this->products_model->get_all_sizes($model_code);
 		if( $sizes !== FALSE )
 		{
       foreach($sizes as $size)
@@ -1746,12 +1729,12 @@ class Orders extends PS_Controller
   }
 
 
-  public function getOrderTableWidth($style_code)
+  public function getOrderTableWidth($model_code)
   {
     $sc = 600; //--- ชั้นต่ำ
     $tdWidth = 80;  //----- แต่ละช่อง
     $padding = 80; //----- สำหรับช่องแสดงไซส์
-    $color = $this->products_model->count_color($style_code);
+    $color = $this->products_model->count_color($model_code);
     if($color > 0)
     {
       $sc = $color * $tdWidth + $padding;
@@ -2471,7 +2454,7 @@ class Orders extends PS_Controller
           if($sc === TRUE)
           {
             $this->db->trans_commit();
-                        
+
             if(is_true(getConfig('WRX_OB_INTERFACE')))
             {
               $this->load->library('wrx_ob_api');

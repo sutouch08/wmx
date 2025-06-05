@@ -30,4 +30,19 @@ function select_budget($id = NULL)
   return $ds;
 }
 
+
+function sponsor_status_name($status = 'P')
+{
+  $sd = array(
+    'P' => 'Draft',
+    'O' => 'Approval',
+    'A' => 'Approved',
+    'R' => 'Rejected',
+    'C' => 'Closed',
+    'D' => 'Canceled'
+  );
+
+  return empty($sd[$status]) ? $sd['P'] : $sd[$status];
+}
+
  ?>

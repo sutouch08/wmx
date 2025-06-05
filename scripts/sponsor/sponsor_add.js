@@ -1,39 +1,11 @@
 var click = 0;
 
-$('#date').datepicker({
+$('#date-add').datepicker({
   dateFormat:'dd-mm-yy'
 });
 
 
-//---- เปลี่ยนสถานะออเดอร์  เป็นบันทึกแล้ว
-function saveOrder(){
-  var order_code = $('#order_code').val();
-	$.ajax({
-		url: BASE_URL + 'orders/sponsor/save/'+ order_code,
-		type:"POST",
-    cache:false,
-		success:function(rs){
-			var rs = $.trim(rs);
-			if( rs == 'success' ){
-				swal({
-          title: 'Saved',
-          type: 'success',
-          timer: 1000
-        });
-
-				setTimeout(function(){
-          editOrder(order_code)
-        }, 1200);
-
-			}else{
-				swal("Error ! ", rs , "error");
-			}
-		}
-	});
-}
-
-
-$("#customerCode").autocomplete({
+$("#customer-code").autocomplete({
 	source: BASE_URL + 'auto_complete/get_sponsor',
 	autoFocus: true,
 	close: function(){
@@ -42,12 +14,13 @@ $("#customerCode").autocomplete({
 		if( arr.length == 2 ){
 			var code = arr[0];
 			var name = arr[1];
-			$("#customerCode").val(code);
-			$("#customer").val(name);
+			$("#customer-code").val(code);
+			$("#customer-name").val(name);
       getBudget(code);
-		}else{
-			$("#customerCode").val('');
-			$('#customer').val('');
+		}
+    else {
+			$("#customer-code").val('');
+			$('#customer-name').val('');
       $('#budget-amount').val(0.00);
       $('#budget-amount').data('amount', 0);
       $('#budget-id').val('');
@@ -57,7 +30,7 @@ $("#customerCode").autocomplete({
 });
 
 
-$("#customer").autocomplete({
+$("#customer-name").autocomplete({
 	source: BASE_URL + 'auto_complete/get_sponsor',
 	autoFocus: true,
 	close: function(){
@@ -66,12 +39,13 @@ $("#customer").autocomplete({
 		if( arr.length == 2 ){
 			var code = arr[0];
 			var name = arr[1];
-			$("#customerCode").val(code);
-			$("#customer").val(name);
+			$("#customer-code").val(code);
+			$("#customer-name").val(name);
       getBudget(code);
-		}else{
-			$("#customerCode").val('');
-			$("#customer").val('');
+		}
+    else {
+			$("#customer-code").val('');
+			$("#customer-name").val('');
       $('#budget-amount').val(0.00);
       $('#budget-amount').data('amount', 0);
       $('#budget-id').val('');
@@ -120,11 +94,12 @@ function getBudget(code) {
 }
 
 
-$('#customer').focusout(function(){
+$('#customer-name').focusout(function(){
   var code = $(this).val();
+
   if(code.length == 0)
   {
-    $('#customerCode').val('');
+    $('#customer-code').val('');
     $('#budget-amount').val(0.00);
     $('#budget-amount').data('amount', 0);
     $('#budget-id').val('');
@@ -133,11 +108,12 @@ $('#customer').focusout(function(){
 });
 
 
-$('#customerCode').focusout(function(){
+$('#customer-code').focusout(function(){
   var code = $(this).val();
+
   if(code.length == 0)
   {
-    $('#customer').val('');
+    $('#customer-name').val('');
     $('#budget-amount').val(0.00);
     $('#budget-amount').data('amount', 0);
     $('#budget-id').val('');
@@ -152,33 +128,32 @@ function add() {
     clearErrorByClass('e');
 
     let h = {
-      'customer_code' : $('#customerCode').val(),
-      'customer_name' : $('#customer').val(),
-      'date_add' : $('#date').val(),
-      'empName' : $('#empName').val(),
+      'customer_code' : $('#customer-code').val(),
+      'customer_name' : $('#customer-name').val(),
+      'date_add' : $('#date-add').val(),
+      'customer_ref' : $('#customer-ref').val(),
       'warehouse_code' : $('#warehouse').val(),
       'budget_id' : $('#budget-id').val(),
       'budget_code' : $('#budget-code').val(),
       'budget_amount' : parseDefault(parseFloat($('#budget-amount').data('amount')), 0),
-      'transformed' : $('#transformed').val(),
       'remark' : $('#remark').val().trim()
     };
 
     if(h.customer_code.length == 0) {
-      $('#customerCode').hasError();
+      $('#customer-code').hasError();
       click = 0;
       return false;
     }
 
     if(h.customer_name.length == 0) {
-      $('#customer').hasError();
+      $('#customer-name').hasError();
       click = 0;
       return false;
     }
 
     if( ! isDate(h.date_add))
     {
-      $('#datae').hasError();
+      $('#date-add').hasError();
       click = 0;
       return false;
     }
@@ -195,9 +170,9 @@ function add() {
       return false;
     }
 
-    if(h.empName.length == 0)
+    if(h.customer_ref.length == 0)
     {
-      $('#empName').hasError();
+      $('#customer-ref').hasError();
       click = 0;
       return false;
     }
@@ -247,73 +222,38 @@ function add() {
 }
 
 
-function validateOrder() {
-  var prefix = $('#prefix').val();
-  var runNo = parseInt($('#runNo').val());
-  let code = $('#code').val();
+function getProductGrid(){
+	let pdCode 	= $("#pd-box").val();
+	let whCode = $('#warehouse').val();
 
-  if(code.length == 0){
-    $('#addForm').submit();
-    return false;
-  }
+	if( pdCode.length > 0  ) {
+		load_in();
 
-  let arr = code.split('-');
-
-  if(arr.length == 2){
-    if(arr[0] !== prefix){
-      swal('Prefix ต้องเป็น '+prefix);
-      return false;
-    }else if(arr[1].length != (4 + runNo)){
-      swal('Run Number ไม่ถูกต้อง');
-      return false;
-    }else{
-      $.ajax({
-        url: BASE_URL + 'orders/orders/is_exists_order/'+code,
-        type:'GET',
-        cache:false,
-        success:function(rs){
-          if(rs == 'not_exists'){
-            $('#addForm').submit();
-          }else{
-            swal({
-              title:'Error!!',
-              text: rs,
-              type: 'error'
-            });
-          }
-        }
-      })
-    }
-
-  }else{
-    swal('เลขที่เอกสารไม่ถูกต้อง');
-    return false;
-  }
+		$.ajax({
+			url: BASE_URL + 'orders/orders/get_order_grid',
+			type:"GET",
+			cache:"false",
+			data:{
+				"model_code" : pdCode,
+				"warehouse_code" : whCode,
+				"isView" : 0
+			},
+			success: function(rs){
+				load_out();
+				if(isJson(rs)) {
+					let ds = $.parseJSON(rs);
+					$('#modal').css('width', ds.tableWidth + 'px');
+					$('#modalTitle').html(ds.styleCode + ' | ' + ds.styleOldCode + '<br/>' + ds.styleName);
+					$('#modalBody').html(ds.table);
+					$('#orderGrid').modal('show');
+				}
+				else {
+					swal(rs);
+				}
+			}
+		});
+	}
 }
-
-
-var customer;
-var channels;
-var payment;
-var date;
-
-
-function getEdit(){
-  let approved = $('#is_approved').val();
-  if(approved == 1){
-    $('#remark').removeAttr('disabled');
-  } else {
-    $('.edit').removeAttr('disabled');
-  }
-
-  $('#btn-edit').addClass('hide');
-  $('#btn-update').removeClass('hide');
-  customer = $("#customerCode").val();
-	channels = $("#channels").val();
-	payment  = $("#payment").val();
-	date = $("#date").val();
-}
-
 
 //---- เพิ่มรายการสินค้าเช้าออเดอร์
 function addToOrder(){
@@ -418,7 +358,7 @@ function removeDetail(id, name){
 
 
 $("#pd-box").autocomplete({
-	source: BASE_URL + 'auto_complete/get_style_code',
+	source: BASE_URL + 'auto_complete/get_model_code_and_name',
 	autoFocus: true,
   close:function(){
     var rs = $(this).val();

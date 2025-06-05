@@ -42,7 +42,7 @@ function getProductGrid(){
 			type:"GET",
 			cache:"false",
 			data:{
-				"style_code" : pdCode,
+				"model_code" : pdCode,
 				"warehouse_code" : whCode,
 				"isView" : isView
 			},

@@ -1,57 +1,96 @@
 <?php $this->load->view('include/header'); ?>
-<?php $isAdmin = (get_cookie('id_profile') == -987654321 ? TRUE : FALSE); ?>
 <div class="row">
-	<div class="col-lg-3 col-md-3 col-sm-3 hidden-xs padding-5">
-    <h3 class="title"><?php echo $this->title; ?></h3>
-  </div>
-	<div class="col-xs-12 padding-5 visible-xs">
-		<h3 class="title-xs"><?php echo $this->title; ?> </h3>
+	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 padding-5 padding-top-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
 	</div>
-  <div class="col-sm-9 col-xs-12 padding-5">
-    	<p class="pull-right" style="margin-bottom:1px;">
-				<?php if(empty($approve_view)) : ?>
-				<button type="button" class="btn btn-sm btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-			<?php endif; ?>
-
-				<button type="button" class="btn btn-sm btn-default top-btn" onclick="printOrderSheet()"><i class="fa fa-print"></i> พิมพ์</button>
-				<?php if(empty($approve_view)) : ?>
-				<?php if($order->state < 4 && $isAdmin && $order->never_expire == 0) : ?>
-				<button type="button" class="btn btn-sm btn-primary top-btn" onclick="setNotExpire(1)">ยกเว้นการหมดอายุ</button>
-				<?php endif; ?>
-				<?php if($order->state < 4 && $isAdmin && $order->never_expire == 1) : ?>
-					<button type="button" class="btn btn-sm btn-info top-btn" onclick="setNotExpire(0)">ไม่ยกเว้นการหมดอายุ</button>
-				<?php endif; ?>
-				<?php if($isAdmin && $order->is_expired == 1) : ?>
-					<button type="button" class="btn btn-sm btn-warning top-btn" onclick="unExpired()">ทำให้ไม่หมดอายุ</button>
-				<?php endif; ?>
-				<?php if($order->state < 4 && ($this->pm->can_add OR $this->pm->can_edit) && $order->is_approved == 0) : ?>
-				<button type="button" class="btn btn-sm btn-yellow top-btn" onclick="editDetail()"><i class="fa fa-pencil"></i> แก้ไขรายการ</button>
-				<?php endif; ?>
-				<?php if($order->status == 0) : ?>
-					<button type="button" class="btn btn-sm btn-success top-btn" onclick="saveOrder()"><i class="fa fa-save"></i> บันทึก</button>
-				<?php endif; ?>
-			<?php endif; ?>
-				<?php if($order->state == 1 && $order->is_approved == 0 && $order->status == 1 && $order->is_expired == 0 && $this->pm->can_approve) : ?>
-						<button type="button" class="btn btn-sm btn-success top-btn" onclick="approve()"><i class="fa fa-check"></i> อนุมัติ</button>
-				<?php endif; ?>
-				<?php if($order->state == 1 && $order->is_approved == 1 && $order->status == 1 && $order->is_expired == 0 && $this->pm->can_approve) : ?>
-						<button type="button" class="btn btn-sm btn-danger top-btn" onclick="unapprove()"><i class="fa fa-refresh"></i> ไม่อนุมัติ</button>
-				<?php endif; ?>
-      </p>
-  </div>
+	<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 padding-5 text-right">
+		<button type="button" class="btn btn-sm btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+		<button type="button" class="btn btn-sm btn-default top-btn" onclick="printOrderSheet()"><i class="fa fa-print"></i> พิมพ์</button>
+		<?php if($order->status == 'P') : ?>
+			<button type="button" class="btn btn-sm btn-success top-btn" onclick="saveOrder()"><i class="fa fa-save"></i> บันทึก</button>
+		<?php endif; ?>
+	</div>
 </div><!-- End Row -->
 <hr class="padding-5"/>
-
 <?php $this->load->view('sponsor/sponsor_edit_header'); ?>
-<?php if(empty($approve_view)) : ?>
-<?php $this->load->view('orders/order_panel'); ?>
-<?php $this->load->view('sponsor/sponsor_discount_bar'); ?>
-<?php $this->load->view('orders/order_online_modal'); ?>
-<?php else : ?>
-	<input type="hidden" id="id_sender" value="<?php echo $order->id_sender; ?>"/>
-	<input type="hidden" id="id_address" value="<?php echo $order->id_address; ?>"/>
-<?php endif; ?>
-<?php $this->load->view('sponsor/sponsor_detail'); ?>
+
+<div class="row">
+	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
+		<div class="tabable">
+			<ul class="nav nav-tabs" role="tablist">
+        <li class="active">
+        	<a href="#content" aria-expanded="true" aria-controls="content" role="tab" data-toggle="tab">Contents</a>
+        </li>
+      	<li>
+          <a href="#address" aria-expanded="false" aria-controls="logistic" role="tab" data-toggle="tab">Logistics</a>
+        </li>
+      </ul>
+
+			<div class="tab-content">
+				<div role="tabpanel" class="tab-pane fade active in" id="content">
+					<div class="row">
+						<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height:350px; overflow:auto;">
+							<?php $this->load->view('sponsor/sponsor_detail'); ?>
+						</div>
+					</div>
+				</div>
+
+				<div role="tabpanel" class="tab-pane fade" id="address">
+          <div class="row">
+            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="height:350px; overflow:auto;">
+            	<?php $this->load->view('sponsor/sponsor_address'); ?>
+          </div>
+        </div><!-- /row-->
+      </div>
+			</div>
+		</div><!-- tabable -->
+	</div>
+</div>
+<hr class="margin-bottom-15">
+<div class="row">
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
+		<div class="form-horizontal">
+			<div class="form-group margin-bottom-5">
+				<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">User</div>
+				<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12">
+					<input type="text" class="width-100" value="<?php echo $order->user; ?>" disabled />
+				</div>
+			</div>
+
+			<div class="form-group margin-bottom-5">
+				<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Remark</div>
+				<div class="col-lg-10 col-md-6 col-sm-6 col-xs-12">
+					<textarea class="width-100" id="remark" rows="3" onchange="updateRemark()"><?php echo $order->remark; ?></textarea>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
+		<div class="form-horizontal">
+			<div class="form-group margin-bottom-5">
+				<div class="col-lg-8 col-md-8 col-sm-8 col-xs-6 control-label no-padding-right">Total Qty</div>
+				<div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+					<input type="text" class="width-100" id="total-qty" value="<?php echo number($order->total_qty, 2); ?>" disabled />
+				</div>
+			</div>
+
+			<div class="form-group margin-bottom-5">
+				<div class="col-lg-8 col-md-8 col-sm-8 col-xs-6 control-label no-padding-right">Total Amount</div>
+				<div class="col-lg-4 col-md-4 col-sm-4 col-xs-6">
+					<input type="text" class="width-100" id="total-amount" value="<?php echo number($order->total_amount, 2); ?>" disabled />
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<?php //$this->load->view('sponsor/sponsor_panel'); ?>
+<?php //$this->load->view('sponsor/sponsor_discount_bar'); ?>
+<?php //$this->load->view('orders/order_online_modal'); ?>
+<input type="hidden" id="id_sender" value="<?php echo $order->id_sender; ?>"/>
+<input type="hidden" id="id_address" value="<?php echo $order->id_address; ?>"/>
+
 
 <?php if(!empty($approve_logs)) : ?>
 	<div class="row">

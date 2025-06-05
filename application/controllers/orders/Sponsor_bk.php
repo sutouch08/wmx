@@ -9,49 +9,90 @@ class Sponsor extends PS_Controller
 	public $title = 'สปอนเซอร์';
   public $filter;
   public $error;
-  public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
     $this->home = base_url().'orders/sponsor';
-    $this->load->model('orders/order_sponsor_model');
-    $this->load->model('orders/order_sponsor_model');
-    $this->load->model('stock/stock_model');
+    $this->load->model('orders/orders_model');
     $this->load->model('masters/sponsors_model');
     $this->load->model('masters/sponsor_budget_model');
     $this->load->model('masters/customers_model');
+    $this->load->model('orders/order_state_model');
+    $this->load->model('stock/stock_model');
     $this->load->model('masters/product_model_model');
     $this->load->model('masters/products_model');
-    $this->load->model('masters/warehouse_model');
 
     $this->load->helper('order');
     $this->load->helper('customer');
     $this->load->helper('users');
+    $this->load->helper('state');
+    $this->load->helper('product_images');
     $this->load->helper('warehouse');
-    $this->load->helper('sponsors');
   }
 
 
   public function index()
   {
     $filter = array(
-      'code' => get_filter('code', 'sp_code', ''),
-      'customer' => get_filter('customer', 'sp_customer', ''),
-      'user' => get_filter('user', 'sp_user', 'all'),
-      'from_date' => get_filter('fromDate', 'sp_fromDate', ''),
-      'to_date' => get_filter('toDate', 'sp_toDate', ''),
-      'is_approved' => get_filter('is_approved', 'sp_is_approved', 'all'),
-			'warehouse' => get_filter('warehouse', 'sp_warehouse', 'all'),
-      'status' => get_filter('status', 'sp_status', 'all')
+      'code' => get_filter('code', 'sponsor_code', ''),
+      'customer' => get_filter('customer', 'sponsor_customer', ''),
+      'user' => get_filter('user', 'sponsor_user', 'all'),
+      'zone_code' => get_filter('zone', 'sponsor_zone', ''),
+      'from_date' => get_filter('fromDate', 'sponsor_fromDate', ''),
+      'to_date' => get_filter('toDate', 'sponsor_toDate', ''),
+      'notSave' => get_filter('notSave', 'sponsor_notSave', NULL),
+      'onlyMe' => get_filter('onlyMe', 'sponsor_onlyMe', NULL),
+      'isExpire' => get_filter('isExpire', 'sponsor_isExpire', NULL),
+      'isApprove' => get_filter('isApprove', 'sponsor_isApprove', 'all'),
+			'warehouse' => get_filter('warehouse', 'sponsor_warehouse', 'all'),
+      'is_backorder' => get_filter('is_backorder', 'sponsor_is_backorder', 'all')
     );
+
+    $state = array(
+      '1' => get_filter('state_1', 'sponsor_state_1', 'N'),
+      '2' => get_filter('state_2', 'sponsor_state_2', 'N'),
+      '3' => get_filter('state_3', 'sponsor_state_3', 'N'),
+      '4' => get_filter('state_4', 'sponsor_state_4', 'N'),
+      '5' => get_filter('state_5', 'sponsor_state_5', 'N'),
+      '6' => get_filter('state_6', 'sponsor_state_6', 'N'),
+      '7' => get_filter('state_7', 'sponsor_state_7', 'N'),
+      '8' => get_filter('state_8', 'sponsor_state_8', 'N'),
+      '9' => get_filter('state_9', 'sponsor_state_9', 'N')
+    );
+
+    $state_list = array();
+
+    $button = array();
+
+    for($i =1; $i <= 9; $i++)
+    {
+    	if($state[$i] === 'Y')
+    	{
+    		$state_list[] = $i;
+    	}
+
+      $btn = 'state_'.$i;
+      $button[$btn] = $state[$i] === 'Y' ? 'btn-info' : '';
+    }
+
+    $button['not_save'] = empty($filter['notSave']) ? '' : 'btn-info';
+    $button['only_me'] = empty($filter['onlyMe']) ? '' : 'btn-info';
+    $button['is_expire'] = empty($filter['isExpire']) ? '' : 'btn-info';
+
+
+    $filter['state_list'] = empty($state_list) ? NULL : $state_list;
 
 		//--- แสดงผลกี่รายการต่อหน้า
 		$perpage = get_rows();
 
-		$rows = $this->order_sponsor_model->count_rows($filter);
-		$init = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-    $filter['orders'] = $this->order_sponsor_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+    $role = 'P'; //--- P = sponsor;
+		$segment = 4; //-- url segment
+		$rows = $this->orders_model->count_rows($filter, $role);
+		$init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+    $filter['orders'] = $this->orders_model->get_list($filter, $perpage, $this->uri->segment($segment), $role);
+    $filter['state'] = $state;
+    $filter['btn'] = $button;
 
 		$this->pagination->initialize($init);
     $this->load->view('sponsor/sponsor_list', $filter);
@@ -103,12 +144,16 @@ class Sponsor extends PS_Controller
   {
     $sc = TRUE;
 
+		$this->load->model('masters/warehouse_model');
+
     $data = json_decode($this->input->post('data'));
 
     if( ! empty($data))
     {
       $date_add = db_date($data->date_add);
       $code = $this->get_new_code($date_add);
+
+      $role = 'P'; //--- P = Sponsor
 
       $wh = $this->warehouse_model->get($data->warehouse_code);
       $customer = $this->customers_model->get($data->customer_code);
@@ -120,20 +165,31 @@ class Sponsor extends PS_Controller
           $ds = array(
             'date_add' => $date_add,
             'code' => $code,
+            'role' => $role,
             'customer_code' => $customer->code,
             'customer_name' => $customer->name,
             'user' => $this->_user->uname,
             'remark' => get_null($data->remark),
-            'customer_ref' => $data->customer_ref,
+            'user_ref' => $data->empName,
             'warehouse_code' => $wh->code,
             'budget_id' => $data->budget_id,
             'budget_code' => $data->budget_code
           );
 
-          if( ! $this->order_sponsor_model->add($ds))
+          if( ! $this->orders_model->add($ds))
           {
             $sc = FALSE;
-            set_error('insert');
+            $this->error = "เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+          }
+          else
+          {
+            $arr = array(
+              'order_code' => $code,
+              'state' => 1,
+              'update_user' => $this->_user->uname
+            );
+
+            $this->order_state_model->add_state($arr);
           }
         }
         else
@@ -165,39 +221,65 @@ class Sponsor extends PS_Controller
   }
 
 
-  public function edit($code)
+
+  public function edit_order($code, $approve_view = NULL)
   {
     $this->load->model('approve_logs_model');
-		$this->load->model('address/customer_address_model');
+		$this->load->model('address/address_model');
 		$this->load->helper('sender');
     $ds = array();
-    $order = $this->order_sponsor_model->get($code);
-
-    if( ! empty($order))
+    $rs = $this->orders_model->get($code);
+    if(!empty($rs))
     {
-      $details = $this->order_sponsor_model->get_details($code);
+      $rs->customer_name = empty($rs->customer_name) ? $this->customers_model->get_name($rs->customer_code) : $rs->customer_name;
+      $rs->total_amount = $rs->doc_total <= 0 ? $this->orders_model->get_order_total_amount($rs->code) : $rs->doc_total;
+      $rs->user = $this->user_model->get_name($rs->user);
+      $rs->state_name = get_state_name($rs->state);
 
-      $totalQty = 0;
-      $totalAmount = 0;
+      $state = $this->order_state_model->get_order_state($code);
 
-      if( ! empty($details))
+      $ost = array();
+      if(!empty($state))
       {
-        foreach($details as $rs)
+        foreach($state as $st)
         {
-          $totalQty += $rs->qty;
-          $totalAmount += $rs->total_amount;
+          $ost[] = $st;
         }
       }
 
-      $order->total_qty = $totalQty;
-      $order->total_amount = $totalAmount;
+      $details = $this->orders_model->get_order_details($code);
+			$ship_to = $this->address_model->get_ship_to_address($code);
 
-			$ship_to = $this->customer_address_model->get_customer_address_list($order->customer_code, 'B');
-      
+      if(empty($ship_to))
+      {
+        $ship_to = (object)array(
+          'id' => NULL,
+          'name' => NULL,
+          'address' => NULL,
+          'sub_district' => NULL,
+          'district' => NULL,
+          'province' => NULL,
+          'postcode' => NULL,
+          'country' => NULL,
+          'phone' => NULL,
+          'email' => NULL,
+          'alias' => NULL
+        );
+      }
+
+      $ds['state'] = $ost;
+      $ds['approve_view'] = $approve_view;
       $ds['approve_logs'] = $this->approve_logs_model->get($code);
-      $ds['order'] = $order;
+      $ds['order'] = $rs;
       $ds['details'] = $details;
 			$ds['addr']  = $ship_to;
+      
+			$ds['cancle_reason'] = ($rs->state == 9 ? $this->orders_model->get_cancle_reason($code) : NULL);
+      $ds['allowEditDisc'] = FALSE; //getConfig('ALLOW_EDIT_DISCOUNT') == 1 ? TRUE : FALSE;
+      $ds['allowEditPrice'] = getConfig('ALLOW_EDIT_PRICE') == 1 ? TRUE : FALSE;
+      $ds['edit_order'] = TRUE; //--- ใช้เปิดปิดปุ่มแก้ไขราคาสินค้าไม่นับสต็อก
+      $ds['tracking'] = $this->orders_model->get_order_tracking($code);
+      $ds['backlogs'] = $rs->is_backorder == 1 ? $this->orders_model->get_backlogs_details($rs->code) : NULL;
       $this->load->view('sponsor/sponsor_edit', $ds);
     }
     else
@@ -218,7 +300,7 @@ class Sponsor extends PS_Controller
     {
 			$this->load->model('masters/warehouse_model');
 
-      $order = $this->order_sponsor_model->get($data->code);
+      $order = $this->orders_model->get($data->code);
 
       if( ! empty($order))
       {
@@ -263,7 +345,7 @@ class Sponsor extends PS_Controller
           }
         }
 
-        if(! $this->order_sponsor_model->update($data->code, $ds))
+        if(! $this->orders_model->update($data->code, $ds))
         {
           $sc = FALSE;
           $this->error = "ปรับปรุงเอกสารไม่สำเร็จ";
@@ -290,11 +372,11 @@ class Sponsor extends PS_Controller
   {
     $this->load->helper('product_tab');
     $ds = array();
-    $rs = $this->order_sponsor_model->get($code);
+    $rs = $this->orders_model->get($code);
     if($rs->state <= 3)
     {
       $rs->customer_name = $this->customers_model->get_name($rs->customer_code);
-      $details = $this->order_sponsor_model->get_order_details($code);
+      $details = $this->orders_model->get_order_details($code);
       $ds['order'] = $rs;
       $ds['details'] = $details;
       $ds['allowEditDisc'] = FALSE;
@@ -309,10 +391,10 @@ class Sponsor extends PS_Controller
   public function save($code)
   {
     $sc = TRUE;
-    $order = $this->order_sponsor_model->get($code);
+    $order = $this->orders_model->get($code);
 
     //---- check credit balance
-    $amount = $this->order_sponsor_model->get_order_total_amount($code);
+    $amount = $this->orders_model->get_order_total_amount($code);
 
     $bd = $this->sponsor_budget_model->get_valid_budget($order->budget_id);
 
@@ -329,7 +411,7 @@ class Sponsor extends PS_Controller
           'is_approved' => 0
         );
 
-        if( ! $this->order_sponsor_model->update($order->code, $arr))
+        if( ! $this->orders_model->update($order->code, $arr))
         {
           $sc = FALSE;
           $this->error = "บันทึกออเดอร์ไม่สำเร็จ";
@@ -368,7 +450,7 @@ class Sponsor extends PS_Controller
 					'id_sender' => $id_sender
 				);
 
-				$this->order_sponsor_model->update($order->code, $arr);
+				$this->orders_model->update($order->code, $arr);
 			}
 		}
 
@@ -384,7 +466,7 @@ class Sponsor extends PS_Controller
     $prefix = getConfig('PREFIX_SPONSOR');
     $run_digit = getConfig('RUN_DIGIT_SPONSOR');
     $pre = $prefix .'-'.$Y.$M;
-    $code = $this->order_sponsor_model->get_max_code($pre);
+    $code = $this->orders_model->get_max_code($pre);
     if(! is_null($code))
     {
       $run_no = mb_substr($code, ($run_digit*-1), NULL, 'UTF-8') + 1;
@@ -399,20 +481,51 @@ class Sponsor extends PS_Controller
   }
 
 
+
+  public function set_never_expire()
+  {
+    $code = $this->input->post('order_code');
+    $option = $this->input->post('option');
+    $rs = $this->orders_model->set_never_expire($code, $option);
+    echo $rs === TRUE ? 'success' : 'ทำรายการไม่สำเร็จ';
+  }
+
+
+  public function un_expired()
+  {
+    $code = $this->input->post('order_code');
+    $rs = $this->orders_model->un_expired($code);
+    echo $rs === TRUE ? 'success' : 'ทำรายการไม่สำเร็จ';
+  }
+
   public function clear_filter()
   {
     $filter = array(
-      'sp_code',
-      'sp_customer',
-      'sp_user',
-      'sp_warehouse',
-      'sp_is_approved',
-      'sp_fromDate',
-      'sp_toDate',
-      'sp_status'
+      'sponsor_code',
+      'sponsor_customer',
+      'sponsor_user',
+      'sponsor_zone',
+      'sponsor_fromDate',
+      'sponsor_toDate',
+      'sponsor_isApprove',
+			'sponsor_warehouse',
+      'sponsor_is_backorder',
+      'sponsor_sap_status',
+      'sponsor_notSave',
+      'sponsor_onlyMe',
+      'sponsor_isExpire',
+      'sponsor_state_1',
+      'sponsor_state_2',
+      'sponsor_state_3',
+      'sponsor_state_4',
+      'sponsor_state_5',
+      'sponsor_state_6',
+      'sponsor_state_7',
+      'sponsor_state_8',
+      'sponsor_state_9'
     );
 
-    return clear_filter($filter);
+    clear_filter($filter);
   }
 }
 ?>
