@@ -143,11 +143,14 @@ class Promotions extends REST_Controller
           $c_item[] = array(
             'productId' => $item->productId,
             'itemSKU' => $item->itemSKU,
-            'discount' => $disc->totalDiscAmount,
+            'discount' => $disc->totalDiscAmount, //--- ส่วนลดรวม Qty * item discount
             'discountPercent' => $disc->totalDiscPrecent,
             'discountLabel' => discountLabel($disc->disc1, $disc->disc2, $disc->disc3),
             'discountGP' => $disc->totalDiscAmount,
             'discountGPpercent' => $disc->totalDiscPrecent,
+            'priceAfterDisc' => $disc->sellPrice, //-- ราคาขายต่อหน่วย
+            'itemDiscAmount' => $disc->discAmount, //--- ส่วนลดรวมต่อ 1 รายการ
+            'amountAfterDisc' => $item->qty * $disc->sellPrice,
             'conditionCode' => ! empty($disc->rule_code) ? $disc->rule_code : $freeList->rule_code,
             'conditionName' => ! empty($disc->rule_code) ? $disc->rule_name : $freeList->rule_name,
             'freeQty' => floatval($freeList->freeQty),

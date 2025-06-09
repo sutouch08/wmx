@@ -62,11 +62,43 @@ class Order_sponsor_model extends CI_Model
   }
 
 
+  public function get_exists_detail($order_code, $product_code)
+  {
+    $rs = $this->db
+    ->where('order_code', $order_code)
+    ->where('product_code', $product_code)
+    ->order_by('id', 'ASC')
+    ->limit(1)
+    ->get($this->td);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
   public function add(array $ds = array())
   {
     if( ! empty($ds))
     {
       if($this->db->insert($this->tb, $ds))
+      {
+        return $this->db->insert_id();
+      }
+    }
+
+    return FALSE;
+  }
+
+
+  public function add_detail(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      if($this->db->insert($this->td, $ds))
       {
         return $this->db->insert_id();
       }
@@ -131,7 +163,7 @@ class Order_sponsor_model extends CI_Model
     return $this->db->where('id', $id)->delete($this->td);
   }
 
-  
+
   public function count_rows(array $ds = array())
   {
     if( ! empty($ds['code']))
@@ -239,6 +271,14 @@ class Order_sponsor_model extends CI_Model
     }
 
     return NULL;
+  }
+
+
+  public function recal_total($code)
+  {
+    $qr = "UPDATE order_sponsor SET doc_total = (SELECT SUM(total_amount) FROM order_sponsor_details WHERE order_code = '{$code}') WHERE code = '{$code}'";
+
+    return $this->db->query($qr);
   }
 
 

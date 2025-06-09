@@ -1082,13 +1082,10 @@ class Auto_complete extends CI_Controller
     $sc = array();
     $txt = $_REQUEST['term'];
     $rs = $this->db
-    ->select('code, old_code')
+    ->select('code')
     ->where('active', 1)
-    ->group_start()
     ->like('code', $txt)
-    ->or_like('old_code', $txt)
-    ->group_end()
-    ->limit(20)
+    ->limit(50)
     ->get('products');
 
     if($rs->num_rows() > 0)

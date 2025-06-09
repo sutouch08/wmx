@@ -388,11 +388,10 @@ class Orders extends PS_Controller
                     }
                   }
                 }
-
               }
               else  //--- ถ้ามีรายการในออเดอร์อยู่แล้ว
               {
-                $qty			= $qty + $detail->qty;
+                $qty = $qty + $detail->qty;
 
                 $discount = array(
                   'amount' => 0,
@@ -1424,7 +1423,7 @@ class Orders extends PS_Controller
     $warehouse_code = get_null($this->input->get('warehouse_code'));
     $filter = getConfig('MAX_SHOW_STOCK');
     $auz = getConfig('ALLOW_UNDER_ZERO') ? TRUE : FALSE;
-    $item = $this->products_model->get_with_old_code($item_code);
+    $item = $this->products_model->get($item_code);
 
     if( ! empty($item))
     {
@@ -1541,9 +1540,11 @@ class Orders extends PS_Controller
 			$sc 	.= $isVisual === FALSE ? '<center><span class="font-size-10 blue">('.($stock < 0 ? 0 : $stock).')</span></center>':'';
 
       if( $view === FALSE )
-			{
-			$sc 	.= '<input type="number" class="form-control input-sm order-grid display-block" name="qty[0]['.$item->code.']" id="qty_'.$item->code.'" onkeyup="valid_qty($(this), '.($qty === FALSE ? 1000000 : $qty).')" '.$disabled.' />';
-			}
+      {
+        $sc 	.= '<input type="number" class="form-control input-sm order-grid display-block"
+        data-sku="'.$item->code.'" data-limit="'.$limit.'" data-countstock="'.$item->count_stock.'"
+        name="qty[0]['.$item->code.']" id="qty_'.$item->code.'" '.$disabled.' />';
+      }
 
       $sc 	.= 	'<center>';
       $sc   .= '<span class="font-size-10">';
@@ -1590,10 +1591,10 @@ class Orders extends PS_Controller
 
         if( !empty($item) )
         {
-          $active	= $item->active == 0 ? 'Disactive' : ( $item->can_sell == 0 ? 'Not for sell' : ( $item->is_deleted == 1 ? 'Deleted' : TRUE ) );
+          $active	= $item->active == 0 ? 'Disactive' : TRUE;
 
           $stock	= $isVisual === FALSE ? ( $active == TRUE ? $this->showStock( $this->stock_model->get_stock($item->code) )  : 0 ) : 0; //---- สต็อกทั้งหมดทุกคลัง
-          $qty 		= $isVisual === FALSE ? ( $active == TRUE ? $this->showStock( $this->get_sell_stock($item->code, $warehouse, $zone) ) : 0 ) : FALSE; //--- สต็อกที่สั่งซื้อได้
+          $qty = $isVisual === FALSE ? ( $active == TRUE ? $this->showStock( $this->get_sell_stock($item->code, $warehouse, $zone) ) : 0 ) : FALSE; //--- สต็อกที่สั่งซื้อได้
           $disabled  = $isVisual === TRUE  && $active == TRUE ? '' : ( ($active !== TRUE OR $qty < 1 ) ? 'disabled' : '');
 
           if( $qty < 1 && $active === TRUE )
@@ -1619,8 +1620,8 @@ class Orders extends PS_Controller
             $sc .= 'class="form-control text-center order-grid" ';
             $sc .= 'name="qty['.$item->color_code.']['.$item->code.']" ';
             $sc .= 'id="qty_'.$item->code.'" ';
-            $sc .= 'placeholder="'.$color_code.'-'.$size_code.'" ';
-            $sc .= 'onkeyup="valid_qty($(this), '.$limit.')" '.$disabled.' />';
+            $sc .= 'data-sku="'.$item->code.'" data-limit="'.$limit.'" data-countstock="'.$item->count_stock.'" ';
+            $sc .= 'placeholder="'.$color_code.'-'.$size_code.'" '.$limit.'" '.$disabled.' />';
           }
 
           $sc 	.= $isVisual === FALSE ? '<center>'.$available.'</center>' : '';

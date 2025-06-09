@@ -243,7 +243,7 @@ function getProductGrid(){
 				if(isJson(rs)) {
 					let ds = $.parseJSON(rs);
 					$('#modal').css('width', ds.tableWidth + 'px');
-					$('#modalTitle').html(ds.styleCode + ' | ' + ds.styleOldCode + '<br/>' + ds.styleName);
+					$('#modalTitle').html(ds.modelCode + ' | ' + ds.modelName);
 					$('#modalBody').html(ds.table);
 					$('#orderGrid').modal('show');
 				}
@@ -255,48 +255,294 @@ function getProductGrid(){
 	}
 }
 
-//---- เพิ่มรายการสินค้าเช้าออเดอร์
-function addToOrder(){
-  var order_code = $('#order_code').val();
-	//var count = countInput();
-  var data = [];
-  $(".order-grid").each(function(index, element){
-    if($(this).val() != ''){
-      var code = $(this).attr('id');
-      var arr = code.split('qty_');
-      data.push({'code' : arr[1], 'qty' : $(this).val()});
-    }
-  });
 
-	if(data.length > 0 ){
-		$("#orderGrid").modal('hide');
+function getItemGrid(){
+	let itemCode 	= $("#item-code").val();
+	let whCode = $('#warehouse').val();
+
+	if( itemCode.length > 0  ){
 		$.ajax({
-			url: BASE_URL + 'orders/orders/add_detail/'+order_code,
-			type:"POST",
-      cache:"false",
-      data: {
-        'data' : data
-      },
-			success: function(rs){
-				load_out();
-				var rs = $.trim(rs);
-				if( rs == 'success' ){
-					swal({
-            title: 'success',
-            type: 'success',
-            timer: 1000
-          });
-					$("#btn-save-order").removeClass('hide');
-					updateDetailTable(); //--- update list of order detail
-				}else{
-					swal("Error", rs, "error");
+			url:BASE_URL + 'orders/orders/get_item_grid',
+			type:'GET',
+			cache:false,
+			data:{
+				'warehouse_code' : whCode,
+				'itemCode' : itemCode,
+				'isView' : 0
+			},
+			success:function(rs){
+				var rs = rs.split(' | ');
+
+				if(rs[0] === 'success') {
+					$('#stock-qty').val(rs[2]);
+					$('#input-qty').val('').focus();
+				}
+        else {
+					$('#stock-qty').val('');
+					$('#input-qty').val('');
+					beep();
+          showError(rs[0]);
 				}
 			}
-		});
+		})
 	}
 }
 
 
+function addToOrder() {
+  clearErrorByClass('order-grid');
+
+  let err = 0;
+  let code = $('#order_code').val();
+  let h = {
+    'code' : code,
+    'items' : []
+  };
+
+  $(".order-grid").each(function() {
+    let el = $(this);
+    if(el.val() != '') {
+      let qty = parseDefault(parseFloat(el.val()), 0);
+      let limit = parseDefault(parseFloat(el.data('limit')), 0);
+
+      if(qty < 0 || qty > limit) {
+        el.hasError();
+        err++;
+      }
+
+      if(qty > 0){
+        h.items.push({
+          'sku' : el.data('sku'),
+          'qty' :  qty
+        });
+      }
+    }
+  });
+
+  if(err > 0) {
+    return false;
+  }
+
+  if(h.items.length > 0) {
+    $('#orderGrid').modal('hide');
+
+    load_in();
+
+    $.ajax({
+      url:HOME + 'add_details',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        load_out();
+
+        if(rs.trim() === 'success') {
+          updateDetailTable();
+        }
+        else {
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }
+}
+
+
+//---- เพิ่มรายการสินค้าเช้าออเดอร์
+function addItemToOrder(){
+  console.log('add');
+  $('#item-code').clearError();
+  $('#input-qty').clearError();
+
+	let orderCode = $('#order_code').val();
+  let code = $('#order_code').val();
+
+  let h = {
+    'code' : code,
+    'items' : []
+  };
+
+	let qty = parseDefault(parseInt($('#input-qty').val()), 0);
+	let limit = parseDefault(parseInt($('#stock-qty').val()), 0);
+	let itemCode = $('#item-code').val();
+
+  if(itemCode.length == 0) {
+    $('#item-code').hasError();
+    return false;
+  }
+
+  if(qty <= 0 || qty > limit)
+  {
+    $('#input-qty').hasError();
+    return false;
+  }
+
+  h.items.push({'sku' : itemCode, 'qty' : qty});
+
+  $.ajax({
+    url:HOME + 'add_details',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        updateDetailTable();
+
+        setTimeout(function() {
+          $('#item-code').val('');
+          $('#stock-qty').val('');
+          $('#input-qty').val('');
+          $('#item-code').focus();
+        },1200);
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+    }
+  })
+}
+
+//---- for update price on noncount item
+function updateItemPrice(id) {
+  let code = $('#order_code').val();
+  let price = parseDefault(parseFloat($('#price-'+id).val()), 0.00);
+  let currentPrice = parseDefault(parseFloat($('#price-'+id).data('price')), 0);
+  price = price < 0 ? price * -1 : price;
+
+  recalItem(id);
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'update_item_price',
+    type:'POST',
+    cache:false,
+    data:{
+      'order_code' : code,
+      'id' : id,
+      'price' : price
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() == 'success') {
+        //--- update current
+        $('#price-'+id).data('price', price);
+      }
+      else {
+        showError(rs);
+        //--- roll back data
+        $('#price-'+id).val(currentPrice);
+        recalItem(id);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+      $('#price-'+id).val(currentPrice);
+      recalItem(id);
+    }
+  })
+}
+
+
+function updateItem(id) {
+  clearErrorByClass('e');
+
+  let h = {
+    'id' : id,
+    'code' : $('#order_code').val(),
+    'qty' : parseDefault(parseFloat($('#qty-'+id).val()), 0),
+    'price' : parseDefault(parseFloat($('#price-'+id).val()), 0.00)
+  }
+
+  let currentQty = parseDefault(parseFloat($('#qty-'+id).data('qty')), 0);
+	let currentPrice = parseDefault(parseFloat($('#price-'+id).data('price')), 0);
+
+  if(h.qty <= 0) {
+    $('#qty-'+id).hasError();
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'update_item',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        $('#price-'+id).data('price', h.price);
+        $('#qty-'+id).data('qty', h.qty);
+      }
+      else {
+        showError(rs);
+        $('#price-'+id).val(currentPrice);
+        $('#qty-'+id).val(currentQty);
+      }
+
+      recalItem(id);
+    },
+    error:function(rs) {
+      showError(rs);
+      $('#qty-'+id).val(currentQty);
+      recalItem(id);
+    }
+  })
+}
+
+
+function recalItem(id) {
+	let price = parseDefault(parseFloat($('#price-'+id).val()), 0);
+  let qty = parseDefault(parseFloat($('#qty-'+id).val()), 0);
+
+  if(price < 0) {
+    price = price * (-1);
+    $('#price-'+id).val(price.toFixed(2));
+  }
+
+	let lineTotal = price * qty;
+	$('#line-total-'+id).val(addCommas(lineTotal.toFixed(2)));
+	recalTotal();
+}
+
+
+function recalTotal() {
+	let totalQty = 0;
+  let totalAmount = 0;
+
+	$('.line-total').each(function() {
+		let id = $(this).data('id');
+		let price = parseDefault(parseFloat($('#price-'+id).val()), 0);
+		let qty = parseDefault(parseFloat($('#qty-'+id).val()), 0);
+	  let amount = qty * price;
+
+    totalQty += qty;
+    totalAmount += amount;
+	});
+
+	$('#total-qty').val(addCommas(totalQty.toFixed(2)));
+	$('#total-amount').val(addCommas(totalAmount.toFixed(2)));
+}
 
 
 // JavaScript Document
@@ -355,8 +601,6 @@ function removeDetail(id, name){
 }
 
 
-
-
 $("#pd-box").autocomplete({
 	source: BASE_URL + 'auto_complete/get_model_code_and_name',
 	autoFocus: true,
@@ -368,8 +612,6 @@ $("#pd-box").autocomplete({
 });
 
 
-
-
 $('#pd-box').keyup(function(event) {
 	if(event.keyCode == 13){
 		var code = $(this).val();
@@ -377,7 +619,6 @@ $('#pd-box').keyup(function(event) {
 			setTimeout(function(){
 				getProductGrid();
 			}, 300);
-
 		}
 	}
 });
@@ -406,103 +647,6 @@ $('#input-qty').keyup(function(e){
 		addItemToOrder();
 	}
 });
-
-
-//---- เพิ่มรายการสินค้าเช้าออเดอร์
-function addItemToOrder(){
-	var orderCode = $('#order_code').val();
-	var qty = parseDefault(parseInt($('#input-qty').val()), 0);
-	var limit = parseDefault(parseInt($('#stock-qty').val()), 0);
-	var itemCode = $('#item-code').val();
-  var data = [{'code':itemCode, 'qty' : qty}];
-
-	if(qty > 0 && qty <= limit){
-		load_in();
-		$.ajax({
-			url:BASE_URL + 'orders/orders/add_detail/'+orderCode,
-			type:"POST",
-			cache:"false",
-			data:{
-				'data' : data
-			},
-			success: function(rs){
-				load_out();
-				var rs = $.trim(rs);
-				if( rs == 'success' ){
-					swal({
-						title: 'success',
-						type: 'success',
-						timer: 1000
-					});
-
-					$("#btn-save-order").removeClass('hide');
-					updateDetailTable(); //--- update list of order detail
-
-					setTimeout(function(){
-						$('#item-code').val('');
-						$('#stock-qty').val('');
-						$('#input-qty').val('');
-						$('#item-code').focus();
-					},1200);
-
-
-				}else{
-					swal("Error", rs, "error");
-				}
-			}
-		});
-	}
-}
-
-
-
-
-//--- ตรวจสอบจำนวนที่คีย์สั่งใน order grid
-function countInput(){
-	var qty = 0;
-	$(".order-grid").each(function(index, element) {
-        if( $(this).val() != '' ){
-			qty++;
-		}
-  });
-	return qty;
-}
-
-
-
-function validUpdate(){
-	var date_add = $("#date").val();
-	var customer_code = $("#customerCode").val();
-  var customer_name = $('#customer').val();
-	var user_ref = $("#user_ref").val();
-  var warehouse = $('#warehouse').val();
-
-	//---- ตรวจสอบวันที่
-	if( ! isDate(date_add) ){
-		swal("วันที่ไม่ถูกต้อง");
-		return false;
-	}
-
-	//--- ตรวจสอบลูกค้า
-	if( customer_code.length == 0 || customer_name == "" ){
-		swal("ชื่อลูกค้าไม่ถูกต้อง");
-		return false;
-	}
-
-  if(user_ref == ""){
-    swal('กรุณาระบุผู้เบิก[ผู้สั่งงาน]');
-    return false;
-  }
-
-
-  if(warehouse == ""){
-    swal("กรุณาเลือกคลัง");
-    return false;
-  }
-
-  updateOrder();
-}
-
 
 
 

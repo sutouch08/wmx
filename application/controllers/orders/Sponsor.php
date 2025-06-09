@@ -17,6 +17,8 @@ class Sponsor extends PS_Controller
     $this->home = base_url().'orders/sponsor';
     $this->load->model('orders/order_sponsor_model');
     $this->load->model('orders/order_sponsor_model');
+    $this->load->model('orders/orders_model');
+    $this->load->model('orders/reserv_stock_model');
     $this->load->model('stock/stock_model');
     $this->load->model('masters/sponsors_model');
     $this->load->model('masters/sponsor_budget_model');
@@ -193,7 +195,7 @@ class Sponsor extends PS_Controller
       $order->total_amount = $totalAmount;
 
 			$ship_to = $this->customer_address_model->get_customer_address_list($order->customer_code, 'B');
-      
+
       $ds['approve_logs'] = $this->approve_logs_model->get($code);
       $ds['order'] = $order;
       $ds['details'] = $details;
@@ -285,25 +287,273 @@ class Sponsor extends PS_Controller
   }
 
 
-
-  public function edit_detail($code)
+  public function add_details()
   {
-    $this->load->helper('product_tab');
-    $ds = array();
-    $rs = $this->order_sponsor_model->get($code);
-    if($rs->state <= 3)
+    $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
-      $rs->customer_name = $this->customers_model->get_name($rs->customer_code);
-      $details = $this->order_sponsor_model->get_order_details($code);
-      $ds['order'] = $rs;
-      $ds['details'] = $details;
-      $ds['allowEditDisc'] = FALSE;
-      $ds['allowEditPrice'] = getConfig('ALLOW_EDIT_PRICE') == 1 ? TRUE : FALSE;
-      $ds['edit_order'] = FALSE; //--- ใช้เปิดปิดปุ่มแก้ไขราคาสินค้าไม่นับสต็อก
-      $this->load->view('sponsor/sponsor_edit_detail', $ds);
+      $order = $this->order_sponsor_model->get($ds->code);
+
+      if( ! empty($order))
+      {
+        if($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R')
+        {
+          if( ! empty($ds->items))
+          {
+            $auz = is_true(getConfig('ALLOW_UNDER_ZERO'));
+
+            $this->db->trans_begin();
+
+            foreach($ds->items as $rs)
+            {
+              if($sc === FALSE) { break; }
+
+              $item = $this->products_model->get($rs->sku);
+
+              if( ! empty($item) && $rs->qty > 0)
+              {
+                $qty = intval($rs->qty);
+                $stock = $this->get_sell_stock($item->code, $order->warehouse_code);
+
+                if($stock >= $qty OR $item->count_stock == 0 OR $auz)
+                {
+                  $detail = $this->order_sponsor_model->get_exists_detail($order->code, $item->code);
+
+                  if(empty($detail))
+                  {
+                    $arr = array(
+                      'order_code' => $order->code,
+                      'product_code' => $item->code,
+                      'product_name' => $item->name,
+                      'model_code' => $item->model_code,
+                      'unit_code' => $item->unit_code,
+                      'cost' => $item->cost,
+                      'price' => $item->price,
+                      'qty' => $qty,
+                      'total_amount' => $qty * $item->price,
+                      'is_count' => $item->count_stock
+                    );
+
+                    if( ! $this->order_sponsor_model->add_detail($arr))
+                    {
+                      $sc = FALSE;
+                      $this->error = "Error : Failed to insert item row {$item->code}";
+                    }
+                  }
+                  else
+                  {
+                    $Qty = $qty + $detail->qty;
+                    $total_amount = $Qty * $detail->price;
+
+                    $arr = array(
+                      'qty' => $Qty,
+                      'total_amount' => $total_amount
+                    );
+
+                    if( ! $this->order_sponsor_model->update_detail($detail->id, $arr))
+                    {
+                      $sc = FALSE;
+                      $this->error = "Error : Update failed for {$item->code}";
+                    }
+                  }
+                }
+                else
+                {
+                  $sc = FALSE;
+                  $this->error = "Error : สินค้าไม่เพียงพอ : {$item->code}";
+                }
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              if($order->status != 'P')
+              {
+                $arr = array(
+                  'status' => 'P',
+                  'update_user' => $this->_user->uname
+                );
+
+                $this->order_sponsor_model->update($order->code, $arr);
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              $this->db->trans_commit();
+
+              $this->order_sponsor_model->recal_total($order->code);
+            }
+            else
+            {
+              $this->db->trans_rollback();
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            set_error('required');
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('status');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('notfound');
+      }
     }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
   }
 
+
+  //--- update item qty
+  public function update_item()
+  {
+    $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
+    {
+      $order = $this->order_sponsor_model->get($ds->code);
+
+      if( ! empty($order))
+      {
+        if($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R')
+        {
+          $detail = $this->order_sponsor_model->get_detail($ds->id);
+
+          if( ! empty($detail))
+          {
+            if($ds->qty > 0)
+            {
+              $auz = is_true(getConfig('ALLOW_UNDER_ZERO'));
+              $Qty = intval($ds->qty);
+              $stock = $this->get_sell_stock($detail->product_code, $order->warehouse_code);
+
+              if($stock >= $Qty OR $detail->is_count == 0 OR $auz)
+              {
+                $total_amount = $Qty * $detail->price;
+
+                $arr = array(
+                  'qty' => $Qty,
+                  'total_amount' => $total_amount,
+                  'update_user' => $this->_user->uname
+                );
+
+                if( ! $this->order_sponsor_model->update_detail($detail->id, $arr))
+                {
+                  $sc = FALSE;
+                  $this->error = "Error : Update failed for {$detail->product_code}";
+                }
+                else
+                {
+                  $this->order_sponsor_model->recal_total($order->code);
+                }
+              }
+              else
+              {
+                $sc = FALSE;
+                $this->error = "Error : สินค้าไม่เพียงพอ : {$detail->product_code}";
+              }
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            set_error('notfound');
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('status');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('notfound');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
+
+
+  public function update_item_price()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('order_code');
+    $price = $this->input->post('price');
+    $id = $this->input->post('id');
+
+    $order = $this->order_sponsor_model->get($code);
+
+    if( ! empty($order))
+    {
+      if($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R')
+      {
+        $detail = $this->order_sponsor_model->get_detail($id);
+
+        //--- ถ้ารายการนี้มีอยู่
+  			if( ! empty($detail))
+  			{
+					$total_amount = ( $detail->qty * $price );
+
+					$arr = array(
+						'price' => $price,
+						'total_amount' => $total_amount,
+						'update_user' => $this->_user->uname
+					);
+
+					if( ! $this->order_sponsor_model->update_detail($id, $arr))
+          {
+            $sc = FALSE;
+            $this->error = "Failed to update item price";
+          }
+          else
+          {
+            $this->order_sponsor_model->recal_total($code);
+          }
+  			}
+        else
+        {
+          $sc = FALSE;
+          $this->error = "Item not found in order or has removed from order";
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('status');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Invalid order number";
+    }
+
+    $this->_response($sc);
+  }
 
 
   public function save($code)
@@ -373,6 +623,17 @@ class Sponsor extends PS_Controller
 		}
 
     $this->_response($sc);
+  }
+
+
+  public function get_sell_stock($item_code, $warehouse = NULL, $zone = NULL)
+  {
+    //---- sell stock = stock in zone + buffer + cancel
+    $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse, $zone);
+    $ordered = $this->orders_model->get_reserv_stock($item_code, $warehouse, $zone);
+    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item_code, $warehouse);
+    $availableStock = $sell_stock - $ordered - $reserv_stock;
+		return $availableStock < 0 ? 0 : $availableStock;
   }
 
 

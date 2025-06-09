@@ -123,6 +123,50 @@ class stock_model extends CI_Model
 
     $rs = $this->db->where('s.product_code', $item)->get();
 
+    $stock = intval($rs->row()->qty);
+    $buffer = $this->get_buffer_stock($item, $warehouse, $zone);
+    $cancel = $this->get_cancel_stock($item, $warehouse, $zone);
+
+    return $stock + $buffer + $cancel;
+  }
+
+
+  public function get_buffer_stock($sku, $warehouse_code = NULL, $zone_code = NULL)
+  {
+    $this->db->select_sum('qty')->where('product_code', $sku);
+
+    if( ! empty($warehouse_code))
+    {
+      $this->db->where('warehouse_code', $warehouse_code);
+    }
+
+    if( ! empty($zone_code))
+    {
+      $this->db->where('zone_code', $zone_code);
+    }
+
+    $rs = $this->db->get('buffer');
+
+    return intval($rs->row()->qty);
+  }
+
+
+  public function get_cancel_stock($sku, $warehouse_code = NULL, $zone_code = NULL)
+  {
+    $this->db->select_sum('qty')->where('product_code', $sku);
+
+    if( ! empty($warehouse_code))
+    {
+      $this->db->where('warehouse_code', $warehouse_code);
+    }
+
+    if( ! empty($zone_code))
+    {
+      $this->db->where('zone_code', $zone_code);
+    }
+
+    $rs = $this->db->get('cancle');
+
     return intval($rs->row()->qty);
   }
 
