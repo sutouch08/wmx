@@ -303,6 +303,210 @@ class Products extends REST_Controller
   }
 
 
+  public function price_list_post()
+  {
+    $sc = TRUE;
+    $this->load->model('masters/products_model');
+    $type = "ITEM";
+    $trans_id = genUid();
+    $action = "price  list";
+    $this->api_path = $this->api_path."/price_list";
+
+    $json = file_get_contents('php://input');
+
+    $ds = json_decode($json);
+
+    if(empty($ds))
+    {
+      if($this->logs_json)
+      {
+        $arr = array(
+          'trans_id' => $trans_id,
+          'status' => FALSE,
+          'error' => 'empty data'
+        );
+
+        $logs = array(
+          'trans_id' => $trans_id,
+          'api_path' => $this->api_path,
+          'type' =>'ITEM',
+          'code' => NULL,
+          'action' => $action,
+          'status' => 'failed',
+          'message' => 'empty data',
+          'request_json' => $json,
+          'response_json' => json_encode($arr)
+        );
+
+        $this->api_logs_model->add_logs($logs);
+      }
+
+      $this->response($arr, 400);
+    }
+
+    //--- check required fields
+    if( ! property_exists($ds, 'items') OR ! is_array($ds->items))
+    {
+      $sc = FALSE;
+
+      if( ! property_exists($ds, 'items'))
+      {
+        $this->error = "Missing required parameter : items";
+      }
+      else
+      {
+        $this->error = "items must be array";
+      }
+
+      $arr = array(
+        'trans_id' => $trans_id,
+        'status' => FALSE,
+        'error' => $this->error
+      );
+
+      if($this->logs_json)
+      {
+        $logs = array(
+          'trans_id' => $trans_id,
+          'api_path' => $this->api_path,
+          'type' =>'ITEM',
+          'code' => NULL,
+          'action' => $action,
+          'status' => 'failed',
+          'message' => $this->error,
+          'request_json' => $json,
+          'response_json' => json_encode($arr)
+        );
+
+        $this->api_logs_model->add_logs($logs);
+      }
+
+      $this->response($arr, 400);
+    }
+
+    if($sc === TRUE)
+    {
+      foreach($ds->items as $item)
+      {
+        if($sc === FALSE) { break; }
+
+        if(empty($item->code) OR ! $this->products_model->is_exists($item->code))
+        {
+          $sc = FALSE;
+          $this->error = "Invalid SKU Code '{$item->code}'";
+        }
+
+        if($sc === TRUE)
+        {
+          if( ! isset($item->cost) OR ! is_numeric($item->cost))
+          {
+            $sc = FALSE;
+            $this->error = "Cost must be number @{$item->code}";
+          }
+        }
+
+        if($sc === TRUE)
+        {
+          if( ! isset($item->price) OR ! is_numeric($item->price))
+          {
+            $sc = FALSE;
+            $this->error = "Price must be number @{$item->code}";
+          }
+        }
+      }
+
+
+      if($sc === FALSE)
+      {
+        $arr = array(
+          'trans_id' => $trans_id,
+          'status' => FALSE,
+          'error' => $this->error
+        );
+
+        if($this->logs_json)
+        {
+          $logs = array(
+            'trans_id' => $trans_id,
+            'api_path' => $this->api_path,
+            'type' =>'ITEM',
+            'code' => NULL,
+            'action' => $action,
+            'status' => 'failed',
+            'message' => $this->error,
+            'request_json' => $json,
+            'response_json' => json_encode($arr)
+          );
+
+          $this->api_logs_model->add_logs($logs);
+        }
+
+        $this->response($arr, 400);
+      }
+    }
+
+    $failed_list = [];
+    $count = 0;
+    $success = 0;
+    $failed = 0;
+
+    if($sc === TRUE)
+    {
+      foreach($ds->items as $item)
+      {
+        $count++;
+
+        $arr = array(
+          'cost' => $item->cost,
+          'price' => $item->price
+        );
+
+        if( ! $this->products_model->update($item->code, $arr))
+        {
+          $failed++;
+          $failed_list[] = array('code' => $item->code, 'status' => 'failed');
+        }
+        else
+        {
+          $success++;
+        }
+      }
+    }
+
+    if($sc === TRUE)
+    {
+      $arr = array(
+        'trans_id' => $trans_id,
+        'status' => TRUE,
+        'message' => 'success',
+        'count' => $count,
+        'success' => $success,
+        'failed' => $failed,
+        'failed_items' => empty($failed_list) ? NULL : $failed_list
+      );
+
+      if($this->logs_json)
+      {
+        $logs = array(
+          'trans_id' => $trans_id,
+          'api_path' => $this->api_path,
+          'type' =>'ITEM',
+          'code' => NULL,
+          'action' => $action,
+          'status' => 'success',
+          'message' => 'success',
+          'request_json' => $json,
+          'response_json' => json_encode($arr)
+        );
+
+        $this->api_logs_model->add_logs($logs);
+      }
+
+      $this->response($arr, 200);
+    }
+  } //-- end
+
+
   private function update_product_attribute($ds)
   {
     if( ! empty($ds))
