@@ -745,6 +745,11 @@ class Orders_model extends CI_Model
       $this->db->like('so_no', $ds['so_no']);
     }
 
+    if( ! empty($ds['fulfillment_code']))
+    {
+      $this->db->like('fulfillment_code', $ds['fulfillment_code']);
+    }
+
     //--- รหัส/ชื่อ ลูกค้า
     if( ! empty($ds['customer']))
     {
@@ -900,7 +905,7 @@ class Orders_model extends CI_Model
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $role = 'S')
   {
     $this->db
-    ->select('id, code, role, so_no, reference, customer_code, customer_name, customer_ref')
+    ->select('id, code, role, so_no, fulfillment_code, reference, customer_code, customer_name, customer_ref')
     ->select('channels_code, payment_code, state, status, warehouse_code, zone_code, date_add, is_expired, doc_total')
     ->select('is_backorder, is_approved, user, empName, is_cancled, budget_id, budget_code')
     ->where('role', $role);
@@ -924,6 +929,11 @@ class Orders_model extends CI_Model
     if( ! empty($ds['so_no']))
     {
       $this->db->like('so_no', $ds['so_no']);
+    }
+
+    if( ! empty($ds['fulfillment_code']))
+    {
+      $this->db->like('fulfillment_code', $ds['fulfillment_code']);
     }
 
     //---- เลขที่อ้างอิงออเดอร์ภายนอก
@@ -1104,6 +1114,7 @@ class Orders_model extends CI_Model
 
     return NULL;
   }
+
 
   private function zone_in($zone)
   {

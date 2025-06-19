@@ -21,6 +21,10 @@
 			<input type="text" class="form-control input-sm search" name="so_no"  value="<?php echo $so_no; ?>" />
 		</div>
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>Fulfillment No.</label>
+			<input type="text" class="form-control input-sm search" name="fulfillment_code"  value="<?php echo $fulfillment_code; ?>" />
+		</div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>MKP No.</label>
 			<input type="text" class="form-control input-sm search" name="reference" value="<?php echo $reference; ?>" />
 		</div>
@@ -28,7 +32,7 @@
 			<label>ลูกค้า</label>
 			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
 		</div>
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>ช่องทางขาย</label>
 			<select class="width-100 filter" name="channels" id="channels">
 				<option value="all">ทั้งหมด</option>
@@ -61,7 +65,7 @@
 			</select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
 			<label>Pre order</label>
 			<select class="form-control input-sm" name="is_pre_order" onchange="getSearch()">
 				<option value="all">ทั้งหมด</option>
@@ -70,7 +74,7 @@
 			</select>
 		</div>
 
-		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-4 padding-5">
+		<!-- <div class="col-lg-1 col-md-2 col-sm-2 col-xs-4 padding-5">
 			<label>Add By</label>
 			<select class="form-control input-sm" name="method" onchange="getSearch()">
 				<option value="all">ทั้งหมด</option>
@@ -78,7 +82,7 @@
 				<option value="1" <?php echo is_selected('1', $method); ?>>Upload</option>
 				<option value="2" <?php echo is_selected('2', $method); ?>>API</option>
 			</select>
-		</div>
+		</div> -->
 
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>User</label>
@@ -144,15 +148,16 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="order-table" style="overflow:auto;">
-		<table class="table tableFixHead" style="min-width:1260px; margin-bottom:20px;">
+		<table class="table tableFixHead" style="min-width:1380px; margin-bottom:20px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-40 middle text-center fix-header">ลำดับ</th>
 					<th class="fix-width-80 middle text-center fix-header">วันที่</th>
 					<th class="fix-width-100 middle fix-header">Order No.</th>
 					<th class="fix-width-120 middle fix-header">SO No.</th>
+					<th class="fix-width-120 middle fix-header">Fulfillment No.</th>
 					<th class="fix-width-120 middle fix-header">MKP No.</th>
-					<th class="min-width-250 middle fix-header">ลูกค้า</th>
+					<th class="fix-width-250 middle fix-header">ลูกค้า</th>
 					<th class="fix-width-100 middle text-right fix-header">ยอดเงิน</th>
 					<th class="fix-width-150 middle fix-header">ช่องทางขาย</th>
 					<th class="fix-width-150 middle fix-header">การชำระเงิน</th>
@@ -170,6 +175,7 @@
               <td class="middle text-center pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo thai_date($rs->date_add); ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->code . $cn_text; ?></td>
 							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->so_no; ?></td>
+							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->fulfillment_code; ?></td>
 							<td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')"><?php echo $rs->reference; ?></td>
               <td class="middle pointer" onclick="editOrder('<?php echo $rs->code; ?>')">
 								<?php if($rs->role == 'L' OR $rs->role == 'R') : ?>

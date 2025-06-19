@@ -27,8 +27,8 @@ class Wrx_ob_api
     $this->ci->load->model('inventory/delivery_order_model');
     $this->ci->load->model('masters/sender_model');
 
-    $action = "INT021";
-    $type = "INT021";
+    $action = "update";
+    $type = "INT21";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_OB_URL');
     $api_path = $url;

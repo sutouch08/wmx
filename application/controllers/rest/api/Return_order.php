@@ -10,7 +10,7 @@ class Return_order extends REST_Controller
 	public $log_json = FALSE;
 	public $api = FALSE;
   public $checkBackorder = FALSE;
-  private $type = 'SM';
+  private $type = 'ADD90';
 
   public function __construct()
   {
@@ -971,7 +971,7 @@ class Return_order extends REST_Controller
       $this->error = "returnAuthNumber is required";
       return FALSE;
     }
-    
+
     if(empty($data->customer_code))
     {
       $this->error = "customer_code is required";

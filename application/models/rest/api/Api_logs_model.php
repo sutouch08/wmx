@@ -19,12 +19,17 @@ class Api_logs_model extends CI_Model
 
 	public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
 	{
-		if(!empty($ds['code']))
+		if( ! empty($ds['code']))
 		{
 			$this->logs->like('code', $ds['code'], 'after');
 		}
 
-		if(!empty($ds['status']) && $ds['status'] !== 'all')
+		// if( ! empty($ds['api_path']) && $ds['api_path'] != 'all')
+		// {
+		// 	$this->logs->where('api_path', $ds['api_path']);
+		// }
+
+		if( ! empty($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->logs->where('status', $ds['status']);
 		}
@@ -39,7 +44,7 @@ class Api_logs_model extends CI_Model
 			$this->logs->where('action', $ds['action']);
 		}
 
-		if(!empty($ds['from_date']) && !empty($ds['to_date']))
+		if( ! empty($ds['from_date']) && !empty($ds['to_date']))
 		{
 			$this->logs
 			->where('date_upd >=', from_date($ds['from_date']))
@@ -61,12 +66,17 @@ class Api_logs_model extends CI_Model
 
 	public function count_rows(array $ds = array())
 	{
-		if(!empty($ds['code']))
+		if( ! empty($ds['code']))
 		{
 			$this->logs->like('code', $ds['code'], 'after');
 		}
 
-		if(!empty($ds['status']) && $ds['status'] !== 'all')
+		// if( ! empty($ds['api_path']) && $ds['api_path'] != 'all')
+		// {
+		// 	$this->logs->where('api_path', $ds['api_path']);
+		// }
+
+		if( ! empty($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->logs->where('status', $ds['status']);
 		}
@@ -81,7 +91,7 @@ class Api_logs_model extends CI_Model
 			$this->logs->where('action', $ds['action']);
 		}
 
-		if(!empty($ds['from_date']) && !empty($ds['to_date']))
+		if( ! empty($ds['from_date']) && !empty($ds['to_date']))
 		{
 			$this->logs
 			->where('date_upd >=', from_date($ds['from_date']))
@@ -104,4 +114,16 @@ class Api_logs_model extends CI_Model
 		return NULL;
 	}
 
+
+	public function get_all_path()
+	{
+		$rs = $this->logs->order_by('pos', 'ASC')->get('api_path');
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
 } //---

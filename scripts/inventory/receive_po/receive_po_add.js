@@ -95,6 +95,7 @@ function save() {
 				'po_detail_id' : el.data('baseline'),
 				'product_code' : el.data('code'),
 				'product_name' : el.data('name'),
+				'unit' : el.data('unit'),
 				'qty' : qty,
 				'backlogs' : el.data('backlogs')
 			}

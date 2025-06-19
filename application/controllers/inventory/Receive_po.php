@@ -42,7 +42,8 @@ class Receive_po extends PS_Controller
       'from_date' => get_filter('from_date', 'receive_from_date', ''),
       'to_date' => get_filter('to_date', 'receive_to_date', ''),
       'warehouse' => get_filter('warehouse', 'receive_warehouse', 'all'),
-      'status' => get_filter('status', 'receive_status', ($this->is_mobile ? 'O' : 'all'))
+      'status' => get_filter('status', 'receive_status', 'all'),
+      'is_mobile' => $this->is_mobile ? TRUE : FALSE
     );
 
 
@@ -151,7 +152,7 @@ class Receive_po extends PS_Controller
         {
           $this->receive_po_model->update($doc->code, ['status' => 'R', 'update_user' => $this->_user->uname]);
         }
-        
+
         $totalQty = 0;
         $totalReceive = 0;
 
@@ -218,7 +219,7 @@ class Receive_po extends PS_Controller
 
       if( ! empty($doc))
       {
-        if($doc->status == 'O')
+        if($doc->status == 'O' OR $doc->status == 'R')
         {
           $this->db->trans_begin();
 
@@ -305,7 +306,7 @@ class Receive_po extends PS_Controller
 
       if( ! empty($doc))
       {
-        if($doc->status == 'O')
+        if($doc->status == 'O' OR $doc->status == 'R')
         {
           if( ! empty($ds->rows))
           {
@@ -805,6 +806,7 @@ class Receive_po extends PS_Controller
                           'zone_code' => $zone->code,
                           'product_code' => $rs->product_code,
                           'product_name' => $rs->product_name,
+                          'unit' => $rs->unit,
                           'qty' => $rs->qty,
                           'receive_qty' => $ds->save_type == '1' ? $rs->qty : 0,
                           'valid' => $ds->save_type == '1' ? 1 : 0,
@@ -1289,6 +1291,7 @@ class Receive_po extends PS_Controller
               'po_detail_id' => $rs->id,
               'product_code' => $rs->product_code,
               'product_name' => $rs->product_name,
+              'unit' => $rs->unit,
               'on_order' => $onOrder,
               'on_order_label' => number($onOrder, 2),
               'qty_label' => number($qty, 2),

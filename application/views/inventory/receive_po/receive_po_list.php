@@ -109,7 +109,7 @@
 								<?php if($this->pm->can_delete && $rs->status != 'D') : ?>
 									<button type="button" class="btn btn-minier btn-danger" onclick="goDelete('<?php echo $rs->code; ?>')"><i class="fa fa-trash"></i></button>
 								<?php endif; ?>
-								<?php if($this->pm->can_edit && $rs->status == 'O') : ?>
+								<?php if($this->pm->can_edit && ($rs->status == 'O' OR $rs->status == 'R')) : ?>
 									<button type="button" class="btn btn-minier btn-purple" onclick="goProcess('<?php echo $rs->code; ?>')">รับเข้า</button>
 								<?php endif; ?>
 								<?php if($this->pm->can_edit && $rs->status == 'P') : ?>

@@ -52,6 +52,7 @@ class Orders extends PS_Controller
     $filter = array(
       'code' => get_filter('code', 'order_code', ''),
       'so_no' =>  get_filter('so_no', 'so_no', ''),
+      'fulfillment_code' => get_filter('fulfillment_code', 'fulfillment_code', ''),
       'reference' => get_filter('reference', 'order_reference', ''),
       'customer' => get_filter('customer', 'order_customer', ''),
       'user' => get_filter('user', 'order_user', 'all'),

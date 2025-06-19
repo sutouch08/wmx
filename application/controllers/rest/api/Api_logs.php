@@ -21,6 +21,7 @@ class Api_logs extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'logs_code', ''),
+			'api_path' => get_filter('api_path', 'logs_path', 'all'),
       'status' => get_filter('status', 'logs_status', 'all'),
 			'type' => get_filter('type', 'logs_type', 'all'),
 			'action' => get_filter('action', 'logs_action', 'all'),
@@ -44,6 +45,7 @@ class Api_logs extends PS_Controller
 			$logs   = $this->api_logs_model->get_list($filter, $perpage, $this->uri->segment($segment));
 
 			$filter['logs'] = $logs;
+			$filter['path'] = $this->api_logs_model->get_all_path();
 
 			$this->pagination->initialize($init);
 			$this->load->view('rest/api/api_logs_view', $filter);
@@ -62,6 +64,7 @@ class Api_logs extends PS_Controller
 	{
 		$filter = array(
 			'logs_code',
+			'logs_path',
 			'logs_status',
 			'logs_type',
 			'logs_action',

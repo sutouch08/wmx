@@ -6,6 +6,7 @@ function receive_status_color($status = 'P')
   $colors = array(
     'P' => '#FFFFFF',
     'O' => '#fbe4ff',
+    'R' => '#f1e9ff',
     'C' => '#f4ffe7',
     'D' => '#d3d3d3'
   );
@@ -20,6 +21,7 @@ function receive_status_text($status = 'P')
   $text = array(
     'P' => 'Draft',
     'O' => 'Open',
+    'R' => 'Receiving',
     'C' => 'Closed',
     'D' => 'Canceled'
   );

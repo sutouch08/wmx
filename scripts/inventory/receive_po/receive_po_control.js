@@ -26,6 +26,7 @@ function addPoItems() {
 
 					let itemCode = el.data('code'); //--- product code;
 					let itemName = el.data('name');
+					let unitCode = el.data('unit');
 					let baseCode = el.data('basecode');
 					let baseLine = el.data('baseline');
 					let limit = parseDefault(parseFloat(el.data('limit')), 0.00);
@@ -35,6 +36,7 @@ function addPoItems() {
 						'uid' : no,
 						'pdCode' : itemCode,
 						'pdName' : itemName,
+						'unit' : unitCode,
 						'baseCode' : baseCode,
 						'baseLine' : baseLine,
 						'qty' : qty,

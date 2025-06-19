@@ -40,7 +40,7 @@ class Products extends REST_Controller
   {
     $sc = TRUE;
     $this->load->model('masters/products_model');
-    $type = "ITEM";
+    $type = "INT10";
     $trans_id = genUid();
     $action = "create";
 
@@ -61,7 +61,7 @@ class Products extends REST_Controller
         $logs = array(
           'trans_id' => $trans_id,
           'api_path' => $this->api_path,
-          'type' =>'ITEM',
+          'type' => $type,
           'code' => NULL,
           'action' => $action,
           'status' => 'failed',
@@ -99,7 +99,7 @@ class Products extends REST_Controller
           $logs = array(
             'trans_id' => $trans_id,
             'api_path' => $this->api_path,
-            'type' =>'ITEM',
+            'type' => $type,
             'code' => NULL,
             'action' => $action,
             'status' => 'failed',
@@ -138,7 +138,7 @@ class Products extends REST_Controller
             $logs = array(
               'trans_id' => $trans_id,
               'api_path' => $this->api_path,
-              'type' =>'ITEM',
+              'type' => $type,
               'code' => $ds->code,
               'action' => $action,
               'status' => 'failed',
@@ -220,7 +220,7 @@ class Products extends REST_Controller
               $logs = array(
                 'trans_id' => $trans_id,
                 'api_path' => $this->api_path,
-                'type' =>'ITEM',
+                'type' => $type,
                 'code' => $ds->code,
                 'action' => $action,
                 'status' => 'failed',
@@ -237,6 +237,8 @@ class Products extends REST_Controller
         }
         else
         {
+          $action = "update";
+
           if( ! $this->products_model->update_by_id($id, $arr))
           {
             $sc = FALSE;
@@ -253,7 +255,7 @@ class Products extends REST_Controller
               $logs = array(
                 'trans_id' => $trans_id,
                 'api_path' => $this->api_path,
-                'type' =>'ITEM',
+                'type' => $type,
                 'code' => $ds->code,
                 'action' => $action,
                 'status' => 'failed',
@@ -284,7 +286,7 @@ class Products extends REST_Controller
             $logs = array(
               'trans_id' => $trans_id,
               'api_path' => $this->api_path,
-              'type' =>'ITEM',
+              'type' => $type,
               'code' => $ds->code,
               'action' => $action,
               'status' => 'success',
@@ -307,9 +309,9 @@ class Products extends REST_Controller
   {
     $sc = TRUE;
     $this->load->model('masters/products_model');
-    $type = "ITEM";
+    $type = "INT11";
     $trans_id = genUid();
-    $action = "price  list";
+    $action = "update";
     $this->api_path = $this->api_path."/price_list";
 
     $json = file_get_contents('php://input');
@@ -329,7 +331,7 @@ class Products extends REST_Controller
         $logs = array(
           'trans_id' => $trans_id,
           'api_path' => $this->api_path,
-          'type' =>'ITEM',
+          'type' => $type,
           'code' => NULL,
           'action' => $action,
           'status' => 'failed',
@@ -369,7 +371,7 @@ class Products extends REST_Controller
         $logs = array(
           'trans_id' => $trans_id,
           'api_path' => $this->api_path,
-          'type' =>'ITEM',
+          'type' => $type,
           'code' => NULL,
           'action' => $action,
           'status' => 'failed',
@@ -429,7 +431,7 @@ class Products extends REST_Controller
           $logs = array(
             'trans_id' => $trans_id,
             'api_path' => $this->api_path,
-            'type' =>'ITEM',
+            'type' => $type,
             'code' => NULL,
             'action' => $action,
             'status' => 'failed',
@@ -490,7 +492,7 @@ class Products extends REST_Controller
         $logs = array(
           'trans_id' => $trans_id,
           'api_path' => $this->api_path,
-          'type' =>'ITEM',
+          'type' => $type,
           'code' => NULL,
           'action' => $action,
           'status' => 'success',
@@ -692,7 +694,6 @@ class Products extends REST_Controller
       }
     }
   }
-
 
 }
 

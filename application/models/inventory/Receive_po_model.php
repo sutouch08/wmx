@@ -237,9 +237,16 @@ class Receive_po_model extends CI_Model
       $this->db->where('date_add <=', to_date($ds['to_date']));
     }
 
-    if($ds['status'] !== 'all')
+    if($ds['is_mobile'] === TRUE)
     {
-      $this->db->where('status', $ds['status']);
+      $this->db->where_in('status', ['O','R']);
+    }
+    else
+    {
+      if($ds['status'] !== 'all')
+      {
+        $this->db->where('status', $ds['statusx']);
+      }
     }
 
     if(isset($ds['user']) && $ds['user'] != 'all')
@@ -296,9 +303,16 @@ class Receive_po_model extends CI_Model
       $this->db->where('date_add <=', to_date($ds['to_date']));
     }
 
-    if($ds['status'] !== 'all')
+    if($ds['is_mobile'] === TRUE)
     {
-      $this->db->where('status', $ds['status']);
+      $this->db->where_in('status', ['O','R']);
+    }
+    else
+    {
+      if($ds['status'] !== 'all')
+      {
+        $this->db->where('status', $ds['statusx']);
+      }
     }
 
     if(isset($ds['user']) && $ds['user'] != 'all')

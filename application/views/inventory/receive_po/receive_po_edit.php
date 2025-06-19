@@ -235,7 +235,8 @@
 					data-basecode="{{baseCode}}"
 					data-baseline="{{baseLine}}"
 					data-code="{{pdCode}}"
-					data-name="{{pdName}}"					
+					data-name="{{pdName}}"
+					data-unit="{{unit}}"
 					value="{{qty}}" onchange="recalAmount({{uid}})" />
 			</td>
 		</tr>
@@ -258,6 +259,7 @@
 				data-uid="{{uid}}"
 				data-code="{{product_code}}"
 				data-name="{{product_name}}"
+				data-unit="{{unit}}"
 				data-basecode="{{po_code}}"
 				data-baseline="{{po_detail_id}}"
 				data-limit="{{limit}}"

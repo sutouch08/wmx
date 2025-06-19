@@ -233,3 +233,8 @@ function pullBack(code) {
 		}, 100);
 	})
 }
+
+
+function sendToERP(code) {
+	
+}

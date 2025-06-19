@@ -12,7 +12,7 @@
 	<?php if( ! empty($document)) : ?>
 		<?php $no = $this->uri->segment(4) + 1; ?>
 		<?php foreach($document as $rs) : ?>
-			<div class="move-list-item">
+			<div class="move-list-item" style="background-color: <?php echo receive_status_color($rs->status); ?>">
 				<div class="col-xs-9 padding-5" style="overflow:auto;">
 					<p class="move-list-line bold">
 						<?php echo $rs->code; ?>
@@ -23,10 +23,8 @@
 					<p class="move-list-line bold">โซน : <?php echo $rs->zone_code; ?></p>
 				</div>
 				<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
-					<?php if($rs->status == 'O') : ?>
+					<?php if($rs->status == 'O' OR $rs->status == 'R') : ?>
 						<a class="move-list-link font-size-24" href="javascript:processMobile('<?php echo $rs->code; ?>')"><i class="fa fa-angle-right"></i></a>
-					<?php else : ?>
-						<a class="move-list-link font-size-24" href="javascript:viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-angle-right"></i></a>
 					<?php endif; ?>
 				<?php endif; ?>
 			</div>

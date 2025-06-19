@@ -10,7 +10,7 @@ class Orders extends REST_Controller
 	public $log_json = FALSE;
 	public $api = FALSE;
   public $checkBackorder = FALSE;
-  private $type = 'ORDER';
+  private $type = 'INT20';
 
   public function __construct()
   {

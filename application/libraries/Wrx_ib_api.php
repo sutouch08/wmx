@@ -20,15 +20,15 @@ class Wrx_ib_api
     $this->test = is_true($this->api['WRX_API_TEST']);
   }
 
-  public function update_status($code)
+  public function export_receive($code)
   {
     $sc = TRUE;
-    $this->ci->load->model('orders/orders_model');
-    $this->ci->load->model('inventory/delivery_order_model');
-    $this->ci->load->model('masters/sender_model');
+    $this->ci->load->model('inventory/receive_po_model');
+    $this->ci->load->model('masters/warehouse_model');
+    $this->ci->load->model('masters/zone_model');
 
-    $action = "INT021";
-    $type = "INT021";
+    $action = "create";
+    $type = "ADD24";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_IB_URL');
     $api_path = $url;
@@ -40,151 +40,54 @@ class Wrx_ib_api
 
     $apiUrl = str_replace(" ","%20",$url);
     $method = 'POST';
-    $order = $this->ci->orders_model->get($code);
 
-    if( ! empty($order))
+    $doc = $this->ci->receive_po_model->get($code);
+
+    if( ! empty($doc))
     {
-      $playload = array(
-        'Company' => $this->company,
-        'HeaderInternalId' => intval($order->oracle_id),
-        'Fulfillment' => $order->fulfillment_code,
-        'Status' => ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked')),
-        'ShippingCarrier' => $this->ci->sender_model->get_code($order->id_sender),
-        'TrackingNo'=> empty($order->shipping_code) ? "" : $order->shipping_code,
-        'UpdateBy' => 'WMS API',
-        'LineItems' => []
-      );
-
-      $details = $order->state == 8 ? $this->ci->delivery_order_model->get_sold_details($code) : $this->ci->orders_model->get_order_details($code);
-
-      if( ! empty($details))
+      if($doc->status == 'C')
       {
-        foreach($details as $rs)
-        {
-          $playload['LineItems'][] = array(
-            'LineInternalId' => intval($rs->line_id),
-            'Item' => $rs->product_code,
-            'Qty' => intval($rs->qty),
-            'Unit' => $rs->unit_code
-          );
-        }
-      }
+        $playload = array(
+          'Company' => $this->company,
+          'PoNumber' => $doc->po_code,
+          'InvoiceNumber' =>  $doc->invoice_code,
+          'SupplierNumber' => $doc->vender_code,
+          'SupplierName' => $doc->vender_name,
+          'ReceiptDate' => $doc->shipped_date,
+          'Location' => $doc->warehouse_code,
+          'LineItems' => []
+        );
 
-      if( ! empty($playload))
-      {
-        $json = json_encode($playload);
+        $details = $this->ci->receive_po_model->get_details($code);
 
-        if($this->test)
+        if( ! empty($details))
         {
-          if($this->logs_json)
+          foreach($details as $rs)
           {
-            $logs = array(
-              'trans_id' => genUid(),
-              'type' => $type,
-              'api_path' => $api_path,
-              'code' => NULL,
-              'action' => 'test',
-              'status' => 'test',
-              'message' => 'test',
-              'request_json' => $json,
-              'response_json' => NULL
-            );
 
-            $this->ci->api_logs_model->add_logs($logs);
           }
         }
         else
         {
-          $curl = curl_init();
-          curl_setopt($curl, CURLOPT_URL, $url);
-          curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-          curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
-          curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-          curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-          curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-          $response = curl_exec($curl);
-          curl_close($curl);
-          $res = json_decode($response);
-
-          if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
-          {
-            if($res->status !== 'success')
-            {
-              $sc = FALSE;
-              $this->error = $res->serviceMessage;
-            }
-
-            if($this->logs_json)
-            {
-              $logs = array(
-                'trans_id' => genUid(),
-                'type' => $type,
-                'api_path' => $api_path,
-                'code' => NULL,
-                'action' => $action,
-                'status' => $sc === TRUE ? 'success' : 'failed',
-                'message' => $res->serviceMessage,
-                'request_json' => $json,
-                'response_json' => $response
-              );
-
-              $this->ci->api_logs_model->add_logs($logs);
-            }
-          }
-          else
-          {
-            $sc = FALSE;
-            $this->error = "No response from ERP";
-
-            if($this->logs_json)
-            {
-              $logs = array(
-                'trans_id' => genUid(),
-                'type' => $type,
-                'api_path' => $api_path,
-                'code' => NULL,
-                'action' => $action,
-                'status' => 'failed',
-                'message' => 'No response',
-                'request_json' => $json,
-                'response_json' => NULL
-              );
-
-              $this->ci->api_logs_model->add_logs($logs);
-            }
-          }
+          $sc = FALSE;
+          $this->error = "No receipt items";
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = "Invalid playload";
+        $this->error = "Invalid document status";
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "Order not found !";
-
-      $logs = array(
-        'trans_id' => genUid(),
-        'type' => $type,
-        'api_path' => $api_path,
-        'code' => $code,
-        'action' => $action,
-        'status' => 'failed',
-        'message' => $this->error,
-        'request_json' => NULL,
-        'response_json' => NULL
-      );
-
-      $this->ci->api_logs_model->add_api_logs($logs);
+      $this->error = "Invalid document number";
     }
 
     return $sc;
   }
-
+  
 } //-- end class
 
  ?>
