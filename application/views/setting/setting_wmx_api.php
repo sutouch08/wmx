@@ -10,7 +10,7 @@
 			<div class="col-sm-8">
 				<label style="padding-top:5px; margin-bottom:0px;">
 					<input class="ace ace-switch ace-switch-7" data-name="IX_API" type="checkbox" value="1" <?php echo is_checked($IX_API , '1'); ?> onchange="toggleOption($(this))"/>
-					<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+					<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 				</label>
 			</div>
       <div class="divider-hidden"></div>
@@ -53,7 +53,7 @@
 			<div class="col-sm-8">
 				<label style="padding-top:5px; margin-bottom:0px;">
 					<input class="ace ace-switch ace-switch-7" data-name="SYNC_IX_STOCK" type="checkbox" value="1" <?php echo is_checked($SYNC_IX_STOCK , '1'); ?> onchange="toggleOption($(this))"/>
-					<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+					<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 				</label>
 			</div>
       <div class="divider-hidden"></div>
@@ -64,7 +64,7 @@
 			<div class="col-sm-8">
 				<label style="padding-top:5px; margin-bottom:0px;">
 					<input class="ace ace-switch ace-switch-7" data-name="IX_LOG_JSON" type="checkbox" value="1" <?php echo is_checked($IX_LOG_JSON , '1'); ?> onchange="toggleOption($(this))"/>
-					<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+					<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 				</label>
 			</div>
       <div class="divider-hidden"></div>
@@ -75,7 +75,7 @@
 			<div class="col-sm-8">
 				<label style="padding-top:5px; margin-bottom:0px;">
 					<input class="ace ace-switch ace-switch-7" data-name="IX_TEST" type="checkbox" value="1" <?php echo is_checked($IX_TEST , '1'); ?> onchange="toggleOption($(this))"/>
-					<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+					<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 				</label>
 			</div>
       <div class="divider-hidden"></div>

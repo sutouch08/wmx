@@ -14,7 +14,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_API" type="checkbox" value="1" <?php echo is_checked($WRX_API , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -41,7 +41,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_SHOPEE_API" type="checkbox" value="1" <?php echo is_checked($WRX_SHOPEE_API , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -52,7 +52,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_TIKTOK_API" type="checkbox" value="1" <?php echo is_checked($WRX_TIKTOK_API , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -63,7 +63,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_LAZADA_API" type="checkbox" value="1" <?php echo is_checked($WRX_LAZADA_API , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -74,7 +74,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_OB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_OB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -93,7 +93,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_IB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_IB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -112,7 +112,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input data-name="WRX_LOG_JSON" class="ace ace-switch ace-switch-7" type="checkbox" value="1" <?php echo is_checked($WRX_LOG_JSON , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
@@ -123,7 +123,7 @@
 		<div class="col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
 				<input data-name="WRX_API_TEST" class="ace ace-switch ace-switch-7" type="checkbox" value="1" <?php echo is_checked($WRX_API_TEST , '1'); ?> onchange="toggleOption($(this))"/>
-				<span class="lbl" data-lbl="ON&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;OFF"></span>
+				<span class="lbl" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
 		</div>
 		<div class="divider-hidden"></div>
