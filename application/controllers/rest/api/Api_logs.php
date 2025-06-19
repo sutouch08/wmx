@@ -44,8 +44,7 @@ class Api_logs extends PS_Controller
 			$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
 			$logs   = $this->api_logs_model->get_list($filter, $perpage, $this->uri->segment($segment));
 
-			$filter['logs'] = $logs;
-			$filter['path'] = $this->api_logs_model->get_all_path();
+			$filter['logs'] = $logs;			
 
 			$this->pagination->initialize($init);
 			$this->load->view('rest/api/api_logs_view', $filter);

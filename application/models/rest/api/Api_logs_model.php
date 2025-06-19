@@ -24,11 +24,6 @@ class Api_logs_model extends CI_Model
 			$this->logs->like('code', $ds['code'], 'after');
 		}
 
-		// if( ! empty($ds['api_path']) && $ds['api_path'] != 'all')
-		// {
-		// 	$this->logs->where('api_path', $ds['api_path']);
-		// }
-
 		if( ! empty($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->logs->where('status', $ds['status']);
@@ -71,11 +66,6 @@ class Api_logs_model extends CI_Model
 			$this->logs->like('code', $ds['code'], 'after');
 		}
 
-		// if( ! empty($ds['api_path']) && $ds['api_path'] != 'all')
-		// {
-		// 	$this->logs->where('api_path', $ds['api_path']);
-		// }
-
 		if( ! empty($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->logs->where('status', $ds['status']);
@@ -114,16 +104,4 @@ class Api_logs_model extends CI_Model
 		return NULL;
 	}
 
-
-	public function get_all_path()
-	{
-		$rs = $this->logs->order_by('pos', 'ASC')->get('api_path');
-
-		if($rs->num_rows() > 0)
-		{
-			return $rs->result();
-		}
-
-		return NULL;
-	}
 } //---
