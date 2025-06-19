@@ -383,7 +383,7 @@ class Prepare extends PS_Controller
           }
         }
 
-        if(is_true(getConfig('WRX_OB_INTERFACE')) && $order->state == 3)
+        if(is_true(getConfig('WRX_OB_INTERFACE')) && $order->state == 4)
         {
           $this->load->library('wrx_ob_api');
           $this->wrx_ob_api->update_status($code);
