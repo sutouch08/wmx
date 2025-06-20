@@ -10,7 +10,7 @@ class Po extends REST_Controller
 	public $log_json = FALSE;
 	public $api = FALSE;
   public $checkBackorder = FALSE;
-  private $type = 'PO';
+  private $type = 'ADD23';
 
   public function __construct()
   {
@@ -416,7 +416,7 @@ class Po extends REST_Controller
                       'product_name' => trim($rs->description),
                       'unit' => trim($rs->unit),
                       'qty' => $rs->qty,
-                      'open_qty' => $rs->qty,                      
+                      'open_qty' => $rs->qty,
                       'update_user' => $this->user
                     );
                   }
