@@ -85,9 +85,6 @@
 	</div>
 </div>
 
-<?php //$this->load->view('sponsor/sponsor_panel'); ?>
-<?php //$this->load->view('sponsor/sponsor_discount_bar'); ?>
-<?php //$this->load->view('orders/order_online_modal'); ?>
 <input type="hidden" id="id_sender" value="<?php echo $order->id_sender; ?>"/>
 <input type="hidden" id="id_address" value="<?php echo $order->id_address; ?>"/>
 
@@ -113,12 +110,14 @@
 	</div>
 <?php endif; ?>
 
-
+<script>
+	$('#warehouse').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/sponsor/sponsor.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/sponsor/sponsor_add.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/sponsor/sponsor_address.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/print/print_order.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/print/print_address.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/orders/order_online.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/cancel_order.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

@@ -24,21 +24,12 @@
             <tr class="font-size-11" id="<?php echo $rs->id; ?>">
               <td class="middle">
                 <?php if($this->pm->can_edit && ! $view) : ?>
-                  <?php if( $rs->is_default == 1 ) : ?>
-                    <button type="button" class="btn btn-minier btn-success btn-address" id="btn-<?php echo $rs->id; ?>" onClick="setDefault(<?php echo $rs->id; ?>)">
-                      <i class="fa fa-check"></i>
-                    </button>
-                  <?php else : ?>
-                    <button type="button" class="btn btn-minier btn-address" id="btn-<?php echo $rs->id; ?>" onClick="setDefault(<?php echo $rs->id; ?>)">
-                      <i class="fa fa-check"></i>
-                    </button>
-                  <?php endif; ?>
                   <button type="button" class="btn btn-minier btn-warning" onClick="editAddress(<?php echo $rs->id; ?>)"><i class="fa fa-pencil"></i></button>
                   <button type="button" class="btn btn-minier btn-danger" onClick="removeAddress(<?php echo $rs->id; ?>)"><i class="fa fa-trash"></i></button>
                 <?php endif; ?>
               </td>
-              <td class="middle text-center"><?php echo $rs->alias; ?></td>
-              <td><?php echo $rs->name; ?></td>
+              <td class="middle text-center"><?php echo $rs->name; ?></td>
+              <td><?php echo $rs->consignee; ?></td>
               <td><?php echo $rs->address.' '. $rs->sub_district.' '.$rs->district.' '.$rs->province.' '. $rs->postcode; ?></td>
               <td><?php echo $rs->phone; ?></td>
             </tr>
@@ -62,10 +53,9 @@
       <div class="modal-body">
         <form id="addAddressForm"	>
           <input type="hidden" id="id_address" />
-          <input type="hidden" id="customer_ref" value="<?php echo $ds->code; ?>" />
           <div class="row">
             <div class="col-sm-12 col-xs-12">
-              <label class="input-label">ชื่อ</label>
+              <label class="input-label">ผู้รับ</label>
               <input type="text" class="form-control input-sm e" name="Fname" id="Fname"  maxlength="100" placeholder="ชื่อผู้รับ (จำเป็น)" />
             </div>
             <div class="col-sm-12 col-xs-12">
@@ -92,10 +82,6 @@
             <div class="col-sm-6 col-xs-12">
               <label class="input-label">เบอร์โทรศัพท์</label>
               <input type="text" class="form-control input-sm" name="phone" id="phone" maxlength="32" placeholder="000 000 0000" />
-            </div>
-            <div class="col-sm-6 col-xs-12">
-              <label class="input-label">อีเมล์</label>
-              <input type="text" class="form-control input-sm e" name="email" id="email" maxlength="100" placeholder="someone@somesite.com" />
             </div>
             <div class="col-sm-6 col-xs-12">
               <label class="input-label">ชื่อเรียก</label>
@@ -135,16 +121,11 @@
   {{#each this}}
     <tr class="font-size-11" id="{{id}}">
       <td class="middle">
-        {{#if default}}
-          <button type="button" class="btn btn-minier btn-success btn-address" id="btn-{{id}}" onClick="setDefault({{id}})"><i class="fa fa-check"></i></button>
-        {{else}}
-          <button type="button" class="btn btn-minier btn-address" id="btn-{{id}}" onClick="setDefault({{id}})"><i class="fa fa-check"></i></button>
-        {{/if}}
         <button type="button" class="btn btn-minier btn-warning" onClick="editAddress({{id}})"><i class="fa fa-pencil"></i></button>
         <button type="button" class="btn btn-minier btn-danger" onClick="removeAddress({{id}})"><i class="fa fa-trash"></i></button>
       </td>
-      <td class="middle text-center">{{alias}}</td>
-      <td>{{name}}</td>
+      <td class="middle text-center">{{name}}</td>
+      <td>{{consignee}}</td>
       <td>{{address}}</td>
       <td>{{phone}}</td>
     </tr>

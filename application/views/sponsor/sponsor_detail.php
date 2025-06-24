@@ -59,29 +59,29 @@
 									<?php endif; ?>
 								<?php endif; ?>
 							</td>
-							<td class="middle text-center"><?php echo $no; ?></td>
+							<td class="middle text-center no"><?php echo $no; ?></td>
 							<td class="middle"><?php echo $rs->product_code; ?></td>
 							<td class="middle"><?php echo $rs->product_name; ?></td>
 							<td class="middle">
 								<?php $disabled = ($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R') ? "" : "disabled"; ?>
-									<input type="number" class="form-control input-xs text-right text-label input-price e"
+									<input type="number" class="form-control input-xs text-right input-price e"
 									id="price-<?php echo $rs->id; ?>"
 									data-id="<?php echo $rs->id; ?>"
 									data-sku="<?php echo $rs->product_code; ?>"
 									data-price="<?php echo $rs->price; ?>"
 									data-count="<?php echo $rs->is_count; ?>"
-									value="<?php echo round($rs->price, 2); ?>"
+									value="<?php echo $rs->price; ?>"
 									onchange="updateItemPrice(<?php echo $rs->id; ?>)"
 									<?php echo $disabled; ?> />
 							</td>
 							<td class="middle">
-								<input type="number" class="form-control input-xs text-right text-label input-qty e"
+								<input type="number" class="form-control input-xs text-right input-qty e"
 								id="qty-<?php echo $rs->id; ?>"
 								data-id="<?php echo $rs->id; ?>"
 								data-sku="<?php echo $rs->product_code; ?>"
 								data-count="<?php echo $rs->is_count; ?>"
 								data-qty="<?php echo $rs->qty; ?>"
-								value="<?php echo round($rs->qty, 2); ?>"
+								value="<?php echo $rs->qty; ?>"
 								onchange="updateItem(<?php echo $rs->id; ?>)"
 								<?php echo $disabled; ?> />
 							</td>
@@ -130,8 +130,53 @@
 </form>
 <!-- order detail template ------>
 
-<script id="nodata-template" type="text/x-handlebars-template">
+<script id="nodata-template" type="text/x-handlebarsTemplate">
 	<tr>
       <td colspan="11" class="text-center"><h4>ไม่พบรายการ</h4></td>
   </tr>
+</script>
+
+<script id="details-template" type="text/x-handlebarsTemplate">
+	{{#each this}}
+		<tr class="font-size-11" id="row-{{id}}">
+			<td class="middle text-center">
+				{{#if can_edit}}
+					<a href="Javascript:removeDetail({{id}}, '{{product_code}}')">
+						<i class="fa fa-times fa-lg red"></i>
+					</a>
+				{{/if}}
+			</td>
+			<td class="middle text-center no">{{no}}</td>
+			<td class="middle">{{product_code}}</td>
+			<td class="middle">{{product_name}}</td>
+			<td class="middle">
+					<input type="number" class="form-control input-xs text-right input-price e"
+					id="price-{{id}}"
+					data-id="{{id}}"
+					data-sku="{{product_code}}"
+					data-price="{{price}}"
+					data-count="{{is_count}}"
+					value="{{price}}"
+					onchange="updateItemPrice({{id}})"
+					{{#unless can_edit}} disabled {{/unless}} />
+			</td>
+			<td class="middle">
+				<input type="number" class="form-control input-xs text-right input-qty e"
+				id="qty-{{id}}"
+				data-id="{{id}}"
+				data-sku="{{product_code}}"
+				data-count="{{is_count}}"
+				data-qty="{{qty}}"
+				value="{{qty}}"
+				onchange="updateItem({{id}})"
+				{{#unless can_edit}} disabled {{/unless}} />
+			</td>
+			<td class="middle">
+				<input type="text" class="form-control input-xs text-right text-label line-total"
+					id="line-total-{{id}}" data-id="{{id}}"
+					data-sku="{{product_code}}"
+					value="{{totalLabel}}" readonly />
+			</td>
+		</tr>
+	{{/each}}
 </script>

@@ -194,7 +194,7 @@ class Sponsor extends PS_Controller
       $order->total_qty = $totalQty;
       $order->total_amount = $totalAmount;
 
-			$ship_to = $this->customer_address_model->get_customer_address_list($order->customer_code, 'B');
+			$ship_to = $this->customer_address_model->get_customer_address_list($order->customer_code, 'S');
 
       $ds['approve_logs'] = $this->approve_logs_model->get($code);
       $ds['order'] = $order;
@@ -208,6 +208,53 @@ class Sponsor extends PS_Controller
     }
   }
 
+
+  public function get_detail_table($code)
+  {
+    $sc = TRUE;
+    $ds = array();
+    $order = $this->order_sponsor_model->get($code);
+
+    if( ! empty($order))
+    {
+      $details = $this->order_sponsor_model->get_details($code);
+
+      if( ! empty($details))
+      {
+        $no = 1;
+
+        foreach($details as $rs)
+        {
+          if($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R')
+          {
+            if($this->pm->can_add OR $this->pm->can_edit)
+            {
+              $rs->can_edit = 'Y';
+            }
+          }
+
+          $rs->no = $no;
+          $rs->totalLabel = number($rs->total_amount, 2);
+          $no++;
+
+          $ds[] = $rs;
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('notfound');
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
+  }
 
 
   public function update_order()
@@ -556,6 +603,44 @@ class Sponsor extends PS_Controller
   }
 
 
+  public function remove_detail()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+    $id = $this->input->post('id');
+
+    $order = $this->order_sponsor_model->get($code);
+
+    if( ! empty($order))
+    {
+      if($order->status == 'P' OR $order->status == 'O' OR $order->status == 'R')
+      {
+        if( ! $this->order_sponsor_model->delete_detail($id))
+        {
+          $sc = FALSE;
+          $this->error = "Failed to delete item";
+        }
+        else
+        {
+          $this->order_sponsor_model->recal_total($code);
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('status');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('notfound');
+    }
+
+    $this->_response($sc);
+  }
+
+
   public function save($code)
   {
     $sc = TRUE;
@@ -636,6 +721,54 @@ class Sponsor extends PS_Controller
 		return $availableStock < 0 ? 0 : $availableStock;
   }
 
+
+  public function set_sender()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+    $id_sender = $this->input->post('id_sender');
+
+    if( ! empty($code) && ! empty($id_sender))
+    {
+      if( ! $this->order_sponsor_model->update($code, ['id_sender' => $id_sender]))
+      {
+        $sc = FALSE;
+        $this->error = "Failed to update data";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
+
+
+  public function set_address()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+    $id_address = $this->input->post('id_address');
+
+    if( ! empty($code) && ! empty($id_address))
+    {
+      if( ! $this->order_sponsor_model->update($code, ['id_address' => $id_address]))
+      {
+        $sc = FALSE;
+        set_error('update');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
+  
 
   public function get_new_code($date)
   {

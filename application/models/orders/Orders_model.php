@@ -377,15 +377,16 @@ class Orders_model extends CI_Model
 
   public function get_order_details($code)
   {
-    $rs = $this->db
-    ->select('order_details.*, products.unit_code')
-    ->from('order_details')
-    ->join('products', 'order_details.product_code = products.code', 'left')
-    ->where('order_code', $code)
-    ->order_by('products.model_code', 'ASC')
-    ->order_by('products.color_code', 'ASC')
-    ->order_by('products.size_code', 'ASC')
-    ->get();
+    $rs = $this->db->where('order_code', $code)->get($this->td);
+    // $rs = $this->db
+    // ->select('order_details.*, products.unit_code')
+    // ->from('order_details')
+    // ->join('products', 'order_details.product_code = products.code', 'left')
+    // ->where('order_code', $code)
+    // ->order_by('products.model_code', 'ASC')
+    // ->order_by('products.color_code', 'ASC')
+    // ->order_by('products.size_code', 'ASC')
+    // ->get();
 
     if($rs->num_rows() > 0)
     {

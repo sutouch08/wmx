@@ -97,7 +97,7 @@ function removeAddress(id){
 }
 
 
-function editAddress(id){
+function editAddress(id) {
 	$.ajax({
 		url:BASE_URL + 'masters/customers/get_ship_to',
 		type:"POST",
@@ -110,7 +110,7 @@ function editAddress(id){
 			if( isJson(rs) ){
 				var ds = $.parseJSON(rs);
 				$("#id_address").val(ds.id);
-				$("#Fname").val(ds.name);
+				$("#Fname").val(ds.consignee);
 				$("#address1").val(ds.address);
 				$("#sub_district").val(ds.sub_district);
 				$('#district').val(ds.district);
@@ -118,9 +118,10 @@ function editAddress(id){
 				$("#postcode").val(ds.postcode);
 				$("#phone").val(ds.phone);
 				$("#email").val(ds.email);
-				$("#alias").val(ds.alias);
+				$("#alias").val(ds.name);
 				$("#addressModal").modal('show');
-			}else{
+			}
+			else {
 				swal("ข้อผิดพลาด!", "ไม่พบข้อมูลที่อยู่", "error");
 			}
 		}
@@ -218,7 +219,6 @@ function clearAddressField() {
 	$("#province").val('');
 	$("#postcode").val('');
 	$("#phone").val('');
-	$("#email").val('');
 	$("#alias").val('');
 }
 
@@ -253,24 +253,18 @@ function saveShipTo() {
 	clearErrorByClass('e');
 
 	let h = {
+		'adrType' : 'S',
 		'id_address' : $('#id_address').val(),
 		'customer_code' : $('#code').val(),
-		'customer_ref' : $('#customer_ref').val(),
-		'name' : $('#Fname').val().trim(),
+		'customer_name' : $('#name').val(),
+		'consignee' : $('#Fname').val(),
+		'name' : $('#alias').val().trim(),
 		'address' : $('#address1').val().trim(),
 		'sub_district' : $('#sub_district').val().trim(),
 		'district' : $('#district').val().trim(),
 		'province' : $('#province').val().trim(),
 		'postcode' : $('#postcode').val().trim(),
-		'phone' : $('#phone').val().trim(),
-		'email' : $('#email').val().trim(),
-		'alias' : $('#alias').val().trim()
-	}
-
-
-	if(h.customer_code == '') {
-		swal('กรุณาระบุชื่อลูกค้า');
-		return false;
+		'phone' : $('#phone').val().trim()
 	}
 
 	if( h.name.length == 0 ) {
@@ -283,29 +277,8 @@ function saveShipTo() {
 		return false;
 	}
 
-	if(h.sub_district.length == 0){
-		$('#sub_district').hasError();
-		return false;
-	}
-
-	if(h.district.length == 0){
-		$('#district').hasError();
-		return false;
-	}
-
-	if(h.province.length == 0){
-		$('#province').hasError();
-		return false;
-	}
-
 	if( h.alias == '' ){
 		$('#alias').hasError();
-		return false;
-	}
-
-	if( h.email != '' && ! validEmail(email) ){
-		$('#email').hasError();
-		swal("อีเมล์ไม่ถูกต้องกรุณาตรวจสอบ");
 		return false;
 	}
 

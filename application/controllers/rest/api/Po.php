@@ -285,6 +285,7 @@ class Po extends REST_Controller
           else
           {
             $code = $doc->code;
+            $action =  "update";
 
             //--- ! empty($doc)
             $arr = array(

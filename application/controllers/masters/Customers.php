@@ -210,8 +210,8 @@ class Customers extends PS_Controller
 
     if( ! empty($customer))
     {
-      $bill_to = $this->customer_address_model->get_customer_bill_to_address($customer->code);
-      $ship_to = NULL; //$this->customer_address_model->get_ship_to_address($customer->code);
+      $bill_to = $this->customer_address_model->get_customer_address_list($customer->code, 'B'); //$this->customer_address_model->get_customer_bill_to_address($customer->code);
+      $ship_to = $this->customer_address_model->get_customer_address_list($customer->code, 'S'); //$this->customer_address_model->get_ship_to_address($customer->code);
 
       $data['ds'] = $customer;
       $data['tab'] = $tab;
@@ -290,21 +290,22 @@ class Customers extends PS_Controller
       $this->load->model('address/customer_address_model');
 
       $arr = array(
+        'adrType' => 'S',
         'customer_code' => $ds->customer_code,
+        'customer_name' => $ds->customer_name,
+        'consignee' => $ds->consignee,
         'name' => $ds->name,
         'address' => $ds->address,
         'sub_district' => $ds->sub_district,
         'district' => $ds->district,
         'province' => $ds->province,
         'postcode' => $ds->postcode,
-        'phone' => $ds->phone,
-        'email' => $ds->email,
-        'alias' => $ds->alias
+        'phone' => $ds->phone
       );
 
       if( ! empty($ds->id_address))
       {
-        if( ! $this->customer_address_model->update_ship_to_by_id($ds->id_address, $arr))
+        if( ! $this->customer_address_model->update($ds->id_address, $arr))
         {
           $sc = FALSE;
           set_error('update');
@@ -312,7 +313,7 @@ class Customers extends PS_Controller
       }
       else
       {
-        if( ! $this->customer_address_model->add_ship_to($arr))
+        if( ! $this->customer_address_model->add($arr))
         {
           $sc = FALSE;
           set_error('insert');
@@ -339,7 +340,7 @@ class Customers extends PS_Controller
     {
       $this->load->model('address/customer_address_model');
 
-      if( ! $this->customer_address_model->delete_ship_to($id))
+      if( ! $this->customer_address_model->delete($id))
       {
         $sc = FALSE;
         set_error('delete');
@@ -361,24 +362,25 @@ class Customers extends PS_Controller
     if($this->input->post('customer_code'))
     {
       $code = $this->input->post('customer_code');
+
       if(!empty($code))
       {
         $ds = array();
         $this->load->model('address/customer_address_model');
-        $adrs = $this->customer_address_model->get_ship_to_address($code);
+        $adrs = $this->customer_address_model->get_customer_address_list($code, 'S');
+
         if(!empty($adrs))
         {
           foreach($adrs as $rs)
           {
             $arr = array(
               'id' => $rs->id,
+              'consignee' => $rs->consignee,
               'name' => $rs->name,
               'address' => $rs->address.' '.$rs->sub_district.' '.$rs->district.' '.$rs->province.' '.$rs->postcode,
-              'phone' => $rs->phone,
-              'email' => $rs->email,
-              'alias' => $rs->alias,
-              'default' => $rs->is_default == 1 ? 1 : ''
+              'phone' => $rs->phone
             );
+
             array_push($ds, $arr);
           }
         }
@@ -401,26 +403,10 @@ class Customers extends PS_Controller
   {
     $this->load->model('address/customer_address_model');
     $id = $this->input->post('id_address');
-    $rs = $this->customer_address_model->get_customer_ship_to_address($id);
+    $rs = $this->customer_address_model->get($id);
 
     if( ! empty($rs))
     {
-      $arr = array(
-        'id' => $rs->id,
-        'code' => $rs->code,
-        'name' => $rs->name,
-        'address' => $rs->address,
-        'sub_district' => $rs->sub_district,
-        'district' => $rs->district,
-        'province' => $rs->province,
-        'postcode' => $rs->postcode,
-				'country' => $rs->country,
-        'phone' => $rs->phone,
-        'email' => $rs->email,
-        'alias' => $rs->alias,
-        'is_default' => $rs->is_default
-      );
-
       echo json_encode($rs);
     }
     else

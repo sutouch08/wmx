@@ -48,23 +48,144 @@ class Wrx_ib_api
       if($doc->status == 'C')
       {
         $playload = array(
-          'Company' => $this->company,
-          'PoNumber' => $doc->po_code,
-          'InvoiceNumber' =>  $doc->invoice_code,
-          'SupplierNumber' => $doc->vender_code,
-          'SupplierName' => $doc->vender_name,
-          'ReceiptDate' => $doc->shipped_date,
-          'Location' => $doc->warehouse_code,
-          'LineItems' => []
+          'company' => $this->company,
+          'poNumber' => $doc->po_code,
+          'receiptDate' => $doc->shipped_date,
+          'items' => []
         );
 
         $details = $this->ci->receive_po_model->get_details($code);
 
         if( ! empty($details))
         {
+          $line = 1;
+
           foreach($details as $rs)
           {
+            $playload['items'][] = array(
+              'orderLine' => $line,
+              'itemNumber' => $rs->product_code,
+              'receiveQty' => $rs->receive_qty,
+              'lineLocation' => $doc->warehouse_code,
+              'bin' => $doc->zone_code
+            );
 
+            $line++;
+          }
+        }
+
+        if( ! empty($playload['items']))
+        {
+          $json = json_encode($playload);
+
+          if($this->test)
+          {
+            if($this->logs_json)
+            {
+              $logs = array(
+                'trans_id' => genUid(),
+                'type' => $type,
+                'api_path' => $api_path,
+                'code' => $code,
+                'action' => 'test',
+                'status' => 'test',
+                'message' => 'test',
+                'request_json' => $json,
+                'response_json' => NULL
+              );
+
+              $this->ci->api_logs_model->add_logs($logs);
+            }
+          }
+          else
+          {
+            $curl = curl_init();
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $json);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $response = curl_exec($curl);
+            curl_close($curl);
+            $res = json_decode($response);
+
+            if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
+            {
+              if($res->status == 'success' && ! empty($res->data))
+              {
+                $ds = $res->data;
+
+                if($ds->status == 'Success' OR $ds->status == 'success')
+                {
+                  $res->serviceMessage = $ds->message;
+
+                  $arr = array(
+                    'oracle_id' => $ds->internalId,
+                    'DocNum' => $ds->externalId
+                  );
+
+                  if( ! $this->ci->receive_po_model->update($code, $arr))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Export data success but update document failed";
+                  }
+                }
+                else
+                {
+                  if( empty($ds->data))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Response data is empty";
+                  }
+                }
+              }
+              else
+              {
+                $sc = FALSE;
+                $this->error = $res->serviceMessage;
+              }
+
+              if($this->logs_json)
+              {
+                $logs = array(
+                  'trans_id' => genUid(),
+                  'type' => $type,
+                  'api_path' => $api_path,
+                  'code' => $code,
+                  'action' => $action,
+                  'status' => $sc === TRUE ? 'success' : 'failed',
+                  'message' => $res->serviceMessage,
+                  'request_json' => $json,
+                  'response_json' => $response
+                );
+
+                $this->ci->api_logs_model->add_logs($logs);
+              }
+            }
+            else
+            {
+              $sc = FALSE;
+              $this->error = "No response from ERP";
+
+              if($this->logs_json)
+              {
+                $logs = array(
+                  'trans_id' => genUid(),
+                  'type' => $type,
+                  'api_path' => $api_path,
+                  'code' => $code,
+                  'action' => $action,
+                  'status' => 'failed',
+                  'message' => 'No response',
+                  'request_json' => $json,
+                  'response_json' => NULL
+                );
+
+                $this->ci->api_logs_model->add_logs($logs);
+              }
+            }
           }
         }
         else
@@ -87,7 +208,7 @@ class Wrx_ib_api
 
     return $sc;
   }
-  
+
 } //-- end class
 
  ?>

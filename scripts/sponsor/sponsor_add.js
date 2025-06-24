@@ -545,58 +545,74 @@ function recalTotal() {
 }
 
 
-// JavaScript Document
 function updateDetailTable(){
 	var order_code = $("#order_code").val();
+
 	$.ajax({
-		url: BASE_URL + 'orders/orders/get_detail_table/'+order_code,
+		url: HOME + 'get_detail_table/'+order_code,
 		type:"GET",
     cache:"false",
-		success: function(rs){
+		success: function(rs) {
 			if( isJson(rs) ){
-				var source = $("#detail-table-template").html();
-				var data = $.parseJSON(rs);
-				var output = $("#detail-table");
-				render(source, data, output);
+        let ds = JSON.parse(rs);
+
+        if(ds.status === 'success') {
+          let source = $("#details-template").html();
+  				let output = $("#detail-table");
+  				render(source, ds.data, output);
+
+          recalTotal();
+          reIndex();
+        }
+        else {
+          showError(ds.message);
+        }
 			}
-			else
-			{
-				var source = $("#nodata-template").html();
-				var data = [];
-				var output = $("#detail-table");
-				render(source, data, output);
-			}
-		}
+		},
+    error:function(rs) {
+      showError(rs);
+    }
 	});
 }
 
 
+function removeDetail(id, name) {
+  let code = $('#order_code').val();
 
-function removeDetail(id, name){
-	swal({
-		title: "คุณแน่ใจ ?",
-		text: "ต้องการลบ '" + name + "' หรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#DD6B55",
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-		}, function(){
-			$.ajax({
-				url: BASE_URL + 'orders/orders/remove_detail/'+ id,
-				type:"POST",
-        cache:"false",
-				success: function(rs){
-					var rs = $.trim(rs);
-					if( rs == 'success' ){
-						swal({ title: 'Deleted', type: 'success', timer: 1000 });
-						updateDetailTable();
-					}else{
-						swal("Error !", rs , "error");
-					}
-				}
-			});
+  swal({
+    title: "คุณแน่ใจ ?",
+    text: "ต้องการลบ '" + name + "' หรือไม่ ?",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#DD6B55",
+    confirmButtonText: 'ใช่, ฉันต้องการลบ',
+    cancelButtonText: 'ยกเลิก',
+    closeOnConfirm: true
+  }, function() {
+    $.ajax({
+      url: HOME + 'remove_detail',
+      type:"POST",
+      cache:"false",
+      data:{
+        'code' : code,
+        'id' : id
+      },
+      success: function(rs) {
+        if(rs.trim() === 'success') {
+          $('#row-'+id).remove();
+          recalTotal();
+          reIndex();
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    });
   });
 }
 
@@ -630,6 +646,7 @@ $('#item-code').autocomplete({
 	autoFocus:true
 });
 
+
 $('#item-code').keyup(function(e){
 	if(e.keyCode == 13){
 		var code = $(this).val();
@@ -649,6 +666,12 @@ $('#input-qty').keyup(function(e){
 });
 
 
+function getEdit() {
+  $('.h').removeAttr('disabled');
+
+  $('#btn-edit').addClass('hide');
+  $('#btn-update').removeClass('hide');
+}
 
 
 function updateOrder() {
@@ -721,151 +744,66 @@ function updateOrder() {
 }
 
 
+function setSender() {
+  let code = $('#order_code').val();
+  let id_sender = $('#sender').val();
 
-function recalDiscount(){
-	updateOrder(1);
-}
-
-
-
-// JavaScript Document
-function changeState(){
-  var order_code = $("#order_code").val();
-  var state = $("#stateList").val();
-  var id_address = $('#address_id').val();
-  var id_sender = $('#id_sender').val();
-  var trackingNo = $('#trackingNo').val();
-  var tracking = $('#tracking').val();
-  var reason_id = $('#reason-id').val();
-  var cancle_reason = $.trim($('#cancle-reason').val());
-  let force_cancel = $('#force-cancel').is(':checked') ? 1 : 0;
-
-  if(state == 9 && cancle_reason.length < 10) {
-    showCancleModal();
+  if(id_sender == "") {
+    swal("กรุณาเลือกผู้จัดส่ง");
     return false;
   }
 
-  if( state != 0){
-    load_in();
-    $.ajax({
-      url:BASE_URL + 'orders/orders/order_state_change',
-      type:"POST",
-      cache:"false",
-      data:{
-        "order_code" : order_code,
-        "state" : state,
-        "id_address" : id_address,
-        "id_sender" : id_sender,
-        "tracking" : tracking,
-        "reason_id" : reason_id,
-        "cancle_reason" : cancle_reason,
-        "force_cancel" : force_cancel
-      },
-      success:function(rs){
-        load_out();
-        var rs = $.trim(rs);
-        if(rs == 'success'){
-          swal({
-            title:'success',
-            text:'status updated',
-            type:'success',
-            timer: 1000
-          });
-
-          setTimeout(function(){
-            window.location.reload();
-          }, 1500);
-
-        }
-        else {
-          swal({
-            title:"Error !",
-            text:rs,
-            type: "error",
-            html:true
-          }, function() {
-            window.location.reload();
-          });
-        }
-      },
-      error:function(xhr, status, error) {
-        load_out();
-        swal({
-          title:'Error!',
-          text:xhr.responseText,
-          type:'error',
-          html:true
-        }, function() {
-          window.location.reload();
-        })
-      }
-    });
-  }
-}
-
-
-
-
-function setNotExpire(option){
-  var order_code = $('#order_code').val();
   load_in();
+
   $.ajax({
-    url:BASE_URL + 'orders/orders/set_never_expire',
+    url:HOME + 'set_sender',
     type:'POST',
-    cache:'false',
+    cache:false,
     data:{
-      'order_code' : order_code,
-      'option' : option
+      'code' : code,
+      'id_sender' : id_sender
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-        swal({
-          title:'Success',
-          type:'success',
-          timer: 1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        },1500);
-      }else{
-        swal('Error', rs, 'error');
+      if(rs.trim() != 'success') {
+        beep();
+        showError(rs);
       }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
-  });
+  })
 }
 
-function unExpired(){
-  var order_code = $('#order_code').val();
+
+function setAddress(id) {
+  let code = $('#order_code').val();
+
   load_in();
   $.ajax({
-    url:BASE_URL + 'orders/orders/un_expired',
-    type:'GET',
-    cache:'false',
+    url:HOME + 'set_address',
+    type:'POST',
+    cache:false,
     data:{
-      'order_code' : order_code
+      'code' : code,
+      'id_address' : id
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success')
-      {
-        swal({
-          title:'Success',
-          type:'success',
-          timer: 1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        },1500);
+      if(rs.trim() == 'success') {
+        $('.btn-address').removeClass('btn-success');
+        $('#btn-'+id).addClass('btn-success');
       }
-      else
-      {
-        swal('Error', rs, 'error');
+      else {
+        beep();
+        swal(rs);
       }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   })
 }

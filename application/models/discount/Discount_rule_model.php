@@ -66,159 +66,406 @@ class Discount_rule_model extends CI_Model
 
   public function getCustomerRuleList($id)
   {
-    $qr  = "SELECT cs.code, cs.name FROM discount_rule_customer AS cr ";
-    $qr .= "JOIN customers AS cs ON cr.customer_code = cs.code ";
-    $qr .= "WHERE cr.id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer AS cr')
+    ->join('customers AS cs', 'cr.customer_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getCustomerGroupRule($id)
   {
-    $qr  = "SELECT cs.code, cs.name FROM discount_rule_customer_group AS cr ";
-    $qr .= "JOIN customer_group AS cs ON cr.group_code = cs.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer_group AS cr')
+    ->join('customer_group AS cs', 'cr.group_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getCustomerTypeRule($id)
   {
-    $qr  = "SELECT cs.code, cs.code, cs.name FROM discount_rule_customer_type AS cr ";
-    $qr .= "JOIN customer_type AS cs ON cr.type_code = cs.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer_type AS cr')
+    ->join('customer_type AS cs', 'cr.type_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getCustomerKindRule($id)
   {
-    $qr  = "SELECT cs.code, cs.code, cs.name FROM discount_rule_customer_kind AS cr ";
-    $qr .= "JOIN customer_kind AS cs ON cr.kind_code = cs.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer_kind AS cr')
+    ->join('customer_kind AS cs', 'cr.kind_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getCustomerAreaRule($id)
   {
-    $qr  = "SELECT cs.code, cs.code, cs.name FROM discount_rule_customer_area AS cr ";
-    $qr .= "JOIN customer_area AS cs ON cr.area_code = cs.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer_area AS cr')
+    ->join('customer_area AS cs', 'cr.area_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getCustomerClassRule($id)
   {
-    $qr  = "SELECT cs.code, cs.code, cs.name FROM discount_rule_customer_class AS cr ";
-    $qr .= "JOIN customer_class AS cs ON cr.class_code = cs.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('cs.code, cs.name')
+    ->from('discount_rule_customer_class AS cr')
+    ->join('customer_class AS cs', 'cr.class_code = cs.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
-  public function getProductStyleRule($id)
+  public function getProductRule($id)
   {
-    $qr = "SELECT ps.code FROM discount_rule_product_style AS sr ";
-    $qr .= "JOIN product_style AS ps ON sr.style_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('product_code AS code')
+    ->where('id_rule', $id)
+    ->get('discount_rule_product');
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductModelRule($id)
+  {
+    $rs = $this->db
+    ->select('model_code AS code')
+    ->where('id_rule', $id)
+    ->get('discount_rule_product_model');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductSegmentRule($id)
+  {
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_segment AS sr')
+    ->join('product_segment AS ps', 'sr.segment_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductClassRule($id)
+  {
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_class AS sr')
+    ->join('product_class AS ps', 'sr.class_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductFamilyRule($id)
+  {
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_family AS sr')
+    ->join('product_family AS ps', 'sr.family_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductMainGroupRule($id)
+  {
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_main_group AS sr')
+    ->join('product_main_group AS ps', 'sr.main_group_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getProductGroupRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_group AS sr ";
-    $qr .= "JOIN product_group AS ps ON sr.group_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_group AS sr')
+    ->join('product_group AS ps', 'sr.group_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
-  public function getProductSubGroupRule($id)
+  public function getProductSportTypeRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_sub_group AS sr ";
-    $qr .= "JOIN product_sub_group AS ps ON sr.sub_group_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_sport_type AS sr')
+    ->join('product_sport_type AS ps', 'sr.sport_type_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function getProductCollectionRule($id)
+  {
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_collection AS sr')
+    ->join('product_collection AS ps', 'sr.collection_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getProductTypeRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_type AS sr ";
-    $qr .= "JOIN product_type AS ps ON sr.type_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_type AS sr')
+    ->join('product_type AS ps', 'sr.type_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getProductKindRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_kind AS sr ";
-    $qr .= "JOIN product_kind AS ps ON sr.kind_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_kind AS sr')
+    ->join('product_kind AS ps', 'sr.kind_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
-  public function getProductCategoryRule($id)
+  public function getProductGenderRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_category AS sr ";
-    $qr .= "JOIN product_category AS ps ON sr.category_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_gender AS sr')
+    ->join('product_gender AS ps', 'sr.gender_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getProductBrandRule($id)
   {
-    $qr = "SELECT ps.code, ps.name FROM discount_rule_product_brand AS sr ";
-    $qr .= "JOIN product_brand AS ps ON sr.brand_code = ps.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ps.code, ps.name')
+    ->from('discount_rule_product_brand AS sr')
+    ->join('product_brand AS ps', 'sr.brand_code = ps.code', 'left')
+    ->where('sr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getProductYearRule($id)
   {
-    $qr = "SELECT year FROM discount_rule_product_year WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('year')
+    ->where('id_rule', $id)
+    ->get('discount_rule_product_year');
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
+  public function getFreeProductRule($id)
+  {
+    $rs = $this->db
+    ->select('product_code AS code')
+    ->where('id_rule', $id)
+    ->get('discount_rule_free_product');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
   public function getChannelsRule($id)
   {
-    $qr = "SELECT cn.name FROM discount_rule_channels AS cr ";
-    $qr .= "JOIN channels AS cn ON cr.channels_code = cn.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('ch.name')
+    ->from('discount_rule_channels AS cr')
+    ->join('channels AS ch', 'cr.channels_code = ch.code', 'left')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
   public function getPaymentRule($id)
   {
-    $qr = "SELECT cn.name FROM discount_rule_payment AS cr ";
-    $qr .= "JOIN payment_method AS cn ON cr.payment_code = cn.code ";
-    $qr .= "WHERE id_rule = ".$id;
+    $rs = $this->db
+    ->select('pm.name')
+    ->from('discount_rule_payment AS cr')
+    ->join('payment_method AS pm', 'cr.payment_code = pm.code')
+    ->where('cr.id_rule', $id)
+    ->get();
 
-    return $this->db->query($qr);
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
   /*
@@ -424,7 +671,7 @@ class Discount_rule_model extends CI_Model
   {
     $sc = array();
     $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_family');
-    
+
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $rd)

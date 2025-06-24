@@ -659,6 +659,8 @@ class Receive_po extends PS_Controller
           {
             $this->db->trans_rollback();
           }
+
+          
         }
         else
         {
@@ -898,6 +900,20 @@ class Receive_po extends PS_Controller
               else
               {
                 $this->db->trans_rollback();
+              }
+
+              if($sc === TRUE)
+              {
+                if($ds->save_type == '1')
+                {
+                  $this->load->library('wrx_ib_api');
+
+                  if( ! $this->wrx_ib_api->export_receive($ds->code))
+                  {
+                    $sc = FALSE;
+                    $this->error = $this->wrx_ib_api->error;
+                  }
+                }
               }
             } //-- $sc == TRUE
           }

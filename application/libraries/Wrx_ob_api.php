@@ -65,8 +65,7 @@ class Wrx_ob_api
           $playload['LineItems'][] = array(
             'LineInternalId' => intval($rs->line_id),
             'Item' => $rs->product_code,
-            'Qty' => intval($rs->qty),
-            'Unit' => $rs->unit_code
+            'Qty' => intval($rs->qty)
           );
         }
       }

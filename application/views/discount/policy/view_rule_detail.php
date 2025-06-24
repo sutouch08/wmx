@@ -33,12 +33,44 @@ $currency = getConfig('CURRENTCY');
         <td class="middle text-right"><strong>พนักงาน</strong></td>
         <td class="middle" ><?php echo $this->user_model->get_name($rule->update_user); ?></td>
       </tr>
+
+    <?php if($rule->type == 'D') : ?>
       <tr class="">
         <td class="middle text-right"><strong>ส่วนลด</strong></td>
         <td class="middle"><?php echo $rule->disc1.'%'; ?></td>
-        <td class="middle text-right"><strong>กำหนดราคา</strong></td>
-        <td class="middle"><?php echo ($rule->type == 'N' ? number($rule->price, 2) : 'No'); ?></td>
+        <td class="middle text-right"><strong>Net Price</strong></td>
+        <td class="middle">-</td>
       </tr>
+    <?php endif; ?>
+    <?php if($rule->type == 'N') : ?>
+      <tr class="">
+        <td class="middle text-right"><strong>ส่วนลด</strong></td>
+        <td class="middle">-</td>
+        <td class="middle text-right"><strong>Net Price</strong></td>
+        <td class="middle"><?php echo number($rule->price , 2); ?></td>
+      </tr>
+    <?php endif; ?>
+    <?php if($rule->type == 'F') : ?>
+      <tr class="">
+        <td class="middle text-right"><strong>Get Free</strong></td>
+        <td class="middle text-center">Yes</td>
+        <td class="middle">จำนวน</td>
+        <td class="middle"><?php echo number($rule->freeQty); ?></td>
+      </tr>
+      <?php $qs = $this->discount_rule_model->getFreeProductRule($id_rule); ?>
+      <tr class="">
+        <td class="middle text-right"><strong>ของแถม</strong></td>
+        <td colspan="3">
+        <?php if( ! empty($qs)) : ?>
+          <?php $i = 1; ?>
+          <?php foreach($qs as $rs) : ?>
+            <?php echo $i == 1 ? $rs->code : ', '.$rs->code; ?>
+            <?php $i++; ?>
+          <?php endforeach; ?>
+        <?php endif; ?>
+        </td>
+      </tr>
+    <?php endif; ?>
       <tr>
         <td class="middle text-right"><strong>จำนวนขั้นต่ำ</strong></td>
         <td class="middle"><?php echo ($rule->minQty > 0 ? number($rule->minQty) : 'No'); ?></td>
@@ -59,30 +91,29 @@ $currency = getConfig('CURRENTCY');
         <td colspan="3"><?php echo 'ทั้งหมด'; ?></td>
       </tr>
       <?php endif; ?>
-      <!------------ รายชื่อลูกค้าแบบกำหนดรายบุคคล --------->
+
       <?php if($rule->all_customer == 0) : ?>
-      <?php   $qs = $this->discount_rule_model->getCustomerRuleList($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   $ds = $this->discount_rule_model->getCustomerRuleList($id_rule); ?>
+      <?php   if( ! empty($ds)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>รายชื่อลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($ds as $rs) : ?>
           <?php echo $i == 1 ? $rs->code.' : '.$rs->name : ', '.$rs->code.' : '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
           </td>
         </tr>
         <?php endif; ?>
-      <!----------- จบรายชื่อลูกค้า  ------------>
-      <!---------- กลุ่มลูกค้า ----------->
+
       <?php   $qs = $this->discount_rule_model->getCustomerGroupRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   if( ! empty($qs)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>กลุ่มลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($qs as $rs) : ?>
           <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
@@ -90,67 +121,62 @@ $currency = getConfig('CURRENTCY');
         </tr>
         <?php endif; ?>
 
-      <!---------- จบกลุ่มลูกค้า ----------->
-      <!---------- ชนิดลูกค้า ----------->
       <?php   $qs = $this->discount_rule_model->getCustomerTypeRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   if( ! empty($qs)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>ชนิดลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($qs as $rs) : ?>
           <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
           </td>
         </tr>
         <?php endif; ?>
-      <!---------- จบชนิดลูกค้า ----------->
-      <!---------- ประเภทลูกค้า ----------->
+
       <?php   $qs = $this->discount_rule_model->getCustomerKindRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   if( ! empty($qs)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>ประเภทลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($qs as $rs) : ?>
           <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
           </td>
         </tr>
         <?php endif; ?>
-      <!---------- จบประเภทลูกค้า ----------->
-      <!---------- เขตลูกค้า ----------->
+
       <?php   $qs = $this->discount_rule_model->getCustomerAreaRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   if( ! empty($qs)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>เขตลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($qs as $rs) : ?>
           <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
           </td>
         </tr>
         <?php endif; ?>
-      <!---------- จบเชตลูกค้า ----------->
-      <!---------- เกรดลูกค้า ----------->
+
       <?php   $qs = $this->discount_rule_model->getCustomerClassRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
+      <?php   if( ! empty($qs)) : ?>
         <tr class="">
           <td class="middle text-right"><strong>เกรดลูกค้า</strong></td>
           <td class="middle" colspan="3">
           <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
+        <?php   foreach($qs as $rs) : ?>
           <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
           <?php $i++; ?>
         <?php endforeach; ?>
           </td>
         </tr>
         <?php endif; ?>
-      <!---------- จบเกรดลูกค้า ----------->
+
       <?php endif; ?>
       <tr>
         <td colspan="4" class="text-center"><strong>สินค้า</strong></td>
@@ -162,130 +188,204 @@ $currency = getConfig('CURRENTCY');
       </tr>
       <?php endif; ?>
 
-      <!------------ ถ้าไม่ได้เลือกสินค้าทั้งหมด แต่เลือกเป็นรุ่น --------->
       <?php if($rule->all_product == 0) : ?>
-      <?php   $qs = $this->discount_rule_model->getProductStyleRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>รุ่นสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->code : ', '.$rs->code; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
+        <?php   $qs = $this->discount_rule_model->getProductRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>SKU</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->code : ', '.$rs->code; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
         <?php endif; ?>
-      <!----------- จบรุ่นสินค้า  ------------>
 
-      <!---------- กลุ่มสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductGroupRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>กลุ่มสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
+        <?php   $qs = $this->discount_rule_model->getProductModelRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>รุ่นสินค้า</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->code : ', '.$rs->code; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
         <?php endif; ?>
-      <!---------- จบกลุ่มสินค้า ----------->
-      <!---------- กลุ่มย่อยสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductSubGroupRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>กลุ่มย่อยสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบกลุ่มย่อยสินค้า ----------->
-      <!---------- ชนิดสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductTypeRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>ชนิดสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบชนิดสินค้า ----------->
-      <!---------- ประเภทสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductKindRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>ประเภทสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบประเภทสินค้า ----------->
-      <!---------- หมวดหมู่สินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductCategoryRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>หมวดหมู่สินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบหมวดหมู่สินค้า ----------->
-      <!---------- ยี่ห้อสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductBrandRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>ยี่ห้อสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบยี่ห้อสินค้า ----------->
-      <!---------- ปีสินค้า ----------->
-      <?php   $qs = $this->discount_rule_model->getProductYearRule($id_rule); ?>
-      <?php   if($qs->num_rows() > 0) : ?>
-        <tr class="">
-          <td class="middle text-right"><strong>ปีสินค้า</strong></td>
-          <td class="middle" colspan="3">
-          <?php $i = 1; ?>
-        <?php   foreach($qs->result() as $rs) : ?>
-          <?php echo $i == 1 ? $rs->year : ', '.$rs->year; ?>
-          <?php $i++; ?>
-        <?php endforeach; ?>
-          </td>
-        </tr>
-        <?php endif; ?>
-      <!---------- จบปีสินค้า ----------->
 
-    <?php endif; ?>
+        <?php   $qs = $this->discount_rule_model->getProductMainGroupRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Main Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductGroupRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Sub Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductSegmentRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Segment</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductClassRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Class</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductFamilyRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Family</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductTypeRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductKindRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductGenderRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Gender</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductSportTypeRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Sport Type</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductCollectionRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Club/Collection</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductBrandRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+
+        <?php   $qs = $this->discount_rule_model->getProductYearRule($id_rule); ?>
+        <?php   if( ! empty($qs)) : ?>
+          <tr class="">
+            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle" colspan="3">
+              <?php $i = 1; ?>
+              <?php   foreach($qs as $rs) : ?>
+                <?php echo $i == 1 ? $rs->year : ', '.$rs->year; ?>
+                <?php $i++; ?>
+              <?php endforeach; ?>
+            </td>
+          </tr>
+        <?php endif; ?>
+      <?php endif; ?>
+
 
     <tr>
       <td colspan="4" class="text-center"><strong>ช่องทางการขายและการชำระเงิน</strong></td>
@@ -297,9 +397,9 @@ $currency = getConfig('CURRENTCY');
             ทั้งหมด
         <?php else : ?>
           <?php $qs = $this->discount_rule_model->getChannelsRule($id_rule); ?>
-          <?php if($qs->num_rows() > 0) : ?>
+          <?php if( ! empty($qs)) : ?>
             <?php $i = 1; ?>
-            <?php foreach($qs->result() as $rs) : ?>
+            <?php foreach($qs as $rs) : ?>
               <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
             <?php endforeach; ?>
           <?php endif; ?>
@@ -314,13 +414,12 @@ $currency = getConfig('CURRENTCY');
             ทั้งหมด
         <?php else : ?>
           <?php $qs = $this->discount_rule_model->getPaymentRule($id_rule); ?>
-          <?php if($qs->num_rows() > 0) : ?>
+          <?php if( ! empty($qs)) : ?>
             <?php $i = 1; ?>
-            <?php foreach($qs->result() as $rs) : ?>
+            <?php foreach($qs as $rs) : ?>
               <?php echo $i == 1 ? $rs->name : ', '.$rs->name; ?>
             <?php endforeach; ?>
           <?php endif; ?>
-
         <?php endif; ?>
       </td>
     </tr>
