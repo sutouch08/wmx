@@ -516,6 +516,7 @@ class Receive_po extends PS_Controller
   public function finish_receive()
   {
     $sc = TRUE;
+    $ex = 0;
     $ds = json_decode($this->input->post('data'));
 
     if( ! empty($ds))
@@ -660,7 +661,17 @@ class Receive_po extends PS_Controller
             $this->db->trans_rollback();
           }
 
-          
+          if($sc === TRUE)
+          {
+            $this->load->library('wrx_ib_api');
+
+            if( ! $this->wrx_ib_api->export_receive($doc->code))
+            {
+              $sc = FALSE;
+              $ex = 1;
+              $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+            }
+          }
         }
         else
         {
@@ -680,7 +691,13 @@ class Receive_po extends PS_Controller
       set_error('required');
     }
 
-    $this->_response($sc);
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'ex' => $ex
+    );
+
+    echo json_encode($arr);
   }
 
 
