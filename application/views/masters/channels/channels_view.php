@@ -42,17 +42,16 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped table-bordered table-hover" style="min-width:810px;">
+		<table class="table table-striped table-bordered table-hover" style="min-width:900px;">
 			<thead>
 				<tr>
+					<th class="fix-width-100"></th>
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-100 middle">รหัส</th>
-					<th class="fix-width-150 middle">ชื่อ</th>
-					<th class="fix-width-150 middle">ลูกค้าเริ่มต้น</th>
+					<th class="fix-width-200 middle">ชื่อ</th>
+					<th class="min-width-250 middle">ลูกค้าเริ่มต้น</th>
 					<th class="fix-width-150 middle text-center">Type code</th>
 					<th class="fix-width-60 middle text-center">Online</th>
-					<th class="fix-width-60 middle text-center">Default</th>
-					<th class="min-width-100"></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -60,6 +59,18 @@
 				<?php $no = $this->uri->segment(4) + 1; ?>
 				<?php foreach($data as $rs) : ?>
 					<tr>
+						<td class="">
+							<?php if($this->pm->can_edit) : ?>
+								<button type="button" class="btn btn-mini btn-warning" onclick="getEdit('<?php echo $rs->code; ?>')">
+									<i class="fa fa-pencil"></i>
+								</button>
+							<?php endif; ?>
+							<?php if($this->pm->can_delete) : ?>
+								<button type="button" class="btn btn-mini btn-danger" onclick="getDelete('<?php echo $rs->code; ?>', '<?php echo $rs->name; ?>')">
+									<i class="fa fa-trash"></i>
+								</button>
+							<?php endif; ?>
+						</td>
 						<td class="middle text-center"><?php echo $no; ?></td>
 						<td class="middle"><?php echo $rs->code; ?></td>
 						<td class="middle"><?php echo $rs->name; ?></td>
@@ -82,26 +93,6 @@
 							<i class="fa fa-times"></i>
 							<?php endif; ?>
 						<?php endif; ?>
-						</td>
-						<td class="middle text-center">
-							<?php if($rs->is_default) : ?>
-								<i class="fa fa-check green"></i>
-							<?php else : ?>
-								<i class="fa fa-times"></i>
-							<?php endif; ?>
-						</td>
-
-						<td class="">
-							<?php if($this->pm->can_edit) : ?>
-								<button type="button" class="btn btn-mini btn-warning" onclick="getEdit('<?php echo $rs->code; ?>')">
-									<i class="fa fa-pencil"></i>
-								</button>
-							<?php endif; ?>
-							<?php if($this->pm->can_delete) : ?>
-								<button type="button" class="btn btn-mini btn-danger" onclick="getDelete('<?php echo $rs->code; ?>', '<?php echo $rs->name; ?>')">
-									<i class="fa fa-trash"></i>
-								</button>
-							<?php endif; ?>
 						</td>
 					</tr>
 					<?php $no++; ?>
