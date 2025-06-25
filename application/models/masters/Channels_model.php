@@ -78,7 +78,7 @@ class Channels_model extends CI_Model
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
@@ -108,7 +108,19 @@ class Channels_model extends CI_Model
   }
 
 
+  public function get_code($name)
+  {
+    $rs = $this->db->select('code')->where('name', $name)->get('channels');
 
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->code;
+    }
+
+    return NULL;
+  }
+
+  
   public function get_name($code)
   {
     $rs = $this->db->select('name')->where('code', $code)->get('channels');
@@ -117,7 +129,7 @@ class Channels_model extends CI_Model
       return $rs->row()->name;
     }
 
-    return FALSE;
+    return NULL;
   }
 
 

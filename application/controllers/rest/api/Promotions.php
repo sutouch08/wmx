@@ -64,6 +64,7 @@ class Promotions extends REST_Controller
 
     $this->load->model('masters/products_model');
     $this->load->model('masters/customers_model');
+    $this->load->model('masters/channels_model');
     $this->load->model('discount/discount_model');
     $this->load->library('promotion');
     $this->load->helper('discount');
@@ -94,6 +95,19 @@ class Promotions extends REST_Controller
 
         if( ! empty($pd))
         {
+          $channels = $this->channels_model->get($data->salesChannel); //--- try to get by code first
+
+          if(empty($channels))
+          {
+            $channels = $this->channels_model->get_code($data->salesChannel);
+          }
+          else
+          {
+            $channels = $channels->code;
+          }
+
+          $data->salesChannel = $channels;
+
           $disc = $this->promotion->getItemDiscount($pd, $cs, $item->sellingPrice, $item->qty, $data->paymentChannel, $data->salesChannel, $data->requestDate);
 
           // มูลค่าหลังส่วนลด ใช้เพือดูของแถม
