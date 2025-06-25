@@ -192,7 +192,7 @@ $currency = getConfig('CURRENTCY');
         <?php   $qs = $this->discount_rule_model->getProductRule($id_rule); ?>
         <?php   if( ! empty($qs)) : ?>
           <tr class="">
-            <td class="middle text-right"><strong>SKU</strong></td>
+            <td class="middle text-right"><strong>รหัสสินค้า</strong></td>
             <td class="middle" colspan="3">
               <?php $i = 1; ?>
               <?php   foreach($qs as $rs) : ?>
@@ -290,7 +290,7 @@ $currency = getConfig('CURRENTCY');
         <?php   $qs = $this->discount_rule_model->getProductTypeRule($id_rule); ?>
         <?php   if( ! empty($qs)) : ?>
           <tr class="">
-            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle text-right"><strong>Type</strong></td>
             <td class="middle" colspan="3">
               <?php $i = 1; ?>
               <?php   foreach($qs as $rs) : ?>
@@ -304,7 +304,7 @@ $currency = getConfig('CURRENTCY');
         <?php   $qs = $this->discount_rule_model->getProductKindRule($id_rule); ?>
         <?php   if( ! empty($qs)) : ?>
           <tr class="">
-            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle text-right"><strong>Kind</strong></td>
             <td class="middle" colspan="3">
               <?php $i = 1; ?>
               <?php   foreach($qs as $rs) : ?>
@@ -360,7 +360,7 @@ $currency = getConfig('CURRENTCY');
         <?php   $qs = $this->discount_rule_model->getProductBrandRule($id_rule); ?>
         <?php   if( ! empty($qs)) : ?>
           <tr class="">
-            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle text-right"><strong>Brand</strong></td>
             <td class="middle" colspan="3">
               <?php $i = 1; ?>
               <?php   foreach($qs as $rs) : ?>
@@ -374,7 +374,7 @@ $currency = getConfig('CURRENTCY');
         <?php   $qs = $this->discount_rule_model->getProductYearRule($id_rule); ?>
         <?php   if( ! empty($qs)) : ?>
           <tr class="">
-            <td class="middle text-right"><strong>Group</strong></td>
+            <td class="middle text-right"><strong>Year</strong></td>
             <td class="middle" colspan="3">
               <?php $i = 1; ?>
               <?php   foreach($qs as $rs) : ?>
