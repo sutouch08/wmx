@@ -22,8 +22,7 @@
   </div>
   <div class="col-lg-10 col-md-10 col-sm-10 col-xs-12 padding-5">
     	<p class="pull-right top-p text-right" >
-				<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-				<button type="button" class="btn btn-xs btn-default top-btn hidden-xs" onclick="printOrderSheet()"><i class="fa fa-print"></i> พิมพ์</button>
+				<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>				
 				<?php if($order->status == 0 && $order->is_expired == 0) : ?>
 					<button type="button" id="btn-save-order" class="btn btn-xs btn-success btn-100 top-btn" onclick="saveOrder()">บันทึก</button>
 				<?php else : ?>

@@ -24,8 +24,7 @@
 			</thead>
 			<tbody id="detail-table">
 				<?php if( ! empty($details)) : ?>
-					<?php   foreach($details as $rs) : ?>
-						<?php 	$discount = discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
+					<?php   foreach($details as $rs) : ?>						
 						<?php 	$discLabel = discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
 						<tr class="font-size-11" id="row_<?php echo $rs->id; ?>">
 							<td class="middle text-center"><?php echo $no; ?></td>

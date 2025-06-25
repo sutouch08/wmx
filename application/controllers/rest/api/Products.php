@@ -392,10 +392,10 @@ class Products extends REST_Controller
       {
         if($sc === FALSE) { break; }
 
-        if(empty($item->code) OR ! $this->products_model->is_exists($item->code))
+        if(empty($item->code))
         {
           $sc = FALSE;
-          $this->error = "Invalid SKU Code '{$item->code}'";
+          $this->error = "Missing required parameter : items.code";
         }
 
         if($sc === TRUE)
