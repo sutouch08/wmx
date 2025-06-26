@@ -67,8 +67,8 @@ class Wrx_ib_api
               'orderLine' => $line,
               'itemNumber' => $rs->product_code,
               'receiveQty' => floatval($rs->receive_qty),
-              'lineLocation' => $doc->warehouse_code,
-              'bin' => $doc->zone_code
+              'lineLocation' => "Khlong Song Nam", //$doc->warehouse_code,
+              'bin' => "store" //$doc->zone_code
             );
 
             $line++;
