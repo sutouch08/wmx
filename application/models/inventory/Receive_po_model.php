@@ -77,7 +77,12 @@ class Receive_po_model extends CI_Model
 
   public function get_details($code)
   {
-    $rs = $this->db->where('receive_code', $code)->get($this->td);
+    $rs = $this->db
+    ->select('rd.*, pd.line_num')
+    ->from('receive_product_detail AS rd')
+    ->join('po_details AS pd', 'rd.po_detail_id = pd.id', 'left')
+    ->where('receive_code', $code)
+    ->get();
 
     if($rs->num_rows() > 0)
     {

@@ -59,19 +59,15 @@ class Wrx_ib_api
 
         if( ! empty($details))
         {
-          $line = 1;
-
           foreach($details as $rs)
           {
             $playload['items'][] = array(
-              'orderLine' => $line,
+              'orderLine' => intval($rs->line_num),
               'itemNumber' => $rs->product_code,
               'receiveQty' => floatval($rs->receive_qty),
               'lineLocation' => "Khlong Song Nam", //$doc->warehouse_code,
               'bin' => "store" //$doc->zone_code
             );
-
-            $line++;
           }
         }
 
@@ -121,10 +117,17 @@ class Wrx_ib_api
                 if($ds->status == 'Success' OR $ds->status == 'success')
                 {
                   $res->serviceMessage = $ds->message;
+                  $message = explode(':', $ds->message);
+                  $docNum = NULL;
+
+                  if( ! empty($message[1]))
+                  {
+                    $docNum = trim($message[1]);
+                  }
 
                   $arr = array(
                     'oracle_id' => $ds->internalId,
-                    'DocNum' => $ds->externalId
+                    'DocNum' => $docNum
                   );
 
                   if( ! $this->ci->receive_po_model->update($code, $arr))
