@@ -721,9 +721,12 @@ class Orders_model extends CI_Model
   }
 
 
-  public function count_rows(array $ds = array(), $role = 'S')
+  public function count_rows(array $ds = array())
   {
-    $this->db->where('role', $role);
+    if( isset($ds['role']) && $ds['role'] != 'all')
+    {
+      $this->db->where('role', $ds['role']);
+    }
 
     if( ! empty($ds['from_date']))
     {
@@ -903,13 +906,17 @@ class Orders_model extends CI_Model
   }
 
 
-  public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $role = 'S')
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
     $this->db
     ->select('id, code, role, so_no, fulfillment_code, reference, customer_code, customer_name, customer_ref')
     ->select('channels_code, payment_code, state, status, warehouse_code, zone_code, date_add, is_expired, doc_total')
-    ->select('is_backorder, is_approved, user, empName, is_cancled, budget_id, budget_code')
-    ->where('role', $role);
+    ->select('is_backorder, is_approved, user, empName, is_cancled, budget_id, budget_code');
+
+    if( isset($ds['role']) && $ds['role'] != 'all')
+    {
+      $this->db->where('role', $ds['role']);
+    }
 
     if( ! empty($ds['from_date']))
     {
@@ -1090,24 +1097,11 @@ class Orders_model extends CI_Model
 			}
 		}
 
-    if( ! empty($ds['order_by']))
-    {
-      $order_by = "{$ds['order_by']}";
-      $this->db->order_by($order_by, $ds['sort_by']);
-    }
-    else
-    {
-      $this->db->order_by('id', 'DESC');
-    }
+    $rs = $this->db
+    ->order_by('id', 'DESC')
+    ->limit($perpage, $offset)
+    ->get($this->tb);
 
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get($this->tb);
-    // echo $this->db->get_compiled_select($this->tb);
     if($rs->num_rows() > 0)
     {
       return $rs->result();

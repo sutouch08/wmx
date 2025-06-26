@@ -161,6 +161,7 @@
 						data-baseline="<?php echo $rs->po_detail_id; ?>"
 						data-code="<?php echo $rs->product_code; ?>"
 						data-name="<?php echo $rs->product_name; ?>"
+						data-unit="<?php echo $rs->unit; ?>"
 						value="<?php echo round($rs->qty, 2); ?>"
 						onchange="recalAmount(<?php echo $uid; ?>)" />
 				</td>

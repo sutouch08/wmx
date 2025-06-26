@@ -1,3 +1,5 @@
+var click = 0;
+
 function goDelete(code){
 	swal({
 		title: "คุณแน่ใจ ?",
@@ -236,5 +238,39 @@ function pullBack(code) {
 
 
 function sendToERP(code) {
-	
+	if(click == 0) {
+		click = 1;
+
+		load_in();
+
+		$.ajax({
+			url:HOME + 'send_to_erp',
+			type:'POST',
+			cache:false,
+			data:{
+				'code' : code
+			},
+			success:function(rs) {
+				load_out();
+
+				if(rs.trim() === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					click = 0;
+				}
+				else {
+					showError(rs);
+					click = 0;
+				}
+			},
+			error:function(rs) {
+				showError(rs);
+				click = 0;
+			}
+		})
+	}
 }

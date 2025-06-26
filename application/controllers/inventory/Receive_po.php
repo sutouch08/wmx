@@ -663,13 +663,16 @@ class Receive_po extends PS_Controller
 
           if($sc === TRUE)
           {
-            $this->load->library('wrx_ib_api');
-
-            if( ! $this->wrx_ib_api->export_receive($doc->code))
+            if(is_true(getConfig('WRX_IB_INTERFACE')))
             {
-              $sc = FALSE;
-              $ex = 1;
-              $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+              $this->load->library('wrx_ib_api');
+
+              if( ! $this->wrx_ib_api->export_receive($doc->code))
+              {
+                $sc = FALSE;
+                $ex = 1;
+                $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+              }
             }
           }
         }
@@ -698,6 +701,52 @@ class Receive_po extends PS_Controller
     );
 
     echo json_encode($arr);
+  }
+
+
+  public function send_to_erp()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+
+    if( ! empty($code))
+    {
+      if(is_true(getConfig('WRX_IB_INTERFACE')))
+      {
+        $doc = $this->receive_po_model->get($code);
+
+        if( ! empty($doc))
+        {
+          if($doc->status == 'C')
+          {
+            $this->load->library('wrx_ib_api');
+
+            if( ! $this->wrx_ib_api->export_receive($doc->code))
+            {
+              $sc = FALSE;
+              $this->error = "่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            set_error('status');
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('notfound');
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
   }
 
 
@@ -923,12 +972,15 @@ class Receive_po extends PS_Controller
               {
                 if($ds->save_type == '1')
                 {
-                  $this->load->library('wrx_ib_api');
-
-                  if( ! $this->wrx_ib_api->export_receive($ds->code))
+                  if(is_true(getConfig('WRX_IB_INTERFACE')))
                   {
-                    $sc = FALSE;
-                    $this->error = $this->wrx_ib_api->error;
+                    $this->load->library('wrx_ib_api');
+
+                    if( ! $this->wrx_ib_api->export_receive($ds->code))
+                    {
+                      $sc = FALSE;
+                      $this->error = $this->wrx_ib_api->error;
+                    }
                   }
                 }
               }

@@ -50,6 +50,7 @@ class Orders extends PS_Controller
   public function index()
   {
     $filter = array(
+      'role' => get_filter('role', 'order_role', 'all'),
       'code' => get_filter('code', 'order_code', ''),
       'so_no' =>  get_filter('so_no', 'so_no', ''),
       'fulfillment_code' => get_filter('fulfillment_code', 'fulfillment_code', ''),

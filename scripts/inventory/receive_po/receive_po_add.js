@@ -1,5 +1,3 @@
-var click = 0;
-
 window.addEventListener('load', () => {
 	poInit();
 	zone_init();

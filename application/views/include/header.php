@@ -41,7 +41,7 @@
 		<!-- #section:basics/navbar.layout -->
 		<div id="navbar" class="navbar navbar-default">
 			<script type="text/javascript">
-				var BASE_URL = '<?php echo base_url(); ?>/';
+				var BASE_URL = '<?php echo base_url(); ?>';
 				var HOME = '<?php echo $this->home.'/'; ?>';
 			</script>
 			<div class="navbar-container" id="navbar-container">

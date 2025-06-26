@@ -234,33 +234,18 @@ class Orders extends REST_Controller
     //---- new code start
     if($sc === TRUE)
     {
-      $roleMap = array(
-        'WO' => 'S',
-        'WS' => 'P',
-        'WU' => 'U',
-        'WL' => 'L',
-        'WT' => 'N',
-        'WC' => 'C',
-        'WQ' => 'T',
-        'WV' => 'Q',
-        'WW' => 'W'
-      );
-
-      $ref_code = $data->order_number;
-
-      $prefix = substr($ref_code, 0, 2);
-      $role = empty($roleMap[$prefix]) ? 'S' : $roleMap[$prefix];
-
       //---- check duplicate order number
-      //$order = $this->orders_model->get_active_order_by_oracle_id($data->headerInternalId);
+      $order = $this->orders_model->get_active_order_by_oracle_id($data->headerInternalId);
 
-      $order = $this->orders_model->get_active_order_by_so($data->order_number);
+      $role = 'S';
 
       $date_add = date('Y-m-d H:i:s');
       $doc_date = empty($data->doc_date) ? NULL : db_date($data->doc_date, TRUE);
       $due_date = empty($data->due_date) ? NULL : db_date($data->due_date, TRUE);
 
-      $customer = empty($data->customer_code) ? NULL : $this->customers_model->get($data->customer_code);
+      $ref_code = $data->order_number;
+
+      $customer = $this->customers_model->get($data->customer_code);
 
       $state = 3;
 
@@ -272,7 +257,7 @@ class Orders extends REST_Controller
       $id_sender = empty($sender) ? NULL : $sender;
 
       //--- order code gen จากระบบ
-      $order_code = empty($order) ? $this->get_new_code($date_add, $prefix) : $order->code;
+      $order_code = empty($order) ? $this->get_new_code($date_add) : $order->code;
 
       $tracking = get_null($data->tracking_no);
 
@@ -294,13 +279,12 @@ class Orders extends REST_Controller
           'oracle_id' => $data->headerInternalId,
           'fulfillment_code' => $data->fulfillment,
           'reference' => get_null($data->reference),
-          'customer_code' => empty($data->customer_code) ? NULL : $data->customer_code,
-          'customer_name' => empty($data->customer_name) ? NULL : $data->customer_name,
+          'customer_code' => $data->customer_code,
+          'customer_name' => $data->customer_name,
           'customer_ref' => $customer_ref,
-          'channels_code' => empty($data->channel) ? NULL : $data->channel,
-          'payment_code' => empty($data->payment_method) ? NULL : $data->payment_method,
-          'cod_amount' => empty($data->cod_amount) ? 0 : $data->cod_amount,
-          'budget_code' => empty($data->budget_code) ? NULL : $data->budget_code,
+          'channels_code' => $data->channel,
+          'payment_code' => $data->payment_method,
+          'cod_amount' => $data->cod_amount,
           'state' => 3,
           'status' => 1,
           'shipping_code' => $tracking,
@@ -317,13 +301,12 @@ class Orders extends REST_Controller
         //--- เตรียมข้อมูลสำหรับเพิ่มเอกสารใหม่
         $ds = array(
           'reference' => get_null($data->reference),
-          'customer_code' => empty($data->customer_code) ? NULL : $data->customer_code,
-          'customer_name' => empty($data->customer_name) ? NULL : $data->customer_name,
+          'customer_code' => $data->customer_code,
+          'customer_name' => $data->customer_name,
           'customer_ref' => $customer_ref,
-          'channels_code' => empty($data->channel) ? NULL : $data->channel,
-          'payment_code' => empty($data->payment_method) ? NULL : $data->payment_method,
-          'cod_amount' => empty($data->cod_amount) ? 0 : $data->cod_amount,
-          'budget_code' => empty($data->budget_code) ? NULL : $data->budget_code,
+          'channels_code' => $data->channel,
+          'payment_code' => $data->payment_method,
+          'cod_amount' => $data->cod_amount,
           'state' => 3,
           'shipping_code' => $tracking,
           'user' => $this->user,
@@ -1233,9 +1216,10 @@ class Orders extends REST_Controller
   }
 
 
+
   public function verify_data($data)
 	{
-    if( ! property_exists($data, 'order_number') OR $data->order_number == '')
+    if(! property_exists($data, 'order_number') OR $data->order_number == '')
     {
       $this->error = 'order_number is required';
       return FALSE;
@@ -1253,44 +1237,39 @@ class Orders extends REST_Controller
       return FALSE;
     }
 
-    $prefix = substr($data->order_number, 0, 2);
-
-    if($prefix == 'WO')
+    if( ! property_exists($data, 'customer_code') OR $data->customer_code == '')
     {
-      if( ! property_exists($data, 'channel') OR ! $this->channels_model->is_exists($data->channel))
-      {
-        $this->error = "Invalid channels code : {$data->channel}";
-        return FALSE;
-      }
-
-      if( ! property_exists($data, 'payment_method') OR ! $this->payment_methods_model->is_exists($data->payment_method))
-      {
-        $this->error = 'Invalid payment_method code';
-        return FALSE;
-      }
+      $this->error = 'customer_code is required';
+      return FALSE;
     }
 
-    if($prefix == 'WO' OR $prefix == 'WU' OR $prefix == 'WS' OR $prefix == 'WC')
+    if( ! empty($data->customer_code) && ! $this->customers_model->is_exists($data->customer_code))
     {
-      if( ! property_exists($data, 'customer_code') OR $data->customer_code == '')
-      {
-        $this->error = 'customer_code is required';
-        return FALSE;
-      }
+      $this->error = "Invalid Customer Code";
+      return FALSE;
     }
 
-    if($prefix == 'WS' OR $prefix == 'WU')
+    if( ! property_exists($data, 'channel') OR ! $this->channels_model->is_exists($data->channel))
     {
-      if( ! property_exists($data, 'budget_code') OR $data->budget_code == '')
-      {
-        $this->error = 'budget_code is required';
-        return FALSE;
-      }
+      $this->error = "Invalid channels code : {$data->channel}";
+      return FALSE;
     }
 
-    if(property_exists($data, 'order_number') && $this->orders_model->is_active_order_so($data->order_number))
+    if( ! property_exists($data, 'payment_method') OR ! $this->payment_methods_model->is_exists($data->payment_method))
+    {
+      $this->error = 'Invalid payment_method code';
+      return FALSE;
+    }
+
+    if(property_exists($data, 'headerInternalId') && $this->orders_model->is_active_order_fulfillment($data->headerInternalId))
     {
       $this->error = 'Order number already exists';
+			return FALSE;
+    }
+
+    if(property_exists($data, 'reference') && $this->orders_model->is_active_order_reference($data->reference))
+    {
+      $this->error = 'Marketplace order number '.$data->reference.' already exists';
 			return FALSE;
     }
 
