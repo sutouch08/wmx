@@ -77,12 +77,7 @@ class Receive_po_model extends CI_Model
 
   public function get_details($code)
   {
-    $rs = $this->db
-    ->select('rd.*, pd.line_num')
-    ->from('receive_product_detail AS rd')
-    ->join('po_details AS pd', 'rd.po_detail_id = pd.id', 'left')
-    ->where('receive_code', $code)
-    ->get();
+    $rs = $this->db->where('receive_code', $code)->get($this->td);
 
     if($rs->num_rows() > 0)
     {
@@ -397,6 +392,28 @@ class Receive_po_model extends CI_Model
     return 0;
   }
 
+
+  //--- use by po
+  public function is_exists_po_ref($po_ref)
+  {
+    $count = $this->db->where('po_ref', $po_ref)->where('status !=', 'D')->count_all_results($this->tb);
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
+  public function is_exists_po_detail($po_detail_id)
+  {
+    $count = $this->db->where('po_detail_id', $po_detail_id)->where('line_status !=', 'D')->count_all_results($this->td);
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
+  public function is_all_not_received($po_code)
+  {
+    $count = $this->db->where('po_code', $po_code)->where('line_status !=', 'D')->count_all_results($this->td);
+
+    return $count > 0 ? FALSE : TRUE;
+  }
 }
 
  ?>

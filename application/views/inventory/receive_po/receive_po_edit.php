@@ -44,12 +44,12 @@
     <label>วันที่</label>
     <input type="text" class="form-control input-sm text-center h" id="doc-date" value="<?php echo thai_date($doc->date_add); ?>" />
   </div>
-	<div class="col-lg-1-harf col-md-2-harf col-sm-2 col-xs-4 padding-5">
+	<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-4 padding-5">
 		<label>ผู้จำหน่าย</label>
 		<input type="text" class="form-control input-sm text-center h" name="vender_code" id="vender_code" value="<?php echo $doc->vender_code; ?>" placeholder="รหัสผู้จำหน่าย" />
 	</div>
 
-	<div class="col-lg-4-harf col-md-6 col-sm-4 col-xs-8 padding-5">
+	<div class="col-lg-4-harf col-md-6 col-sm-6 col-xs-8 padding-5">
 	 	<label class="not-show">vender</label>
 	  <input type="text" class="form-control input-sm h" name="venderName" id="venderName" value="<?php echo $doc->vender_name; ?>" placeholder="ระบุผู้จำหน่าย" />
 	</div>
@@ -58,25 +58,30 @@
 	<?php $p_hide = empty($doc->po_code) ? 'hide' : '' ; ?>
 	<?php $p_disabled = empty($doc->po_code) ? '' : 'disabled'; ?>
 
-	<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-4 padding-5">
+	<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
 		<label>ใบสั่งซื้อ</label>
 		<input type="text" class="form-control input-sm text-center h" name="poCode" id="poCode" value="<?php echo $doc->po_code; ?>" placeholder="ค้นหาใบสั่งซื้อ" <?php echo $p_disabled; ?>/>
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-3 padding-5">
 		<label class="display-block not-show">clear</label>
 		<button type="button" class="btn btn-xs btn-info btn-block <?php echo $c_hide; ?> h" id="btn-confirm-po" onclick="confirmPo()">ยืนยัน</button>
 		<button type="button" class="btn btn-xs btn-primary btn-block <?php echo $p_hide; ?> h" id="btn-get-po" onclick="getPoDetail()">แสดง</button>
 	</div>
-	<div class="col-lg-1 col-md-1 col-sm-1 col-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1 col-sm-1-harf col-xs-3 padding-5">
 		<label class="display-block not-show">clear</label>
 		<button type="button" class="btn btn-xs btn-warning btn-block" id="btn-clear-po" onclick="clearPo()">Clear</button>
 	</div>
 
-	<div class="col-lg-2 col-md-3 col-sm-3 col-xs-4 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2-harf col-xs-6 padding-5">
+		<label>PO Ref.</label>
+		<input type="text" class="form-control input-sm text-center" id="po-ref" value="<?php echo $doc->reference; ?>" disabled />
+	</div>
+
+	<div class="col-lg-2 col-md-3 col-sm-3-harf col-xs-6 padding-5">
 		<label>ใบส่งสินค้า</label>
 		<input type="text" class="form-control input-sm text-center h" name="invoice" id="invoice" value="<?php echo $doc->invoice_code; ?>" placeholder="อ้างอิงใบส่งสินค้า" />
 	</div>
-	<div class="col-lg-3 col-md-4-harf col-sm-3 col-xs-8 padding-5">
+	<div class="col-lg-3 col-md-3-harf col-sm-3-harf col-xs-12 padding-5">
 		<label>คลัง</label>
 		<select class="width-100 h" id="warehouse" onchange="warehouse_init()">
 			<option value="">เลือก</option>
@@ -84,11 +89,11 @@
 		</select>
 	</div>
 
-	<div class="col-lg-2 col-md-2 col-sm-3 col-xs-6 padding-5">
+	<div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
 		<label>โซนรับสินค้า</label>
 		<input type="text" class="form-control input-sm h" name="zone_code" id="zone_code" placeholder="รหัสโซน" value="<?php echo empty($zone) ? NULL : $zone->code; ?>" />
 	</div>
-	<div class="col-lg-5 col-md-4 col-sm-6 col-xs-6 padding-5">
+	<div class="col-lg-3-harf col-md-4 col-sm-6 col-xs-6 padding-5">
 		<label class="not-show">zone</label>
 		<input type="text" class="form-control input-sm zone h" name="zoneName" id="zoneName" placeholder="ชื่อโซน" value="<?php echo empty($zone) ? NULL : $zone->name; ?>" />
 	</div>
@@ -235,6 +240,8 @@
 					data-backlogs="{{backlogs}}"
 					data-basecode="{{baseCode}}"
 					data-baseline="{{baseLine}}"
+					data-polinenum="{{poLineNum}}"
+					data-poref="{{poRef}}"
 					data-code="{{pdCode}}"
 					data-name="{{pdName}}"
 					data-unit="{{unit}}"
@@ -262,7 +269,9 @@
 				data-name="{{product_name}}"
 				data-unit="{{unit}}"
 				data-basecode="{{po_code}}"
+				data-poref="{{po_ref}}"
 				data-baseline="{{po_detail_id}}"
+				data-polinenum="{{po_line_num}}"
 				data-limit="{{limit}}"
 				data-backlogs="{{backlog}}"
 				data-qty="{{qty}}"

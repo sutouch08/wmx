@@ -22,6 +22,7 @@ class Po extends REST_Controller
       $this->load->model('rest/api/api_logs_model');
 
 	    $this->load->model('purchase/po_model');
+      $this->load->model('inventory/receive_po_model');
 	    $this->load->model('masters/products_model');
 
 	    $this->user = 'api@warrix';
@@ -136,13 +137,11 @@ class Po extends REST_Controller
         $this->response($arr, 400);
       }
 
-      $is_cancel = FALSE;
+      $is_cancel = empty($data->is_cancel) ? FALSE : ($data->is_cancel == 'Y' ? TRUE : FALSE);
 
       if( ! empty($data->items))
       {
         $lineNum = [];
-        $count = 0;
-        $cancel = 0;
 
         foreach($data->items as $rs)
         {
@@ -164,18 +163,7 @@ class Po extends REST_Controller
               $sc = FALSE;
               $this->error = "Duplicate Line Number {$rs->line_num}";
             }
-
-            $count++;
-            if($rs->qty <= 0)
-            {
-              $cancel++;
-            }
           }
-        }
-
-        if($cancel == $count)
-        {
-          $is_cancel = TRUE;
         }
       }
 
@@ -216,13 +204,104 @@ class Po extends REST_Controller
         //---- check duplicate order number
         $doc = $this->po_model->get_by_reference($data->po_no, 'NOT_CANCEL');
 
-        if( ! empty($doc) && $doc->status == 'C')
+        if( ! empty($doc))
         {
-          $sc = FALSE;
-          $this->error = "This document has been closed cannot be change";
+          $action = 'update';
+
+          if($doc->status == 'C')
+          {
+            $sc = FALSE;
+            $this->error = "This document has been closed cannot be change";
+          }
+
+          if($sc === TRUE)
+          {
+            if( ! $is_cancel && $doc->status == 'D')
+            {
+              $sc = FALSE;
+              $this->error = "This document has been canceled cannot be chane";
+            }
+          }
+
+          if($sc === TRUE && $is_cancel)
+          {
+            $action = 'cancel';
+
+            if($this->po_model->is_received($doc->code))
+            {
+              $sc = FALSE;
+              $this->error = "This document has been received cannot be cancel";
+            }
+
+            if($sc === TRUE && $this->receive_po_model->is_exists_po_ref($data->po_no))
+            {
+              $sc = FALSE;
+              $this->error = "This document has been received cannot be cancel";
+            }
+
+            if($sc === TRUE)
+            {
+              $arr = array(
+                'status' => 'D',
+                'cancel_reason' => NULL,
+                'cancel_user' => $this->user,
+                'cancel_date' => now()
+              );
+
+              if( ! $this->po_model->update($doc->code, $arr))
+              {
+                $sc = FALSE;
+                $this->error = "Failed to update document status";
+              }
+
+              if($sc === TRUE)
+              {
+                $arr = array(
+                  'line_status' => 'D',
+                  'update_user' => $this->user
+                );
+
+                if( ! $this->po_model->update_details($doc->code, $arr))
+                {
+                  $sc = FALSE;
+                  $this->error = "Failed to update item rows status";
+                }
+              }
+            }
+          }
         }
 
-        if($sc === TRUE)
+        //---- if any error return
+        if($sc === FALSE)
+        {
+          $arr = array(
+            'status' => FALSE,
+            'error' => $this->error,
+            'retry' => FALSE
+          );
+
+          if($this->logs_json)
+          {
+            $logs = array(
+              'trans_id' => genUid(),
+              'api_path' => $this->api_path,
+              'type' => $this->type,
+              'code' => $data->po_no,
+              'action' => $action,
+              'status' => 'failed',
+              'message' => $this->error,
+              'request_json' => $json,
+              'response_json' => json_encode($arr)
+            );
+
+            $this->api_logs_model->add_logs($logs);
+          }
+
+          $this->response($arr, 400);
+        }
+
+
+        if($sc === TRUE && ! $is_cancel)
         {
           $doc_date = empty($data->doc_date) ? date('Y-m-d') : db_date($data->doc_date, FALSE);
           $due_date = empty($data->due_date) ? date('Y-m-d') : db_date($data->due_date, FALSE);
@@ -320,7 +399,7 @@ class Po extends REST_Controller
 
             if($sc === TRUE)
             {
-              if($doc->status == 'O' && $this->po_model->is_all_open($doc->code))
+              if($doc->status == 'O' && $this->po_model->is_all_open($doc->code) && $this->receive_po_model->is_all_not_received($doc->code))
               {
                 //--- if all details is open
                 //--- drop current details
@@ -338,27 +417,30 @@ class Po extends REST_Controller
                   {
                     if($sc === FALSE) { break; }
 
-                    $arr = array(
-                      'po_id' => $doc->id,
-                      'po_code' => $doc->code,
-                      'po_ref' => $doc->reference,
-                      'line_num' => $rs->line_num,
-                      'product_code' => trim($rs->sku),
-                      'product_name' => trim($rs->description),
-                      'unit' => trim($rs->unit),
-                      'qty' => $rs->qty,
-                      'open_qty' => $rs->qty,
-                      'update_user' => $this->user
-                    );
+                    if($rs->qty > 0)
+                    {
+                      $arr = array(
+                        'po_id' => $doc->id,
+                        'po_code' => $doc->code,
+                        'po_ref' => $doc->reference,
+                        'line_num' => $rs->line_num,
+                        'product_code' => trim($rs->sku),
+                        'product_name' => trim($rs->description),
+                        'unit' => trim($rs->unit),
+                        'qty' => $rs->qty,
+                        'open_qty' => $rs->qty,
+                        'update_user' => $this->user
+                      );
 
-                    if( ! $this->po_model->add_detail($arr))
-                    {
-                      $sc = FALSE;
-                      $this->error = "Failed to insert item row at line num {$rs->line_num}";
-                    }
-                    else
-                    {
-                      $totalQty += $rs->qty;
+                      if( ! $this->po_model->add_detail($arr))
+                      {
+                        $sc = FALSE;
+                        $this->error = "Failed to insert item row at line num {$rs->line_num}";
+                      }
+                      else
+                      {
+                        $totalQty += $rs->qty;
+                      }
                     }
                   }
 
@@ -375,7 +457,6 @@ class Po extends REST_Controller
               }
               else
               {
-                $rows_id = []; //--- rows ids must update or ignore change use to  get row to delete
                 $del_rows_id = []; //--- row must delete
                 $add_rows = []; //--- row add new
                 $update_rows = []; //--- rows to update
@@ -388,34 +469,43 @@ class Po extends REST_Controller
 
                   if( ! empty($row))
                   {
-                    $rows_id[] = $row->id;
+                    $is_received = $this->receive_po_model->is_exists_po_detail($row->id);
 
-                    if($row->line_status == 'O')
+                    if($rs->qty > 0)
                     {
-                      $price = get_zero($rs->price);
-                      $line_total = $rs->qty * $price;
-
-                      $update_rows[] = (object) array(
-                        'id' => $row->id,
-                        'line_num' => $rs->line_num,
-                        'product_code' => $rs->sku,
-                        'product_name' => $rs->description,
-                        'unit' => $rs->unit,
-                        'price' => $price,
-                        'qty' => $rs->qty,
-                        'open_qty' => $rs->qty,
-                        'update_user' => $this->user
-                      );
-                    }
-
-                    if($row->line_status == 'P' OR $row->line_status == 'C')
-                    {
-                      //--- if row qty == api qty ignore change
-                      //--- if row qty != api qty cannot update
-                      if($row->qty != $rs->qty)
+                      if($row->line_status == 'O')
+                      {
+                        if($rs->qty != $row->qty)
+                        {
+                          $update_rows[] = (object) array(
+                            'id' => $row->id,
+                            'line_num' => $rs->line_num,
+                            'product_code' => $rs->sku,
+                            'product_name' => $rs->description,
+                            'unit' => $rs->unit,
+                            'qty' => $rs->qty,
+                            'open_qty' => $rs->qty,
+                            'update_user' => $this->user
+                          );
+                        }
+                      }
+                      else
                       {
                         $sc = FALSE;
-                        $this->error = "Po line number {$rs->line_num} has beeb received cannot be change";
+                        $this->error = "Po line number {$rs->line_num} has been received cannot be change";
+                      }
+                    }
+                    else
+                    {
+                      //--- to cancel
+                      if(($row->line_status == 'O' OR $row->line_status == 'D') && ! $is_received)
+                      {
+                        $del_rows_id[] = $row->id;
+                      }
+                      else
+                      {
+                        $sc = FALSE;
+                        $this->error = "Po line number {$rs->line_num} has been received cannot be change";
                       }
                     }
                   }
@@ -437,29 +527,6 @@ class Po extends REST_Controller
                   }
                 }
                 //--- end foreach
-
-                //--- check row to delete
-                if($sc === TRUE && ! empty($rows_id))
-                {
-                  $rows_to_delete = $this->po_model->get_details_exclude_ids($doc->code, $rows_id);
-
-                  if( ! empty($rows_to_delete))
-                  {
-                    foreach($rows_to_delete as $rd)
-                    {
-                      if($rd->line_status == 'O' OR $rd->line_status == 'D')
-                      {
-                        $del_rows_id[] = $rd->id;
-                      }
-
-                      if($rd->line_status == 'P' OR $rd->line_status == 'C')
-                      {
-                        $sc = FALSE;
-                        $this->error = "Item line number {$rd->line_num} : {$rd->product_code} has been received cannot be delete";
-                      }
-                    }
-                  }
-                } //--- end if rows_id
 
                 //--- update rows
                 if($sc === TRUE && ! empty($update_rows))

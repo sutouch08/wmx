@@ -28,7 +28,9 @@ function addPoItems() {
 					let itemName = el.data('name');
 					let unitCode = el.data('unit');
 					let baseCode = el.data('basecode');
+					let poRef = el.data('poref');
 					let baseLine = el.data('baseline');
+					let poLineNum = el.data('polinenum');
 					let limit = parseDefault(parseFloat(el.data('limit')), 0.00);
 					let backlogs = parseDefault(parseFloat(el.data('backlogs')), 0);
 
@@ -39,6 +41,8 @@ function addPoItems() {
 						'unit' : unitCode,
 						'baseCode' : baseCode,
 						'baseLine' : baseLine,
+						'poRef' : poRef,
+						'poLineNum' : poLineNum,
 						'qty' : qty,
 						'qtyLabel' : addCommas(qty.toFixed(2)),
 						'backlogs' : backlogs,
@@ -196,6 +200,7 @@ function getPoDetail(poCode) {
 
 				if(ds.status === 'success') {
 					$('#po-code').val(ds.po_code);
+					$('#po-ref').val(ds.po_ref);
 					$('#vender_code').val(ds.vender_code);
 					$('#venderName').val(ds.vender_name);
 
@@ -272,8 +277,8 @@ function clearPo() {
 		setTimeout(() => {
 			load_out();
 			$('#receive-table').html('');
-			$('#poCode').val('');
-			$('#poCode').removeAttr('disabled');
+			$('#poCode').val('').removeAttr('disabled');
+			$('#po-ref').val('');
 			$('#btn-get-po').addClass('hide');
 			$('#btn-confirm-po').removeClass('hide');
 			$('#total-receive').val('0.00');

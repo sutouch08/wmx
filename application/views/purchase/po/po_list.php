@@ -13,11 +13,15 @@
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
 	<div class="row">
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>เลขที่เอกสาร</label>
+			<label>Document No.</label>
 			<input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
 		</div>
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>ผู้ขาย</label>
+			<label>Reference No.</label>
+			<input type="text" class="form-control input-sm search" name="reference"  value="<?php echo $reference; ?>" />
+		</div>
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+			<label>Vender</label>
 			<input type="text" class="form-control input-sm search" name="vender" value="<?php echo $vender; ?>" />
 		</div>
 		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -58,7 +62,8 @@
 					<th class="fix-width-100 middle"></th>
 					<th class="fix-width-50 middle text-center">#</th>
 					<th class="fix-width-100 middle text-center">วันที่</th>
-					<th class="fix-width-100 middle">เลขที่</th>
+					<th class="fix-width-100 middle">Document No.</th>
+					<th class="fix-width-100 middle">Reference</th>
 					<th class="fix-width-80 middle text-center">สถานะ</th>
 					<th class="fix-width-250 middle">ผู้ขาย</th>
 					<th class="fix-width-100 middle text-right">จำนวน</th>
@@ -81,10 +86,11 @@
               <td class="middle text-center no"><?php echo $no; ?></td>
               <td class="middle text-center"><?php echo thai_date($rs->doc_date); ?></td>
               <td class="middle"><?php echo $rs->code; ?></td>
+							<td class="middle"><?php echo $rs->reference; ?></td>
 							<td class="middle text-center"><?php echo po_status_text($rs->status); ?></td>
 							<td class="middle"><?php echo $rs->vender_name; ?></td>
 							<td class="middle text-right"><?php echo number($rs->total_qty, 2); ?></td>
-							<td class="middle text-right"><?php echo number($rs->total_open_qty, 2); ?></td>							
+							<td class="middle text-right"><?php echo number($rs->total_open_qty, 2); ?></td>
 							<td class="middle text-center"><?php echo thai_date($rs->due_date); ?></td>
 							<td class="middle"><?php echo $rs->user; ?></td>
             </tr>
@@ -92,7 +98,7 @@
           <?php endforeach; ?>
 				<?php else : ?>
 					<tr>
-						<td colspan="11" class="text-center">---- ไม่พบรายการ ----</td>
+						<td colspan="12" class="text-center">---- ไม่พบรายการ ----</td>
 					</tr>
         <?php endif; ?>
 			</tbody>

@@ -62,7 +62,7 @@ class Wrx_ib_api
           foreach($details as $rs)
           {
             $playload['items'][] = array(
-              'orderLine' => intval($rs->line_num),
+              'orderLine' => intval($rs->po_line_num),
               'itemNumber' => $rs->product_code,
               'receiveQty' => floatval($rs->receive_qty),
               'lineLocation' => "Khlong Song Nam", //$doc->warehouse_code,

@@ -27,6 +27,7 @@ class Po extends PS_Controller
 
     $filter = array(
       'code' => get_filter('code', 'po_code', ''),
+      'reference' => get_filter('reference', 'po_reference', ''),
       'vender' => get_filter('vender', 'po_vender', ''),
       'from_date' => get_filter('fromDate', 'po_from_date', ''),
       'to_date' => get_filter('toDate', 'po_to_date', ''),
@@ -818,8 +819,6 @@ class Po extends PS_Controller
   }
 
 
-
-
   public function get_new_code($date = '')
   {
     $date = $date == '' ? date('Y-m-d') : $date;
@@ -842,9 +841,10 @@ class Po extends PS_Controller
     return $new_code;
   }
 
+
   public function clear_filter()
   {
-    $filter = array('po_code', 'po_vender', 'po_from_date', 'po_to_date', 'po_status');
+    $filter = array('po_code', 'po_reference', 'po_vender', 'po_from_date', 'po_to_date', 'po_status');
     clear_filter($filter);
   }
 } //-- end class

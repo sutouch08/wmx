@@ -27,6 +27,7 @@ function save() {
 		'vender_code' : $('#vender_code').val(),
 		'vender_name' : $('#venderName').val(),
 		'po_code' : $('#poCode').val().trim(),
+		'po_ref' : $('#po-ref').val().trim(),
 		'invoice' : $('#invoice').val().trim(),
 		'warehouse_code' : $('#warehouse').val(),
 		'zone_code' : $('#zone_code').val(),
@@ -91,6 +92,8 @@ function save() {
 			let row = {
 				'po_code' : el.data('basecode'),
 				'po_detail_id' : el.data('baseline'),
+				'po_ref' : el.data('poref'),
+				'po_line_num' : el.data('polinenum'),
 				'product_code' : el.data('code'),
 				'product_name' : el.data('name'),
 				'unit' : el.data('unit'),

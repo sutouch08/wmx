@@ -830,6 +830,7 @@ class Receive_po extends PS_Controller
                 'vender_code' => $ds->vender_code,
                 'vender_name' => $ds->vender_name,
                 'po_code' => $ds->po_code,
+                'po_ref' => $ds->po_ref,
                 'invoice_code' => $ds->invoice,
                 'zone_code' => $zone->code,
                 'warehouse_code' => $zone->warehouse_code,
@@ -870,7 +871,9 @@ class Receive_po extends PS_Controller
                         $de = array(
                           'receive_code' => $ds->code,
                           'po_code' => $rs->po_code,
+                          'po_ref' => $rs->po_ref,
                           'po_detail_id' => $rs->po_detail_id,
+                          'po_line_num' => $rs->po_line_num,
                           'zone_code' => $zone->code,
                           'product_code' => $rs->product_code,
                           'product_name' => $rs->product_name,
@@ -1373,7 +1376,9 @@ class Receive_po extends PS_Controller
               'no' => $no,
               'uid' => $rs->po_id."-".$rs->id,
               'po_code' => $po_code,
+              'po_ref' => $rs->po_ref,
               'po_detail_id' => $rs->id,
+              'po_line_num' => $rs->line_num,
               'product_code' => $rs->product_code,
               'product_name' => $rs->product_name,
               'unit' => $rs->unit,
@@ -1385,7 +1390,7 @@ class Receive_po extends PS_Controller
               'limit' => ($rs->qty + ($rs->qty * $rate)) - $dif,
               'backlog_label' => number($rs->open_qty, 2),
               'backlog' => round($rs->open_qty, 2),
-              'isOpen' => $rs->line_status === 'O' ? TRUE : FALSE
+              'isOpen' => ($rs->line_status == 'O' OR $rs->line_status == 'P') ? TRUE : FALSE
             );
 
             array_push($ds, $arr);
@@ -1409,6 +1414,7 @@ class Receive_po extends PS_Controller
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
       'po_code' => $sc === TRUE ? $po->code : NULL,
+      'po_ref' => $sc === TRUE ? $po->reference : NULL,
       'vender_code' => $sc === TRUE ? $po->vender_code : NULL,
       'vender_name' => $sc === TRUE ? $po->vender_name : NULL,
       'details' => $sc === TRUE ? $ds : NULL
