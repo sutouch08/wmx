@@ -49,6 +49,7 @@ class Wrx_ib_api
       {
         $playload = array(
           'company' => $this->company,
+          'source' => 'NONE',
           'poNumber' => $doc->po_code,
           'receiptDate' => $doc->shipped_date,
           'items' => []
