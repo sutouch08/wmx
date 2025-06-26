@@ -32,7 +32,7 @@ class Wrx_ib_api
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_IB_URL');
     $api_path = $url;
-
+    $req_time = NULL;
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
@@ -96,6 +96,8 @@ class Wrx_ib_api
           }
           else
           {
+            $req_time = date('Y-m-d H:i:s');
+
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
@@ -172,6 +174,12 @@ class Wrx_ib_api
             {
               $sc = FALSE;
               $this->error = "No response from ERP";
+              $resp = array(
+                'status' => 'failed',
+                'message' => $this->error,
+                'request_start' => $req_time,
+                'request_end' => date('Y-m-d H:i:s')
+              );
 
               if($this->logs_json)
               {
@@ -184,7 +192,7 @@ class Wrx_ib_api
                   'status' => 'failed',
                   'message' => 'No response',
                   'request_json' => $json,
-                  'response_json' => NULL
+                  'response_json' => json_encode($resp)
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
