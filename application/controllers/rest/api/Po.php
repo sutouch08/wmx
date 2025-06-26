@@ -136,10 +136,13 @@ class Po extends REST_Controller
         $this->response($arr, 400);
       }
 
+      $is_cancel = FALSE;
 
       if( ! empty($data->items))
       {
         $lineNum = [];
+        $count = 0;
+        $cancel = 0;
 
         foreach($data->items as $rs)
         {
@@ -161,7 +164,18 @@ class Po extends REST_Controller
               $sc = FALSE;
               $this->error = "Duplicate Line Number {$rs->line_num}";
             }
+
+            $count++;
+            if($rs->qty <= 0)
+            {
+              $cancel++;
+            }
           }
+        }
+
+        if($cancel == $count)
+        {
+          $is_cancel = TRUE;
         }
       }
 

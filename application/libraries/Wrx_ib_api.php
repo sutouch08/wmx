@@ -65,7 +65,7 @@ class Wrx_ib_api
             $playload['items'][] = array(
               'orderLine' => $line,
               'itemNumber' => $rs->product_code,
-              'receiveQty' => $rs->receive_qty,
+              'receiveQty' => floatval($rs->receive_qty),
               'lineLocation' => $doc->warehouse_code,
               'bin' => $doc->zone_code
             );
