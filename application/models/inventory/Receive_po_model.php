@@ -45,7 +45,13 @@ class Receive_po_model extends CI_Model
 
   public function get($code)
   {
-    $rs = $this->db->where('code', $code)->get($this->tb);
+    $rs = $this->db
+    ->select('re.*, po.reference')
+    ->from('receive_product AS re')
+    ->join('po', 're.po_code = po.code', 'left')
+    ->where('re.code', $code)
+    ->get();
+    // $rs = $this->db->where('code', $code)->get($this->tb);
 
     if($rs->num_rows() === 1)
     {
