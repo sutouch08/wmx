@@ -32,7 +32,7 @@
 			<label>ลูกค้า</label>
 			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
 		</div>
-		<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
+		<div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>ช่องทางขาย</label>
 			<select class="width-100 filter" name="channels" id="channels">
 				<option value="all">ทั้งหมด</option>
@@ -47,6 +47,14 @@
 				<?php echo select_payment_method($payment); ?>
 			</select>
 		</div>
+
+		<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+	    <label>รูปแบบ</label>
+			<select class="width-100 filter" name="role" id="role">
+	      <option value="all">ทั้งหมด</option>
+	      <?php echo select_order_role($role); ?>
+	    </select>
+	  </div>
 
 		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-6 padding-5">
 			<label>วันที่</label>
@@ -64,31 +72,12 @@
 				<option value="1" <?php echo is_selected('1', $is_backorder); ?>>Yes</option>
 			</select>
 		</div>
-
-		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
-			<label>Pre order</label>
-			<select class="form-control input-sm" name="is_pre_order" onchange="getSearch()">
+		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-4 padding-5">
+			<label>Canceled</label>
+			<select class="form-control input-sm filter" name="is_cancled">
 				<option value="all">ทั้งหมด</option>
-				<option value="1" <?php echo is_selected('1', $is_pre_order); ?>>Yes</option>
-				<option value="0" <?php echo is_selected('0', $is_pre_order); ?>>No</option>
-			</select>
-		</div>
-
-		<!-- <div class="col-lg-1 col-md-2 col-sm-2 col-xs-4 padding-5">
-			<label>Add By</label>
-			<select class="form-control input-sm" name="method" onchange="getSearch()">
-				<option value="all">ทั้งหมด</option>
-				<option value="0" <?php echo is_selected('0', $method); ?>>Manual</option>
-				<option value="1" <?php echo is_selected('1', $method); ?>>Upload</option>
-				<option value="2" <?php echo is_selected('2', $method); ?>>API</option>
-			</select>
-		</div> -->
-
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
-			<label>User</label>
-			<select class="width-100 filter" name="user" id="user">
-				<option value="all">ทั้งหมด</option>
-				<?php echo select_user($user); ?>
+				<option value="0" <?php echo is_selected('0', $is_cancled); ?>>No</option>
+				<option value="1" <?php echo is_selected('1', $is_cancled); ?>>Yes</option>
 			</select>
 		</div>
 
@@ -122,9 +111,6 @@
 			<button type="button" id="btn-state-7" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_7']; ?>" onclick="toggleState(7)">รอเปิดบิล</button>
 			<button type="button" id="btn-state-8" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_8']; ?>" onclick="toggleState(8)">เปิดบิลแล้ว</button>
 			<button type="button" id="btn-state-9" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_9']; ?>" onclick="toggleState(9)">ยกเลิก</button>
-			<!-- <button type="button" id="btn-not-save" class="btn btn-sm margin-bottom-5 <?php echo $btn['not_save']; ?>" onclick="toggleNotSave()">ไม่บันทึก</button>
-			<button type="button" id="btn-expire" class="btn btn-sm margin-bottom-5 <?php echo $btn['is_expire']; ?>" onclick="toggleIsExpire()">หมดอายุ</button>
-			<button type="button" id="btn-only-me" class="btn btn-sm margin-bottom-5 <?php echo $btn['only_me']; ?>" onclick="toggleOnlyMe()">เฉพาะฉัน</button> -->
 		</div>
 	</div>
 
@@ -137,12 +123,7 @@
 	<input type="hidden" name="state_7" id="state_7" value="<?php echo $state[7]; ?>" />
 	<input type="hidden" name="state_8" id="state_8" value="<?php echo $state[8]; ?>" />
 	<input type="hidden" name="state_9" id="state_9" value="<?php echo $state[9]; ?>" />
-	<input type="hidden" name="notSave" id="notSave" value="<?php echo $notSave; ?>" />
-	<input type="hidden" name="onlyMe" id="onlyMe" value="<?php echo $onlyMe; ?>" />
-	<input type="hidden" name="isExpire" id="isExpire" value="<?php echo $isExpire; ?>" />
 	<hr class="margin-top-15 padding-5">
-	<input type="hidden" name="order_by" id="order_by" value="<?php echo $order_by; ?>">
-	<input type="hidden" name="sort_by" id="sort_by" value="<?php echo $sort_by; ?>">
 	<input type="hidden" name="search" value="1" />
 </form>
 <?php echo $this->pagination->create_links(); ?>

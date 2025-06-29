@@ -261,36 +261,42 @@ class Prepare_model extends CI_Model
 
   public function count_rows(array $ds = array(), $state = 3)
   {
-    $this->db
-    ->select('o.state')
+    $this->db		
     ->from('orders AS o')
-    ->join('channels AS ch', 'ch.code = o.channels_code','left');
+    ->join('channels AS ch', 'o.channels_code = ch.code', 'left');
+
     if( ! empty($ds['item_code']))
     {
       $this->db->join('order_details AS od', 'o.code = od.order_code','left');
-    }
-
-    if($state == 4)
-    {
-      $this->db->join('user AS u', 'u.uname = o.update_user', 'left');
-    }
-
-    if($state == 3)
-    {
-      $this->db->join('user AS u', 'u.uname = o.user', 'left');
     }
 
     $this->db
     ->where('o.state', $state)
     ->where('o.status', 1);
 
-    if(!empty($ds['code']))
+    if(isset($ds['role']) && $ds['role'] != 'all')
     {
-      $this->db
-			->group_start()
-			->like('o.code', $ds['code'])
-			->or_like('o.reference', $ds['code'])
-			->group_end();
+      $this->db->where('role', $ds['role']);
+    }
+
+    if( ! empty($ds['code']))
+    {
+      $this->db->like('o.code', $ds['code']);
+    }
+
+    if( ! empty($ds['reference']))
+    {
+      $this->db->like('o.reference', $ds['reference']);
+    }
+
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('o.so_no', $ds['so_no']);
+    }
+
+    if( ! empty($ds['fulfillment_code']))
+    {
+      $this->db->like('o.fulfillment_code', $ds['fulfillment_code']);
     }
 
     if(!empty($ds['item_code']))
@@ -308,37 +314,25 @@ class Prepare_model extends CI_Model
       ->group_end();
     }
 
-
-    if($ds['warehouse'] !== 'all' && !empty($ds['warehouse']))
+    if(isset($ds['warehouse']) && $ds['warehouse'] !== 'all')
     {
       $this->db->where('o.warehouse_code', $ds['warehouse']);
     }
 
-
-    //---- user name / display name
-    if($state == 3 && !empty($ds['user']))
+    if($state == 4)
     {
-      $this->db->group_start();
-      $this->db->like('u.uname', $ds['user']);
-      $this->db->or_like('u.name', $ds['user']);
-      $this->db->group_end();
+      if(isset($ds['user']) && $ds['user'] != 'all')
+      {
+        $this->db->where('o.update_user', $ds['user']);
+      }
     }
-
-    if($state == 4 && !empty($ds['display_name']))
-    {
-      $this->db->group_start();
-      $this->db->like('u.uname', $ds['display_name']);
-      $this->db->or_like('u.name', $ds['display_name']);
-      $this->db->group_end();
-    }
-
 
     if( ! empty($ds['channels']) && $ds['channels'] != 'all')
     {
       $this->db->where('o.channels_code', $ds['channels']);
     }
 
-    if($ds['is_online'] != '2')
+    if( isset($ds['is_online']) && $ds['is_online'] != 'all')
     {
       if($ds['is_online'] == 1)
       {
@@ -353,23 +347,14 @@ class Prepare_model extends CI_Model
       }
     }
 
-
-    if(!empty($ds['payment']) && $ds['payment'] !== 'all')
+    if( ! empty($ds['payment']) && $ds['payment'] !== 'all')
     {
       $this->db->where('o.payment_code', $ds['payment']);
     }
 
-
-    if($ds['role'] != 'all')
-    {
-      $this->db->where('o.role', $ds['role']);
-    }
-
-
-
     if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
     {
-      if(!empty($ds['stated']))
+      if( ! empty($ds['stated']))
       {
         $from_date = from_date($ds['from_date']);
         $to_date = to_date($ds['to_date']);
@@ -381,18 +366,6 @@ class Prepare_model extends CI_Model
         $this->db->where('o.date_add >=', from_date($ds['from_date']));
         $this->db->where('o.date_add <=', to_date($ds['to_date']));
       }
-    }
-
-    $this->db->group_by('o.code');
-
-    if( ! empty($ds['order_by']))
-    {
-      $order_by = "o.{$ds['order_by']}";
-      $this->db->order_by($order_by, $ds['sort_by']);
-    }
-    else
-    {
-      $this->db->order_by('o.date_add', 'DESC');
     }
 
     return $this->db->count_all_results();
@@ -415,39 +388,46 @@ class Prepare_model extends CI_Model
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0, $state = 3)
   {
     $this->db
-		->select('o.id, o.code, o.role, o.reference, o.customer_code, o.customer_name, o.customer_ref, o.date_add, o.channels_code, o.is_cancled')
-    ->select('o.warehouse_code, o.empName, o.user')
-    ->select('ch.name AS channels_name')
-    ->select('u.name AS display_name')
+		->select('o.id, o.code, o.role, o.so_no, o.fulfillment_code, o.oracle_id')
+    ->select('o.reference, o.customer_code, o.customer_name, o.customer_ref')
+    ->select('o.date_add, o.channels_code, o.is_cancled')
+    ->select('o.warehouse_code, o.to_warehouse, o.user, o.update_user')
+    ->select('ch.code AS channels_code, ch.name AS channels_name')
     ->from('orders AS o')
-    ->join('channels AS ch', 'ch.code = o.channels_code','left');
+    ->join('channels AS ch', 'o.channels_code = ch.code', 'left');
 
     if( ! empty($ds['item_code']))
     {
       $this->db->join('order_details AS od', 'o.code = od.order_code','left');
     }
 
-    if($state == 4)
-    {
-      $this->db->join('user AS u', 'u.uname = o.update_user', 'left');
-    }
-
-    if($state == 3)
-    {
-      $this->db->join('user AS u', 'u.uname = o.user', 'left');
-    }
-
     $this->db
     ->where('o.state', $state)
     ->where('o.status', 1);
 
-    if(!empty($ds['code']))
+    if(isset($ds['role']) && $ds['role'] != 'all')
     {
-      $this->db
-			->group_start()
-			->like('o.code', $ds['code'])
-			->or_like('o.reference', $ds['code'])
-			->group_end();
+      $this->db->where('role', $ds['role']);
+    }
+
+    if( ! empty($ds['code']))
+    {
+      $this->db->like('o.code', $ds['code']);
+    }
+
+    if( ! empty($ds['reference']))
+    {
+      $this->db->like('o.reference', $ds['reference']);
+    }
+
+    if( ! empty($ds['so_no']))
+    {
+      $this->db->like('o.so_no', $ds['so_no']);
+    }
+
+    if( ! empty($ds['fulfillment_code']))
+    {
+      $this->db->like('o.fulfillment_code', $ds['fulfillment_code']);
     }
 
     if(!empty($ds['item_code']))
@@ -465,28 +445,17 @@ class Prepare_model extends CI_Model
       ->group_end();
     }
 
-
-    if($ds['warehouse'] !== 'all' && !empty($ds['warehouse']))
+    if(isset($ds['warehouse']) && $ds['warehouse'] !== 'all')
     {
       $this->db->where('o.warehouse_code', $ds['warehouse']);
     }
 
-
-    //---- user name / display name
-    if($state == 3 && !empty($ds['user']))
+    if($state == 4)
     {
-      $this->db->group_start();
-      $this->db->like('u.uname', $ds['user']);
-      $this->db->or_like('u.name', $ds['user']);
-      $this->db->group_end();
-    }
-
-    if($state == 4 && !empty($ds['display_name']))
-    {
-      $this->db->group_start();
-      $this->db->like('u.uname', $ds['display_name']);
-      $this->db->or_like('u.name', $ds['display_name']);
-      $this->db->group_end();
+      if(isset($ds['user']) && $ds['user'] != 'all')
+      {
+        $this->db->where('o.update_user', $ds['user']);
+      }
     }
 
     if( ! empty($ds['channels']) && $ds['channels'] != 'all')
@@ -494,7 +463,7 @@ class Prepare_model extends CI_Model
       $this->db->where('o.channels_code', $ds['channels']);
     }
 
-    if($ds['is_online'] != '2')
+    if( isset($ds['is_online']) && $ds['is_online'] != 'all')
     {
       if($ds['is_online'] == 1)
       {
@@ -509,21 +478,14 @@ class Prepare_model extends CI_Model
       }
     }
 
-
-    if(!empty($ds['payment']) && $ds['payment'] !== 'all')
+    if( ! empty($ds['payment']) && $ds['payment'] !== 'all')
     {
       $this->db->where('o.payment_code', $ds['payment']);
     }
 
-
-    if($ds['role'] != 'all')
-    {
-      $this->db->where('o.role', $ds['role']);
-    }
-
     if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
     {
-      if(!empty($ds['stated']))
+      if( ! empty($ds['stated']))
       {
         $from_date = from_date($ds['from_date']);
         $to_date = to_date($ds['to_date']);
@@ -538,20 +500,16 @@ class Prepare_model extends CI_Model
     }
 
     $this->db->group_by('o.code');
-
-    if( ! empty($ds['order_by']))
-    {
-      $order_by = "o.{$ds['order_by']}";
-      $this->db->order_by($order_by, $ds['sort_by']);
-    }
-    else
-    {
-      $this->db->order_by('o.id', 'ASC');
-    }
-
+    $this->db->order_by('o.id', 'ASC');
     $rs = $this->db->limit($perpage, $offset)->get();
     //echo $this->db->get_compiled_select();
-    return $rs->result();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 

@@ -18,13 +18,13 @@
 					<th class="min-width-250">ชื่อสินค้า</th>
 					<th class="fix-width-100 text-right">ราคา</th>
 					<th class="fix-width-100 text-center">จำนวน</th>
-					<th class="fix-width-100 text-center">ส่วนลด</th>
+					<th class="fix-width-100 text-center">ส่วนลด/หน่วย</th>
 					<th class="fix-width-150 text-right">มูลค่า</th>
 				</tr>
 			</thead>
 			<tbody id="detail-table">
 				<?php if( ! empty($details)) : ?>
-					<?php   foreach($details as $rs) : ?>						
+					<?php   foreach($details as $rs) : ?>
 						<?php 	$discLabel = discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
 						<tr class="font-size-11" id="row_<?php echo $rs->id; ?>">
 							<td class="middle text-center"><?php echo $no; ?></td>
@@ -50,7 +50,7 @@
 		</table>
 	</div>
 </div>
-<?php 	$netAmount = $total_amount - $order->bDiscAmount;	?>
+
 <div class="divider-hidden"></div>
 <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5">
   <div class="form-horizontal">
@@ -94,7 +94,7 @@
     <div class="form-group">
       <label class="col-lg-8 col-md-8 col-sm-8 col-xs-6 control-label no-padding-right">รวมทั้งสิ้น</label>
       <div class="col-lg-4 col-md-4 col-sm-4 col-xs-6 padding-5">
-        <input type="text" class="form-control input-sm text-right" id="net-amount" value="<?php echo number($netAmount, 2); ?>" readonly/>
+        <input type="text" class="form-control input-sm text-right" id="net-amount" value="<?php echo number($total_amount, 2); ?>" readonly/>
       </div>
     </div>
   </div> <!-- form horizontal -->

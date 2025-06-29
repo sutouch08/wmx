@@ -50,14 +50,9 @@ class Orders_model extends CI_Model
   }
 
 
-	public function get_cancle_reason($code)
+	public function get_cancel_reason($code)
 	{
-		$rs = $this->db
-    ->select('c.*, g.name AS reason_group')
-    ->from('order_cancle_reason AS c')
-    ->join('cancel_reason AS g', 'c.reason_id = g.id', 'left')
-    ->where('c.code', $code)
-    ->get();
+		$rs = $this->db->where('code', $code)->get('order_cancel_reason');
 
 		if($rs->num_rows() > 0)
 		{
@@ -82,11 +77,11 @@ class Orders_model extends CI_Model
   }
 
 
-	public function add_cancle_reason(array $ds = array())
+	public function add_cancel_reason(array $ds = array())
 	{
 		if( ! empty($ds))
 		{
-			return $this->db->insert('order_cancle_reason', $ds);
+			return $this->db->insert('order_cancel_reason', $ds);
 		}
 
 		return FALSE;
@@ -96,6 +91,12 @@ class Orders_model extends CI_Model
   public function update_detail($id, array $ds = array())
   {
     return $this->db->where('id', $id)->update($this->td, $ds);
+  }
+
+
+  public function update_details($code, array $ds = array())
+  {
+    return $this->db->where('order_code', $code)->update($this->td, $ds);
   }
 
 
@@ -525,6 +526,22 @@ class Orders_model extends CI_Model
   }
 
 
+  public function get_order_by_oracle_id($oracle_id)
+  {
+    $rs = $this->db
+    ->where('oracle_id IS NOT NULL', NULL, FALSE)
+    ->where('oracle_id', $oracle_id)
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
   public function get_active_order_code_by_reference($reference)
   {
     $rs = $this->db->select('code')->where('reference', $reference)->where('state !=', 9)->where('status !=', 2)->get($this->tb);
@@ -567,7 +584,20 @@ class Orders_model extends CI_Model
 
 
   //--- เช็คว่า oracle_id นี้มีการเพิ่มเข้า order แล้ว และไม่ได้ยกเลิก เพื่อเพิ่มออเดอร์ใหม่โดยใช้ oracle_id ได้
-  public function is_active_order_fulfillment($oracle_id)
+  public function is_active_order_fulfillment($fulfillment_code)
+  {
+    $count = $this->db
+    ->where('fulfillment_code IS NOT NULL', NULL, FALSE)
+    ->where('fulfillment_code', $fulfillment_code)
+    ->where('is_cancled', 0)
+    ->where_in('state', [4, 5, 6, 7, 8])
+    ->count_all_results($this->tb);
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
+
+  public function is_active_order_oracle_id($oracle_id)
   {
     $count = $this->db
     ->where('oracle_id IS NOT NULL', NULL, FALSE)
@@ -624,6 +654,24 @@ class Orders_model extends CI_Model
     return NULL;
   }
 
+
+  public function get_active_order_by_fulfillment_code($fulfillment_code)
+  {
+    $rs = $this->db
+    ->where('fulfillment_code IS NOT NULL', NULL, FALSE)
+    ->where('fulfillment_code', $fulfillment_code)
+    ->where('state <=', 7)
+    ->order_by('state', 'ASC')
+    ->limit(1)
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
 
   public function valid_detail($id)
   {
@@ -801,44 +849,9 @@ class Orders_model extends CI_Model
       }
     }
 
-    if( !empty($ds['user_ref']))
-    {
-      $this->db->like('user_ref', $ds['user_ref']);
-    }
-
-    if( ! empty($ds['empName']))
-    {
-      $this->db->like('empName', $ds['empName']);
-    }
-
     if(isset($ds['warehouse']) && $ds['warehouse'] != 'all')
     {
       $this->db->where('warehouse_code', $ds['warehouse']);
-    }
-
-    if( ! empty($ds['notSave']))
-    {
-      $this->db->where('status', 0);
-    }
-    else
-    {
-      if(isset($ds['isApprove']))
-      {
-        if($ds['isApprove'] !== 'all')
-        {
-          $this->db->where('status', 1);
-        }
-      }
-    }
-
-    if( ! empty($ds['onlyMe']))
-    {
-      $this->db->where('user', $this->_user->uname);
-    }
-
-    if( ! empty($ds['isExpire']))
-    {
-      $this->db->where('is_expired', 1);
     }
 
     if( ! empty($ds['state_list']))
@@ -846,61 +859,15 @@ class Orders_model extends CI_Model
       $this->db->where_in('state', $ds['state_list']);
     }
 
-    //--- ใช้กับเอกสารที่ต้อง approve เท่านั้น
-    if(isset($ds['isApprove']))
-    {
-      if($ds['isApprove'] !== 'all')
-      {
-        $this->db->where('is_approved', $ds['isApprove']);
-      }
-    }
-
-    //--- ใช้กับเอกสารที่ต้อง ว่ารับสินค้าเข้าปลายทางหรือยัง เท่านั้น
-    if(isset($ds['isValid']))
-    {
-      if($ds['isValid'] !== 'all')
-      {
-        $this->db->where('is_valid', $ds['isValid']);
-      }
-    }
-
     if(isset($ds['is_backorder']) && $ds['is_backorder'] != 'all')
     {
       $this->db->where('is_backorder', $ds['is_backorder']);
     }
 
-    if( isset($ds['is_pre_order']) && $ds['is_pre_order'] !== 'all')
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
     {
-      $this->db->where('is_pre_order', $ds['is_pre_order']);
+      $this->db->where('is_cancled', $ds['is_cancled']);
     }
-
-		if(isset($ds['method']) && $ds['method'] != "all")
-		{
-			if($ds['method'] == 0)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 0)
-				->where('is_api', 0)
-				->group_end();
-			}
-			else if($ds['method'] == 1)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 1)
-				->where('is_api', 0)
-				->group_end();
-			}
-			else if($ds['method'] == 2)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 0)
-				->where('is_api', 1)
-				->group_end();
-			}
-		}
 
     return $this->db->count_all_results($this->tb);
   }
@@ -911,7 +878,7 @@ class Orders_model extends CI_Model
     $this->db
     ->select('id, code, role, so_no, fulfillment_code, reference, customer_code, customer_name, customer_ref')
     ->select('channels_code, payment_code, state, status, warehouse_code, zone_code, date_add, is_expired, doc_total')
-    ->select('is_backorder, is_approved, user, empName, is_cancled, budget_id, budget_code');
+    ->select('is_backorder, is_cancled, budget_id, budget_code');
 
     if( isset($ds['role']) && $ds['role'] != 'all')
     {
@@ -961,11 +928,6 @@ class Orders_model extends CI_Model
       ->group_end();
     }
 
-    if( isset($ds['user']) && $ds['user'] != 'all')
-    {
-      $this->db->where('user', $ds['user']);
-    }
-
     //---เลขที่จัดส่ง
     if( ! empty($ds['ship_code']))
     {
@@ -996,44 +958,9 @@ class Orders_model extends CI_Model
       }
     }
 
-    if( ! empty($ds['user_ref']))
-    {
-      $this->db->like('user_ref', $ds['user_ref']);
-    }
-
-    if( ! empty($ds['empName']))
-    {
-      $this->db->like('empName', $ds['empName']);
-    }
-
     if(isset($ds['warehouse']) && $ds['warehouse'] != 'all')
     {
       $this->db->where('warehouse_code', $ds['warehouse']);
-    }
-
-    if( ! empty($ds['notSave']))
-    {
-      $this->db->where('status', 0);
-    }
-    else
-    {
-      if(isset($ds['isApprove']))
-      {
-        if($ds['isApprove'] !== 'all')
-        {
-          $this->db->where('status', 1);
-        }
-      }
-    }
-
-    if( ! empty($ds['onlyMe']))
-    {
-      $this->db->where('user', $this->_user->uname);
-    }
-
-    if( ! empty($ds['isExpire']))
-    {
-      $this->db->where('is_expired', 1);
     }
 
     if( ! empty($ds['state_list']))
@@ -1041,61 +968,15 @@ class Orders_model extends CI_Model
       $this->db->where_in('state', $ds['state_list']);
     }
 
-    //--- ใช้กับเอกสารที่ต้อง approve เท่านั้น
-    if(isset($ds['isApprove']))
-    {
-      if($ds['isApprove'] !== 'all')
-      {
-        $this->db->where('is_approved', $ds['isApprove']);
-      }
-    }
-
-    //--- ใช้กับเอกสารที่ต้อง ว่ารับสินค้าเข้าปลายทางหรือยัง เท่านั้น
-    if(isset($ds['isValid']))
-    {
-      if($ds['isValid'] !== 'all')
-      {
-        $this->db->where('is_valid', $ds['isValid']);
-      }
-    }
-
 	  if(isset($ds['is_backorder']) && $ds['is_backorder'] != 'all')
     {
       $this->db->where('is_backorder', $ds['is_backorder']);
     }
 
-    if( isset($ds['is_pre_order']) && $ds['is_pre_order'] !== 'all')
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
     {
-      $this->db->where('is_pre_order', $ds['is_pre_order']);
+      $this->db->where('is_cancled', $ds['is_cancled']);
     }
-
-		if(isset($ds['method']) && $ds['method'] != "all")
-		{
-			if($ds['method'] == 0)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 0)
-				->where('is_api', 0)
-				->group_end();
-			}
-			else if($ds['method'] == 1)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 1)
-				->where('is_api', 0)
-				->group_end();
-			}
-			else if($ds['method'] == 2)
-			{
-				$this->db
-				->group_start()
-				->where('is_import', 0)
-				->where('is_api', 1)
-				->group_end();
-			}
-		}
 
     $rs = $this->db
     ->order_by('id', 'DESC')
@@ -1347,80 +1228,11 @@ class Orders_model extends CI_Model
   }
 
 
-  //--- ใช้คำนวนยอดเครดิตคงเหลือ
-  public function get_sum_not_complete_amount($customer_code)
+  public function count_order_sku($code)
   {
-    $rs = $this->db
-    ->select_sum('order_details.total_amount', 'amount')
-    ->from('order_details')
-    ->join('orders', 'orders.code = order_details.order_code', 'left')
-    ->where_in('orders.role', array('S', 'C', 'N'))
-		->where('orders.state !=', 9)
-    ->where('orders.customer_code', $customer_code)
-    ->where('order_details.is_complete', 0)
-    ->where('orders.is_expired', 0)
-		->where('order_details.is_cancle', 0)
-    ->get();
+    $count = $this->db->where('order_code', $code)->where('is_count', 1)->count_all_results('order_details');
 
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->amount;
-    }
-
-    return 0.00;
-  }
-
-
-  //---- คำนวนยอดมูลค่าคงเหลือที่่ยังไม่เข้า complete
-  public function get_consign_not_complete_amount($role, $whsCode)
-  {
-    $qr  = "SELECT SUM(od.cost * od.qty) AS amount ";
-    $qr .= "FROM order_details AS od ";
-    $qr .= "LEFT JOIN orders AS o ON od.order_code = o.code ";
-    $qr .= "LEFT JOIN zone AS zn ON o.zone_code = zn.code ";
-    $qr .= "WHERE o.role = '{$role}' ";
-    $qr .= "AND o.state != 9 ";
-    $qr .= "AND o.status != 2 ";
-    $qr .= "AND o.is_expired = 0 ";
-    $qr .= "AND zn.warehouse_code = '{$whsCode}' ";
-    $qr .= "AND od.is_complete = 0 ";
-    $qr .= "AND od.is_count = 1 ";
-    $qr .= "AND od.is_cancle = 0 ";
-    $qr .= "AND od.is_expired = 0 ";
-
-    $rs = $this->db->query($qr);
-
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->amount;
-    }
-
-    return 0.00;
-  }
-
-
-  public function get_bill_discount($code)
-  {
-    $rs = $this->db->select('bDiscAmount')
-    ->where('code', $code)
-    ->get($this->tb);
-    if($rs->num_rows() === 1)
-    {
-      return $rs->row()->bDiscAmount;
-    }
-
-    return 0;
-  }
-
-
-  public function get_sum_style_qty($order_code, $model_code)
-  {
-    $rs = $this->db->select_sum('qty')
-    ->where('order_code', $order_code)
-    ->where('model_code', $model_code)
-    ->get('order_detils');
-
-    return $rs->row()->qty;
+    return $count;
   }
 
 

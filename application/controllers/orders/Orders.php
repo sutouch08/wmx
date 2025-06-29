@@ -56,24 +56,17 @@ class Orders extends PS_Controller
       'fulfillment_code' => get_filter('fulfillment_code', 'fulfillment_code', ''),
       'reference' => get_filter('reference', 'order_reference', ''),
       'customer' => get_filter('customer', 'order_customer', ''),
-      'user' => get_filter('user', 'order_user', 'all'),
       'ship_code' => get_filter('shipCode', 'order_shipCode', ''),
       'channels' => get_filter('channels', 'order_channels', 'all'),
       'payment' => get_filter('payment', 'order_payment', 'all'),
       'from_date' => get_filter('fromDate', 'order_fromDate', ''),
       'to_date' => get_filter('toDate', 'order_toDate', ''),
       'warehouse' => get_filter('warehouse', 'order_warehouse', 'all'),
-      'notSave' => get_filter('notSave', 'notSave', NULL),
-      'onlyMe' => get_filter('onlyMe', 'onlyMe', NULL),
-      'isExpire' => get_filter('isExpire', 'isExpire', NULL),
-			'method' => get_filter('method', 'method', 'all'),
-      'order_by' => get_filter('order_by', 'order_order_by', ''),
-      'sort_by' => get_filter('sort_by', 'order_sort_by', ''),
       'stated' => get_filter('stated', 'stated', ''),
       'startTime' => get_filter('startTime', 'startTime', ''),
       'endTime' => get_filter('endTime', 'endTime', ''),
-      'is_pre_order' => get_filter('is_pre_order', 'is_pre_order', 'all'),
-      'is_backorder' => get_filter('is_backorder', 'is_backorder', 'all')
+      'is_backorder' => get_filter('is_backorder', 'is_backorder', 'all'),
+      'is_cancled' => get_filter('is_cancled', 'is_cancled', 'all')
     );
 
     $state = array(
@@ -102,11 +95,6 @@ class Orders extends PS_Controller
       $btn = 'state_'.$i;
       $button[$btn] = $state[$i] === 'Y' ? 'btn-info' : '';
     }
-
-    $button['not_save'] = empty($filter['notSave']) ? '' : 'btn-info';
-    $button['only_me'] = empty($filter['onlyMe']) ? '' : 'btn-info';
-    $button['is_expire'] = empty($filter['isExpire']) ? '' : 'btn-info';
-
 
     $filter['state_list'] = empty($state_list) ? NULL : $state_list;
 
@@ -1033,7 +1021,7 @@ class Orders extends PS_Controller
 	    $ds['ship_to']  = $ship_to;
       $ds['tracking'] = $tracking;
       $ds['backlogs'] = $backlogs;
-			$ds['cancle_reason'] = ($rs->state == 9 ? $this->orders_model->get_cancle_reason($code) : NULL);
+			$ds['cancle_reason'] = ($rs->state == 9 ? $this->orders_model->get_cancel_reason($code) : NULL);
 	    $this->load->view('orders/order_edit', $ds);
     }
 		else
@@ -3303,10 +3291,11 @@ class Orders extends PS_Controller
   public function clear_filter()
   {
     $filter = array(
+      'order_role',
       'order_code',
 			'so_no',
+      'fulfillment_code',
       'order_customer',
-      'order_user',
       'order_reference',
       'order_shipCode',
       'order_channels',
@@ -3314,14 +3303,6 @@ class Orders extends PS_Controller
       'order_fromDate',
       'order_toDate',
       'order_warehouse',
-      'notSave',
-      'onlyMe',
-      'isExpire',
-			'sap_status',
-			'DoNo',
-			'method',
-      'order_order_by',
-      'order_sort_by',
       'state_1',
       'state_2',
       'state_3',
@@ -3331,13 +3312,8 @@ class Orders extends PS_Controller
       'state_7',
       'state_8',
       'state_9',
-      'stated',
-      'startTime',
-      'endTime',
-      'is_pre_order',
       'is_backorder',
-      'tax_status',
-      'is_etax'
+      'is_cancled'
     );
 
     clear_filter($filter);

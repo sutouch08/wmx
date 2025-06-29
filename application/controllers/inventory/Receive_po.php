@@ -724,7 +724,7 @@ class Receive_po extends PS_Controller
             if( ! $this->wrx_ib_api->export_receive($doc->code))
             {
               $sc = FALSE;
-              $this->error = "่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
             }
           }
           else

@@ -4,8 +4,11 @@
 		<h3 class="title"><?php echo $this->title; ?></h3>
 	</div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-		<button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-		<button type="button" class="btn btn-xs btn-info top-btn" onclick="printReturn()"><i class="fa fa-print"></i> พิมพ์</button>
+		<button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+		<?php if($doc->status == 'C') : ?>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="sendToErp('<?php echo $doc->code; ?>')"><i class="fa fa-send"></i> Send to ERP</button>
+		<?php endif; ?>
+		<button type="button" class="btn btn-white btn-info top-btn" onclick="printReturn()"><i class="fa fa-print"></i> พิมพ์</button>
   </div>
 </div>
 <hr />

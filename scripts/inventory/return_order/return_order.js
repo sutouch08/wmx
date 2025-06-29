@@ -81,20 +81,9 @@ function doCancle() {
 }
 
 
-
 $('#cancle-modal').on('shown.bs.modal', function() {
 	$('#cancle-reason').focus();
 });
-
-
-function addNew(){
-  window.location.href = HOME + 'add_new';
-}
-
-
-function goEdit(code){
-	window.location.href = HOME + 'edit/'+ code;
-}
 
 
 function goProcess(code) {
@@ -122,7 +111,37 @@ $("#toDate").datepicker({
 });
 
 
-// JavaScript Document
+function sendToErp(code) {
+	load_in();
+
+	$.ajax({
+		url:HOME + 'send_to_erp',
+		type:'POST',
+		cache:false,
+		data:{
+			'code' : code
+		},
+		success:function(rs) {
+			load_out();
+
+			if(rs.trim() === 'success') {
+				swal({
+					title:'Success',
+					type:'success',
+					timer:1000
+				});
+			}
+			else {
+				showError(rs);
+			}
+		},
+		error:function(rs) {
+			showError(rs);
+		}
+	})
+}
+
+
 function printReturn(){
 	var code = $("#return_code").val();
 	var center = ($(document).width() - 800) /2;

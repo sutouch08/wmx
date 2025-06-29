@@ -587,8 +587,7 @@ class Delivery_order extends PS_Controller
               $this->error = "บันทึกขายสำเร็จแต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->wrx_ob_api->error;
 
               $arr = array(
-                'is_exported' => 3,
-                'export_error' => $this->error
+                'is_exported' => 3
               );
 
               $this->orders_model->update($code, $arr);
@@ -596,8 +595,7 @@ class Delivery_order extends PS_Controller
             else
             {
               $arr = array(
-                'is_exported' => 1,
-                'export_error' => NULL
+                'is_exported' => 1
               );
 
               $this->orders_model->update($code, $arr);

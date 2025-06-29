@@ -92,9 +92,8 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
           <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
             <table class="table table-bordered">
 							<thead>
-	            	<tr>
-	            		<th class="fix-width-200">เหตุผลในการยกเลิก</th>
-                  <th class="min-width-200">คำอธิบาย</th>
+	            	<tr class="font-size-11">
+                  <th class="min-width-200">เหตุผลในการยกเลิก</th>
 									<th class="fix-width-200">User</th>
 									<th class="fix-width-150">วันที่ยกเลิก</th>
 	            	</tr>
@@ -102,11 +101,10 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
 							<tbody>
 							<?php if( ! empty($cancle_reason)) : ?>
 								<?php foreach($cancle_reason as $reason) : ?>
-									<tr>
-                    <td><?php echo $reason->reason_group; ?></td>
+									<tr class="font-size-11">
 										<td><?php echo $reason->reason; ?></td>
 										<td><?php echo $this->user_model->get_name($reason->user); ?></td>
-										<td><?php echo thai_date($reason->cancle_date, TRUE); ?></td>
+										<td><?php echo thai_date($reason->cancel_date, TRUE); ?></td>
 									</tr>
 								<?php endforeach; ?>
 							<?php else : ?>

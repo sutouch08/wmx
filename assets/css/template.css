@@ -605,6 +605,10 @@ hr.padding-5 {
   margin-right:7px !important;
 }
 
+.margin-right-0 {
+	margin-right:0px !important;
+}
+
 .margin-right-5 {
 	margin-right:5px !important;
 }
@@ -615,6 +619,10 @@ hr.padding-5 {
 
 .margin-right-15 {
 	margin-right:15px !important;
+}
+
+.margin-top-0{
+	margin-top:0px !important;
 }
 
 .margin-top-5{
@@ -641,6 +649,10 @@ hr.padding-5 {
 	margin-top:30px !important;
 }
 
+.margin-left-0 {
+  margin-left: 0px !important;
+}
+
 .margin-left-5 {
 	margin-left:5px !important;
 }
@@ -653,8 +665,12 @@ hr.padding-5 {
 	margin-left:15px !important;
 }
 
+.margin-bottom-0 {
+	margin-bottom:0px !important;
+}
+
 .margin-bottom-5 {
-	margin-bottom:5px;
+	margin-bottom:5px !important;
 }
 
 .margin-bottom-10 {
@@ -1477,7 +1493,7 @@ td.one-attribute{
   .no-border-xs {
     border:0px !important
   }
-  
+
 	.cart-modal {
 		width:100%;
 		height: 100%;

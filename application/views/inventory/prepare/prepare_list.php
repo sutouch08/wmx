@@ -17,63 +17,73 @@
 			<h4 class="title">ตัวกรอง</h4>
 		</div>
 
-		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-12 padding-5 fi">
 			<label>เลขที่เอกสาร</label>
-			<input type="text" class="form-control input-sm search" name="code"  value="<?php echo $code; ?>" />
+			<input type="text" class="width-100 search" name="code"  value="<?php echo $code; ?>" />
+		</div>
+
+		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
+			<label>MKP No.</label>
+			<input type="text" class="width-100 search" name="reference"  value="<?php echo $reference; ?>" />
+		</div>
+
+		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
+			<label>SO No.</label>
+			<input type="text" class="width-100 search" name="so_no" value="<?php echo $so_no; ?>" />
+		</div>
+
+		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
+			<label>Fulfillment No.</label>
+			<input type="text" class="width-100 search" name="fulfillment_code"  value="<?php echo $fulfillment_code; ?>" />
 		</div>
 
 		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
 			<label>ลูกค้า</label>
-			<input type="text" class="form-control input-sm search" name="customer" value="<?php echo $customer; ?>" />
+			<input type="text" class="width-100 search" name="customer" value="<?php echo $customer; ?>" />
 		</div>
 
-		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
-			<label>พนักงาน[เปิดออเดอร์]</label>
-			<input type="text" class="form-control input-sm search" name="user" value="<?php echo $user; ?>" />
-		</div>
-
-		<div class="col-lg-3 col-md-4-harf col-sm-4-harf col-xs-12 padding-5 fi">
+		<div class="col-lg-3 col-md-5 col-sm-4-harf col-xs-12 padding-5 fi">
 			<label>คลัง</label>
-			<select class="width-100" name="warehouse" id="warehouse">
+			<select class="width-100 filter" name="warehouse" id="warehouse">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_sell_warehouse($warehouse); ?>
 			</select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-2-harf col-sm-2-harf col-xs-12 padding-5 fi">
+		<div class="col-lg-1-harf col-md-3 col-sm-3 col-xs-12 padding-5 fi">
 			<label>ช่องทางขาย</label>
-			<select class="form-control input-sm" name="channels">
+			<select class="width-100 filter" name="channels" id="channels">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_channels($channels); ?>
 			</select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-12 padding-5 fi">
-			<label>ออนไลน์</label>
-			<select class="form-control input-sm" name="is_online">
-				<option value="2">ทั้งหมด</option>
-				<option value="1" <?php echo is_selected($is_online, '1'); ?>>ออนไลน์</option>
-				<option value="0" <?php echo is_selected($is_online, '0'); ?>>ออฟไลน์</option>
+		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-12 padding-5 fi">
+			<label>Online</label>
+			<select class="width-100 filter" name="is_online">
+				<option value="all">ทั้งหมด</option>
+				<option value="1" <?php echo is_selected($is_online, '1'); ?>>Online</option>
+				<option value="0" <?php echo is_selected($is_online, '0'); ?>>Offline</option>
 			</select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-2 col-sm-2-harf col-xs-12 padding-5 fi">
+		<div class="col-lg-1 col-md-2 col-sm-2-harf col-xs-12 padding-5 fi">
 			<label>รูปแบบ</label>
 			<select class="width-100 filter" name="role" id="role">
 	      <option value="all">ทั้งหมด</option>
 	      <?php echo select_order_role($role); ?>
 	    </select>
 		</div>
-		
-		<div class="col-lg-1-harf col-md-3 col-sm-2 col-xs-12 padding-5 fi">
+
+		<div class="col-lg-1-harf col-md-3-harf col-sm-3-harf col-xs-12 padding-5 fi">
 			<label>ช่องทางการชำระเงิน</label>
-			<select class="form-control input-sm" name="payment">
+			<select class="width-100 filter" name="payment">
 				<option value="">ทั้งหมด</option>
 				<?php echo select_payment_method($payment); ?>
 			</select>
 		</div>
 
-		<div class="col-lg-2 col-md-3 col-sm-3 col-xs-12 padding-5 fi">
+		<div class="col-lg-2 col-md-3-harf col-sm-3 col-xs-12 padding-5 fi">
 			<label>วันที่</label>
 			<div class="input-daterange input-group width-100">
 				<input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" readonly value="<?php echo $from_date; ?>" />
@@ -81,9 +91,9 @@
 			</div>
 		</div>
 
-		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-12 padding-5 fi">
+		<div class="col-lg-1 col-md-2 col-sm-2-harf col-xs-12 padding-5 fi">
 			<label>สถานะ</label>
-			<select class="form-control input-sm" name="stated">
+			<select class="width-100" name="stated">
 				<option value="">เลือกสถานะ</option>
 				<option value="3" <?php echo is_selected($stated, '3'); ?>>รอจัดสินค้า</option>
 				<option value="4" <?php echo is_selected($stated, '4'); ?>>กำลังจัดสินค้า</option>
@@ -94,31 +104,31 @@
 		</div>
 
 		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5 fi">
-			<label class="display-block">เริ่มต้น</label>
-			<select class="form-control input-sm" name="startTime">
+			<label>เริ่มต้น</label>
+			<select class="width-100" name="startTime">
 				<?php echo selectTime($startTime); ?>
 			</select>
 		</div>
 
 		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5 fi">
-			<label class="display-block">สิ้นสุด</label>
-			<select class="form-control input-sm" name="endTime">
+			<label>สิ้นสุด</label>
+			<select class="width-100" name="endTime">
 				<?php echo selectTime($endTime); ?>
 			</select>
 		</div>
 
-		<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 padding-5 fi">
+		<div class="col-lg-1-harf col-md-4 col-sm-4 col-xs-12 padding-5 fi">
 			<label>รหัสสินค้า</label>
 			<input type="text" class="form-control input-sm search" name="item_code" id="item_code" value="<?php echo $item_code; ?>" />
 		</div>
 
 		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5 hidden-xs">
 			<label class="display-block not-show">&nbsp;</label>
-			<button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
+			<button type="submit" class="btn btn-xs btn-primary btn-block">Search</button>
 		</div>
 		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5 hidden-xs">
 			<label class="display-block not-show">&nbsp;</label>
-			<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
+			<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()">Reset</button>
 		</div>
 		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-6 padding-5 visible-xs fi">
 			<label class="display-block not-show">&nbsp;</label>
@@ -129,16 +139,12 @@
 			<button type="button" class="btn btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
 		</div>
 	</div>
-	<input type="hidden" name="order_by" id="order_by" value="<?php echo $order_by; ?>">
-	<input type="hidden" name="sort_by" id="sort_by" value="<?php echo $sort_by; ?>">
 	<input type="hidden" name="search" value="1" />
 </form>
 <hr class="margin-top-15 hidden-xs">
 <div class="">
 	<?php echo $this->pagination->create_links(); ?>
 </div>
-<?php $sort_date = $order_by == '' ? "" : ($order_by === 'date_add' ? ($sort_by === 'DESC' ? 'sorting_desc' : 'sorting_asc') : ''); ?>
-<?php $sort_code = $order_by == '' ? '' : ($order_by === 'code' ? ($sort_by === 'DESC' ? 'sorting_desc' : 'sorting_asc') : ''); ?>
 
 <div class="row">
 	<div class="col-lg-3 col-md-4 col-sm-4 padding-5 hidden-xs">
@@ -203,13 +209,7 @@
 							<td class="middle hidden-xs"><?php echo $rs->reference; ?></td>
 							<td class="middle  hidden-xs"><?php echo $rs->channels_name; ?></td>
 							<td class="middle text-center  hidden-xs"><?php echo number($rs->qty); ?></td>
-							<td class="middle  hidden-xs">
-								<?php if($rs->role == 'L' OR $rs->role == 'R') : ?>
-									<?php echo $rs->empName; ?>
-								<?php else : ?>
-									<?php echo $customer_name; ?>
-								<?php endif; ?>
-							</td>
+							<td class="middle  hidden-xs"><?php echo $customer_name; ?></td>
 
 							<td class="visible-xs" style="border:0px; padding:3px; font-size:14px;">
 								<div class="col-xs-12" style="border:solid 1px #ccc; border-radius:5px; box-shadow:0px 1px 2px #f3ecec; padding:5px;">
@@ -220,13 +220,7 @@
 											<?php echo (empty($rs->reference) ? "" : "<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[".$rs->reference."]"); ?>
 											<?php echo $cn_text; ?>
 										</p>
-										<p class="margin-bottom-3 pre-wrap"><b>ลูกค้า : </b>
-											<?php if($rs->role == 'L' OR $rs->role == 'R') : ?>
-												<?php echo $rs->empName; ?>
-											<?php else : ?>
-												<?php echo $customer_name; ?>
-											<?php endif; ?>
-										</p>
+										<p class="margin-bottom-3 pre-wrap"><b>ลูกค้า : </b><?php echo $customer_name; ?></p>
 										<p class="margin-bottom-3 pre-wrap"><b>ช่องทางขาย : </b> <?php echo $rs->channels_name; ?></p>
 										<p class="margin-bottom-3 pre-wrap"><b>คลัง : </b> <?php echo $whName[$rs->warehouse_code]; ?></p>
 										<p class="margin-bottom-3 pre-wrap"><b>จำนวน : </b> <?php echo number($rs->qty); ?></p>
@@ -297,6 +291,10 @@
 	<input type="hidden" id="extra" value="hide" />
 </div>
 
+<script>
+	$('#warehouse').select2();
+	$('#channels').select2();
+</script>
 <script src="<?php echo base_url(); ?>scripts/inventory/prepare/prepare.js?v=<?php echo date('YmdHis'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/inventory/prepare/prepare_list.js?v=<?php echo date('YmdHis'); ?>"></script>
 

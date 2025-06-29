@@ -32,15 +32,15 @@ class Prepare extends PS_Controller
 
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
+      'reference' => get_filter('reference', 'ic_reference', ''),
+      'so_no' => get_filter('so_no', 'ic_so_no', ''),
+      'fulfillment_code' => get_filter('fulfillment_code', 'id_fulfillment_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
-      'user' => get_filter('user', 'ic_user', ''),
       'channels' => get_filter('channels', 'ic_channels', 'all'),
-      'is_online' => get_filter('is_online', 'ic_is_online', '2'),
+      'is_online' => get_filter('is_online', 'ic_is_online', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
       'to_date' => get_filter('to_date', 'ic_to_date', ''),
-      'order_by' => get_filter('order_by', 'ic_order_by', ''),
-      'sort_by' => get_filter('sort_by', 'ic_sort_by', ''),
       'stated' => get_filter('stated', 'ic_stated', ''),
       'startTime' => get_filter('startTime', 'ic_startTime', ''),
       'endTime' => get_filter('endTime', 'ic_endTime', ''),
@@ -79,15 +79,15 @@ class Prepare extends PS_Controller
 
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
+      'reference' => get_filter('reference', 'ic_reference', ''),
+      'so_no' => get_filter('so_no', 'ic_so_no', ''),
+      'fulfillment_code' => get_filter('fulfillment_code', 'id_fulfillment_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
-      'user' => get_filter('user', 'ic_user', ''),
       'channels' => get_filter('channels', 'ic_channels', 'all'),
-      'is_online' => get_filter('is_online', 'ic_is_online', '2'),
+      'is_online' => get_filter('is_online', 'ic_is_online', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
       'to_date' => get_filter('to_date', 'ic_to_date', ''),
-      'order_by' => get_filter('order_by', 'ic_order_by', ''),
-      'sort_by' => get_filter('sort_by', 'ic_sort_by', ''),
       'stated' => get_filter('stated', 'ic_stated', ''),
       'startTime' => get_filter('startTime', 'ic_startTime', ''),
       'endTime' => get_filter('endTime', 'ic_endTime', ''),
@@ -936,6 +936,9 @@ class Prepare extends PS_Controller
   {
     $filter = array(
       'ic_code',
+      'ic_reference',
+      'ic_so_no',
+      'ic_fulfillment_code',
       'ic_customer',
       'ic_user',
       'ic_channels',
@@ -943,13 +946,10 @@ class Prepare extends PS_Controller
       'ic_role',
       'ic_from_date',
       'ic_to_date',
-      'ic_order_by',
-      'ic_sort_by',
       'ic_stated',
       'ic_startTime',
       'ic_endTime',
       'ic_item_code',
-      'ic_display_name',
       'ic_payment',
       'ic_warehouse'
     );

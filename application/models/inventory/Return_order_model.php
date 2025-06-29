@@ -3,6 +3,7 @@ class Return_order_model extends CI_Model
 {
   private $tb = "return_order";
   private $td = "return_order_detail";
+  private $log = "return_order_logs";
 
   public function __construct()
   {
@@ -323,6 +324,25 @@ class Return_order_model extends CI_Model
     if($rs->num_rows() == 1)
     {
       return $rs->row()->code;
+    }
+
+    return NULL;
+  }
+
+
+  public function add_logs(array $ds = array())
+  {
+    return $this->db->insert($this->log, $ds);
+  }
+
+
+  public function get_logs($code)
+  {
+    $rs = $this->db->where('code', $code)->get($this->log);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
     }
 
     return NULL;
