@@ -21,7 +21,7 @@ class Products extends REST_Controller
 		$json = file_get_contents("php://input");
 
     echo $json;
-    
+
 		if(! empty($data))
 		{
 			$last_sync = empty($data->date) ? '2020-01-01 00:00:00' : $data->date;
@@ -60,6 +60,7 @@ class Products extends REST_Controller
 		$json = file_get_contents("php://input");
 		$data = json_decode($json);
 
+    print_r($data);
 		if(! empty($data))
 		{
 			$last_sync = empty($data->date) ? '2020-01-01 00:00:00' : $data->date;
