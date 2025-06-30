@@ -58,8 +58,111 @@ class Stock_zone extends REST_Controller
     }
   }
 
+
+  public function countItems_post()
+  {
+    $json = file_get_contents("php://input");
+
+    $data = json_decode($json);
+
+    if( ! empty($data) && ! empty($data->zone_code))
+    {
+      $zone = $this->zone_model->get($data->zone_code);
+
+      $count = 0;
+
+      if( ! empty($zone))
+      {
+        $count = $this->stock_model->count_items_zone($zone->code);
+
+        $arr = array(
+          'status' => TRUE,
+          'rows' => $count
+        );
+
+        $this->response($arr, 200);
+      }
+      else
+      {
+        $arr = array(
+          'status' => FALSE,
+          'error' => 'Invalid zone code'
+        );
+
+        $this->response($arr, 200);
+      }
+    }
+    else
+    {
+      $arr = array(
+        'status' => FALSE,
+        'error' => "Missing required parameter"
+      );
+
+      $this->response($arr, 400);
+    }
+  }
+
+
   //---- for check stock
   public function getStockZone_get()
+  {
+    //--- Get raw post data
+    $json = file_get_contents("php://input");
+
+    $data = json_decode($json);
+
+    if(empty($data) OR empty($data->zone_code))
+    {
+      $arr = array(
+        'status' => FALSE,
+        'error' => 'empty data'
+      );
+
+      $this->response($arr, 400);
+    }
+
+    if( ! empty($data->zone_code))
+    {
+      $zone = $this->zone_model->get($data->zone_code);
+
+      if( ! empty($zone))
+      {
+        $result = $this->stock_model->get_all_stock_in_zone($zone->code);
+
+        $arr = array(
+          'status' => TRUE,
+          'data' => $result,
+          'count' => empty($result) ? 0 : count($result),
+          'error' => 'success'
+        );
+
+        $this->response($arr, 200);
+      }
+      else
+      {
+        $arr = array(
+          'status' => FALSE,
+          'error' => 'ไม่พบโซนในระบบ'
+        );
+
+        $this->response($arr, 200);
+      }
+    }
+    else
+    {
+      $arr = array(
+        'status' => FALSE,
+        'error' =>"Missing required parameter 'zone code'"
+      );
+
+      $this->response($arr, 400);
+    }
+  }
+
+
+  //---- for check stock
+  public function getStockZone_post()
   {
     //--- Get raw post data
     $json = file_get_contents("php://input");
