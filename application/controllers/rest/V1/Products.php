@@ -19,8 +19,7 @@ class Products extends REST_Controller
 	public function countUpdateItem_post()
 	{
 		$json = file_get_contents("php://input");
-
-    echo $json;
+    $data = json_decode($json);
 
 		if(! empty($data))
 		{
