@@ -13,9 +13,7 @@ class Customers extends PS_Controller
     parent::__construct();
     $this->home = base_url().'masters/customers';
     $this->load->model('masters/customers_model');
-    $this->load->model('masters/customer_group_model');
-    $this->load->model('masters/customer_kind_model');
-    $this->load->model('masters/customer_type_model');
+    $this->load->model('masters/customer_group_model');    
     $this->load->model('masters/customer_class_model');
     $this->load->model('masters/customer_area_model');
     $this->load->helper('customer');

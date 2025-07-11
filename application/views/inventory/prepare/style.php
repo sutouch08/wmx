@@ -41,6 +41,18 @@ li {
   min-width:1040px;
 }
 
+.nav-title {
+  position: relative;
+  height: 45px;
+  padding:10px 5px;
+  font-size:16px;
+  text-align: center;
+  border-bottom: solid 1px #ccc;
+  background-color: white;
+  width: 100%;
+  z-index: 10
+}
+
 @media (max-width:767px) {
   .fi {
     margin-bottom: 10px;
@@ -96,7 +108,7 @@ li {
     opacity: 0.9;
     z-index: 11;
   }
-  
+
   .slide-out {
     transition: bottom 0.3s ease-in-out;
     bottom: 0px;
@@ -129,6 +141,46 @@ li {
 
   .table-process {
     min-width: 0px;
+  }
+
+  .move-list {
+    margin-left: -20px;
+    width: 100vw;
+    max-height: 100vh;
+    padding-bottom: 80px;
+    overflow: auto;
+    background-color: white;
+    z-index: 8;
+  }
+
+  .move-list-item {
+    position: relative;
+    height: 100px;
+    padding:10px 5px;
+    border-bottom: solid 1px #ccc;
+    background-color: #white;
+  }
+
+  .move-list-item:first-child {
+    border-top:solid 1px #ccc;
+  }
+
+  .move-list-link {
+    position: absolute;
+    top: 0;
+    right: 0px;
+    width: 50px;
+    height: 100px;
+    padding:25px 15px;
+    text-align: center;
+    vertical-align: middle;
+  }
+
+  p.move-list-line {
+    font-size: 11px;
+    margin-bottom: 3px;
+    white-space: nowrap;
+    overflow: hidden;
   }
 }
 </style>

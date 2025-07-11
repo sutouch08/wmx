@@ -462,7 +462,7 @@ class Return_order extends PS_Controller
                 $sc = FALSE;
                 $this->error = "Send data failed : ERP Error - ".$this->wrx_ib_api->error;
 
-                if($doc->is_exportd != 1)
+                if($doc->is_exported != 1)
                 {
                   $arr = array(
                     'is_exported' => 3,

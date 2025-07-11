@@ -95,13 +95,13 @@
 					<?php $whName = []; ?>
 					<?php $no = $this->uri->segment(4) + 1; ?>
 					<?php foreach($orders as $rs) : ?>
-						<?php $customer_name = (!empty($rs->customer_ref)) ? $rs->customer_ref : (empty($rs->customer_name) ? $rs->empName : $rs->customer_name); ?>
+						<?php $customer_name = empty($rs->customer_ref) ? $rs->customer_name : $rs->customer_ref; ?>
 						<?php $channels_name = empty($rs->channels_code) ? "" : (empty($channels[$rs->channels_code]) ? "" : $channels[$rs->channels_code]); ?>
 						<?php $cn_text = $rs->is_cancled == 1 ? '<span class="badge badge-danger font-size-10 margin-left-5">ยกเลิก</span>' : ''; ?>
 						<?php if( empty($whName[$rs->warehouse_code])) : ?>
 							<?php $whName[$rs->warehouse_code] = warehouse_name($rs->warehouse_code); ?>
 						<?php endif; ?>
-						<tr id="row-<?php echo $rs->code; ?>" class="font-size-12">
+						<tr id="row-<?php echo $rs->code; ?>" class="font-size-11">
 							<td class="middle hidden-xs">
 								<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
 									<button type="button" class="btn btn-white btn-xs btn-info" onClick="goQc('<?php echo $rs->code; ?>')">ตรวจสินค้า</button>

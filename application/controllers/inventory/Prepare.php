@@ -9,6 +9,7 @@ class Prepare extends PS_Controller
 	public $title = 'จัดสินค้า';
   public $filter;
   public $full_mode = TRUE;
+  public $is_mobile = FALSE;
 
   public function __construct()
   {
@@ -20,6 +21,9 @@ class Prepare extends PS_Controller
     $this->load->model('masters/warehouse_model');
     $this->load->model('stock/stock_model');
     $this->load->helper('order');
+    $this->load->library('user_agent');
+
+    $this->is_mobile = $this->agent->is_mobile();
   }
 
 
@@ -66,7 +70,15 @@ class Prepare extends PS_Controller
       $filter['orders'] = $orders;
 
   		$this->pagination->initialize($init);
-      $this->load->view('inventory/prepare/prepare_list', $filter);
+
+      if($this->is_mobile)
+      {
+        $this->load->view('inventory/prepare/prepare_list_mobile', $filter);
+      }
+      else
+      {
+        $this->load->view('inventory/prepare/prepare_list', $filter);
+      }
     }
   }
 
@@ -113,7 +125,15 @@ class Prepare extends PS_Controller
       $filter['orders'] = $orders;
 
   		$this->pagination->initialize($init);
-      $this->load->view('inventory/prepare/prepare_view_process', $filter);
+      
+      if($this->is_mobile)
+      {
+        $this->load->view('inventory/prepare/prepare_view_process_mobile', $filter);
+      }
+      else
+      {
+        $this->load->view('inventory/prepare/prepare_view_process', $filter);
+      }
     }
   }
 
