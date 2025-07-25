@@ -10,6 +10,17 @@ class Return_order_model extends CI_Model
     parent::__construct();
   }
 
+  public function is_received($code)
+  {
+    $count = $this->db
+    ->where('return_code', $code)
+    ->where('receive_qty >', 0, FALSE)
+    ->where('line_status !=', 'D')
+    ->count_all_results($this->td);
+
+    return $count > 0 ?  TRUE : FALSE;
+  }
+
   public function add(array $ds = array())
   {
     if( ! empty($ds))
