@@ -143,7 +143,7 @@ function sendToErp(code) {
 
 
 function printReturn(){
-	var code = $("#return_code").val();
+	var code = $("#return-code").val();
 	var center = ($(document).width() - 800) /2;
   var target = HOME + 'print_detail/'+code;
   window.open(target, "_blank", "width=800, height=900, left="+center+", scrollbars=yes");

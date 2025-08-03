@@ -306,7 +306,7 @@ public function top_page()
 
 public function content_start()
 {
-	$height = ($this->row + $this->sub_total_row+1) * $this->row_height+2;
+	$height = ($this->row + $this->sub_total_row+1) * $this->row_height+1;
 	$border = $this->content_border == 0 ? '' : "border:solid 2px #ccc;";
 	return  "<div style='width:".$this->content_width."mm; height:".$height."mm; margin:auto; margin-bottom:2mm; ".$border." border-radius: 10px;'>";
 }

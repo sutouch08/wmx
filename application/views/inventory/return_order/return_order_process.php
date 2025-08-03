@@ -6,7 +6,7 @@
 	</div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
 		<button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
-		<?php if($doc->status == 'O' && ($this->pm->can_add OR $this->pm->can_edit)) : ?>			
+		<?php if($doc->status == 'O' && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
 			<div class="btn-group">
         <button data-toggle="dropdown" class="btn btn-success btn-white dropdown-toggle margin-top-5" aria-expanded="false">
           <i class="ace-icon fa fa-save icon-on-left"></i>
@@ -64,11 +64,11 @@
 <?php $this->load->view('inventory/return_order/return_order_control'); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped border-1 table-padding-3" style="margin-bottom:0px; min-width:940px;">
+		<table class="table table-striped border-1 table-padding-3" style="margin-bottom:0px; min-width:700px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-40 text-center">#</th>
-					<th class="fix-width-100">barcode</th>
+					<th class="fix-width-150">barcode</th>
 					<th class="fix-width-150">รหัส</th>
 					<th class="min-width-200">สินค้า</th>
 					<th class="fix-width-80 text-center">คืน</th>

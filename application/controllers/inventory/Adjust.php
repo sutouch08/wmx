@@ -21,6 +21,8 @@ class Adjust extends PS_Controller
     $this->load->model('masters/zone_model');
     $this->load->model('masters/products_model');
     $this->load->model('inventory/check_stock_diff_model');
+    $this->load->helper('warehouse');
+    $this->load->helper('adjust');
   }
 
 
@@ -28,13 +30,14 @@ class Adjust extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'adj_code', ''),
+      'DocNum' => get_filter('DocNum', 'adj_docNum', ''),
       'reference' => get_filter('reference', 'adj_reference', ''),
+      'warehouse_code' => get_filter('warehouse_code', 'adj_warehouse_code', 'all'),
       'user' => get_filter('user', 'adj_user', 'all'),
       'from_date' => get_filter('from_date', 'adj_from_date', ''),
       'to_date' => get_filter('to_date', 'adj_to_date', ''),
       'remark' => get_filter('remark', 'adj_remark', ''),
-      'status' => get_filter('status', 'adj_status', 'all'),
-      'isApprove' => get_filter('isApprove', 'adj_isApprove', 'all')
+      'status' => get_filter('status', 'adj_status', 'all')
     );
 
 		//--- แสดงผลกี่รายการต่อหน้า
@@ -72,6 +75,7 @@ class Adjust extends PS_Controller
       $ds = array(
         'code' => $code,
         'date_add' => $date_add,
+        'warehouse_code' => $ds->warehouse_code,
         'reference' => get_null($ds->reference),
         'remark' => get_null($ds->remark),
         'user' => $this->_user->uname
@@ -81,6 +85,17 @@ class Adjust extends PS_Controller
       {
         $sc = FALSE;
         $this->error = "เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
+      }
+
+      if($sc === TRUE)
+      {
+        $logs = array(
+          'code' => $code,
+          'action' => 'add',
+          'user' => $this->_user->uname
+        );
+
+        $this->adjust_model->add_logs($logs);
       }
     }
     else
@@ -102,6 +117,7 @@ class Adjust extends PS_Controller
   public function edit($code)
   {
     $doc = $this->adjust_model->get($code);
+
     if( ! empty($doc))
     {
       $ds = array(
@@ -129,7 +145,7 @@ class Adjust extends PS_Controller
 
       if( ! empty($doc))
       {
-        if($doc->status == 0)
+        if($doc->status === 'P' OR $doc->status === 'A' OR $doc->status == 'R')
         {
           $up_qty = $ds->qty_up;
           $down_qty = $ds->qty_down;
@@ -143,7 +159,7 @@ class Adjust extends PS_Controller
 
             if( ! empty($detail))
             {
-              if($detail->valid == 0)
+              if($detail->line_status === 'O')
               {
                 $stock = $this->stock_model->get_stock_zone($ds->zone_code, $ds->product_code);
                 $new_qty = $stock + ($qty + $detail->qty);
@@ -189,11 +205,14 @@ class Adjust extends PS_Controller
                   else
                   {
                     $arr = array(
-                      'adjust_code' => $ds->code,
+                      'adjust_id' => $doc->id,
+                      'adjust_code' => $doc->code,
                       'warehouse_code' => $zone->warehouse_code,
                       'zone_code' => $zone->code,
                       'product_code' => $item->code,
-                      'qty' => $qty
+                      'product_name' => $item->name,
+                      'qty' => $qty,
+                      'user' => $this->_user->uname
                     );
 
                     if( ! $this->adjust_model->add_detail($arr))
@@ -220,6 +239,28 @@ class Adjust extends PS_Controller
           {
             $sc = FALSE;
             $this->error = "จำนวนต้องไม่ถูกต้อง";
+          }
+
+          if($sc === TRUE)
+          {
+            if($doc->status === 'A' OR $doc->status == 'R')
+            {
+              $arr = array(
+                'status' => 'P',
+                'update_user' => $this->_user->uname,
+                'date_upd' => now()
+              );
+
+              $this->adjust_model->update($doc->code, $arr);
+
+              $logs = array(
+                'code' => $doc->code,
+                'action' => 'edit',
+                'user' => $this->_user->uname
+              );
+
+              $this->adjust_model->add_logs($logs);
+            }
           }
         }
         else
@@ -251,10 +292,9 @@ class Adjust extends PS_Controller
           'pdCode' => $rs->product_code,
           'pdName' => $rs->product_name,
           'zoneCode' => $rs->zone_code,
-          'zoneName' => $rs->zone_name,
           'up' => round(($rs->qty > 0 ? $rs->qty : 0)),
           'down' => ($rs->qty < 0 ? ($rs->qty * -1) : 0),
-          'valid' => $rs->valid
+          'line_status' => $rs->line_status == 'D' ? 'Canceled' : ($rs->line_status == 'C' ? 'Closed' : 'Open')
         );
       }
       else
@@ -322,68 +362,67 @@ class Adjust extends PS_Controller
   }
 
 
-  public function delete_detail()
+  public function remove_selected_details()
   {
     $sc = TRUE;
-    if($this->pm->can_edit)
+    $code = $this->input->post('code');
+    $ids = json_decode($this->input->post('ids'));
+
+    if( ! empty($code) && ! empty($ids))
     {
-      $id = $this->input->post('id');
-      if( ! empty($id))
+      $doc = $this->adjust_model->get($code);
+
+      if( ! empty($doc))
       {
-        $detail = $this->adjust_model->get_detail($id);
-
-        if( ! empty($detail))
+        if($doc->status == 'P' OR $doc->status == 'A' OR $doc->status == 'R')
         {
-          $doc = $this->adjust_model->get($detail->adjust_code);
-
-          if( ! empty($doc))
-          {
-            if($doc->status == 0)
-            {
-              if( ! $this->adjust_model->delete_detail($id))
-              {
-                $sc = FALSE;
-                $this->error = "ลบรายการไม่สำเร็จ";
-              }
-              else
-              {
-                if($detail->id_diff)
-                {
-                  $this->check_stock_diff_model->update($detail->id_diff, array('status' => 0));
-                }
-              }
-            }
-            else
-            {
-              $sc = FALSE;
-              $this->error = "เอกสารถูกบันทึกไปแล้ว ไม่สามารถแก้ไขรายการได้";
-            }
-          }
-          else
+          if( ! $this->adjust_model->delete_details_by_ids($ids))
           {
             $sc = FALSE;
-            $this->error = "ไม่พบเลขที่เอกสาร";
+            $this->error = "Failed to remove item rows";
+          }
+
+          if($sc === TRUE)
+          {
+            if($doc->status == 'A' OR $doc->status == 'R')
+            {
+              $arr = array(
+                'status' => 'P',
+                'update_user' => $this->_user->uname,
+                'date_upd' => now()
+              );
+
+              $this->adjust_model->update($doc->code, $arr);
+
+              $logs = array(
+                'code' => $doc->code,
+                'action' => 'edit',
+                'user' => $this->_user->uname
+              );
+
+              $this->adjust_model->add_logs($logs);
+            }
           }
         }
         else
         {
           $sc = FALSE;
-          $this->error = "ไม่พบรายการที่ต้องการลบ หรือ รายการถูกลบไปแล้ว";
+          set_error('status');
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = "ไม่พบ ID";
+        set_error('notfound');
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "คุณไม่มีสิทธิ์ในการแก้ไขรายการ";
+      set_error('required');
     }
 
-    echo $sc === TRUE ? 'success' : $this->error;
+    $this->_response($sc);
   }
 
 
@@ -450,40 +489,106 @@ class Adjust extends PS_Controller
 
       if( ! empty($doc))
       {
-        if($doc->status == 0)
+        if($doc->status === 'P' OR $doc->status == 'A' OR $doc->status == 'R')
         {
-          $details = $this->adjust_model->get_details($code);
-          if( ! empty($details))
-          {
-            $status = 1; //--- 0 = not save, 1 = saved, 2 = cancled
-            if( ! $this->adjust_model->change_status($code, $status))
-            {
-              $sc = FALSE;
-              $this->error = "เปลี่ยนสถานะเอกสารไม่สำเร็จ";
-            }
-          }
-          else
+          $arr = array(
+            'status' => 'A',
+            'is_approved' => 0,
+            'update_user' => $this->_user->uname,
+            'date_upd' => now()
+          );
+
+          if( ! $this->adjust_model->update($doc->code, $arr))
           {
             $sc = FALSE;
-            $this->error = "ไม่พบรายการปรับยอดกรุณาตรวจสอบ";
+            $this->error = "Failed to update document status";
+          }
+
+          if($sc === TRUE)
+          {
+            $logs = array(
+              'code' => $doc->code,
+              'action' => 'save',
+              'user' => $this->_user->uname
+            );
+
+            $this->adjust_model->add_logs($logs);
           }
         }
         else
         {
           $sc = FALSE;
-          $this->error = "เอกสารถูกบันทึกไปแล้ว";
+          set_error('status');
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = "เลขที่เอกสารไม่ถูกต้อง";
+        set_error('notfound');
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "ไม่พบเลขที่เอกสาร";
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
+
+
+  public function do_reject()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+
+    if( ! empty($code))
+    {
+      $doc = $this->adjust_model->get($code);
+
+      if( ! empty($doc))
+      {
+        if($doc->status == 'A')
+        {
+          $arr = array(
+            'status' => 'R',
+            'update_user' => $this->_user->uname,
+            'date_upd' => now()
+          );
+
+          if( ! $this->adjust_model->update($doc->code, $arr))
+          {
+            $sc = FALSE;
+            set_error('update');
+          }
+
+          if($sc === TRUE)
+          {
+            $logs = array(
+              'code' => $doc->code,
+              'action' => 'reject',
+              'user' => $this->_user->uname
+            );
+
+            $this->adjust_model->add_logs($logs);
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('status');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('notfound');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
     }
 
     $this->_response($sc);
@@ -493,18 +598,15 @@ class Adjust extends PS_Controller
   public function do_approve()
   {
     $sc = TRUE;
+    $code = $this->input->post('code');
 
-    if($this->input->post('code'))
+    if( ! empty($code))
     {
-      $this->load->model('approve_logs_model');
-
-      $code = $this->input->post('code');
-
       $doc = $this->adjust_model->get($code);
 
       if( ! empty($doc))
       {
-        if($doc->status == 1)
+        if($doc->status == 'A')
         {
           $this->db->trans_begin();
 
@@ -519,7 +621,7 @@ class Adjust extends PS_Controller
                 break;
               }
 
-              if($rs->valid == 0)
+              if($rs->line_status == 'O')
               {
                 if($rs->qty < 0)
                 {
@@ -566,18 +668,16 @@ class Adjust extends PS_Controller
 
                 if($sc === TRUE)
                 {
-                  if(! $this->adjust_model->valid_detail($rs->id))
+                  $arr = array(
+                    'line_status' => 'C',
+                    'date_upd' => now(),
+                    'update_user' => $this->_user->uname
+                  );
+
+                  if(! $this->adjust_model->update_detail($rs->id, $arr))
                   {
                     $sc = FALSE;
                     $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ <br/>โซน : {$rs->zone_code}<br/>SKU : {$rs->product_code}<br/>Qty : {$rs->qty}";
-                  }
-                }
-
-                if($sc === TRUE)
-                {
-                  if( ! empty($rs->id_diff))
-                  {
-                    $this->check_stock_diff_model->update($rs->id_diff, array('status' => 2));
                   }
                 }
               }
@@ -587,16 +687,28 @@ class Adjust extends PS_Controller
           //--- do approve
           if($sc === TRUE)
           {
-            if( ! $this->adjust_model->do_approve($code, $this->_user->uname))
+            $arr = array(
+              'status' => 'C',
+              'is_approved' => 1,
+              'update_user' => $this->_user->uname,
+              'date_upd' => now()
+            );
+
+            if( ! $this->adjust_model->update($code, $arr))
             {
               $sc = FALSE;
               $this->error = "อนุมัติเอกสารไม่สำเร็จ";
             }
 
-            //--- write approve logs
             if($sc === TRUE)
             {
-              $this->approve_logs_model->add($code, 1, $this->_user->uname);
+              $logs = array(
+                'code' => $doc->code,
+                'action' => 'approve',
+                'user' => $this->_user->uname
+              );
+
+              $this->adjust_model->add_logs($logs);
             }
           }
 
@@ -612,7 +724,7 @@ class Adjust extends PS_Controller
         else
         {
           $sc = FALSE;
-          $this->error = "เอกสารยังไม่ถูกบันทึก";
+          set_error('status');
         }
       }
       else
@@ -777,18 +889,14 @@ class Adjust extends PS_Controller
 
   public function view_detail($code, $approve_view = NULL)
   {
-    $this->load->model('approve_logs_model');
-
     $doc = $this->adjust_model->get($code);
 
     if( ! empty($doc))
     {
-      $doc->user_name = $this->user_model->get_name($doc->user);
       $ds = array(
         'doc' => $doc,
         'details' => $this->adjust_model->get_details($code),
-        'approve_view' => $approve_view,
-        'approve_list' => $this->approve_logs_model->get($code)
+        'logs' => $this->adjust_model->get_logs($code)
       );
 
       $this->load->view('inventory/adjust/adjust_detail', $ds);
@@ -797,77 +905,144 @@ class Adjust extends PS_Controller
     {
       $this->load->view('page_error');
     }
-
   }
 
 
-  public function cancle($code)
+  public function cancel($code)
   {
     $sc = TRUE;
 
     if( ! empty($code))
     {
+      $reason = get_null($this->input->post('reason'));
       $doc = $this->adjust_model->get($code);
 
       if( ! empty($doc))
       {
-        if($doc->is_approved == 1)
+        if($doc->status != 'D')
         {
-          if(! $this->unapprove($code))
+          if($doc->status == 'C')
           {
-            $sc = FALSE;
-          }
-        }
+            $details = $this->adjust_model->get_details($code);
 
-        //---- ถ้าสามารถยกเลิกการอนุมัติได้ หรือ หากยังไม่ได้อนุมัติ
-        //---- set is_cancle  = 1 in adjust_detail
-        //---- change status = 2 in adjust
-        if($sc === TRUE)
-        {
-          $this->db->trans_begin();
-          //---- set is_cancle = 1 in adjust_detail
-          if(! $this->adjust_model->cancle_details($code))
-          {
-            $sc = FALSE;
-            $this->error = "ยกเลิกรายการไม่สำเร็จ";
-          }
-
-          //--- change doc status to 2 Cancled
-          if($sc === TRUE)
-          {
-            $arr = array(
-              'status' => 2,
-              'cancle_reason' => trim($this->input->post('reason')),
-              'cancle_user' => $this->_user->uname
-            );
-
-            if(! $this->adjust_model->update($code, $arr))
+            if( ! empty($details))
             {
-              $sc = FALSE;
-              $this->error = "ยกเลิกเอกสารไม่สำเร็จ";
-            }
-          }
+              //--- check validate for stock
+              foreach($details as $rs)
+              {
+                if($sc === FALSE) { break; }
 
-          if($sc === TRUE)
-          {
-            $this->db->trans_commit();
-          }
-          else
-          {
-            $this->db->trans_rollback();
+                if($rs->qty > 0)
+                {
+                  $stock = $this->stock_model->get_stock_zone($rs->zone_code, $rs->product_code);
+                  $newQty = $stock + ($rs->qty * -1);
+
+                  if($newQty < 0)
+                  {
+                    $sc = FALSE;
+                    $this->error = "สต็อกคงเหลือไม่เพียงพอให้ย้อนสถานะ <br/>โซน : {$rs->zone_code}<br/>SKU : {$rs->product_code}<br/>Qty : {$rs->qty}";
+                  }
+                }
+              }
+            }
+
+
+            if($sc === TRUE)
+            {
+              $this->db->trans_begin();
+
+              if( ! empty($details))
+              {
+                foreach($details as $rs)
+                {
+                  if($sc === FALSE) { break; }
+
+                  if( ! $this->stock_model->update_stock_zone($rs->zone_code, $rs->product_code, ($rs->qty * -1)))
+                  {
+                    $sc = FALSE;
+                    $this->error = "Failed to update stock : <br/>Zone : {$rs->zone_code}<br/>SKU : {$rs->product_code}<br/>Qty : {$rs->qty}";
+                  }
+                }
+              }
+
+              //-- 1. drop movements
+              if($sc === TRUE)
+              {
+                if( ! $this->movement_model->drop_movement($code))
+                {
+                  $sc = FALSE;
+                  $this->error = "ลบ movement ไม่สำเร็จ";
+                }
+              }
+
+              //--- 2. change details valid to 0
+              if($sc === TRUE)
+              {
+                $arr = array(
+                  'line_status' => 'D',
+                  'date_upd' => now(),
+                  'update_user' => $this->_user->uname
+                );
+
+                if( ! $this->adjust_model->update_details($code, $arr))
+                {
+                  $sc = FALSE;
+                  $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ";
+                }
+              }
+
+              //--- 3. cancel doc
+              if($sc === TRUE)
+              {
+                $arr = array(
+                  'status' => 'D',
+                  'is_approved' => 0,
+                  'update_user' => $this->_user->uname,
+                  'date_upd' => now(),
+                  'cancel_reason' => $reason
+                );
+
+                if( ! $this->adjust_model->update($code, $arr))
+                {
+                  $sc = FALSE;
+                  $this->error = "บันทึกสถานะเอกสารไม่สำเร็จ";
+                }
+              }
+
+              //--- 4. write approve logs
+              if($sc === TRUE)
+              {
+                $logs = array(
+                  'code' => $doc->code,
+                  'action' => 'cancel',
+                  'user' => $this->_user->uname
+                );
+
+                $this->adjust_model->add_logs($logs);
+              }
+
+              if($sc === TRUE)
+              {
+                $this->db->trans_commit();
+              }
+              else
+              {
+                $this->db->trans_rollback();
+              }
+            }
           }
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = "เลขที่เอกสารไม่ถูกต้อง";
+        set_error('notfound');
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "เลขที่เอกสารไม่ถูกต้อง";
+      set_error('required');
     }
 
     $this->_response($sc);
@@ -1010,13 +1185,11 @@ class Adjust extends PS_Controller
       'adj_to_date',
       'adj_remark',
       'adj_status',
-      'adj_isApprove',
-      'adj_sap'
+      'adj_warehouse_code',
+      'adj_docNum'
     );
 
-    clear_filter($filter);
-
-    echo 'done';
+    return clear_filter($filter);    
   }
 
 } //---- End class

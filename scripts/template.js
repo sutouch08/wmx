@@ -297,6 +297,18 @@ function parseDefault(value, def){
 	return value;
 }
 
+function parseDefaultInt(value, def) {
+  let val = parseInt(value);
+  return isNaN(val) ? def : val;
+}
+
+
+function parseDefaultFloat(value, def) {
+  let val = parseFloat(value);
+  return isNaN(val) ? def : val;
+}
+
+
 function roundNumber(num, digit)
 {
 	if(digit === undefined) {

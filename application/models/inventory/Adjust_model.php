@@ -1,9 +1,36 @@
 <?php
 class Adjust_model extends CI_Model
 {
+  private $tb = "adjust";
+  private $td = "adjust_detail";
+  private $logs = "adjust_logs";
+
   public function __construct()
   {
     parent::__construct();
+  }
+
+  public function add_logs(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->insert($this->logs, $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function get_logs($code)
+  {
+    $rs = $this->db->where('code', $code)->get($this->logs);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
@@ -11,7 +38,7 @@ class Adjust_model extends CI_Model
   {
     if( ! empty($code))
     {
-      $rs = $this->db->where('code', $code)->get('adjust');
+      $rs = $this->db->where('code', $code)->get($this->tb);
       if($rs->num_rows() === 1)
       {
         return $rs->row();
@@ -24,27 +51,8 @@ class Adjust_model extends CI_Model
 
   public function get_detail($id)
   {
-    $rs = $this->db->where('id', $id)->get('adjust_detail');
+    $rs = $this->db->where('id', $id)->get($this->td);
     if($rs->num_rows() === 1)
-    {
-      return $rs->row();
-    }
-
-    return FALSE;
-  }
-
-
-  public function get_not_save_detail($code, $product_code, $zone_code)
-  {
-    $rs = $this->db
-    ->where('adjust_code', $code)
-    ->where('zone_code', $zone_code)
-    ->where('product_code', $product_code)
-    ->where('valid', 0)
-    ->where('is_cancle', 0)
-    ->get('adjust_detail');
-
-    if($rs->num_rows() > 0)
     {
       return $rs->row();
     }
@@ -58,16 +66,8 @@ class Adjust_model extends CI_Model
     if( ! empty($code))
     {
       $rs = $this->db
-      ->select('adjust_detail.*')
-      ->select('products.name AS product_name')
-      ->select('zone.name AS zone_name')
-      ->select('warehouse.name AS warehouse_name')
-      ->from('adjust_detail')
-      ->join('products', 'adjust_detail.product_code = products.code')
-      ->join('zone', 'adjust_detail.zone_code = zone.code', 'left')
-      ->join('warehouse', 'adjust_detail.warehouse_code = warehouse.code', 'left')
-      ->where('adjust_detail.adjust_code', $code)
-      ->get();
+      ->where('adjust_code', $code)
+      ->get($this->td);
 
       if($rs->num_rows() > 0)
       {
@@ -75,32 +75,24 @@ class Adjust_model extends CI_Model
       }
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
   public function get_exists_detail($code, $product_code, $zone_code)
   {
     $rs = $this->db
-    ->select('adjust_detail.*')
-    ->select('products.name AS product_name')
-    ->select('zone.name AS zone_name')
-    ->select('warehouse.name AS warehouse_name')
-    ->from('adjust_detail')
-    ->join('products', 'adjust_detail.product_code = products.code')
-    ->join('zone', 'adjust_detail.zone_code = zone.code', 'left')
-    ->join('warehouse', 'adjust_detail.warehouse_code = warehouse.code', 'left')
-    ->where('adjust_detail.adjust_code', $code)
-    ->where('adjust_detail.product_code', $product_code)
-    ->where('adjust_detail.zone_code', $zone_code)
-    ->get();
+    ->where('adjust_code', $code)
+    ->where('product_code', $product_code)
+    ->where('zone_code', $zone_code)
+    ->get($this->td);
 
     if($rs->num_rows() === 1)
     {
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
@@ -108,7 +100,7 @@ class Adjust_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return $this->db->insert('adjust', $ds);
+      return $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -119,7 +111,7 @@ class Adjust_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return $this->db->insert('adjust_detail', $ds);
+      return $this->db->insert($this->td, $ds);
     }
 
     return FALSE;
@@ -130,14 +122,25 @@ class Adjust_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      return $this->db->where('code', $code)->update('adjust', $ds);
+      return $this->db->where('code', $code)->update($this->tb, $ds);
     }
   }
 
 
   public function update_detail($id, $arr)
   {
-    return $this->db->where('id', $id)->update('adjust_detail', $arr);
+    return $this->db->where('id', $id)->update($this->td, $arr);
+  }
+
+
+  public function update_details($code, array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->where('adjust_code', $code)->update($this->td, $ds);
+    }
+
+    return FALSE;
   }
 
 
@@ -149,150 +152,25 @@ class Adjust_model extends CI_Model
 
   public function delete_detail($id)
   {
-    return $this->db->where('id', $id)->delete('adjust_detail');
+    return $this->db->where('id', $id)->delete($this->td);
   }
 
 
   public function delete_details($code)
   {
-    return $this->db->where('adjust_code', $code)->delete('adjust_detail');
+    return $this->db->where('adjust_code', $code)->delete($this->td);
   }
 
 
-  public function valid_detail($id)
+  public function delete_details_by_ids(array $ids = array())
   {
-    return $this->db->set('valid', '1')->where('id', $id)->update('adjust_detail');
-  }
-
-
-  public function unvalid_details($code)
-  {
-    return $this->db->set('valid', '0')->where('adjust_code', $code)->update('adjust_detail');
-  }
-
-
-  public function cancle_details($code)
-  {
-    return $this->db->set('is_cancle', 1)->where('adjust_code', $code)->update('adjust_detail');
-  }
-
-
-  public function change_status($code, $status)
-  {
-    return $this->db->set('status', $status)->set('update_user', get_cookie('uname'))->where('code', $code)->update('adjust');
-  }
-
-
-  public function get_issue_details($code)
-  {
-    $rs = $this->db
-    ->select('ad.*')
-    ->select('pd.name AS product_name, pd.cost, pd.price, pd.unit_code')
-    ->from('adjust_detail AS ad')
-    ->join('products AS pd', 'ad.product_code = pd.code', 'left')
-    ->where('ad.adjust_code', $code)
-    ->where('ad.qty <', 0, FALSE)
-    ->where('ad.valid', 1)
-    ->where('ad.is_cancle', 0)
-    ->get();
-
-    if($rs->num_rows() > 0)
+    if( ! empty($ids))
     {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-
-  public function get_receive_details($code)
-  {
-    $rs = $this->db
-    ->select('ad.*')
-    ->select('pd.name AS product_name, pd.cost, pd.price, pd.unit_code')
-    ->from('adjust_detail AS ad')
-    ->join('products AS pd', 'ad.product_code = pd.code', 'left')
-    ->where('ad.adjust_code', $code)
-    ->where('ad.qty >', 0, FALSE)
-    ->where('ad.valid', 1)
-    ->where('ad.is_cancle', 0)
-    ->get();
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-
-  public function get_non_issue_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->from('adjust')
-    ->where('status', 1)
-    ->where('is_approved', 1)
-    ->where('issue_code IS NULL', NULL, FALSE)
-    ->order_by('code', 'ASC')
-    ->limit($limit)
-    ->get();
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  public function get_non_receive_code($limit = 100)
-  {
-    $rs = $this->db
-    ->select('code')
-    ->from('adjust')
-    ->where('status', 1)
-    ->where('is_approved', 1)
-    ->where('receive_code IS NULL', NULL, FALSE)
-    ->order_by('code', 'ASC')
-    ->limit($limit)
-    ->get();
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-  }
-
-
-  public function update_issue_code($code, $issue_code)
-  {
-    if( ! empty($issue_code))
-    {
-      return $this->db->set('issue_code', $issue_code)->where('code', $code)->update('adjust');
+      return $this->db->where_in('id', $ids)->delete($this->td);
     }
 
     return FALSE;
   }
-
-
-
-  public function update_receive_code($code, $receive_code)
-  {
-    if( ! empty($receive_code))
-    {
-      return $this->db->set('receive_code', $receive_code)->where('code', $code)->update('adjust');
-    }
-
-    return FALSE;
-  }
-
 
 
   public function count_rows(array $ds = array())
@@ -300,6 +178,11 @@ class Adjust_model extends CI_Model
     if( ! empty($ds['code']))
     {
       $this->db->like('code', $ds['code']);
+    }
+
+    if( ! empty($ds['DocNum']))
+    {
+      $this->db->like('DocNum', $ds['DocNum']);
     }
 
     if( ! empty($ds['reference']))
@@ -332,20 +215,8 @@ class Adjust_model extends CI_Model
     {
       $this->db->where('status', $ds['status']);
     }
-    else
-    {
-      if($ds['isApprove'] !== 'all')
-      {
-        $this->db->where('status !=', 2);
-      }
-    }
 
-    if($ds['isApprove'] !== 'all')
-    {
-      $this->db->where('is_approved', $ds['isApprove']);
-    }
-
-    return $this->db->count_all_results('adjust');
+    return $this->db->count_all_results($this->tb);
   }
 
 
@@ -356,6 +227,11 @@ class Adjust_model extends CI_Model
       $this->db->like('code', $ds['code']);
     }
 
+    if( ! empty($ds['DocNum']))
+    {
+      $this->db->like('DocNum', $ds['DocNum']);
+    }
+
     if( ! empty($ds['reference']))
     {
       $this->db->like('reference', $ds['reference']);
@@ -386,22 +262,10 @@ class Adjust_model extends CI_Model
     {
       $this->db->where('status', $ds['status']);
     }
-    else
-    {
-      if($ds['isApprove'] !== 'all')
-      {
-        $this->db->where('status !=', 2);
-      }
-    }
-
-    if($ds['isApprove'] !== 'all')
-    {
-      $this->db->where('is_approved', $ds['isApprove']);
-    }
 
     $this->db->order_by('code', 'DESC')->limit($perpage, $offset);
 
-    $rs = $this->db->get('adjust');
+    $rs = $this->db->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -421,7 +285,7 @@ class Adjust_model extends CI_Model
       'approve_date' => now()
     );
 
-    return $this->db->where('code', $code)->update('adjust', $arr);
+    return $this->db->where('code', $code)->update($this->tb, $arr);
   }
 
 
@@ -433,7 +297,7 @@ class Adjust_model extends CI_Model
       'approve_date' => now()
     );
 
-    return $this->db->where('code', $code)->update('adjust', $arr);
+    return $this->db->where('code', $code)->update($this->tb, $arr);
   }
 
   public function get_max_code($code)
@@ -442,7 +306,7 @@ class Adjust_model extends CI_Model
     ->select_max('code')
     ->like('code', $code, 'after')
     ->order_by('code', 'DESC')
-    ->get('adjust');
+    ->get($this->tb);
 
     return $rs->row()->code;
   }

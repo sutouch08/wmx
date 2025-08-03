@@ -1,19 +1,19 @@
 <div class="pg-footer">
 	<div class="pg-footer-inner">
 		<div class="pg-footer-content text-right">
-			<div class="footer-menu width-33">
+			<div class="footer-menu width-20">
 				<span class="width-100" onclick="refresh()">
-					<i class="fa fa-refresh fa-2x white"></i><span class="fon-size-12">Refresh</span>
+					<i class="fa fa-refresh fa-2x white"></i><span>Refresh</span>
 				</span>
 			</div>
-			<div class="footer-menu width-33">
-				<span class="width-100" onclick="clearFilter()">
-					<i class="fa fa-retweet fa-2x white"></i><span class="fon-size-12">Clear Filter</span>
+			<div class="footer-menu width-20">
+				<span class="width-100" onclick="viewAll()">
+					<i class="fa fa-cubes fa-2x white"></i><span>View All</span>
 				</span>
 			</div>
-			<div class="footer-menu width-33">
-				<span class="width-100" onclick="toggleFilter()">
-					<i class="fa fa-search fa-2x white"></i><span class="fon-size-12">Filter</span>
+			<div class="footer-menu width-20">
+				<span class="width-100" onclick="viewProcess()">
+					<i class="fa fa-cube fa-2x white"></i><span>Process</span>
 				</span>
 			</div>
 		</div>

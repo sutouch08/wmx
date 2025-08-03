@@ -75,19 +75,14 @@
 	{
 		$this->load->view('cancle_watermark');
 	}
-
-	if($doc->status == 'O')
-	{
-		$this->load->view('on_process_watermark');
-	}
 ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-bordered border-1" style="min-width:700px;">
+		<table class="table table-bordered border-1" style="min-width:750px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-50 text-center">#</th>
-					<th class="fix-width-150">SKU</th>
+					<th class="fix-width-200">SKU</th>
 					<th class="min-width-200">Description</th>
 					<th class="fix-width-100 text-right">Return Qty</th>
 					<th class="fix-width-100 text-right">Received Qty</th>
@@ -95,40 +90,34 @@
 				</tr>
 			</thead>
 			<tbody id="detail-table">
-<?php  $no = 1; ?>
-<?php  $ro = 5; ?>
-<?php  $total_qty = 0; ?>
-<?php  $total_reveice_qty = 0; ?>
-<?php if(!empty($details)) : ?>
-<?php  foreach($details as $rs) : ?>
-	<?php $hilight = $rs->qty > $rs->receive_qty ? "color:red;" : ""; ?>
-	<tr class="font-size-11" style="<?php echo $hilight; ?>">
-		<td class="middle text-center no"><?php echo $no; ?></td>
-		<td class="middle"><?php echo $rs->product_code; ?></td>
-		<td class="middle"><?php echo $rs->product_name; ?></td>
-		<td class="middle text-right"><?php echo round($rs->qty,2); ?></td>
-		<td class="middle text-right"><?php echo round($rs->receive_qty,2); ?></td>
-		<td class="middle text-center">
-			<?php echo $rs->line_status == 'D' ? 'Canceled' : ($rs->line_status == 'C' ? 'Closed' : ($rs->line_status == 'O' ? 'In Progress' : 'Pending')); ?>
-		</td>
-	</tr>
-	<?php $no++; ?>
-	<?php $total_qty += $rs->qty; ?>
-	<?php $total_reveice_qty += $rs->receive_qty; ?>
-<?php  endforeach; ?>
-<?php endif; ?>
-
-<?php  while($ro >= $no) : ?>
-	<tr class="font-size-11">
-		<td class="middle text-center no"><?php echo $no; ?></td>
-		<td class="middle"></td>
-		<td class="middle"></td>
-		<td class="middle"></td>
-		<td class="middle"></td>
-		<td class="middle"></td>
-	</tr>
-	<?php $no++; ?>
-<?php endwhile; ?>
+				<?php  $no = 1; ?>
+				<?php  $ro = 5; ?>
+				<?php  $total_qty = 0; ?>
+				<?php  $total_reveice_qty = 0; ?>
+				<?php if(!empty($details)) : ?>
+					<?php  foreach($details as $rs) : ?>
+						<?php $hilight = $rs->qty > $rs->receive_qty ? "color:red;" : ""; ?>
+						<tr class="font-size-11" style="<?php echo $hilight; ?>">
+							<td class="middle text-center no"><?php echo $no; ?></td>
+							<td class="middle"><?php echo $rs->product_code; ?></td>
+							<td class="middle"><?php echo $rs->product_name; ?></td>
+							<td class="middle text-right"><?php echo number($rs->qty); ?></td>
+							<td class="middle text-right"><?php echo number($rs->receive_qty); ?></td>
+							<td class="middle text-center">
+								<?php echo $rs->line_status == 'D' ? 'Canceled' : ($rs->line_status == 'C' ? 'Closed' : ($rs->line_status == 'O' ? 'In Progress' : 'Pending')); ?>
+							</td>
+						</tr>
+						<?php $no++; ?>
+						<?php $total_qty += $rs->qty; ?>
+						<?php $total_reveice_qty += $rs->receive_qty; ?>
+					<?php  endforeach; ?>
+				<?php endif; ?>
+				<tr>
+					<td colspan="3" class="text-right">รวม</td>
+					<td class="text-right"><?php echo number($total_qty); ?></td>
+					<td class="text-right"><?php echo number($total_reveice_qty); ?></td>
+					<td></td>
+				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -138,12 +127,12 @@
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
 		<?php if(!empty($approve_list)) :?>
 			<?php foreach($approve_list as $appr) : ?>
-					<?php if($appr->approve == 1) : ?>
-						<span class="green display-block">อนุมัติโดย : <?php echo $appr->approver; ?> @ <?php echo thai_date($appr->date_upd, TRUE); ?></span>
-					<?php endif; ?>
-					<?php if($appr->approve == 0) : ?>
-						<span class="red display-block">ยกเลิกการอนุมัติโดย : <?php echo $appr->approver; ?> @ <?php echo thai_date($appr->date_upd, TRUE); ?></span>
-					<?php endif; ?>
+				<?php if($appr->approve == 1) : ?>
+					<span class="green display-block">อนุมัติโดย : <?php echo $appr->approver; ?> @ <?php echo thai_date($appr->date_upd, TRUE); ?></span>
+				<?php endif; ?>
+				<?php if($appr->approve == 0) : ?>
+					<span class="red display-block">ยกเลิกการอนุมัติโดย : <?php echo $appr->approver; ?> @ <?php echo thai_date($appr->date_upd, TRUE); ?></span>
+				<?php endif; ?>
 			<?php endforeach; ?>
 		<?php endif; ?>
 	</div>

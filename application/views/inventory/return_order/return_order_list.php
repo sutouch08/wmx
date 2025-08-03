@@ -72,7 +72,7 @@
           <th class="fix-width-40 text-center">#</th>
           <th class="fix-width-100 text-center">Date</th>
           <th class="fix-width-100">Doc No.</th>
-          <th class="fix-width-60 text-center">สถานะ</th>
+          <th class="fix-width-80 text-center">สถานะ</th>
           <th class="fix-width-100">Ref No.</th>
           <th class="fix-width-100">Order No.</th>
           <th class="min-width-200">Customer</th>
@@ -99,7 +99,17 @@
             <td class="middle text-center no"><?php echo $no; ?></td>
             <td class="middle text-center"><?php echo thai_date($rs->date_add, FALSE); ?></td>
             <td class="middle"> <?php echo $rs->code; ?></td>
-            <td class="middle text-center"><?php echo $rs->status; ?></td>
+            <td class="middle text-center">
+              <?php if($rs->status == 'C') : ?>
+                <span class="green">Closed</span>
+              <?php elseif($rs->status == 'O') : ?>
+                <span class="purple">In progress</span>
+              <?php elseif($rs->status == 'D') : ?>
+                <span class="red">Canceled</span>
+              <?php else : ?>
+                <span class="orange">Pending</span>
+              <?php endif; ?>
+            </td>
             <td class="middle"><?php echo $rs->reference; ?></td>
             <td class="middle"><?php echo $rs->order_code; ?></td>
             <td class="middle"><input type="text" class="form-control input-sm text-label" style="font-size:11px !important;" value="<?php echo $rs->customer_code.' : '. $rs->customer_name; ?>" readonly /></td>

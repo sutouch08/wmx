@@ -531,6 +531,32 @@ function statusBackgroundColor($is_expire, $status, $is_approve = 1)
 	return "background-color:{$bk_color};";
 }
 
+function logs_action_name($name)
+{
+  $arr = array(
+    'add' => 'สร้างโดย',
+    'edit' => 'แก้ไขโดย',
+    'cancle' => 'ยกเลิกโดย',
+		'cancel' => 'ยกเลิกโดย',
+		'rollback' => 'ย้อนสถานะโดย',
+		'save' => 'บันทึกโดย',
+		'close' => 'Close โดย',
+    'approve' => 'อนุมัติโดย',
+    'unapprove' => 'ยกเลิกการอนุมัติโดย',
+    'reject' => 'ปฏิเสธการอนุมัติโดย',
+    'unreject' => 'ยกเลิกการปฏิเสธโดย',
+		'release' => 'Released โดย',
+		'unrelease' => 'Unreleased โดย',
+		'pick' => 'เริ่มจัด โดย',
+		'picked' => 'จัดเสร็จ โดย',
+		'pack' => 'เริ่มแพ็ค โดย',
+		'packed' => 'แพ็คเสร็จ โดย',
+		'print' => 'พิมพ์ โดย'
+  );
+
+  return $arr[$name];
+}
+
 function textStatusColor($status = 'P')
 {
 	$bk_color = "";

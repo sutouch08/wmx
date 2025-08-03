@@ -398,6 +398,8 @@ class Return_order extends PS_Controller
 
         if($this->return_order_model->update($doc->code, $arr))
         {
+          $doc->status = 'O';
+          
           $logs  = array(
             'code' => $doc->code,
             'action' => 'receive',

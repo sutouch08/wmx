@@ -8,7 +8,7 @@
     'เลขที่' => $doc->code,
     'วันที่'  => thai_date($doc->date_add, FALSE, '/'),
     'ลูกค้า' => $doc->customer_code.' : '.$doc->customer_name,
-    'เลขที่อ้างอิง' => $doc->is_pos_api ? $doc->bill_code : $doc->invoice,
+    'เลขที่อ้างอิง' => $doc->reference,
     'โซน' => $doc->zone_name,
     'คลัง' => $doc->warehouse_name,
     'พนักงาน' => $this->user_model->get_name($doc->user)
@@ -35,36 +35,33 @@
 	$total_receive = 0;
   	$total_amount = 0;
 	//**************  กำหนดหัวตาราง  ******************************//
-	$thead	= array(
-						array("ลำดับ", "width:10mm; vertical-align:middle; text-align:center; border-top:0px; border-top-left-radius:10px;"),
-						array("รหัส", "width:40mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("สินค้า", "width:60mm; vertical-align:middle; text-align:center;border-left: solid 1px #ccc; border-top:0px;"),
-            array("ราคา", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("จำนวนคืน", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("จำนวนรับ", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("มูลค่า", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
-						);
+  $thead	= array(
+    array("ลำดับ", "width:10mm; vertical-align:middle; text-align:center; border-top:0px; border-top-left-radius:10px;"),
+    array("รหัส", "width:60mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+    array("สินค้า", "width:80mm; vertical-align:middle; text-align:center;border-left: solid 1px #ccc; border-top:0px;"),
+    array("จำนวนคืน", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+    array("จำนวนรับ", "width:20mm; vertical-align:middle; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
+  );
 
 	$this->printer->add_subheader($thead);
 
 	//***************************** กำหนด css ของ td *****************************//
-	$pattern = array(
-							"text-align: center; border-top:0px;",
-							"border-left: solid 1px #ccc; border-top:0px;",
-							"border-left: solid 1px #ccc; border-top:0px;",
-							"text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-							"text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-							"text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-							"text-align:right; border-left: solid 1px #ccc; border-top:0px;"
-							);
+  $pattern = array(
+    "text-align: center; border-top:0px;",
+    "border-left: solid 1px #ccc; border-top:0px;",
+    "border-left: solid 1px #ccc; border-top:0px;",
+    "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
+    "text-align:right; border-left: solid 1px #ccc; border-top:0px;"
+  );
+
 	$this->printer->set_pattern($pattern);
 
 	//*******************************  กำหนดช่องเซ็นของ footer *******************************//
-	$footer	= array(
-						array("ผู้รับ", "", "วันที่ ............................."),
-						array("ผู้ตรวจสอบ", "","วันที่ ............................."),
-						array("ผู้อนุมัติ", "","วันที่ .............................")
-						);
+  $footer	= array(
+    array("ผู้รับ", "", "วันที่ ............................."),
+    array("ผู้ตรวจสอบ", "","วันที่ ............................."),
+    array("ผู้อนุมัติ", "","วันที่ .............................")
+  );
 
   $this->printer->set_footer($footer);
 
@@ -93,22 +90,20 @@
           {
             $data = array(
               $n,
-							inputRow($rs->product_code),
-							inputRow($rs->product_name),
-              number($rs->price, 2),
-							number($rs->qty),
-							number($rs->receive_qty),
-              number($rs->amount, 2)
-						);
+              inputRow($rs->product_code),
+              inputRow($rs->product_name),
+              number($rs->qty),
+              number($rs->receive_qty)
+            );
+
             $total_qty += $rs->qty;
 						$total_receive += $rs->receive_qty;
-            $total_amount += $rs->amount;
-
           }
           else
           {
-            $data = array("", "", "", "","", "", "");
+            $data = array("", "", "", "", "");
           }
+
 					$page .= $this->printer->print_row($data);
 					$n++;
           $i++;
@@ -121,7 +116,9 @@
 				{
 					$qty = number($total_qty);
 					$remark = $doc->remark;
-				}else{
+				}
+        else
+        {
 					$qty = "";
 					$remark = "";
 				}
@@ -129,18 +126,15 @@
 				$sub_total = array(
           array(
           "<td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
-          border-bottom:0px; border-left:0px; text-align:right; width:131mm;'>
+          border-bottom:0px; border-left:0px; text-align:right; width:151mm;'>
           <strong>รวม</strong>
           </td>
           <td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
           border-right:0px; border-bottom:0px; width:20mm; text-align:right;'>
           ".number($total_qty)."</td>
-					<td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
-          border-right:0px; border-bottom:0px; width:20mm; text-align:right;'>
-          ".number($total_receive)."</td>
           <td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
           border-right:0px; border-bottom:0px; border-bottom-right-radius:10px; width:20mm;
-          text-align:right;'>".number($total_amount, 2)."</td>")
+          text-align:right;'>".number($total_receive)."</td>")
 
 			);
 

@@ -1,101 +1,62 @@
 var click = 0;
 
+window.addEventListener('load', () => {
+  zoneInit();
+});
+
 $('#date_add').datepicker({
   dateFormat:'dd-mm-yy'
 });
 
 
-function getDiffList(){
-  load_in();
-  $('#diffForm').submit();
-}
+function save() {
+  if(click == 0) {
+    click = 1;
+    let code = $('#code').val();
+    let error = 0;
 
+    load_in();
 
-function saveAdjust() {
-  let code = $('#code').val();
+    $.ajax({
+      url:HOME + 'save',
+      type:'POST',
+      cache:false,
+      data:{
+        'code' : code
+      },
+      success:function(rs) {
+        load_out();
 
-  load_in();
+        if(rs.trim() === 'success'){
+          swal({
+            title:'Saved',
+            text:'บันทึกรายการเรียบร้อยแล้ว',
+            type:'success',
+            timer:1000
+          });
 
-  $.ajax({
-    url:HOME + 'save',
-    type:'POST',
-    cache:false,
-    data:{
-      'code' : code
-    },
-    success:function(rs) {
-      load_out();
-
-      if(rs.trim() === 'success'){
-        swal({
-          title:'Saved',
-          text:'บันทึกรายการเรียบร้อยแล้ว',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          goDetail(code);
-        }, 1200);
-      }
-      else {
+          setTimeout(function(){
+            goDetail(code);
+          }, 1200);
+        }
+        else {
+          beep();
+          showError(rs);
+          click = 0;
+        }
+      },
+      error:function(rs) {
         beep();
         showError(rs);
+        click = 0;
       }
-    },
-    error:function(rs) {
-      beep();
-      showError(rs);
-    }
-  })
+    })
+  }
 }
 
 
-function unsave() {
-  let code = $('#code').val();
-
-  load_in();
-
-  $.ajax({
-    url:HOME + 'unsave',
-    type:'POST',
-    cache:false,
-    data:{
-      'code' : code
-    },
-    success:function(rs){
-      load_out();
-
-      if(rs.trim() === 'success'){
-        swal({
-          title:'Success',
-          text:'Unsaved successfull',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          goEdit(code);
-        }, 1200);
-
-      }
-      else {
-        beep();
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      beep();
-      showError(rs);
-    }
-  })
-}
-
-
-function getEdit(){
-  $('#date_add').removeAttr('disabled');
-  $('#reference').removeAttr('disabled');
-  $('#remark').removeAttr('disabled');
+function getEdit() {
+  $('.e').removeAttr('disabled');
   $('#btn-edit').addClass('hide');
   $('#btn-update').removeClass('hide');
 }
@@ -149,9 +110,11 @@ function updateHeader(){
 function add() {
   if(click == 0) {
     click = 1;
+    clearErrorByClass('r');
 
     let h = {
       'date_add' : $('#date_add').val(),
+      'warehouse_code' : $('#warehouse').val(),
       'reference' : $('#reference').val().trim(),
       'remark' : $('#remark').val().trim()
     };
@@ -159,6 +122,14 @@ function add() {
     if( ! isDate(h.date_add)){
       swal("วันที่ไม่ถูกต้อง");
       click = 0;
+      $('#date_add').hasError();
+      return false;
+    }
+
+    if( h.warehouse_code == '') {
+      swal("กรุณาระบุคลัง");
+      click = 0;
+      $('#warehouse').hasError();
       return false;
     }
 
@@ -201,24 +172,28 @@ function add() {
 }
 
 
-$('#zone-code').autocomplete({
-  source: BASE_URL + 'auto_complete/get_zone_code_and_name',
-  autoFocus:true,
-  close:function(){
-    let rs = $(this).val();
-    let arr = rs.split(' | ');
-    if(arr.length == 2){
-      let code = arr[0];
-      let name = arr[1];
-      $('#zone-code').val(code);
-      $('#zone-name').val(name);
+function zoneInit() {
+  let warehouse_code = $('#warehouse').val();
+
+  $('#zone-code').autocomplete({
+    source: BASE_URL + 'auto_complete/get_zone_code_and_name/'+warehouse_code,
+    autoFocus:true,
+    close:function(){
+      let rs = $(this).val();
+      let arr = rs.split(' | ');
+      if(arr.length == 2){
+        let code = arr[0];
+        let name = arr[1];
+        $('#zone-code').val(code);
+        $('#zone-name').val(name);
+      }
+      else {
+        $('#zone-code').val('');
+        $('#zone-name').val('');
+      }
     }
-    else {
-      $('#zone-code').val('');
-      $('#zone-name').val('');
-    }
-  }
-})
+  })
+}
 
 
 $('#zone-code').keyup(function(e){
@@ -438,6 +413,7 @@ function getReady(){
   $('#pd-code').val('');
   $('#qty-up').val('');
   $('#qty-down').val('');
+  $('#stock-qty').val('');
   $('#pd-code').focus();
 }
 
@@ -462,43 +438,76 @@ function changeZone(){
 }
 
 
-//--- ลบรายการ 1 บรรทัด
-function deleteDetail(id, pdCode){
-  swal({
-		title: 'คุณแน่ใจ ?',
-		text: 'ต้องการลบ '+ pdCode +' หรือไม่ ?',
-		type: 'warning',
-		showCancelButton: true,
-		comfirmButtonColor: '#DD6855',
-		confirmButtonText: 'ใช่ ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-	}, function(){
-		$.ajax({
-			url: HOME + "delete_detail",
-			type:"POST",
-			cache:"false",
-			data:{
-				"id" : id
-			},
-			success: function(rs){
-				var rs = $.trim(rs);
-				if( rs == 'success' ){
-					swal({
-						title:'Deleted',
-						text: 'ลบรายการเรียบร้อยแล้ว',
-						type: 'success',
-						timer: 1000
-					});
+function checkAll() {
+  if($('#chk-all').is(':checked')) {
+    $('.chk-row').prop('checked', true);
+  }
+  else {
+    $('.chk-row').prop('checked', false);
+  }
+}
 
-					$("#row-"+id).remove();
-          reIndex();
 
-				}else{
+function confirmRemove() {
+  let code = $('#code').val().trim();
 
-					swal("ลบรายการไม่สำเร็จ", rs, "error");
-				}
-			}
-		});
-	});
+  if($('.chk-row:checked').length > 0) {
+    swal({
+      title:'คุณแน่ใจ ?',
+      text:'ต้องการลบรายการที่เลือกหรือไม่ ?',
+      type:'warning',
+      showCancelButton:true,
+      confirmButtonText:'Yes',
+      cancelButtonText:'No',
+      confirmButonColor:'#DD6855',
+      closeOnConfirm:true
+    }, function() {
+
+      setTimeout(() => {
+        let rows = [];
+
+        $('.chk-row:checked').each(function() {
+          rows.push($(this).val());
+        })
+
+        if(rows.length == 0) {
+          swal('กรุณาเลือกรายการ');
+          return false;
+        }
+
+        load_in();
+
+        $.ajax({
+          url:HOME + 'remove_selected_details',
+          type:'POST',
+          cache:false,
+          data:{
+            'code' : code,
+            'ids' : JSON.stringify(rows)
+          },
+          success:function(rs) {
+            load_out();
+
+            if(rs.trim() === 'success') {
+              $('.chk-row:checked').each(function() {
+                id = $(this).val();
+                $('#row-'+id).remove();
+              })
+
+              reIndex();
+            }
+            else {
+              beep();
+              showError(rs);
+            }
+          },
+          error:function(rs) {
+            load_out();
+            beep();
+            showError(rs);
+          }
+        })
+      }, 100);
+    })
+  }
 }

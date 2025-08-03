@@ -1205,20 +1205,17 @@ class Auto_complete extends CI_Controller
     $sc = array();
     $txt = $_REQUEST['term'];
     $rs = $this->db
-    ->select('code, old_code')
+    ->select('code, name')
     ->where('active', 1)
-    ->group_start()
     ->like('code', $txt)
-    ->or_like('old_code', $txt)
-    ->group_end()
-    ->limit(20)
+    ->limit(100)
     ->get('products');
 
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $pd)
       {
-        $sc[] = $pd->code .' | '.$pd->old_code;
+        $sc[] = $pd->code .' | '.$pd->name;
       }
     }
     else
