@@ -32,6 +32,7 @@
 			<option value="ADD24" <?php echo is_selected('ADD24', $type); ?>>ADD24 | (Goods Receipt PO)</option>
 			<option value="ADD90" <?php echo is_selected('ADD90', $type); ?>>ADD90 | (Return Order)</option>
 			<option value="ADD91" <?php echo is_selected('ADD91', $type); ?>>ADD91 | (Return Receipt)</option>
+			<option value="INT17" <?php echo is_selected('INT17', $type);?>>INT17 | (Adjust Stock)</option>
 			<option value="INT10" <?php echo is_selected('INT10', $type);?>>INT10 | (Products Master)</option>
 			<option value="INT11" <?php echo is_selected('INT11', $type);?>>INT11 | (Price List)</option>
 		</select>

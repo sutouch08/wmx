@@ -1,5 +1,5 @@
 <?php
-class Wrx_ib_api
+class Wrx_adjust_api
 {
   private $token;
   private $api;
@@ -30,7 +30,7 @@ class Wrx_ib_api
     $action = "create";
     $type = "INT17";
     $url = $this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_IB_URL');
+    $url .= getConfig('WRX_ADJ_URL');
     $api_path = $url;
     $req_time = NULL;
     $headers = array(
@@ -49,10 +49,11 @@ class Wrx_ib_api
       {
         $playload = array(
           'company' => $this->company,
-          'source' => 'NONE',
-          'poNumber' => $doc->reference,
-          'receiptDate' => $doc->shipped_date,
-          'items' => []
+          'customer' => "WMS",
+          'account' => "0009",
+          'adjustDate' => $doc->date_add,
+          'internalId' => $doc->code,
+          'line' => []
         );
 
         $details = $this->ci->adjust_model->get_details($code);
@@ -61,20 +62,20 @@ class Wrx_ib_api
         {
           foreach($details as $rs)
           {
-            $playload['items'][] = array(
-              'orderLine' => intval($rs->po_line_num),
+            $playload['line'][] = array(
               'itemNumber' => $rs->product_code,
-              'receiveQty' => floatval($rs->receive_qty),
-              'lineLocation' => $doc->warehouse_code,
-              'bin' => "store" //$doc->zone_code
+              'location' => $rs->warehouse_code,
+              'quantity' => floatval($rs->qty),
+              'uom' => $rs->unit_code,
+              'memo' => ""
             );
           }
         }
 
-        if( ! empty($playload['items']))
-        {
-          $json = json_encode($playload);
+        $json = json_encode($playload);
 
+        if( ! empty($playload['line']))
+        {
           if($this->test)
           {
             if($this->logs_json)
@@ -110,9 +111,9 @@ class Wrx_ib_api
             curl_close($curl);
             $res = json_decode($response);
 
-            if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
+            if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'code'))
             {
-              if($res->status == 'success' && ! empty($res->data))
+              if($res->code == 200 && ! empty($res->data))
               {
                 $ds = $res->data;
 

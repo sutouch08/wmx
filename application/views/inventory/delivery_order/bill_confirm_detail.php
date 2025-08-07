@@ -206,60 +206,24 @@
 ?>
 <?php   endforeach; ?>
         <tr class="font-size-12">
-          <td colspan="3" class="text-right font-size-14">
-            รวม
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalQty); ?>
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalPrepared); ?>
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalQc); ?>
-          </td>
-
-          <td class="text-center">
-            ส่วนลดท้ายบิล
-          </td>
-
-          <td class="text-right">
-            <?php echo number($order->bDiscAmount, 2); ?>
-          </td>
+          <td colspan="3" class="text-right font-size-14">รวม</td>
+          <td class="text-center"><?php echo number($totalQty); ?></td>
+          <td class="text-center"><?php echo number($totalPrepared); ?></td>
+          <td class="text-center"><?php echo number($totalQc); ?></td>
+          <td class="text-center" colspan="2"></td>
         </tr>
-
-
         <tr>
-          <td colspan="3" rowspan="3">
-            หมายเหตุ : <?php echo $order->remark; ?>
-          </td>
-          <td colspan="3" class="blod">
-            ราคารวม
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalPrice, 2); ?>
-          </td>
+          <td colspan="3" rowspan="3">หมายเหตุ : <?php echo $order->remark; ?></td>
+          <td colspan="3" class="blod">ราคารวม</td>
+          <td colspan="2" class="text-right"><?php echo number($totalPrice, 2); ?></td>
         </tr>
-
         <tr>
-          <td colspan="3">
-            ส่วนลดรวม
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalDiscount + $order->bDiscAmount, 2); ?>
-          </td>
+          <td colspan="3">ส่วนลดรวม</td>
+          <td colspan="2" class="text-right"><?php echo number($totalDiscount, 2); ?></td>
         </tr>
-
         <tr>
-          <td colspan="3" class="blod">
-            ยอดเงินสุทธิ
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalPrice - ($totalDiscount + $order->bDiscAmount), 2); ?>
-          </td>
+          <td colspan="3" class="blod">ยอดเงินสุทธิ</td>
+          <td colspan="2" class="text-right"><?php echo number($totalPrice - $totalDiscount, 2); ?></td>
         </tr>
 
 <?php else : ?>

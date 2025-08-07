@@ -1,13 +1,13 @@
 <form id="wrxForm" method="post" action="<?php echo $this->home; ?>/update_config">
-	<input type="hidden" name="WRX_API" value="<?php echo $WRX_API; ?>"/>
-	<input type="hidden" name="WRX_OB_INTERFACE" value="<?php echo $WRX_OB_INTERFACE; ?>"/>
-	<input type="hidden" name="WRX_IB_INTERFACE" value="<?php echo $WRX_IB_INTERFACE; ?>"/>
-	<input type="hidden" name="WRX_RETURN_INTERFACE" value="<?php echo $WRX_RETURN_INTERFACE; ?>"/>
+
+
+
+
 	<input type="hidden" name="WRX_LOG_JSON" value="<?php echo $WRX_LOG_JSON; ?>"/>
 	<input type="hidden" name="WRX_API_TEST" value="<?php echo $WRX_API_TEST; ?>"/>
-	<input type="hidden" name="WRX_SHOPEE_API" value="<?php echo $WRX_SHOPEE_API; ?>"/>
-	<input type="hidden" name="WRX_TIKTOK_API" value="<?php echo $WRX_TIKTOK_API; ?>"/>
-	<input type="hidden" name="WRX_LAZADA_API" value="<?php echo $WRX_LAZADA_API; ?>"/>
+
+
+
 	<div class="row">
 		<div class="col-sm-4">
 			<span class="form-control left-label">WRX API</span>
@@ -17,6 +17,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_API" type="checkbox" value="1" <?php echo is_checked($WRX_API , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_API" value="<?php echo $WRX_API; ?>"/>
 		</div>
 		<div class="divider-hidden"></div>
 
@@ -44,6 +45,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_SHOPEE_API" type="checkbox" value="1" <?php echo is_checked($WRX_SHOPEE_API , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_SHOPEE_API" value="<?php echo $WRX_SHOPEE_API; ?>"/>
 		</div>
 		<div class="divider"></div>
 
@@ -55,6 +57,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_TIKTOK_API" type="checkbox" value="1" <?php echo is_checked($WRX_TIKTOK_API , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_TIKTOK_API" value="<?php echo $WRX_TIKTOK_API; ?>"/>
 		</div>
 		<div class="divider"></div>
 
@@ -66,6 +69,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_LAZADA_API" type="checkbox" value="1" <?php echo is_checked($WRX_LAZADA_API , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_LAZADA_API" value="<?php echo $WRX_LAZADA_API; ?>"/>
 		</div>
 		<div class="divider"></div>
 
@@ -77,6 +81,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_OB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_OB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_OB_INTERFACE" value="<?php echo $WRX_OB_INTERFACE; ?>"/>
 		</div>
 		<div class="col-sm-4">
 			<span class="form-control left-label">Outbound api endpoint</span>
@@ -94,6 +99,7 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_IB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_IB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_IB_INTERFACE" value="<?php echo $WRX_IB_INTERFACE; ?>"/>
 		</div>
 		<div class="col-sm-4">
 			<span class="form-control left-label">GRPO api endpoint</span>
@@ -111,12 +117,31 @@
 				<input class="ace ace-switch ace-switch-7" data-name="WRX_RETURN_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_RETURN_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
+			<input type="hidden" name="WRX_RETURN_INTERFACE" value="<?php echo $WRX_RETURN_INTERFACE; ?>"/>
 		</div>
 		<div class="col-sm-4">
 			<span class="form-control left-label">Return api endpoint</span>
 		</div>
 		<div class="col-sm-8">
 			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_RETURN_URL"  value="<?php echo $WRX_RETURN_URL; ?>" />
+		</div>
+		<div class="divider"></div>
+
+		<div class="col-sm-4">
+			<span class="form-control left-label">Adjust Interface (INT17)</span>
+		</div>
+		<div class="col-sm-8">
+			<label style="padding-top:5px; margin-bottom:0px;">
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_ADJ_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_ADJ_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
+			</label>
+			<input type="hidden" name="WRX_ADJ_INTERFACE" value="<?php echo $WRX_ADJ_INTERFACE; ?>"/>
+		</div>
+		<div class="col-sm-4">
+			<span class="form-control left-label">Adjust api endpoint</span>
+		</div>
+		<div class="col-sm-8">
+			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_ADJ_URL"  value="<?php echo $WRX_ADJ_URL; ?>" />
 		</div>
 		<div class="divider"></div>
 

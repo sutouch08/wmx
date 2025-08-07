@@ -96,44 +96,14 @@
 <?php   foreach($details as $rs) :  ?>
   <?php     $color = ($rs->order_qty == $rs->qc OR $rs->is_count == 0) ? '' : 'red'; ?>
           <tr class="font-size-12 <?php echo $color; ?>">
-            <td class="text-center">
-              <?php echo $no; ?>
-            </td>
-
-            <!--- รายการสินค้า ที่มีการสั่งสินค้า --->
-            <td>
-              <?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?>
-            </td>
-
-            <!--- ราคาสินค้า  --->
-            <td class="text-center">
-              <?php echo number($rs->price, 2); ?>
-            </td>
-
-            <!---   จำนวนที่สั่ง  --->
-            <td class="text-center">
-              <?php echo number($rs->order_qty); ?>
-            </td>
-
-            <!--- จำนวนที่จัดได้  --->
-            <td class="text-center">
-              <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->prepared); ?>
-            </td>
-
-            <!--- จำนวนที่ตรวจได้ --->
-            <td class="text-center">
-              <?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->qc); ?>
-            </td>
-
-            <!--- ส่วนลด  --->
-            <td class="text-center">
-              <?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?>
-            </td>
-
-            <td class="text-right">
-              <?php echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty) : number( $rs->final_price * $rs->qc , 2); ?>
-            </td>
-
+            <td class="text-center"><?php echo $no; ?></td>
+            <td><?php echo limitText($rs->product_code.' : '. $rs->product_name, 100); ?></td>
+            <td class="text-center"><?php echo number($rs->price, 2); ?></td>
+            <td class="text-center"><?php echo number($rs->order_qty); ?></td>
+            <td class="text-center"><?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->prepared); ?></td>
+            <td class="text-center"><?php echo $rs->is_count == 0 ? number($rs->order_qty) : number($rs->qc); ?></td>
+            <td class="text-center"><?php echo discountLabel($rs->discount1, $rs->discount2, $rs->discount3); ?></td>
+            <td class="text-right"><?php echo $rs->is_count == 0 ? number($rs->final_price * $rs->order_qty) : number( $rs->final_price * $rs->qc , 2); ?></td>
           </tr>
   <?php
         $totalQty += $rs->order_qty;
@@ -146,60 +116,24 @@
   ?>
 <?php   endforeach; ?>
         <tr class="font-size-12">
-          <td colspan="3" class="text-right font-size-14">
-            รวม
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalQty); ?>
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalPrepared); ?>
-          </td>
-
-          <td class="text-center">
-            <?php echo number($totalQc); ?>
-          </td>
-
-          <td class="text-center">
-            ส่วนลดท้ายบิล
-          </td>
-
-          <td class="text-right">
-            <?php echo number($order->bDiscAmount, 2); ?>
-          </td>
+          <td colspan="3" class="text-right font-size-14">รวม</td>
+          <td class="text-center"><?php echo number($totalQty); ?></td>
+          <td class="text-center"><?php echo number($totalPrepared); ?></td>
+          <td class="text-center"><?php echo number($totalQc); ?></td>
+          <td class="text-center" colspan="2"></td>
         </tr>
-
-
         <tr>
-          <td colspan="3" rowspan="3">
-            หมายเหตุ : <?php echo $order->remark; ?>
-          </td>
-          <td colspan="3" class="blod">
-            ราคารวม
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalPrice, 2); ?>
-          </td>
+          <td colspan="3" rowspan="3">หมายเหตุ : <?php echo $order->remark; ?></td>
+          <td colspan="3" class="blod">ราคารวม</td>
+          <td colspan="2" class="text-right"><?php echo number($totalPrice, 2); ?></td>
         </tr>
-
         <tr>
-          <td colspan="3">
-            ส่วนลดรวม
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalDiscount + $order->bDiscAmount, 2); ?>
-          </td>
+          <td colspan="3">ส่วนลดรวม</td>
+          <td colspan="2" class="text-right"><?php echo number($totalDiscount, 2); ?></td>
         </tr>
-
         <tr>
-          <td colspan="3" class="blod">
-            ยอดเงินสุทธิ
-          </td>
-          <td colspan="2" class="text-right">
-            <?php echo number($totalPrice - ($totalDiscount + $order->bDiscAmount), 2); ?>
-          </td>
+          <td colspan="3" class="blod">ยอดเงินสุทธิ</td>
+          <td colspan="2" class="text-right"><?php echo number($totalPrice - $totalDiscount, 2); ?></td>
         </tr>
 
 <?php else : ?>

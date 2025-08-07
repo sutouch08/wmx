@@ -211,6 +211,7 @@ class Adjust extends PS_Controller
                       'zone_code' => $zone->code,
                       'product_code' => $item->code,
                       'product_name' => $item->name,
+                      'unit_code' => $item->unit_code,
                       'qty' => $qty,
                       'user' => $this->_user->uname
                     );
@@ -426,57 +427,6 @@ class Adjust extends PS_Controller
   }
 
 
-  ///----- Just change status to 0
-  public function unsave()
-  {
-    $sc = TRUE;
-
-    if($this->input->post('code'))
-    {
-      $code = $this->input->post('code');
-      $doc = $this->adjust_model->get($code);
-
-      if( ! empty($doc))
-      {
-        if($doc->status == 1)
-        {
-          $details = $this->adjust_model->get_details($code);
-
-          if( ! empty($details))
-          {
-            $status = 0; //--- 0 = not save, 1 = saved, 2 = cancled
-
-            if( ! $this->adjust_model->change_status($code, $status))
-            {
-              $sc = FALSE;
-              $this->error = "เปลี่ยนสถานะเอกสารไม่สำเร็จ";
-            }
-          }
-          else
-          {
-            $sc = FALSE;
-            $this->error = "ไม่พบรายการปรับยอดกรุณาตรวจสอบ";
-          }
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "เลขที่เอกสารไม่ถูกต้อง";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "ไม่พบเลขที่เอกสาร";
-    }
-
-    $this->_response($sc);
-  }
-
-
-
-  //---- Just change status to 1
   public function save()
   {
     $sc = TRUE;
@@ -743,150 +693,6 @@ class Adjust extends PS_Controller
   }
 
 
-  public function un_approve()
-  {
-    $sc = TRUE;
-
-    if($this->input->post('code'))
-    {
-      $code = $this->input->post('code');
-      $sc = $this->unapprove($code);
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('required');
-    }
-
-    $this->_response($sc);
-  }
-
-
-  public function unapprove($code)
-  {
-    $sc = TRUE;
-
-    $this->load->model('approve_logs_model');
-
-    $doc = $this->adjust_model->get($code);
-
-    if( ! empty($doc))
-    {
-      if($doc->status == 1)
-      {
-        $details = $this->adjust_model->get_details($code);
-
-        if( ! empty($details))
-        {
-          //--- check validate for stock
-          foreach($details as $rs)
-          {
-            if($sc === FALSE) { break; }
-
-            if($rs->qty > 0)
-            {
-              $stock = $this->stock_model->get_stock_zone($rs->zone_code, $rs->product_code);
-              $newQty = $stock + ($rs->qty * -1);
-
-              if($newQty < 0)
-              {
-                $sc = FALSE;
-                $this->error = "สต็อกคงเหลือไม่เพียงพอให้ย้อนสถานะ <br/>โซน : {$rs->zone_code}<br/>SKU : {$rs->product_code}<br/>Qty : {$rs->qty}";
-              }
-            }
-          }
-        }
-
-
-        if($sc === TRUE)
-        {
-          $this->db->trans_begin();
-
-          if( ! empty($details))
-          {
-            foreach($details as $rs)
-            {
-              if($sc === FALSE) { break; }
-
-              if( ! $this->stock_model->update_stock_zone($rs->zone_code, $rs->product_code, ($rs->qty * -1)))
-              {
-                $sc = FALSE;
-                $this->error = "Failed to update stock : <br/>Zone : {$rs->zone_code}<br/>SKU : {$rs->product_code}<br/>Qty : {$rs->qty}";
-              }
-
-              if($sc === TRUE && ! empty($rs->id_diff))
-              {
-                if( ! $this->check_stock_diff_model->update($rs->id_diff, array('status'=> 1)))
-                {
-                  $sc = FALSE;
-                  $this->error = "Failed to rollback check stock diff";
-                }
-              }
-            }
-          }
-
-          //-- 1. drop movements
-          if($sc === TRUE)
-          {
-            if( ! $this->movement_model->drop_movement($code))
-            {
-              $sc = FALSE;
-              $this->error = "ลบ movement ไม่สำเร็จ";
-            }
-          }
-
-          //--- 2. change details valid to 0
-          if($sc === TRUE)
-          {
-            if( ! $this->adjust_model->unvalid_details($code))
-            {
-              $sc = FALSE;
-              $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ";
-            }
-          }
-
-          //--- 3. un_approve
-          if($sc === TRUE)
-          {
-            if( ! $this->adjust_model->un_approve($code, $this->_user->uname))
-            {
-              $sc = FALSE;
-              $this->error = "ยกเลิกการอนุมัติไม่สำเร็จ";
-            }
-          }
-
-          //--- 4. write approve logs
-          if($sc === TRUE)
-          {
-            $this->approve_logs_model->add($code, 0, $this->_user->uname);
-          }
-
-          if($sc === TRUE)
-          {
-            $this->db->trans_commit();
-          }
-          else
-          {
-            $this->db->trans_rollback();
-          }
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        set_error('status');
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('notfound');
-    }
-
-    return $sc;
-  }
-
-
   public function view_detail($code, $approve_view = NULL)
   {
     $doc = $this->adjust_model->get($code);
@@ -1049,96 +855,49 @@ class Adjust extends PS_Controller
   }
 
 
-  public function load_check_diff($code)
+  public function send_to_erp()
   {
     $sc = TRUE;
-    $list = $this->input->post('diff');
-    if( ! empty($list))
+    $code = $this->input->post('code');
+
+    if( ! empty($code))
     {
-      $this->db->trans_begin();
-      //---- add diff list to adjust
-      foreach($list as $id => $val)
+      if(is_true(getConfig('WRX_ADJ_INTERFACE')))
       {
-        $diff = $this->check_stock_diff_model->get($id);
-        if( ! empty($diff))
+        $doc = $this->adjust_model->get($code);
+
+        if( ! empty($doc))
         {
-          if($sc === FALSE)
+          if($doc->status == 'C')
           {
-            break;
-          }
+            $this->load->library('wrx_adjust_api');
 
-          if($diff->status == 0)
-          {
-            $zone = $this->zone_model->get($diff->zone_code);
-            if( ! empty($zone))
-            {
-              $arr = array(
-                'adjust_code' => $code,
-                'warehouse_code' => $zone->warehouse_code,
-                'zone_code' => $zone->code,
-                'product_code' => $diff->product_code,
-                'qty' => $diff->qty,
-                'id_diff' => $diff->id
-              );
-
-              $adjust_id = $this->adjust_model->get_not_save_detail($code, $diff->product_code, $diff->zone_code);
-              if( ! empty($adjust_id))
-              {
-                if(! $this->adjust_model->update_detail($adjust_id, $arr))
-                {
-                  $sc = FALSE;
-                  $this->error = "Update Failed : {$diff->product_code} : {$diff->zone_code}";
-                }
-              }
-              else
-              {
-                if(! $this->adjust_model->add_detail($arr))
-                {
-                  $sc = FALSE;
-                  $this->error = "Add detail failed : {$diff->product_code} : {$diff->zone_code}";
-                }
-              }
-
-              if($sc === TRUE)
-              {
-                $this->check_stock_diff_model->update($diff->id, array('status' => 1));
-              }
-            }
-            else
+            if( ! $this->wrx_adjust_api->export_adjust($doc->code))
             {
               $sc = FALSE;
-              $this->error = "โซนไม่ถูกต้อง";
+              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_adjust_api->error}";
             }
           }
+          else
+          {
+            $sc = FALSE;
+            set_error('status');
+          }
         }
-
-      } //--- endforeach;
-
-      if($sc === TRUE)
-      {
-        $this->db->trans_commit();
-      }
-      else
-      {
-        $this->db->trans_rollback();
+        else
+        {
+          $sc = FALSE;
+          set_error('notfound');
+        }
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "ไม่พบรายการยอดต่าง";
+      set_error('required');
     }
 
-    if($sc === TRUE)
-    {
-      set_message('Loaded');
-    }
-    else
-    {
-      set_error($this->error);
-    }
-
-    redirect("{$this->home}/edit/{$code}");
+    $this->_response($sc);
   }
 
 
@@ -1189,7 +948,7 @@ class Adjust extends PS_Controller
       'adj_docNum'
     );
 
-    return clear_filter($filter);    
+    return clear_filter($filter);
   }
 
 } //---- End class

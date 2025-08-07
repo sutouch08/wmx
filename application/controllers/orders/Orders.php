@@ -2497,8 +2497,7 @@ class Orders extends PS_Controller
 
     if($sc === TRUE)
     {
-      $arr = array(
-        'is_valid' => 0,
+      $arr = array(        
         'is_exported' => 0
       );
 

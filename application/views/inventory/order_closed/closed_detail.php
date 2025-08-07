@@ -224,12 +224,8 @@
               <?php echo number($totalSold); ?>
             </td>
 
-            <td class="text-center">
-              ส่วนลดท้ายบิล
-            </td>
+            <td colspan="2" class="text-center">
 
-            <td class="text-right">
-              <?php echo number($order->bDiscAmount, 2); ?>
             </td>
           </tr>
 
@@ -253,7 +249,7 @@
               ส่วนลดรวม
             </td>
             <td colspan="2" class="text-right">
-              <?php echo number($totalDiscount + $order->bDiscAmount, 2); ?>
+              <?php echo number($totalDiscount, 2); ?>
             </td>
           </tr>
 
@@ -262,7 +258,7 @@
               ยอดเงินสุทธิ
             </td>
             <td colspan="2" class="text-right">
-              <?php echo number($totalPrice - ($totalDiscount + $order->bDiscAmount), 2); ?>
+              <?php echo number($totalPrice - $totalDiscount, 2); ?>
             </td>
           </tr>
 

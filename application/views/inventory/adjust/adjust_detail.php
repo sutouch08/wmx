@@ -9,7 +9,7 @@
 			<button type="button" class="btn btn-white btn-danger top-btn" onclick="confirmCancel('<?php echo $doc->code; ?>')"><i class="fa fa-times"></i> ยกเลิก</button>
 		<?php endif; ?>
 		<?php if($doc->status == 'C') : ?>
-			<button type="button" class="btn btn-white btn-success top-btn" onclick="sendToErp('<?php echo $doc->code; ?>')"><i class="fa fa-send"></i> Send To ERP</button>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="sendToERP('<?php echo $doc->code; ?>')"><i class="fa fa-send"></i> Send To ERP</button>
 		<?php endif; ?>
 		<?php if($this->pm->can_edit && ($doc->status == 'P' OR $doc->status == 'A' OR $doc->status == 'R')) : ?>
 			<button type="button" class="btn btn-white btn-warning top-btn" onclick="goEdit('<?php echo $doc->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
@@ -157,6 +157,6 @@
 </script>
 
 
-<script src="<?php echo base_url(); ?>scripts/inventory/adjust/adjust.js"></script>
-<script src="<?php echo base_url(); ?>scripts/inventory/adjust/adjust_add.js"></script>
+<script src="<?php echo base_url(); ?>scripts/inventory/adjust/adjust.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/inventory/adjust/adjust_add.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>
