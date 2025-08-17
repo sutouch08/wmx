@@ -52,7 +52,7 @@ class Wrx_adjust_api
           'customer' => "",
           'saleChannel' => getConfig('WRX_ADJ_CHANNEL'),
           'adjustDate' => $doc->date_add,
-          'internalId' => $doc->code,
+          'documentId' => $doc->code,
           'memoMain' => $doc->remark,
           'line' => []
         );
