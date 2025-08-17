@@ -65,7 +65,7 @@
     <label>วันที่</label>
     <div class="input-group width-100">
       <input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" value="<?php echo $from_date; ?>" />
-      <input type="text" class="form-control input-sm width-50 text-center" name="from_date" id="toDate" value="<?php echo $to_date; ?>" />
+      <input type="text" class="form-control input-sm width-50 text-center" name="to_date" id="toDate" value="<?php echo $to_date; ?>" />
     </div>
   </div>
 
