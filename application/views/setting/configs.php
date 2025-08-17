@@ -16,41 +16,51 @@
 <div class="row">
 	<div class="col-lg-2 col-md-2 col-sm-2 padding-5 padding-right-0" style="padding-right:0; height:600px; overflow:auto;">
 		<?php
-		$tab2 = $tab == 'company' ? 'active in' : '';
-		$tab3 = $tab == 'system' ? 'active in' : '';
-		$tab4 = $tab == 'inventory' ? 'active in' : '';
-		$tab5 = $tab == 'order' ? 'active in' : '';
-		$tab7 = $tab == 'wrx' ? 'active in' : '';
-		$tab8 = $tab == 'wmx' ? 'active in' : '';
+		$tab1 = $tab == 'general' ? 'active in' : '';
+		$tab2 = $tab == 'system' ? 'active in' : '';
+		$tab3 = $tab == 'inventory' ? 'active in' : '';
+		$tab4 = $tab == 'order' ? 'active in' : '';
+		$tab5 = $tab == 'wmx' ? 'active in' : '';
+		$tab6 = $tab == 'wrx' ? 'active in' : '';
+		$tab7 = $tab == 'porlor' ? 'active in' : '';
+		$tab8 = $tab == 'spx' ? 'active in' : '';
 		?>
 		<ul id="myTab1" class="setting-tabs" style="margin-left:0;">
-			<li class="li-block <?php echo $tab2; ?>" onclick="changeURL('company')"><a href="#company" data-toggle="tab">ข้อมูลบริษัท</a></li>
-			<li class="li-block <?php echo $tab3; ?>" onclick="changeURL('system')"><a href="#system" data-toggle="tab">ระบบ</a></li>
-			<li class="li-block <?php echo $tab4; ?>" onclick="changeURL('inventory')"><a href="#inventory" data-toggle="tab">คลังสินค้า</a></li>
-			<li class="li-block <?php echo $tab5; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li>
-			<li class="li-block <?php echo $tab7; ?>" onclick="changeURL('wrx')"><a href="#wrx" data-toggle="tab">WRX API</a></li>
-			<li class="li-block <?php echo $tab8; ?>" onclick="changeURL('wmx')"><a href="#wmx" data-toggle="tab">WMS API</a></li>
+			<li class="li-block <?php echo $tab1; ?>" onclick="changeURL('general')"><a href="#general" data-toggle="tab">ทั่วไป</a></li>
+			<li class="li-block <?php echo $tab2; ?>" onclick="changeURL('system')"><a href="#system" data-toggle="tab">ระบบ</a></li>
+			<li class="li-block <?php echo $tab3; ?>" onclick="changeURL('inventory')"><a href="#inventory" data-toggle="tab">คลังสินค้า</a></li>
+			<li class="li-block <?php echo $tab4; ?>" onclick="changeURL('order')"><a href="#order" data-toggle="tab">ออเดอร์</a></li>
+			<li class="li-block <?php echo $tab5; ?>" onclick="changeURL('wmx')"><a href="#wmx" data-toggle="tab">WMS API</a></li>
+			<li class="li-block <?php echo $tab6; ?>" onclick="changeURL('wrx')"><a href="#wrx" data-toggle="tab">WRX API</a></li>
+			<li class="li-block <?php echo $tab7; ?>" onclick="changeURL('porlor')"><a href="#porlor" data-toggle="tab">PORLOR API</a></li>
+			<li class="li-block <?php echo $tab8; ?>" onclick="changeURL('spx')"><a href="#spx" data-toggle="tab">SPX API</a></li>
 		</ul>
 	</div>
 	<div class="col-lg-10 col-md-10 col-sm-10 border-1" style="padding-top:15px; border-top:0px !important; height:600px; overflow:auto;">
 		<div class="tab-content" style="border:0px;">
-			<div class="tab-pane fade <?php echo $tab2; ?>" id="company">
-				<?php $this->load->view('setting/setting_company'); ?>
+			<div class="tab-pane fade <?php echo $tab1; ?>" id="general">
+				<?php $this->load->view('setting/setting_general'); ?>
 			</div>
-			<div class="tab-pane fade <?php echo $tab3; ?>" id="system">
+			<div class="tab-pane fade <?php echo $tab2; ?>" id="system">
 				<?php	$this->load->view('setting/setting_system'); ?>
 			</div>
-			<div class="tab-pane fade <?php echo $tab4; ?>" id="inventory">
+			<div class="tab-pane fade <?php echo $tab3; ?>" id="inventory">
 				<?php $this->load->view('setting/setting_inventory'); ?>
 			</div>
-			<div class="tab-pane fade <?php echo $tab5; ?>" id="order">
+			<div class="tab-pane fade <?php echo $tab4; ?>" id="order">
 				<?php $this->load->view('setting/setting_order'); ?>
 			</div>
-			<div class="tab-pane fade <?php echo $tab7; ?>" id="wrx">
+			<div class="tab-pane fade <?php echo $tab5; ?>" id="wmx">
+				<?php $this->load->view('setting/setting_wmx_api'); ?>
+			</div>
+			<div class="tab-pane fade <?php echo $tab6; ?>" id="wrx">
 				<?php $this->load->view('setting/setting_wrx_api'); ?>
 			</div>
-			<div class="tab-pane fade <?php echo $tab8; ?>" id="wmx">
-				<?php $this->load->view('setting/setting_wmx_api'); ?>
+			<div class="tab-pane fade <?php echo $tab7; ?>" id="porlor">
+				<?php $this->load->view('setting/setting_porlor_api'); ?>
+			</div>
+			<div class="tab-pane fade <?php echo $tab8; ?>" id="spx">
+				<?php //$this->load->view('setting/setting_spx_api'); ?>
 			</div>
 		</div><!--/ tab-content-->
 	</div><!--/ col-sm-9  -->

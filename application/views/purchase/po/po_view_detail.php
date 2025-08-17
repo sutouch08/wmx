@@ -16,7 +16,7 @@
 		<?php endif; ?>
 
 		<?php if($po->status != 'P' && $po->status != 'D') : ?>
-			<button type="button" class="btn btn-white btn-info top-btn btn-100" onclick="printPO()"><i class="fa fa-print"></i> พิมพ์</button>
+			<!-- <button type="button" class="btn btn-white btn-info top-btn btn-100" onclick="printPO()"><i class="fa fa-print"></i> พิมพ์</button> -->
 		<?php endif; ?>
 	</div>
 </div><!-- End Row -->
@@ -43,8 +43,12 @@
 			<label>กำหนดส่ง</label>
 			<input type="text" class="form-control input-sm text-center edit" name="require_date" id="require_date" value="<?php echo thai_date($po->due_date); ?>" disabled readonly required>
 		</div>
+		<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-6 padding-5">
+			<label>Ref No.</label>
+			<input type="text" class="form-control input-sm text-center" value="<?php echo $po->reference; ?>" disabled>
+		</div>
 
-		<div class="col-lg-10-harf col-md-10-harf col-sm-10-harf col-xs-12 padding-5">
+		<div class="col-lg-9 col-md-9 col-sm-9 col-xs-12 padding-5">
 			<label>หมายเหตุ</label>
 			<input type="text" class="form-control input-sm edit" name="remark" id="remark" value="<?php echo $po->remark; ?>" disabled>
 		</div>

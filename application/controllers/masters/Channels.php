@@ -6,6 +6,7 @@ class Channels extends PS_Controller
   public $menu_code = 'DBCHAN';
 	public $menu_group_code = 'DB';
 	public $title = 'ช่องทางการขาย';
+  public $segment = 4;
 
   public function __construct()
   {
@@ -18,100 +19,73 @@ class Channels extends PS_Controller
 
   public function index()
   {
-		$code = get_filter('code', 'channels_code', '');
-		$name = get_filter('name', 'channels_name', '');
-
-		//--- แสดงผลกี่รายการต่อหน้า
-		$perpage = get_filter('set_rows', 'rows', 20);
-		//--- หาก user กำหนดการแสดงผลมามากเกินไป จำกัดไว้แค่ 300
-		if($perpage > 300)
-		{
-			$perpage = get_filter('rows', 'rows', 300);
-		}
-
-		$segment = 4; //-- url segment
-		$rows = $this->channels_model->count_rows($code, $name);
-		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-		$rs = $this->channels_model->get_data($code, $name, $perpage, $this->uri->segment($segment));
-
-    $ds = array(
-      'code' => $code,
-      'name' => $name,
-			'data' => $rs
+    $filter = array(
+      'code' => get_filter('code', 'channels_code', ''),
+      'is_online' => get_filter('is_online', 'channels_is_online', 'all')
     );
 
+		//--- แสดงผลกี่รายการต่อหน้า
+		$perpage = get_rows();
+		$rows = $this->channels_model->count_rows($filter);
+    $filter['list'] = $this->channels_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+		$init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
 		$this->pagination->initialize($init);
-    $this->load->view('masters/channels/channels_view', $ds);
+    $this->load->view('masters/channels/channels_list', $filter);
   }
 
 
   public function add_new()
   {
-    $data['code'] = $this->session->flashdata('code');
-    $data['name'] = $this->session->flashdata('name');
-    $data['customer_code'] = $this->session->flashdata('customer_code');
-    $data['customer_name'] = $this->session->flashdata('customer_name');
-    $this->load->view('masters/channels/channels_add_view', $data);
+    $this->load->view('masters/channels/channels_add');
   }
 
 
   public function add()
   {
-    if($this->input->post('code'))
+    $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
+
+    if( ! empty($ds))
     {
-      $sc = TRUE;
-      $code = $this->input->post('code');
-      $name = $this->input->post('name');
-      $customer_code = $this->input->post('customer_code');
-      $customer_name = $this->input->post('customer_name');
-			$type_code = $this->input->post('type_code');
-      $is_online = $this->input->post('is_online');
-      $ds = array(
-        'code' => $code,
-        'name' => $name,
-        'customer_code' => empty($customer_code) ? NULL : $customer_code,
-        'customer_name' => empty($customer_name) ? NULL : $customer_code,
-				'type_code' => empty($type_code) ? NULL : $type_code,
-        'is_online' => empty($is_online) ? 0 : 1
-      );
-
-      if($this->channels_model->is_exists($code) === TRUE)
+      if($this->channels_model->is_exists($ds->code))
       {
         $sc = FALSE;
-        set_error("'".$code."' already exists");
+        set_error('exists', $ds->code);
       }
 
-      if($this->channels_model->is_exists_name($name) === TRUE)
+      if($sc === TRUE)
       {
-        $sc = FALSE;
-        set_error("'".$name."' already exists");
+        if($this->channels_model->is_exists_name($ds->name))
+        {
+          $sc = FALSE;
+          set_error('exists', $ds->name);
+        }
       }
 
-      if($sc === TRUE && $this->channels_model->add($ds))
+      if($sc === TRUE)
       {
-        set_message('Channels created');
-      }
-      else
-      {
-        $sc = FALSE;
-        set_error('Cannot create channels');
-      }
+        $arr = array(
+          'code' => $ds->code,
+          'name' => $ds->name,
+          'is_online' => $ds->is_online,
+          'position' => $ds->position,
+          'user' => $this->_user->uname
+        );
 
-      if($sc === FALSE)
-      {
-        $this->session->set_flashdata('code', $code);
-        $this->session->set_flashdata('name', $name);
-        $this->session->set_flashdata('customer_code', $customer_code);
-        $this->session->set_flashdata('customer_name', $customer_name);
+        if( ! $this->channels_model->add($arr))
+        {
+          $sc = FALSE;
+          set_error('insert');
+        }
       }
     }
     else
     {
-      set_error('Data not found');
+      $sc = FALSE;
+      set_error('required');
     }
 
-    redirect($this->home.'/add_new');
+    $this->_response($sc);
   }
 
 
@@ -119,7 +93,7 @@ class Channels extends PS_Controller
   public function edit($code)
   {
     $data['data'] = $this->channels_model->get_channels($code);
-    $this->load->view('masters/channels/channels_edit_view', $data);
+    $this->load->view('masters/channels/channels_edit', $data);
   }
 
 
@@ -127,88 +101,80 @@ class Channels extends PS_Controller
   public function update()
   {
     $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
 
-    if($this->input->post('code'))
+    if( ! empty($ds))
     {
-      $old_code = $this->input->post('channels_code');
-      $old_name = $this->input->post('channels_name');
-      $code = $this->input->post('code');
-      $name = $this->input->post('name');
-      $customer_code = $this->input->post('customer_code');
-      $customer_name = $this->input->post('customer_name');
-			$type_code = $this->input->post('type_code');
-      $is_online = $this->input->post('is_online');
-
-      $ds = array(
-        'code' => $code,
-        'name' => $name,
-        'customer_code' => empty($customer_code) ? NULL : $customer_code,
-        'customer_name' => empty($customer_name) ? NULL : $customer_name,
-				'type_code' => empty($type_code) ? NULL : $type_code,
-        'is_online' => empty($is_online) ? 0 : 1
-      );
-
-      if($sc === TRUE && $this->channels_model->is_exists($code, $old_code) === TRUE)
+      if( ! $this->channels_model->is_exists_name($ds->name, $ds->id))
       {
-        $sc = FALSE;
-        set_error("'".$code."' already exists please choose another");
-      }
+        $arr = array(
+          'name' => $ds->name,
+          'is_online' => $ds->is_online,
+          'position' => $ds->position,
+          'update_user' => $this->_user->uname,
+          'date_upd' => now()
+        );
 
-      if($sc === TRUE && $this->channels_model->is_exists_name($name, $old_name) === TRUE)
-      {
-        $sc = FALSE;
-        set_error("'".$name."' already exists please choose another");
-      }
-
-      if($sc === TRUE)
-      {
-        if($this->channels_model->update($old_code, $ds) === TRUE)
-        {
-          set_message('Channels updated');
-        }
-        else
+        if( ! $this->channels_model->update_by_id($ds->id, $arr))
         {
           $sc = FALSE;
-          set_error('Update channels not successfull');
+          set_error('update');
         }
       }
-
+      else
+      {
+        $sc = FALSE;
+        $this->error = "{$ds->name} already exists";
+      }
     }
     else
     {
       $sc = FALSE;
-      set_error('Data not found');
+      set_error('required');
     }
 
-    if($sc === FALSE)
-    {
-      $code = $this->input->post('channels_code');
-    }
-
-    redirect($this->home.'/edit/'.$code);
+    $this->_response($sc);
   }
 
 
 
-  public function delete($code)
+  public function delete()
   {
-    if($code != '')
+    $sc = TRUE;
+
+    if($this->pm->can_delete)
     {
-      if($this->channels_model->delete($code))
+      $code = $this->input->post('code');
+
+      if( ! empty($code))
       {
-        set_message('Channels deleted');
+        if( ! $this->channels_model->has_transection($code))
+        {
+          if( ! $this->channels_model->delete($code))
+          {
+            $sc = FALSE;
+            set_error('delete');
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('transection');
+        }
       }
       else
       {
-        set_error('Cannot delete channels');
+        $sc = FALSE;
+        set_error('required');
       }
     }
     else
     {
-      set_error('Channels not found');
+      $sc = FALSE;
+      set_error('permission');
     }
 
-    redirect($this->home);
+    $this->_response($sc);
   }
 
 
@@ -251,8 +217,7 @@ class Channels extends PS_Controller
 
   public function clear_filter()
 	{
-		clear_filter(array('channels_code', 'channels_name'));
-    echo 'done';
+		return clear_filter(['channels_code', 'channels_is_online']);
 	}
 
 }//--- end class

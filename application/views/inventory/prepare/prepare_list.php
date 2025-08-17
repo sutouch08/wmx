@@ -6,7 +6,7 @@
 		<h3 class="title"><?php echo $this->title; ?></h3>
 	</div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right hidden-xs">
-		<button type="button" class="btn btn-white btn-primary top-btn" onclick="genPickList()">พิมพ์ใบจัด(ชั่วคราว)</button>
+		<!-- <button type="button" class="btn btn-white btn-primary top-btn" onclick="genPickList()">พิมพ์ใบจัด(ชั่วคราว)</button> -->
 		<button type="button" class="btn btn-white btn-primary top-btn" onclick="goProcess()"><i class="fa fa-external-link-square"></i> รายการกำลังจัด</button>
 	</div>
 </div><!-- End Row -->
@@ -148,24 +148,18 @@
 <hr class="margin-top-15 hidden-xs">
 <div class="row hidden-xs">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-hover border-1 no-border-xs table-listing">
+		<table class="table table-hover border-1 no-border-xs table-listing" style="min-width:1250px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-60"></th>
-					<th class="fix-width-50">
-						<label>
-							<input type="checkbox" class="ace" id="pc-all" onchange="toggleAllPc($(this))" />
-							<span class="lbl"></span>
-						</label>
-					</th>
-					<th class="fix-width-40 middle text-center ">#</th>
-					<th class="fix-width-150 middle text-center ">วันที่</th>
-					<th class="fix-width-100 middle">Order No.</th>
+					<th class="fix-width-40 middle text-center">#</th>
+					<th class="fix-width-150 middle text-center">วันที่</th>
+					<th class="fix-width-120 middle">Order No.</th>
 					<th class="fix-width-100 middle">SO No.</th>
 					<th class="fix-width-100 middle">Fulfil No.</th>
 					<th class="fix-width-150 middle">MKP No.</th>
 					<th class="fix-width-150 middle">ช่องทาง</th>
-					<th class="fix-width-100 middle text-center">จำนวน</th>
+					<th class="fix-width-80 middle text-center">จำนวน</th>
 					<th class="min-width-300 middle">ลูกค้า/ผู้เบิก</th>
 				</tr>
 			</thead>
@@ -183,15 +177,9 @@
             <tr id="row-<?php echo $rs->code; ?>" class="font-size-11">
 							<td class="middle ">
           <?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
-                <button type="button" class="btn btn-white btn-xs btn-info" onClick="goPrepare('<?php echo $rs->code; ?>')">จัดสินค้า</button>
+                <button type="button" class="btn btn-white btn-mini btn-info" onClick="goPrepare('<?php echo $rs->code; ?>')">จัดสินค้า</button>
           <?php endif; ?>
               </td>
-							<td class="middle">
-								<label>
-									<input type="checkbox" class="ace pc" value="<?php echo $rs->code; ?>" />
-									<span class="lbl"><?php echo $this->prepare_model->is_exists_print_logs($rs->code) ? '&nbsp;<i class="fa fa-check green"></i>' : ''; ?>	</span>
-								</label>
-							</td>
               <td class="middle text-center no"><?php echo $no; ?></td>
 							<td class="middle text-center"><?php echo thai_date($rs->date_add, TRUE,'/'); ?></td>
 							<td class="middle"><?php echo $rs->code . $cn_text; ?></td>

@@ -695,6 +695,91 @@ class Products extends REST_Controller
     }
   }
 
+
+  //--------- for check stock
+	public function countUpdateItem_get()
+	{
+		$json = file_get_contents("php://input");
+		$data = json_decode($json);
+
+		if(! empty($data))
+		{
+			$last_sync = empty($data->date) ? '2020-01-01 00:00:00' : $data->date;
+
+			$rs = $this->db
+      ->where('count_stock', 1)
+      ->where('date_upd >=', $last_sync)      
+      ->count_all_results('products');
+
+			$arr = array(
+				'status' => TRUE,
+				'count' => $rs
+			);
+
+			$this->response($arr, 200);
+		}
+		else
+		{
+			$arr = array(
+				'status' => FALSE,
+				'error' => 'Missing required parameter'
+			);
+
+			$this->response($arr, 400);
+		}
+	}
+
+
+  //---- for check stock
+	public function getUpdateItem_get()
+	{
+		$json = file_get_contents("php://input");
+		$ds = json_decode($json);
+
+		if(! empty($ds))
+		{
+			$date = $ds->date;
+			$limit = $ds->limit;
+			$offset = $ds->offset;
+
+			$rs = $this->db
+      ->select('id, code, name, barcode, model_code, cost, price, unit_code, active')
+      ->where('count_stock', 1)
+      ->where('date_upd >=', $date)
+			->limit($limit, $offset)
+			->get('products');
+
+			if($rs->num_rows() > 0)
+			{
+        $arr = array(
+          'status' => TRUE,
+          'rows' => $rs->num_rows(),
+          'items' => $rs->result()
+        );
+			}
+      else
+      {
+        $arr = array(
+          'status' => TRUE,
+          'rows' => 0,
+          'items' => NULL
+        );
+      }
+
+      $this->response($arr, 200);
+		}
+		else
+		{
+			$arr = array(
+				'status' => FALSE,
+				'error' => 'Missing required parameter'
+			);
+
+			$this->response($arr, 400);
+		}
+	}
+
+
 }
 
 

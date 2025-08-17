@@ -42,10 +42,10 @@ class Customers extends REST_Controller
     $this->load->model('masters/customers_model');
     $trans_id = genUid();
     $action = "create";
-    $type = "CUSTOMER";
+    $type = "ADD122";
 
     $json = file_get_contents('php://input');
-  
+
     $ds = json_decode($json);
 
     if(empty($ds))
@@ -77,7 +77,7 @@ class Customers extends REST_Controller
     }
 
     //--- required fields
-    $fields = ['code', 'name'];
+    $fields = ['uuid','code', 'name'];
 
     //--- check required fields
     foreach($fields as $field)
@@ -127,7 +127,9 @@ class Customers extends REST_Controller
       $active = empty($ds->active) ? 1 : ($ds->active == 'N' ? 0 : 1);
 
       $arr = array(
+        'uuid' => trim($ds->uuid),
         'name' => trim($ds->name),
+        'Tax_Id' => empty($ds->tax_id) ? NULL : get_null(trim($ds->tax_id)),
         'group_code' => empty($ds->group_code) ? NULL : get_null($ds->group_code),
         'group_name' => empty($ds->group_name) ? NULL : get_null($ds->group_name),
         'class_code' => empty($ds->grade_code) ? NULL : get_null($ds->grade_code),
@@ -178,6 +180,8 @@ class Customers extends REST_Controller
       }
       else
       {
+        $action = "update";
+
         if( ! $this->customers_model->update_by_id($id, $arr))
         {
           $sc = FALSE;

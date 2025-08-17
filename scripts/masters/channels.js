@@ -1,25 +1,130 @@
-function addNew(){
-  window.location.href = BASE_URL + 'masters/channels/add_new';
+var click = 0;
+
+function goBack(){
+  window.location.href = HOME;
 }
 
 
-
-function goBack(){
-  window.location.href = BASE_URL + 'masters/channels';
+function addNew(){
+  window.location.href = HOME + 'add_new';
 }
 
 
 function getEdit(code){
-  window.location.href = BASE_URL + 'masters/channels/edit/'+code;
+  window.location.href = HOME + 'edit/'+code;
 }
 
 
-function clearFilter(){
-  var url = BASE_URL + 'masters/channels/clear_filter';
-  var page = BASE_URL + 'masters/channels';
-  $.get(url, function(rs){
-    window.location.href = page;
-  });
+function add() {
+  if(click == 0) {
+    click = 1;
+    clearErrorByClass('r');
+
+    let h = {
+      'code' : $('#code').val().trim(),
+      'name' : $('#name').val().trim(),
+      'position' : $('#position').val(),
+      'is_online' : $('#is-online').is(':checked') ? 1 : 0
+    };
+
+    if(h.code.length == 0) {
+      click = 0;
+      $('#code').hasError();
+      swal("Code is required !");
+      return false;
+    }
+
+    if(h.name.length == 0) {
+      click = 0;
+      $('#name').hasError();
+      swal("Name is required !");
+      return false;
+    }
+
+    load_in();
+
+    $.ajax({
+      url:HOME + 'add',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        load_out();
+
+        if(rs.trim() === 'success') {
+          swal({
+            title:'Success',
+            type:'success',
+            timer:1000
+          });
+
+          setTimeout(() => {
+            addNew();
+          }, 1200);
+        }
+        else {
+          click = 0;
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        click = 0;
+        beep();
+        showError(rs);
+      }
+    })
+  }
+}
+
+
+function update() {
+  $('#name').clearError();
+
+  let h = {
+    'id' : $("#id").val(),
+    'code' : $('#code').val().trim(),
+    'name' : $('#name').val().trim(),
+    'position' : $('#position').val(),
+    'is_online' : $('#is-online').is(':checked') ? 1 : 0
+  }
+
+  if(h.name.length == 0) {
+    $('#name').hasError();
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'update',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+      }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+    }
+  })
 }
 
 
@@ -33,8 +138,39 @@ function getDelete(code, name){
 		confirmButtonText: 'ใช่, ฉันต้องการลบ',
 		cancelButtonText: 'ยกเลิก',
 		closeOnConfirm: false
-  },function(){
-    window.location.href = BASE_URL + 'masters/channels/delete/' + code;
+  },function() {
+    setTimeout(() => {
+      $.ajax({
+        url:HOME + 'delete',
+        type:'POST',
+        cache:false,
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
+          if(rs.trim() === 'success') {
+            swal({
+              title:'Deleted',
+              type:'success',
+              timer:1000
+            });
+
+            setTimeout(() => {
+              refresh();
+            }, 1200)
+          }
+          else {
+            beep();
+            showError(rs);
+          }
+        },
+        error:function(rs) {
+          beep();
+          showError(rs);
+        }
+      })
+
+    }, 100);
   })
 }
 

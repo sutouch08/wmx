@@ -13,13 +13,20 @@ class Configs extends PS_Controller
     parent::__construct();
     $this->home = base_url().'setting/configs';
     $this->load->model('setting/config_model');
+    $this->load->helper('customer');
     $this->load->helper('channels');
     $this->load->helper('warehouse');
+    $this->load->helper('setting');
+    $this->load->helper('sender');
+    $this->load->helper('package');
+    $this->load->library('user_agent');
+
+    $this->is_mobile = $this->agent->is_mobile();
   }
 
 
 
-  public function index($tab = 'company')
+  public function index($tab = 'general')
   {
     $groups = $this->config_model->get_group();
     $ps = get_permission('SCSYSC');
@@ -40,7 +47,14 @@ class Configs extends PS_Controller
     $ds['cando'] = $cando;
     $ds['tab'] = $tab;
 
-    $this->load->view('setting/configs', $ds);
+    if($this->is_mobile)
+    {
+      $this->load->view('setting/mobile/configs_mobile', $ds);
+    }
+    else
+    {
+      $this->load->view('setting/configs', $ds);
+    }
   }
 
 

@@ -5,7 +5,7 @@ class Customers extends PS_Controller
   public $menu_code = 'DBCUST';
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'CUSTOMER';
-	public $title = 'เพิ่ม/แก้ไข รายชื่อลูกค้า';
+	public $title = 'รายชื่อลูกค้า';
   public $segment = 4;
 
   public function __construct()
@@ -13,7 +13,7 @@ class Customers extends PS_Controller
     parent::__construct();
     $this->home = base_url().'masters/customers';
     $this->load->model('masters/customers_model');
-    $this->load->model('masters/customer_group_model');    
+    $this->load->model('masters/customer_group_model');
     $this->load->model('masters/customer_class_model');
     $this->load->model('masters/customer_area_model');
     $this->load->helper('customer');
@@ -131,12 +131,6 @@ class Customers extends PS_Controller
 
       if( ! empty($ds) && ! empty($ds->id) && ! empty($ds->name))
       {
-        if($sc === TRUE && $this->customers_model->is_exists_name($ds->name, $ds->id))
-        {
-          $sc = FALSE;
-          set_error('exists', $ds->name);
-        }
-
         if($sc === TRUE)
         {
           $arr = array(
@@ -147,7 +141,6 @@ class Customers extends PS_Controller
             'type_code' => get_null($ds->type),
             'class_code' => get_null($ds->class),
             'area_code' => get_null($ds->area),
-            'sale_code' => get_null($ds->sale_code),
             'active' => $ds->active == 0 ? 0 : 1
           );
 
@@ -182,16 +175,13 @@ class Customers extends PS_Controller
 
     if( ! empty($customer))
     {
-      $bill_to = $this->customer_address_model->get_customer_bill_to_address($customer->code);
-      $ship_to = $this->customer_address_model->get_ship_to_address($customer->code);
+      $ds = array(
+        'ds' => $customer,
+        'tab' => $tab,
+        'view' => TRUE
+      );
 
-      $data['ds'] = $customer;
-      $data['tab'] = $tab;
-      $data['bill'] = $bill_to;
-      $data['addr'] = $ship_to;
-      $data['view'] = TRUE;
-
-      $this->load->view('masters/customers/customers_detail', $data);
+      $this->load->view('masters/customers/customers_detail', $ds);
     }
     else
     {

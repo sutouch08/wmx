@@ -21,6 +21,27 @@ function setToken($token)
 }
 
 
+function parse_value_label($code = NULL, $name = NULL, $sp = " | ")
+{
+	if( ! empty($code) && ! empty($name))
+	{
+		return $code . $sp . $name;
+	}
+
+	if( ! empty($code) && empty($name))
+	{
+		return $code;
+	}
+
+	if( empty($code) && ! empty($name))
+	{
+		return $name;
+	}
+
+	return NULL;
+}
+
+
 function parsePhoneNumber($phone, $length = 10)
 {
 	$find = [" ", "-", "+"];
@@ -593,5 +614,18 @@ function genUid($lenght = 13)
 	return substr(bin2hex($bytes), 0, $lenght);
 }
 
+
+function select_position($min = 1, $max = 10, $se = 10)
+{
+	$option = "";
+
+	while($min <= $max)
+	{
+		$option .= '<option value="'.$min.'" '.is_selected(intval($min), intval($se)).'>'.$min.'</option>';
+		$min++;
+	}
+
+	return $option;
+}
 
  ?>

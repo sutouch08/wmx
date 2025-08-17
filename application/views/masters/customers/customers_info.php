@@ -1,9 +1,16 @@
 <?php $disabled = $view ? 'disabled' : ''; ?>
 <div class="form-horizontal">
 	<div class="form-group margin-top-30">
+		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">UUID</label>
+		<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+			<input type="text" id="uuid" class="form-control input-sm" maxlength="150" value="<?php echo $ds->uuid; ?>" readonly  />
+		</div>
+	</div>
+
+	<div class="form-group">
 		<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">รหัส</label>
 		<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-12">
-			<input type="text" name="code" id="code" class="form-control input-sm input-medium e" maxlength="15" value="<?php echo $ds->code; ?>" disabled  />
+			<input type="text" name="code" id="code" class="form-control input-sm input-medium e" maxlength="15" value="<?php echo $ds->code; ?>" readonly  />
 			<input type="hidden" id="id" value="<?php echo $ds->id; ?>" />
 		</div>
 		<div class="help-block col-xs-12 col-sm-reset inline red" id="code-error"></div>

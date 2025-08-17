@@ -1,6 +1,8 @@
 <?php
 class Channels_model extends CI_Model
 {
+  private $tb = "channels";
+
   public function __construct()
   {
     parent::__construct();
@@ -11,7 +13,7 @@ class Channels_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return  $this->db->insert('channels', $ds);
+      return  $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -24,7 +26,19 @@ class Channels_model extends CI_Model
     if(!empty($ds))
     {
       $this->db->where('code', $code);
-      return $this->db->update('channels', $ds);
+      return $this->db->update($this->tb, $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function update_by_id($id, array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      $this->db->where('id', $id);
+      return $this->db->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -33,34 +47,62 @@ class Channels_model extends CI_Model
 
   public function delete($code)
   {
-    return $this->db->where('code', $code)->delete('channels');
+    return $this->db->where('code', $code)->delete($this->tb);
   }
 
 
-  public function count_rows($c_code = '', $c_name = '')
+  public function count_rows(array $ds = array())
   {
-    $this->db->select('code');
-    if($c_code != '')
+    if( ! empty($ds['code']))
     {
-      $this->db->like('code', $c_code);
+      $this->db
+      ->group_start()
+      ->like('code', $ds['code'])
+      ->or_like('name', $ds['code'])
+      ->group_end();
     }
 
-    if($c_name != '')
+    if(isset($ds['is_online']) && $ds['is_online'] != 'all')
     {
-      $this->db->like('name', $c_name);
+      $this->db->where('is_online', $ds['is_online']);
     }
 
-    $rs = $this->db->get('channels');
-
-    return $rs->num_rows();
+    return $this->db->count_all_results($this->tb);
   }
 
 
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
+  {
+    if( ! empty($ds['code']))
+    {
+      $this->db
+      ->group_start()
+      ->like('code', $ds['code'])
+      ->or_like('name', $ds['code'])
+      ->group_end();
+    }
+
+    if(isset($ds['is_online']) && $ds['is_online'] != 'all')
+    {
+      $this->db->where('is_online', $ds['is_online']);
+    }
+
+    $this->db->order_by('position', 'ASC')->order_by('id', 'ASC');
+
+    $rs = $this->db->limit($perpage, $offset)->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
 
   public function get_channels($code)
   {
-    $rs = $this->db->where('code', $code)->get('channels');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() == 1 )
     {
       return $rs->row();
@@ -72,7 +114,7 @@ class Channels_model extends CI_Model
 
   public function get($code)
   {
-    $rs = $this->db->where('code', $code)->get('channels');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() == 1 )
     {
       return $rs->row();
@@ -85,7 +127,7 @@ class Channels_model extends CI_Model
 
   public function get_default()
   {
-    $rs = $this->db->where('is_default', 1)->get('channels');
+    $rs = $this->db->where('is_default', 1)->get($this->tb);
     if($rs->num_rows() == 1)
     {
       return $rs->row();
@@ -97,7 +139,7 @@ class Channels_model extends CI_Model
 
   public function get_online_list()
   {
-    $rs = $this->db->where('is_online', 1)->get('channels');
+    $rs = $this->db->where('is_online', 1)->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -110,7 +152,7 @@ class Channels_model extends CI_Model
 
   public function get_code($name)
   {
-    $rs = $this->db->select('code')->where('name', $name)->get('channels');
+    $rs = $this->db->select('code')->where('name', $name)->get($this->tb);
 
     if($rs->num_rows() === 1)
     {
@@ -120,10 +162,10 @@ class Channels_model extends CI_Model
     return NULL;
   }
 
-  
+
   public function get_name($code)
   {
-    $rs = $this->db->select('name')->where('code', $code)->get('channels');
+    $rs = $this->db->select('name')->where('code', $code)->get($this->tb);
     if($rs->num_rows() > 0)
     {
       return $rs->row()->name;
@@ -133,67 +175,35 @@ class Channels_model extends CI_Model
   }
 
 
-  public function get_data($c_code = '', $c_name = '', $perpage = '', $offset = '')
+  public function is_exists($code, $id = NULL)
   {
-    if($c_code != '')
+    if( ! empty($id))
     {
-      $this->db->like('code', $c_code);
+      $this->db->where('id !=', $id);
     }
 
-    if($c_name != '')
-    {
-      $this->db->like('name', $c_name);
-    }
-
-    if($perpage != '')
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get('channels');
-
-    return $rs->result();
-  }
-
-
-
-
-  public function is_exists($code, $old_code = '')
-  {
-    if($old_code != '')
-    {
-      $this->db->where('code !=', $old_code);
-    }
-
-    $count = $this->db->where('code', $code)->count_all_results('channels');
+    $count = $this->db->where('code', $code)->count_all_results($this->tb);
 
     return $count > 0 ? TRUE : FALSE;
   }
 
 
-
-  public function is_exists_name($name, $old_name = '')
+  public function is_exists_name($name, $id = NULL)
   {
-    if($old_name != '')
+    if( ! empty($id))
     {
-      $this->db->where('name !=', $old_name);
+      $this->db->where('id !=', $id);
     }
 
-    $rs = $this->db->where('name', $name)->get('channels');
+    $count = $this->db->where('name', $name)->count_all_results($this->tb);
 
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
+    return $count > 0 ? TRUE : FALSE;
   }
 
 
 	public function get_channels_array()
 	{
-		$rs = $this->db->get('channels');
+		$rs = $this->db->get($this->tb);
 
 		if($rs->num_rows() > 0)
 		{
@@ -212,7 +222,7 @@ class Channels_model extends CI_Model
 
   public function get_all()
   {
-    $rs = $this->db->order_by('position', 'ASC')->order_by('code', 'ASC')->get('channels');
+    $rs = $this->db->order_by('position', 'ASC')->order_by('code', 'ASC')->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -220,6 +230,13 @@ class Channels_model extends CI_Model
     }
 
     return NULL;
+  }
+
+  public function has_transection($code)
+  {
+    $count = $this->db->where('channels_code', $code)->count_all_results('orders');
+
+    return $count > 0 ? TRUE : FALSE;
   }
 
 }

@@ -223,7 +223,7 @@ class Qc_model extends CI_Model
     $qr .= "(SELECT SUM(qty) FROM buffer WHERE order_code = '{$order_code}' AND product_code = o.product_code) AS prepared, ";
     $qr .= "(SELECT SUM(qty) FROM qc WHERE order_code = '{$order_code}' AND product_code = o.product_code) AS qc ";
     $qr .= "FROM order_details AS o ";
-    $qr .= "JOIN buffer AS b ON o.product_code = b.product_code ";    
+    $qr .= "JOIN buffer AS b ON o.product_code = b.product_code ";
     $qr .= "WHERE o.order_code = '{$order_code}' AND o.is_count = 1 ";
     $qr .= "GROUP BY o.product_code HAVING ( prepared > qc OR qc IS NULL )";
 
@@ -238,6 +238,20 @@ class Qc_model extends CI_Model
     return FALSE;
   }
 
+
+  //--- for print all box
+  public function get_boxes($code)
+  {
+    $rs = $this->db->where('order_code', $code)->get('qc_box');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+  
 
   //--- รายการกล่องทั้งหมดที่ตรวจในออเดอร์ที่กำหนด
   public function get_box_list($order_code)

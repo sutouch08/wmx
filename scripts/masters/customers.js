@@ -121,7 +121,6 @@ function update() {
       'type' : $('#type').val(),
       'class' : $('#class').val(),
       'area' : $('#area').val(),
-      'sale_code' : $('#sale').val(),
       'active' : $('#active').is(':checked') ? 1 : 0
     }
 
@@ -135,13 +134,7 @@ function update() {
       click = 0;
       $('#name').hasError('Required');
       return false;
-    }
-
-    if(h.group == "") {
-      click = 0;
-      $('#group').hasError('Required');
-      return false;
-    }
+    }    
 
     load_in();
 
@@ -230,7 +223,7 @@ function getDelete(id, code, name) {
           showError(rs)
         }
       })
-    }, 100)    
+    }, 100)
   })
 }
 

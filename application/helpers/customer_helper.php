@@ -10,7 +10,7 @@ function select_customer_group($code = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
     }
   }
 
@@ -30,7 +30,7 @@ function select_customer_kind($code = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -49,7 +49,7 @@ function select_customer_type($code = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -68,7 +68,7 @@ function select_customer_class($code = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -87,7 +87,7 @@ function select_customer_area($code = NULL)
   {
     foreach($options as $rs)
     {
-      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->name.'</option>';
+      $sc .= '<option value="'.$rs->code.'" '.is_selected($code, $rs->code).'>'.$rs->code.' | '.$rs->name.'</option>';
     }
   }
   return $sc;
@@ -112,6 +112,14 @@ function customer_in($txt)
   return $sc;
 }
 
+
+function customer_name($code)
+{
+  $ci =& get_instance();
+  $ci->load->model('masters/customers_model');
+
+  return $ci->customers_model->get_name($code);
+}
 
 
  ?>

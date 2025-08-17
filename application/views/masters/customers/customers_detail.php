@@ -8,62 +8,95 @@
 	</div>
 </div><!-- End Row -->
 <hr/>
-<?php
-$tab1 = $tab == 'infoTab' ? 'active in' : '';
-$tab2 = $tab == 'billTab' ? 'active in' : '';
-$tab3 = $tab == 'shipTab' ? 'active in' : '';
-?>
-<style>
-@media (min-width: 768px){
-	#content-block {
-		 border-left:solid 1px #ccc;
-	}
-}
-</style>
 <div class="row">
-<div class="col-lg-1-harf col-md-2 col-sm-2 padding-5 padding-top-15 hidden-xs">
-	<ul id="myTab1" class="setting-tabs width-100" style="margin-left:0px;">
-	  <li class="li-block <?php echo $tab1; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'infoTab')" >
-			<a href="#infoTab" data-toggle="tab" style="text-decoration:none;">ข้อมูลลูกค้า</a>
-		</li>
-		<li class="li-block <?php echo $tab2; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'billTab')" >
-			<a href="#billTab" data-toggle="tab" style="text-decoration:none;">ที่อยู่เปิดบิล</a>
-		</li>
-		<li class="li-block <?php echo $tab3; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'shipTab')" >
-			<a href="#shipTab" data-toggle="tab" style="text-decoration:none;" >ที่อยู่จัดส่ง</a>
-		</li>
-	</ul>
-</div>
+	<div class="form-horizontal">
+		<div class="form-group margin-top-30">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">UUID</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" id="uuid" class="width-100" maxlength="150" value="<?php echo $ds->uuid; ?>" placeholder="No value" readonly  />
+			</div>
+		</div>
 
-<div class="col-xs-12 padding-5 visible-xs">
-	<ul id="myTab2" class="setting-tabs width-100" style="margin-left:0px;">
-	  <li class="li-block inline border-1 <?php echo $tab1; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'infoTab')" >
-			<a href="#infoTab" data-toggle="tab" style="text-decoration:none;">ข้อมูลลูกค้า</a>
-		</li>
-		<li class="li-block inline border-1 <?php echo $tab2; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'billTab')" >
-			<a href="#billTab" data-toggle="tab" style="text-decoration:none;">ที่อยู่เปิดบิล</a>
-		</li>
-		<li class="li-block inline border-1 <?php echo $tab3; ?>" onclick="changeURL('<?php echo $ds->id; ?>', 'view_detail', 'shipTab')" >
-			<a href="#shipTab" data-toggle="tab" style="text-decoration:none;" >ที่อยู่จัดส่ง</a>
-		</li>
-	</ul>
-</div>
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Code</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" name="code" id="code" class="width-100 e" maxlength="15" value="<?php echo $ds->code; ?>" placeholder="No value" readonly  />
+				<input type="hidden" id="id" value="<?php echo $ds->id; ?>" />
+			</div>
+		</div>
 
-<div class="divider visible-xs" style="margin-bottom:0px;"></div>
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Name</label>
+			<div class="col-lg-4 col-md-6 col-sm-6 col-xs-12">
+				<input type="text" name="name" id="name" class="width-100 e" maxlength="100" value="<?php echo $ds->name; ?>"  placeholder="No value" readonly />
+			</div>
+		</div>
 
-<div class="col-lg-10-harf col-md-10 col-sm-10 col-xs-12 padding-5" id="content-block" style="min-height:600px; ">
-<div class="tab-content" style="border:0">
-	<div class="tab-pane fade <?php echo $tab1; ?>" id="infoTab">
-		<?php $this->load->view('masters/customers/customers_info'); ?>
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Tax ID</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" name="Tax_id" id="tax-id" class="width-100" value="<?php echo $ds->Tax_Id; ?>"  placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Group</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo parse_value_label($ds->group_code, $ds->group_name); ?>" placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Category</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo parse_value_label($ds->kind_code, $ds->kind_name); ?>" placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Grade</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo parse_value_label($ds->class_code, $ds->class_name); ?>" placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Type</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo parse_value_label($ds->type_code, $ds->type_name); ?>" placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Area</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo parse_value_label($ds->area_code, $ds->area_name); ?>" placeholder="No value" readonly />
+			</div>
+		</div>
+
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Status</label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<input type="text" class="width-100" value="<?php echo $ds->active == 1 ? 'Active' : 'Inactive'; ?>" readonly />
+			</div>
+		</div>
+
+		<div class="divider-hidden"></div>
+	<?php if($this->pm->can_edit && ! $view) : ?>
+		<div class="form-group">
+			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right"></label>
+			<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12">
+				<p class="pull-right">
+					<button type="button" class="btn btn-sm btn-success btn-100" onclick="update()">Update</button>
+				</p>
+			</div>
+			<div class="help-block col-xs-12 col-sm-reset inline">
+				&nbsp;
+			</div>
+		</div>
+	<?php endif; ?>
 	</div>
-	<div class="tab-pane fade <?php echo $tab2; ?>" id="billTab">
-		<?php $this->load->view('masters/customers/customers_bill_to'); ?>
-	</div>
-	<div class="tab-pane fade <?php echo $tab3; ?>" id="shipTab">
-		<?php $this->load->view('masters/customers/customers_ship_to'); ?>
-	</div>
-</div>
-</div><!--/ col-sm-9  -->
+
 </div><!--/ row  -->
 
 <script src="<?php echo base_url(); ?>scripts/masters/customers.js?v=<?php echo date('Ymd'); ?>"></script>

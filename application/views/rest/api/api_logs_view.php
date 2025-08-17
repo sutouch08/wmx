@@ -26,15 +26,17 @@
     <label>Type</label>
     <select class="width-100 filter" name="type" id="type">
 			<option value="all">ทั้งหมด</option>
+			<option value="INT10" <?php echo is_selected('INT10', $type);?>>INT10 | (Products Master)</option>
+			<option value="INT11" <?php echo is_selected('INT11', $type);?>>INT11 | (Price List)</option>
+			<option value="INT17" <?php echo is_selected('INT17', $type);?>>INT17 | (Adjust Stock)</option>
 			<option value="INT20" <?php echo is_selected('INT20', $type); ?>>INT20 | (Orders)</option>
 			<option value="INT21" <?php echo is_selected('INT21', $type); ?>>INT21 | (WH-Transaction) </option>
 			<option value="ADD23" <?php echo is_selected('ADD23', $type); ?>>ADD23 | (Purchase Order)</option>
 			<option value="ADD24" <?php echo is_selected('ADD24', $type); ?>>ADD24 | (Goods Receipt PO)</option>
 			<option value="ADD90" <?php echo is_selected('ADD90', $type); ?>>ADD90 | (Return Order)</option>
 			<option value="ADD91" <?php echo is_selected('ADD91', $type); ?>>ADD91 | (Return Receipt)</option>
-			<option value="INT17" <?php echo is_selected('INT17', $type);?>>INT17 | (Adjust Stock)</option>
-			<option value="INT10" <?php echo is_selected('INT10', $type);?>>INT10 | (Products Master)</option>
-			<option value="INT11" <?php echo is_selected('INT11', $type);?>>INT11 | (Price List)</option>
+			<option value="ADD122" <?php echo is_selected('ADD122', $type); ?>>ADD122 | (Customer Master)</option>
+			<option value="ADD123" <?php echo is_selected('ADD123', $type); ?>>ADD123 | (Warehouse Master)</option>	
 		</select>
   </div>
 
@@ -71,25 +73,28 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive padding-5">
-		<table class="table table-striped border-1" style="min-width:1030px;">
+		<table class="table table-striped border-1" style="min-width:1080px;">
 			<thead>
-				<tr>
+				<tr class="font-size-11">
+					<th class="fix-width-50"></th>
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-150 middle">วันที่</th>
 					<th class="fix-width-200 middle">เลขที่/รหัส</th>
 					<th class="fix-width-80 middle text-center">Type</th>
 					<th class="fix-width-80 middle text-center">Action</th>
 					<th class="fix-width-80 middle text-center">Status</th>
-					<th class="fix-width-150 middle">API Path</th>
+					<th class="fix-width-250 middle">API Path</th>
 					<th class="min-width-150 middle">Message</th>
-					<th class="fix-width-100"></th>
 				</tr>
 			</thead>
 			<tbody>
         <?php if(!empty($logs)) : ?>
           <?php $no = $this->uri->segment(5) + 1; ?>
           <?php foreach($logs as $rs) : ?>
-            <tr>
+            <tr class="font-size-11">
+							<td class="middle">
+								<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)"><i class="fa fa-eye"></i></button>
+							</td>
               <td class="middle text-center"><?php echo $no; ?></td>
               <td class="middle"><?php echo thai_date($rs->date_upd, TRUE, '/'); ?></td>
               <td class="middle"><?php echo $rs->code; ?></td>
@@ -98,9 +103,6 @@
               <td class="middle text-center"><?php echo $rs->status; ?></td>
 							<td class="middle"><?php echo $rs->api_path; ?></td>
               <td class="middle"><?php echo $rs->message; ?></td>
-							<td class="middle">
-								<button type="button" class="btn btn-xs btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)">View detail</button>
-							</td>
             </tr>
             <?php $no++; ?>
           <?php endforeach; ?>

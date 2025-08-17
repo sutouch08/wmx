@@ -28,6 +28,22 @@ class Warehouse_model extends CI_Model
   }
 
 
+  public function get_id($code)
+  {
+    $rs = $this->db
+    ->select('id')
+    ->where('code', $code)
+    ->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->id;
+    }
+
+    return NULL;
+  }
+
+
   public function get_name($code)
   {
     $rs = $this->db->where('code', $code)->get($this->tb);
@@ -57,6 +73,17 @@ class Warehouse_model extends CI_Model
     {
       $this->db->where('code', $code);
       return $this->db->update($this->tb, $ds);
+    }
+
+    return FALSE;
+  }
+
+
+  public function update_by_id($id, array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->where('id', $id)->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -304,6 +331,23 @@ class Warehouse_model extends CI_Model
   }
 
 
+  public function get_transform_warehouse_list()
+  {
+    $rs = $this->db
+    ->where('role', 7)
+    ->where('active', 1)
+    ->order_by('position', 'ASC')
+    ->get('warehouse');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
   //---- เอาเฉพาะคลังฝากขายแท้
   public function get_consign_list()
   {
@@ -350,6 +394,22 @@ class Warehouse_model extends CI_Model
 		->where_in('role', array(1, 3, 4, 5))
 		->where('active', 1)
 		->get($this->tb);
+
+		if($rs->num_rows() > 0)
+		{
+			return $rs->result();
+		}
+
+		return NULL;
+	}
+
+
+  public function get_lend_list()
+	{
+		$rs = $this->db
+		->where('role', 8)
+		->where('active', 1)
+		->get('warehouse');
 
 		if($rs->num_rows() > 0)
 		{

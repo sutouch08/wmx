@@ -53,7 +53,7 @@ else
 $header['right'] = array();
 
 $header['right']['A'] = array(
-	array('label' => 'เลขที่', 'value' => $po->code),
+	array('label' => 'เลขที่/Ref.', 'value' => $po->code." / ".$po->reference),
 	array('label' => 'วันที่', 'value' => thai_date($po->date_add, FALSE, '/')),
 	array('label' => 'ครบกำหนด', 'value' => thai_date($po->due_date, FALSE, '/')),
 	array('label' => 'ผู้สั่ง', 'value' => display_name($po->user))
@@ -65,16 +65,15 @@ $this->xprinter->add_header($header);
 
 $row = $this->xprinter->row;
 $total_page  = $this->xprinter->total_page;
-$total_qty = 0; //--  จำนวนรวม
-$total_amount= 0;  //--- มูลค่ารวม(หลังหักส่วนลด ไมีรวมภาษี
+$total_qty = 0;
+$total_open = 0;
 
 //**************  กำหนดหัวตาราง  ******************************//
 $thead	= array(
 	array("#", "width:5%; text-align:center;"),
-	array("รายละเอียด", "width:50%; text-align:center;"),
+	array("รายละเอียด", "width:60%; text-align:center;"),
 	array("จำนวน", "width:20%; text-align:right;"),
-	array("ราคา/หน่วย", "width:10%; text-align:right;"),
-	array("มูลค่า", "width:15%; text-align:right;")
+	array("ค้างรับ", "width:15%; text-align:right;")
 );
 
 $this->xprinter->add_subheader($thead);
@@ -128,17 +127,16 @@ while($total_page > 0 )
 			$data = array(
 				$n,
 				inputRow($detail),
-				number($rs->qty).(empty($rs->unit_name) ? '' : ' '.$rs->unit_name),
-				number($rs->price, 2),
-				number($rs->line_total, 2)
+				number($rs->qty, 2).(empty($rs->unit_name) ? '' : ' '.$rs->unit_name),
+				number($rs->open_qty, 2)
 			);
 
 			$total_qty += $rs->qty;
-			$total_amount += $rs->line_total;
+			$total_open += $rs->open_qty;
 		}
 		else
 		{
-			$data = array("", "", "", "","");
+			$data = array("", "", "", "");
 		}
 
 		$page .= $this->xprinter->print_row($data);
@@ -152,7 +150,7 @@ while($total_page > 0 )
 	if($this->xprinter->current_page == $this->xprinter->total_page)
 	{
 		$qty = number($total_qty, 2);
-		$net_amount = number($total_amount, 2);
+		$net_amount = number($total_open, 2);
 		$remark = $po->remark;
 	}
 	else
@@ -190,7 +188,7 @@ while($total_page > 0 )
 	$sub_net  = "";
 
 	$sub_net .= '<td class="subtotal subtotal-last-row">';
-	$sub_net .=  '<strong class="'.$this->xprinter->text_color.'">จำนวนเงินรวมทั้งสิ้น</strong>';
+	$sub_net .=  '<strong class="'.$this->xprinter->text_color.'">ค้างรับรวม</strong>';
 	$sub_net .= '</td>';
 	$sub_net .= '<td class="subtotal subtotal-last-row text-right">';
 	$sub_net .=  $net_amount;
