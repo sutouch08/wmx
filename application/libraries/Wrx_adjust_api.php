@@ -126,7 +126,7 @@ class Wrx_adjust_api
                 {
                   $docNum = NULL;
 
-                  if( ! empty($$ds->reference))
+                  if( ! empty($ds->reference))
                   {
                     $docNum = trim($ds->reference);
                   }
