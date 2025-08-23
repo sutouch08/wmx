@@ -16,7 +16,7 @@
 				<div class="col-xs-9 padding-5" style="overflow:auto;">
 					<p class="move-list-line bold">
 						<?php echo $rs->code; ?>
-						<?php echo (empty($rs->po_code) ? "" : "&nbsp;&nbsp;[PO".$rs->po_code."]"); ?>
+						<?php echo (empty($rs->po_code) ? "" : "&nbsp;&nbsp;[{$rs->po_code}]"); ?>
 					</p>
 					<p class="move-list-line bold"><?php echo $rs->vender_name; ?></p>
 					<p class="move-list-line bold">วันที่ : <?php echo thai_date($rs->date_add, FALSE,'/'); ?>&nbsp;&nbsp;Invoice : <?php echo $rs->invoice_code; ?></p>

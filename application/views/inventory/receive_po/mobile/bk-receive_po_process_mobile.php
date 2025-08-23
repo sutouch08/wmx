@@ -159,7 +159,7 @@
 						$('#receive-item-'+id).prependTo($('#incomplete-box'));
 
 						if(balance == 0) {
-							$('#receive-item-'+id).removeClass('unvalid').addClass('valid'); //.prependTo($('#complete-box'));
+							$('#receive-item-'+id).removeClass('unvalid').addClass('valid').prependTo($('#complete-box'));
 						}
 					}
 				});
@@ -231,31 +231,6 @@
 	}
 
 
-	function resetReceived(id) {
-		let buffer = parseDefault(parseFloat($('#buffer-'+id).val()), 0); //---- จำนวนรับแล้วที่ยังไม่บันทึก (buffer)
-		let received = parseDefault(parseFloat(removeCommas($('#receive-qty-'+id).val())), 0);
-		let balance = parseDefault(parseFloat(removeCommas($('#balance-'+id).val())), 0);
-		let allQty = parseDefault(parseFloat(removeCommas($('#all-qty').val())), 0);
-
-		if(received > 0) {
-			qty = received;
-			received = 0;
-			buffer = buffer - qty;
-			allQty = allQty - qty;
-			balance = balance + qty;
-
-			$('#receive-qty-'+id).val(addCommas(received));
-			$('#buffer-'+id).val(buffer);
-			$('#balance-'+id).val(addCommas(balance));
-			$('#all-qty').val(addCommas(allQty));
-
-			$('.receive-item').removeClass('heighlight');
-			$('#receive-item-'+id).removeClass('valid').addClass('unvalid').addClass('heighlight');
-			$('#receive-item-'+id).prependTo($('#incomplete-box'));
-		}
-	}
-
-
 	function saveReceived() {
 		let h = {
 			'code' : $('#code').val(),
@@ -307,38 +282,6 @@
 					showError(rs);
 				}
 			})
-		}
-	}
-
-
-	function closeReceive() {
-		let unsave = 0;
-
-		$('.buffer').each(function() {
-			let el = $(this);
-			let qty = parseDefault(parseFloat(el.val()), 0);
-
-			if(qty != 0) {
-				unsave += qty;
-			}
-		});
-
-		if(unsave > 0) {
-			swal({
-				title: 'Warning',
-				text:'พบรายการที่ยังไม่บันทึก '+unsave+' รายการ<br/>กรุณาบันทึกรายการก่อนดำเนินการต่อไป',
-				type: 'warning',
-				html:true
-			});
-
-			return false;
-		}
-
-		if($('.unvalid').length > 0) {
-			forceClose();
-		}
-		else {
-			finishReceive();
 		}
 	}
 
@@ -400,7 +343,7 @@
 
 	function forceClose() {
 		beep();
-
+		
 		swal({
 			title:'Force Close',
 			text:'สินค้าไม่ครบตามยอดส่ง ต้องการบังคับปิดเอกสารนี้หรือไม่ ?',

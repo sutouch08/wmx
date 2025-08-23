@@ -82,7 +82,7 @@ public function doc_header($pageTitle = 'print pages')
 	$header .= "	<div id='preloader' style='margin-top:-10px; height:10px; width:1%; background-color:#09F;'></div>";
 	$header .= "	<div style='width:100%;  text-align:center; margin-top:15px; font-size:12px;'><span><strong>Loading....</strong></span></div>";
 	$header .= "	</div></div></div></div></div> "; // modal fade;
-	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; width:200mm; margin-left:auto; margin-right:auto; text-align:right'>";
+	$header .= "	<div class='hidden-print' style='margin-top:10px; padding-bottom:10px; padding-right:5mm; max-width:100%; margin-left:auto; margin-right:auto; text-align:center'>";
 	$header .= "	<button class='btn btn-primary' onclick='print()'><i class='fa fa-print'></i>&nbspพิมพ์</button>";
 	$header .= "	</div><div style='width:100%'>";
 

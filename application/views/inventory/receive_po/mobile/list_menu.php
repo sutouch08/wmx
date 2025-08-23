@@ -13,7 +13,13 @@
 			</div>
 			<div class="footer-menu width-20">
 				<span class="width-100" onclick="viewProcess()">
-					<i class="fa fa-cube fa-2x white"></i><span>Process</span>
+					<i class="fa fa-cube fa-2x white"></i><span>Pending</span>
+				</span>
+			</div>
+
+			<div class="footer-menu width-20">
+				<span class="width-100" onclick="viewProcess()">
+					<i class="fa fa-cube fa-2x white"></i><span>Receiving</span>
 				</span>
 			</div>
 		</div>

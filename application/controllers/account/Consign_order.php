@@ -8,6 +8,7 @@ class Consign_order extends PS_Controller
 	public $title = 'ตัดยอดฝากขาย';
   public $filter;
   public $error = "";
+  
   public function __construct()
   {
     parent::__construct();

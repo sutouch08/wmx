@@ -42,7 +42,9 @@ li {
 }
 
 .nav-title {
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
   height: 45px;
   padding:10px 5px;
   font-size:16px;
@@ -80,9 +82,7 @@ li {
     width:100vw;
     box-shadow: #333 1px 0px 5px 1px;
     z-index: 10;
-    padding-bottom: 80px;
-    padding-right: 15px;
-    padding-left: 15px;
+    padding: 50px 15px 90px 15px;
     overflow: auto;
   }
 
@@ -139,7 +139,7 @@ li {
     margin-left: -20px;
     width: 100vw;
     max-height: 100vh;
-    padding-bottom: 80px;
+    padding: 10px 10px 80px 10px;
     overflow: auto;
     background-color: white;
     z-index: 8;
@@ -149,12 +149,14 @@ li {
     position: relative;
     height: 110px;
     padding:10px 5px;
-    border-bottom: solid 1px #ccc;
+    border: solid 1px #ccc;
+    border-radius: 10px;
+    margin-bottom: 5px;
     background-color: #white;
   }
 
   .move-list-item:first-child {
-    border-top:solid 1px #ccc;
+    /* border-top:solid 1px #ccc; */
   }
 
   .move-list-link {

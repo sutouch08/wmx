@@ -140,7 +140,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
 
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
-     <span class="form-control left-label text-right">Kind</span>
+     <span class="form-control left-label text-right">Category</span>
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <div class="btn-group width-100">
@@ -150,7 +150,7 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
    </div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block padding-right-5" id="btn-select-cust-kind" onclick="showCustomerKind()" disabled>
-       Kind <span class="badge pull-right" id="badge-kind"><?php echo $custKindNo; ?></span>
+       Category <span class="badge pull-right" id="badge-kind"><?php echo $custKindNo; ?></span>
      </button>
    </div>
    <div class="divider-hidden"></div>

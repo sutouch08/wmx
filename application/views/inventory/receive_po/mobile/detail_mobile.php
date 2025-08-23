@@ -5,7 +5,7 @@
 </div>
 
 <?php $this->load->view('inventory/receive_po/mobile/incomplete_list_mobile'); ?>
-<?php $this->load->view('inventory/receive_po/mobile/complete_list_mobile');?>
+<?php //$this->load->view('inventory/receive_po/mobile/complete_list_mobile');?>
 
 <div id="control-box">
   <div class="">

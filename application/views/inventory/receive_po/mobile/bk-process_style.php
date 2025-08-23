@@ -29,26 +29,19 @@
   .receive-table {
     margin-bottom: 0 !important;
   }
-
   .receive-table>tbody>tr>td{
     padding:0px !important;
     border:0px !important;
   }
 
   .receive-item {
-    font-size: 11px;
     padding:5px;
-    border: solid 1px #ccc;
-    border-radius: 5px;
-    margin-bottom: 5px;
+    border-bottom:solid 1px #ccc;
+    margin-bottom: 10px;
   }
 
   .receive-item.heighlight {
     background-color: #d1ffff;
-  }
-
-  .receive-item.valid {
-    background-color: #d1ffe8 !important;
   }
 
   .incomplete-box {
@@ -57,7 +50,8 @@
     left: 0;
     height: 100vh;
     width: 100vw;
-    padding: 110px 10px 200px 10px;
+    padding-top: 100px;
+    padding-bottom: 200px;
     overflow: auto;
     background-color: white;
     z-index: 6;
@@ -65,19 +59,14 @@
 
   .complete-pad {
     position: fixed;
-    top:0;
-    right: 0;
+    top:0px;
+    right: 0px;
     width: 100vw;
     height: 100vh;
     overflow: auto;
-    padding: 50px 10px 60px 10px;
+    padding-bottom: 80px;
     background-color: white;
     z-index: 101
-  }
-
-  #complete-box {
-    height: 100%;
-    overflow: auto;
   }
 
   .goback {
@@ -222,21 +211,6 @@
     background-color: transparent !important;
     color:white !important;
     font-size:24px !important;
-  }
-
-  .option-right {
-    position: absolute;
-    top: 10px;
-    right: 0;
-  }
-
-  .btn-options {
-    width: 25px;
-    color: #858585 !important;
-    border-radius: 15px;
-    border: 0;
-    padding: 4px 5px !important;
-    background-color: transparent !important;
   }
 
   #control-box {

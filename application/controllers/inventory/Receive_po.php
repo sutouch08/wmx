@@ -205,6 +205,74 @@ class Receive_po extends PS_Controller
     }
   }
 
+  // public function process_mobile($code)
+  // {
+  //   $this->load->model('masters/products_model');
+  //   $this->load->helper('warehouse');
+  //
+  //   $doc = $this->receive_po_model->get($code);
+  //
+  //   if( ! empty($doc))
+  //   {
+  //     if($doc->status == 'O' OR $doc->status == 'R')
+  //     {
+  //       if($doc->status == 'O')
+  //       {
+  //         $this->receive_po_model->update($doc->code, ['status' => 'R', 'update_user' => $this->_user->uname]);
+  //       }
+  //
+  //       $totalQty = 0;
+  //       $totalReceive = 0;
+  //
+  //       $uncomplete = $this->receive_po_model->get_in_complete_list($code);
+  //
+  //       if(!empty($uncomplete))
+  //       {
+  //         foreach($uncomplete as $rs)
+  //         {
+  //           $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+  //           $totalQty += $rs->qty;
+  //           $totalReceive += $rs->receive_qty;
+  //         }
+  //       }
+  //
+  //       $complete = $this->receive_po_model->get_complete_list($code);
+  //
+  //       if( ! empty($complete))
+  //       {
+  //         foreach($complete as $rs)
+  //         {
+  //           $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+  //           $totalQty += $rs->qty;
+  //           $totalReceive += $rs->receive_qty;
+  //         }
+  //       }
+  //
+  //       $ds = array(
+  //         'title' => $doc->code . "  [{$doc->po_code}]"  . "<br/>".$doc->vender_name,
+  //         'doc' => $doc,
+  //         'uncomplete' => $uncomplete,
+  //         'complete' => $complete,
+  //         'allQty' => $totalQty,
+  //         'totalReceive' => $totalReceive,
+  //         'finished' => empty($uncomplete) ? TRUE : FALSE,
+  //         'allow_over_po' => getConfig('ALLOW_RECEIVE_OVER_PO'),
+  //         'zone' => empty($doc->zone_code) ? NULL : $this->zone_model->get($doc->zone_code)
+  //       );
+  //
+  //       $this->load->view('inventory/receive_po/mobile/receive_po_process_mobile', $ds);
+  //     }
+  //     else
+  //     {
+  //       redirect($this->home . '/view_detail/' . $code);
+  //     }
+  //   }
+  //   else
+  //   {
+  //     $this->page_error();
+  //   }
+  // }
+
 
   //---- save receive transection while doing receive
   public function save_receive_rows()
