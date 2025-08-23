@@ -3,7 +3,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Product_class extends PS_Controller
 {
-  public $menu_code = 'DBPDCL';
+  public $menu_code = 'DBPDCC';
 	public $menu_group_code = 'DB';
   public $menu_sub_group_code = 'PRODUCT';
 	public $title = 'Product Class';

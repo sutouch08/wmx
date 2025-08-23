@@ -147,7 +147,7 @@ class Product_kind_model extends CI_Model
 
   public function count_members($code)
   {
-    $count = $this->db->where('group_code', $code)->count_all_results('products');
+    $count = $this->db->where('kind_code', $code)->count_all_results('products');
     return $count;
   }
 
