@@ -96,7 +96,7 @@
 							<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>สถานะ : </b><?php echo $rs->state_name; ?></div>
 							<div class="listing width-50 margin-top-15 text-right">
 								<?php if($this->pm->can_delete) : ?>
-									<button type="button" class="btn btn-minier btn-danger"
+									<button type="button" class="btn btn-minier btn-danger" style="position:absolute; top:10px; right:10px; border-radius:50%;"
 									onclick="deleteBuffer(<?php echo $rs->id;?>, '<?php echo $rs->order_code; ?>', '<?php echo $rs->product_code; ?>')">
 										<i class="fa fa-trash"></i>
 									</button>

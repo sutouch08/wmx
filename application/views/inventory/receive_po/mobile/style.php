@@ -33,6 +33,10 @@ li {
 	color:white;
 }
 
+.footer-menu.active span {
+  color:#0D47A1;
+}
+
 .table-process {
   min-width:1240px;
 }
@@ -56,8 +60,15 @@ li {
 }
 
 @media (max-width:767px) {
-  .fi {
+  .header-info-row {
+    border:solid 1px #ccc;
+    border-radius: 5px;
+    padding:5px;
     margin-bottom: 10px;
+  }
+
+  .fi {
+    margin-bottom: 20px;
   }
 
   .help-block {
@@ -68,6 +79,22 @@ li {
   .tab-content {
     margin-top:-30px;
   }
+
+  .input-group > span.input-group-addon {
+    border-top-left-radius: 5px !important;
+    border-bottom-left-radius: 5px !important;
+  }
+
+  .input-group > input.form-control {
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+  }
+
+  .input-group > select.form-control {
+    border-top-right-radius: 5px !important;
+    border-bottom-right-radius: 5px !important;
+  }
+
 
   #fromDate, #toDate {
     z-index: 11;
@@ -82,7 +109,7 @@ li {
     width:100vw;
     box-shadow: #333 1px 0px 5px 1px;
     z-index: 10;
-    padding: 50px 15px 90px 15px;
+    padding: 50px 15px 100px 15px;
     overflow: auto;
   }
 

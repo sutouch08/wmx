@@ -1,22 +1,21 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Return_order extends PS_Controller
+class Receive_product extends PS_Controller
 {
-  public $menu_code = 'ICRTOR';
+  public $menu_code = 'ICREPD';
 	public $menu_group_code = 'IC';
-  public $menu_sub_group_code = 'RETURN';
-	public $title = 'คืนสินค้า(ลดหนี้ขาย)';
+  public $menu_sub_group_code = 'RECEIVE';
+	public $title = 'รับสินค้าเข้า';
   public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
-    $this->home = base_url().'inventory/return_order';
-    $this->load->model('inventory/return_order_model');
+    $this->home = base_url().'inventory/receive_product';
+    $this->load->model('inventory/receive_product_model');
     $this->load->model('masters/warehouse_model');
     $this->load->model('masters/zone_model');
-    $this->load->model('masters/customers_model');
     $this->load->model('masters/products_model');
     $this->load->helper('warehouse');
   }
@@ -24,15 +23,13 @@ class Return_order extends PS_Controller
   public function index()
   {
     $filter = array(
-      'code' => get_filter('code', 'sm_code', ''),
-      'reference' => get_filter('reference', 'sm_reference', ''),
-      'order_code' => get_filter('order_code', 'sm_order_code', ''),
-      'customer_code' => get_filter('customer_code', 'sm_customer_code', ''),
-      'from_date' => get_filter('from_date', 'sm_from_date', ''),
-      'to_date' => get_filter('to_date', 'sm_to_date', ''),
-      'status' => get_filter('status', 'sm_status', 'all'),
-      'warehouse' => get_filter('warehouse', 'sm_warehouse', 'all'),
-      'zone' => get_filter('zone', 'sm_zone', '')
+      'code' => get_filter('code', 'rp_code', ''),
+      'reference' => get_filter('reference', 'rp_reference', ''),
+      'from_date' => get_filter('from_date', 'rp_from_date', ''),
+      'to_date' => get_filter('to_date', 'rp_to_date', ''),
+      'status' => get_filter('status', 'rp_status', 'all'),
+      'warehouse' => get_filter('warehouse', 'rp_warehouse', 'all'),
+      'zone' => get_filter('zone', 'rp_zone', '')
     );
 
     if($this->input->post('search'))
@@ -44,12 +41,12 @@ class Return_order extends PS_Controller
       //--- แสดงผลกี่รายการต่อหน้า
       $perpage = get_rows();
 
-      $rows = $this->return_order_model->count_rows($filter);
+      $rows = $this->receive_product_model->count_rows($filter);
       $init	= pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
 
-      $filter['docs'] = $this->return_order_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+      $filter['docs'] = $this->receive_product_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
       $this->pagination->initialize($init);
-      $this->load->view('inventory/return_order/return_order_list', $filter);
+      $this->load->view('inventory/receive_product/receive_product_list', $filter);
     }
   }
 
@@ -61,7 +58,7 @@ class Return_order extends PS_Controller
 
     if( ! empty($ds))
     {
-      $doc = $this->return_order_model->get($ds->code);
+      $doc = $this->receive_product_model->get($ds->code);
 
       if( ! empty($doc))
       {
@@ -94,7 +91,7 @@ class Return_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            if( ! $this->return_order_model->update($ds->code, $arr))
+            if( ! $this->receive_product_model->update($ds->code, $arr))
             {
               $sc = FALSE;
               $this->error = "Failed to update document header";
@@ -111,7 +108,7 @@ class Return_order extends PS_Controller
               {
                 if($sc === FALSE) { break; }
 
-                if( ! $this->return_order_model->update_detail($row->id, ['receive_qty' => $row->qty]))
+                if( ! $this->receive_product_model->update_detail($row->id, ['receive_qty' => $row->qty]))
                 {
                   $sc = FALSE;
                   $this->error = "Failed to update row";
@@ -137,7 +134,7 @@ class Return_order extends PS_Controller
               'user' => $this->_user->uname
             );
 
-            $this->return_order_model->add_logs($logs);
+            $this->receive_product_model->add_logs($logs);
           }
         }
         else
@@ -169,7 +166,7 @@ class Return_order extends PS_Controller
 
     if( ! empty($ds))
     {
-      $doc = $this->return_order_model->get($ds->code);
+      $doc = $this->receive_product_model->get($ds->code);
 
       if( ! empty($doc))
       {
@@ -205,7 +202,7 @@ class Return_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            if( ! $this->return_order_model->update($ds->code, $arr))
+            if( ! $this->receive_product_model->update($ds->code, $arr))
             {
               $sc = FALSE;
               $this->error = "Failed to update document header";
@@ -223,7 +220,7 @@ class Return_order extends PS_Controller
               {
                 if($sc === FALSE) { break; }
 
-                $detail = $this->return_order_model->get_detail($row->id);
+                $detail = $this->receive_product_model->get_detail($row->id);
 
                 if( ! empty($detail))
                 {
@@ -234,7 +231,7 @@ class Return_order extends PS_Controller
                       'line_status' => 'C'
                     );
 
-                    if( ! $this->return_order_model->update_detail($row->id, $arr))
+                    if( ! $this->receive_product_model->update_detail($row->id, $arr))
                     {
                       $sc = FALSE;
                       $this->error = "Failed to update row";
@@ -293,7 +290,7 @@ class Return_order extends PS_Controller
               'user' => $this->_user->uname
             );
 
-            $this->return_order_model->add_logs($logs);
+            $this->receive_product_model->add_logs($logs);
           }
           else
           {
@@ -316,7 +313,7 @@ class Return_order extends PS_Controller
                   'export_error' => $this->error
                 );
 
-                $this->return_order_model->update($doc->code, $arr);
+                $this->receive_product_model->update($doc->code, $arr);
               }
               else
               {
@@ -325,7 +322,7 @@ class Return_order extends PS_Controller
                   'export_error' => NULL
                 );
 
-                $this->return_order_model->update($doc->code, $arr);
+                $this->receive_product_model->update($doc->code, $arr);
               }
             }
           }
@@ -356,11 +353,11 @@ class Return_order extends PS_Controller
   {
     $this->load->helper('discount');
 
-    $doc = $this->return_order_model->get($code);
+    $doc = $this->receive_product_model->get($code);
 
     if( ! empty($doc))
     {
-      $details = $this->return_order_model->get_details($code);
+      $details = $this->receive_product_model->get_details($code);
       $barcode_list = array();
 
       if( ! empty($details))
@@ -396,7 +393,7 @@ class Return_order extends PS_Controller
           'status' => 'O'
         );
 
-        if($this->return_order_model->update($doc->code, $arr))
+        if($this->receive_product_model->update($doc->code, $arr))
         {
           $doc->status = 'O';
 
@@ -406,17 +403,17 @@ class Return_order extends PS_Controller
             'user' => $this->_user->uname
           );
 
-          $this->return_order_model->add_logs($logs);
+          $this->receive_product_model->add_logs($logs);
         }
       }
 
       if($doc->status == 'P' OR $doc->status == 'O')
       {
-        $this->load->view('inventory/return_order/return_order_process', $ds);
+        $this->load->view('inventory/receive_product/receive_product_process', $ds);
       }
       else
       {
-        $this->load->view('inventory/return_order/return_order_view_detail', $ds);
+        $this->load->view('inventory/receive_product/receive_product_view_detail', $ds);
       }
     }
     else
@@ -428,14 +425,14 @@ class Return_order extends PS_Controller
 
   public function view_detail($code)
   {
-    $doc = $this->return_order_model->get($code);
-    $details = $this->return_order_model->get_details($code);
+    $doc = $this->receive_product_model->get($code);
+    $details = $this->receive_product_model->get_details($code);
     $ds = array(
       'doc' => $doc,
       'details' => $details
     );
 
-    $this->load->view('inventory/return_order/return_order_view_detail', $ds);
+    $this->load->view('inventory/receive_product/receive_product_view_detail', $ds);
   }
 
 
@@ -451,7 +448,7 @@ class Return_order extends PS_Controller
       {
         if(is_true(getConfig('WRX_RETURN_INTERFACE')))
         {
-          $doc = $this->return_order_model->get($code);
+          $doc = $this->receive_product_model->get($code);
 
           if( ! empty($doc))
           {
@@ -471,7 +468,7 @@ class Return_order extends PS_Controller
                     'export_error' =>  $this->error
                   );
 
-                  $this->return_order_model->update($code, $arr);
+                  $this->receive_product_model->update($code, $arr);
                 }
               }
               else
@@ -483,7 +480,7 @@ class Return_order extends PS_Controller
                     'export_error' => NULL
                   );
 
-                  $this->return_order_model->update($code, $arr);
+                  $this->receive_product_model->update($code, $arr);
                 }
               }
             }
@@ -566,11 +563,10 @@ class Return_order extends PS_Controller
   public function print_detail($code)
   {
     $this->load->library('printer');
-    $doc = $this->return_order_model->get($code);
-    $doc->customer_name = $this->customers_model->get_name($doc->customer_code);
+    $doc = $this->receive_product_model->get($code);
     $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
     $doc->zone_name = $this->zone_model->get_name($doc->zone_code);
-    $details = $this->return_order_model->get_details($code);
+    $details = $this->receive_product_model->get_details($code);
 
     if( ! empty($details))
     {
@@ -584,11 +580,11 @@ class Return_order extends PS_Controller
       'details' => $details
     );
 
-    $this->load->view('print/print_return', $ds);
+    $this->load->view('print/print_receive', $ds);
   }
 
 
-  public function cancle_return()
+  public function cancle_receive()
   {
     $sc = TRUE;
     $code = $this->input->post('code');
@@ -596,7 +592,7 @@ class Return_order extends PS_Controller
 
     if($this->pm->can_delete)
     {
-			$doc = $this->return_order_model->get($code);
+			$doc = $this->receive_product_model->get($code);
 
 			if( ! empty($doc))
 			{
@@ -605,7 +601,7 @@ class Return_order extends PS_Controller
           $this->load->model('stock/stock_model');
           $this->load->model('inventory/movement_model');
 
-          $details = $this->return_order_model->get_details($code);
+          $details = $this->receive_product_model->get_details($code);
 
           if( ! empty($details))
           {
@@ -653,7 +649,7 @@ class Return_order extends PS_Controller
             if($sc === TRUE)
             {
               //--- set details to cancle
-              if( ! $this->return_order_model->update_details($code, array('is_cancle' => 1)))
+              if( ! $this->receive_product_model->update_details($code, array('is_cancle' => 1)))
               {
                 $sc = FALSE;
                 $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ";
@@ -672,7 +668,7 @@ class Return_order extends PS_Controller
                 'cancle_user' => $this->_user->uname
               );
 
-              if( ! $this->return_order_model->update($doc->code, $arr))
+              if( ! $this->receive_product_model->update($doc->code, $arr))
               {
                 $sc = FALSE;
                 $this->error = "Failed to update document status";
@@ -729,10 +725,11 @@ class Return_order extends PS_Controller
     $date = $date == '' ? date('Y-m-d') : $date;
     $Y = date('y', strtotime($date));
     $M = date('m', strtotime($date));
-    $prefix = getConfig('PREFIX_RETURN_ORDER');
-    $run_digit = getConfig('RUN_DIGIT_RETURN_ORDER');
+    $prefix = getConfig('PREFIX_RECEIVE_PRODUCT');
+    $run_digit = getConfig('RUN_DIGIT_RECEIVE_PRODUCT');
     $pre = $prefix .'-'.$Y.$M;
-    $code = $this->return_order_model->get_max_code($pre);
+    $code = $this->receive_product_model->get_max_code($pre);
+
     if(! is_null($code))
     {
       $run_no = mb_substr($code, ($run_digit*-1), NULL, 'UTF-8') + 1;
@@ -750,16 +747,16 @@ class Return_order extends PS_Controller
   public function clear_filter()
   {
     $filter = array(
-      'sm_code',
-      'sm_reference',
-      'sm_customer_code',
-      'sm_from_date',
-      'sm_to_date',
-      'sm_status',
-			'sm_warehouse',
-      'sm_zone'
+      'rp_code',
+      'rp_reference',
+      'rp_from_date',
+      'rp_to_date',
+      'rp_status',
+			'rp_warehouse',
+      'rp_zone'
     );
-    clear_filter($filter);
+
+    return clear_filter($filter);
   }
 } //--- end class
 ?>

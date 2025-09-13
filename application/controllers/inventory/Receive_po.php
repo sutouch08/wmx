@@ -22,6 +22,7 @@ class Receive_po extends PS_Controller
     $this->load->model('stock/stock_model');
     $this->load->model('masters/zone_model');
     $this->load->model('masters/warehouse_model');
+    $this->load->helper('warehouse');
     $this->load->helper('receive_po');
     $this->load->library('user_agent');
     $this->is_mobile = $this->agent->is_mobile();
@@ -30,9 +31,6 @@ class Receive_po extends PS_Controller
 
   public function index()
   {
-    $this->load->helper('channels');
-    $this->load->helper('warehouse');
-
     $filter = array(
       'code' => get_filter('code', 'receive_code', ''),
       'invoice' => get_filter('invoice', 'receive_invoice', ''),
@@ -42,12 +40,14 @@ class Receive_po extends PS_Controller
       'from_date' => get_filter('from_date', 'receive_from_date', ''),
       'to_date' => get_filter('to_date', 'receive_to_date', ''),
       'warehouse' => get_filter('warehouse', 'receive_warehouse', 'all'),
-      'status' => get_filter('status', 'receive_status', 'all'),
-      'is_mobile' => $this->is_mobile ? TRUE : FALSE
+      'status' => get_filter('status', 'receive_status', 'all')
     );
 
-
-    if($this->input->post('search'))
+    if($this->is_mobile)
+    {
+      redirect($this->home ."/pending_list");
+    }
+    else if($this->input->post('search'))
     {
       redirect($this->home);
     }
@@ -71,18 +71,126 @@ class Receive_po extends PS_Controller
       }
 
       $filter['document'] = $document;
-
       $this->pagination->initialize($init);
+      $this->load->view('inventory/receive_po/receive_po_list', $filter);
+    }
+  }
 
-      if($this->is_mobile)
+
+  public function all_list()
+  {
+    $filter = array(
+      'code' => get_filter('code', 'receive_code', ''),
+      'invoice' => get_filter('invoice', 'receive_invoice', ''),
+      'po' => get_filter('po', 'receive_po', ''),
+      'vender' => get_filter('vender', 'receive_vender', ''),
+      'user' => 'all',
+      'from_date' => get_filter('from_date', 'receive_from_date', ''),
+      'to_date' => get_filter('to_date', 'receive_to_date', ''),
+      'warehouse' => get_filter('warehouse', 'receive_warehouse', 'all'),
+      'status' => get_filter('status', 'receive_status', 'all')
+    );
+
+    //--- แสดงผลกี่รายการต่อหน้า
+    $perpage = get_rows();
+
+    $segment  = 4; //-- url segment
+    $rows = $this->receive_po_model->count_rows($filter);
+    $init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+    $document = $this->receive_po_model->get_list($filter, $perpage, $this->uri->segment($segment));
+
+    if(!empty($document))
+    {
+      foreach($document as $rs)
       {
-        $this->load->view('inventory/receive_po/mobile/receive_po_list_mobile', $filter);
-      }
-      else
-      {
-        $this->load->view('inventory/receive_po/receive_po_list', $filter);
+        $rs->qty = $this->receive_po_model->get_sum_qty($rs->code);
       }
     }
+
+    $filter['document'] = $document;
+
+    $this->pagination->initialize($init);
+
+    $filter['tab'] = 'all';
+    $this->load->view('inventory/receive_po/mobile/receive_po_list_mobile', $filter);
+  }
+
+
+  public function pending_list()
+  {
+    $filter = array(
+      'code' => get_filter('code', 'receive_code', ''),
+      'invoice' => get_filter('invoice', 'receive_invoice', ''),
+      'po' => get_filter('po', 'receive_po', ''),
+      'vender' => get_filter('vender', 'receive_vender', ''),
+      'user' => 'all',
+      'from_date' => get_filter('from_date', 'receive_from_date', ''),
+      'to_date' => get_filter('to_date', 'receive_to_date', ''),
+      'warehouse' => get_filter('warehouse', 'receive_warehouse', 'all'),
+      'status' => 'O'
+    );
+
+    //--- แสดงผลกี่รายการต่อหน้า
+    $perpage = get_rows();
+
+    $segment  = 4; //-- url segment
+    $rows = $this->receive_po_model->count_rows($filter);
+    $init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+    $document = $this->receive_po_model->get_list($filter, $perpage, $this->uri->segment($segment));
+
+    if(!empty($document))
+    {
+      foreach($document as $rs)
+      {
+        $rs->qty = $this->receive_po_model->get_sum_qty($rs->code);
+      }
+    }
+
+    $filter['document'] = $document;
+
+    $this->pagination->initialize($init);
+
+    $filter['tab'] = 'pending';
+    $this->load->view('inventory/receive_po/mobile/receive_po_list_mobile', $filter);
+  }
+
+
+  public function process_list()
+  {
+    $filter = array(
+      'code' => get_filter('code', 'receive_code', ''),
+      'invoice' => get_filter('invoice', 'receive_invoice', ''),
+      'po' => get_filter('po', 'receive_po', ''),
+      'vender' => get_filter('vender', 'receive_vender', ''),
+      'user' => 'all',
+      'from_date' => get_filter('from_date', 'receive_from_date', ''),
+      'to_date' => get_filter('to_date', 'receive_to_date', ''),
+      'warehouse' => get_filter('warehouse', 'receive_warehouse', 'all'),
+      'status' => 'R'
+    );
+
+    //--- แสดงผลกี่รายการต่อหน้า
+    $perpage = get_rows();
+
+    $segment  = 4; //-- url segment
+    $rows = $this->receive_po_model->count_rows($filter);
+    $init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+    $document = $this->receive_po_model->get_list($filter, $perpage, $this->uri->segment($segment));
+
+    if(!empty($document))
+    {
+      foreach($document as $rs)
+      {
+        $rs->qty = $this->receive_po_model->get_sum_qty($rs->code);
+      }
+    }
+
+    $filter['document'] = $document;
+
+    $this->pagination->initialize($init);
+
+    $filter['tab'] = 'process';
+    $this->load->view('inventory/receive_po/mobile/receive_po_list_mobile', $filter);
   }
 
 
@@ -181,6 +289,7 @@ class Receive_po extends PS_Controller
         }
 
         $ds = array(
+          'tab' => 'process',
           'title' => $doc->code . "  [{$doc->po_code}]"  . "<br/>".$doc->vender_name,
           'doc' => $doc,
           'uncomplete' => $uncomplete,
@@ -204,74 +313,6 @@ class Receive_po extends PS_Controller
       $this->page_error();
     }
   }
-
-  // public function process_mobile($code)
-  // {
-  //   $this->load->model('masters/products_model');
-  //   $this->load->helper('warehouse');
-  //
-  //   $doc = $this->receive_po_model->get($code);
-  //
-  //   if( ! empty($doc))
-  //   {
-  //     if($doc->status == 'O' OR $doc->status == 'R')
-  //     {
-  //       if($doc->status == 'O')
-  //       {
-  //         $this->receive_po_model->update($doc->code, ['status' => 'R', 'update_user' => $this->_user->uname]);
-  //       }
-  //
-  //       $totalQty = 0;
-  //       $totalReceive = 0;
-  //
-  //       $uncomplete = $this->receive_po_model->get_in_complete_list($code);
-  //
-  //       if(!empty($uncomplete))
-  //       {
-  //         foreach($uncomplete as $rs)
-  //         {
-  //           $rs->barcode = $this->products_model->get_barcode($rs->product_code);
-  //           $totalQty += $rs->qty;
-  //           $totalReceive += $rs->receive_qty;
-  //         }
-  //       }
-  //
-  //       $complete = $this->receive_po_model->get_complete_list($code);
-  //
-  //       if( ! empty($complete))
-  //       {
-  //         foreach($complete as $rs)
-  //         {
-  //           $rs->barcode = $this->products_model->get_barcode($rs->product_code);
-  //           $totalQty += $rs->qty;
-  //           $totalReceive += $rs->receive_qty;
-  //         }
-  //       }
-  //
-  //       $ds = array(
-  //         'title' => $doc->code . "  [{$doc->po_code}]"  . "<br/>".$doc->vender_name,
-  //         'doc' => $doc,
-  //         'uncomplete' => $uncomplete,
-  //         'complete' => $complete,
-  //         'allQty' => $totalQty,
-  //         'totalReceive' => $totalReceive,
-  //         'finished' => empty($uncomplete) ? TRUE : FALSE,
-  //         'allow_over_po' => getConfig('ALLOW_RECEIVE_OVER_PO'),
-  //         'zone' => empty($doc->zone_code) ? NULL : $this->zone_model->get($doc->zone_code)
-  //       );
-  //
-  //       $this->load->view('inventory/receive_po/mobile/receive_po_process_mobile', $ds);
-  //     }
-  //     else
-  //     {
-  //       redirect($this->home . '/view_detail/' . $code);
-  //     }
-  //   }
-  //   else
-  //   {
-  //     $this->page_error();
-  //   }
-  // }
 
 
   //---- save receive transection while doing receive
@@ -593,7 +634,7 @@ class Receive_po extends PS_Controller
 
       if( ! empty($doc))
       {
-        if($doc->status == 'O')
+        if($doc->status == 'O' OR $doc->status == 'R')
         {
           $movement_date = getConfig('ORDER_SOLD_DATE') == 'D' ? db_date($doc->date_add, TRUE) : now();
 
@@ -612,13 +653,9 @@ class Receive_po extends PS_Controller
 
               if( ! empty($row))
               {
-                $amount = $row->price * $rs->receive_qty;
-                $valid = $row->qty <= $rs->receive_qty ? 1 : 0;
-
                 $arr = array(
                   'receive_qty' => $rs->receive_qty,
-                  'amount' => $amount,
-                  'valid' => $valid,
+                  'valid' => $row->qty <= $rs->receive_qty ? 1 : 0,
                   'line_status' => 'C'
                 );
 
@@ -735,7 +772,7 @@ class Receive_po extends PS_Controller
             {
               $this->load->library('wrx_ib_api');
 
-              if( ! $this->wrx_ib_api->export_receive($doc->code))
+              if( ! $this->wrx_ib_api->export_receive_po($doc->code))
               {
                 $sc = FALSE;
                 $ex = 1;
@@ -789,7 +826,7 @@ class Receive_po extends PS_Controller
           {
             $this->load->library('wrx_ib_api');
 
-            if( ! $this->wrx_ib_api->export_receive($doc->code))
+            if( ! $this->wrx_ib_api->export_receive_po($doc->code))
             {
               $sc = FALSE;
               $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
@@ -822,7 +859,7 @@ class Receive_po extends PS_Controller
   {
     $doc = $this->receive_po_model->get($code);
 
-    if(!empty($doc))
+    if( ! empty($doc))
     {
       $doc->zone_name = $this->zone_model->get_name($doc->zone_code);
       $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
@@ -834,6 +871,64 @@ class Receive_po extends PS_Controller
     );
 
     $this->load->view('inventory/receive_po/receive_po_detail', $ds);
+  }
+
+
+  public function view_detail_mobile($code)
+  {
+    $this->load->model('masters/products_model');
+    $this->load->helper('warehouse');
+
+    $doc = $this->receive_po_model->get($code);
+
+    if( ! empty($doc))
+    {
+      $totalQty = 0;
+      $totalReceive = 0;
+
+      $uncomplete = $this->receive_po_model->get_in_complete_list($code);
+
+      if( ! empty($uncomplete))
+      {
+        foreach($uncomplete as $rs)
+        {
+          $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+          $totalQty += $rs->qty;
+          $totalReceive += $rs->receive_qty;
+        }
+      }
+
+      $complete = $this->receive_po_model->get_complete_list($code);
+
+      if( ! empty($complete))
+      {
+        foreach($complete as $rs)
+        {
+          $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+          $totalQty += $rs->qty;
+          $totalReceive += $rs->receive_qty;
+        }
+      }
+
+      $ds = array(
+        'tab' => 'view',
+        'title' => $doc->code . "  [{$doc->po_code}]"  . "<br/>".$doc->vender_name,
+        'doc' => $doc,
+        'uncomplete' => $uncomplete,
+        'complete' => $complete,
+        'allQty' => $totalQty,
+        'totalReceive' => $totalReceive,
+        'finished' => empty($uncomplete) ? TRUE : FALSE,
+        'allow_over_po' => getConfig('ALLOW_RECEIVE_OVER_PO'),
+        'zone' => empty($doc->zone_code) ? NULL : $this->zone_model->get($doc->zone_code)
+      );
+
+      $this->load->view('inventory/receive_po/mobile/receive_po_detail_mobile', $ds);
+    }
+    else
+    {
+      $this->page_error();
+    }
   }
 
 
@@ -939,7 +1034,7 @@ class Receive_po extends PS_Controller
                         $de = array(
                           'receive_code' => $ds->code,
                           'po_code' => $rs->po_code,
-                          'po_ref' => $rs->po_ref,
+                          'po_ref' => $ds->po_ref,
                           'po_detail_id' => $rs->po_detail_id,
                           'po_line_num' => $rs->po_line_num,
                           'zone_code' => $zone->code,
@@ -1047,7 +1142,7 @@ class Receive_po extends PS_Controller
                   {
                     $this->load->library('wrx_ib_api');
 
-                    if( ! $this->wrx_ib_api->export_receive($ds->code))
+                    if( ! $this->wrx_ib_api->export_receive_po($ds->code))
                     {
                       $sc = FALSE;
                       $this->error = $this->wrx_ib_api->error;
@@ -1651,15 +1746,6 @@ class Receive_po extends PS_Controller
   }
 
 
-  public function get_sell_stock($item_code, $warehouse = NULL, $zone = NULL)
-  {
-    $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse, $zone);
-    $reserv_stock = $this->orders_model->get_reserv_stock($item_code, $warehouse, $zone);
-    $availableStock = $sell_stock - $reserv_stock;
-    return $availableStock < 0 ? 0 : $availableStock;
-  }
-
-
   public function get_new_code($date)
   {
     $date = $date == '' ? date('Y-m-d') : $date;
@@ -1695,12 +1781,10 @@ class Receive_po extends PS_Controller
       'receive_status',
       'receive_warehouse',
       'receive_sap',
-      'receive_user',
-      'receive_must_accept'
+      'receive_user'
     );
 
-    clear_filter($filter);
-    echo "done";
+    return clear_filter($filter);
   }
 
 } //--- end class

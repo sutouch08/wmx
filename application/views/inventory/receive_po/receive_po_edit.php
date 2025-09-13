@@ -164,6 +164,8 @@
 						data-backlogs="<?php echo $rs->backlogs; ?>"
 						data-basecode="<?php echo $rs->po_code; ?>"
 						data-baseline="<?php echo $rs->po_detail_id; ?>"
+						data-polinenum="<?php echo $rs->po_line_num; ?>"
+						data-poref="<?php echo $rs->po_ref; ?>"
 						data-code="<?php echo $rs->product_code; ?>"
 						data-name="<?php echo $rs->product_name; ?>"
 						data-unit="<?php echo $rs->unit; ?>"

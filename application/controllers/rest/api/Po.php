@@ -154,6 +154,14 @@ class Po extends REST_Controller
           }
           else
           {
+            $item = $this->products_model->get($rs->sku);
+
+            if(empty($item))
+            {
+              $sc = FALSE;
+              $this->error = "Invalid SKU {$rs->sku}";
+            }
+
             if( ! isset($lineNum[$rs->line_num]))
             {
               $lineNum[$rs->line_num] = $rs->line_num;

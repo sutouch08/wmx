@@ -63,6 +63,18 @@
     z-index: 6;
   }
 
+  .receive-box {
+    position: fixed;
+    top:0;
+    left: 0;
+    height: 100vh;
+    width: 100vw;
+    padding: 110px 10px 100px 10px;
+    overflow: auto;
+    background-color: white;
+    z-index: 6;
+  }
+
   .complete-pad {
     position: fixed;
     top:0;

@@ -158,19 +158,39 @@ function finish(h) {
 					'data' : JSON.stringify(h)
 				},
 				success:function(rs) {
+					click = 0;
 					load_out();
 
-					if(rs.trim() === 'success') {
-						swal({
-							title:'Success',
-							text:'บันทึกรายการเรียบร้อยแล้ว',
-							type:'success',
-							timer:1000
-						});
+					if(isJson(rs)) {
+						let ds = JSON.parse(rs);
 
-						setTimeout(function() {
-							viewDetail(h.code);
-						}, 1200);
+						if(ds.status === 'success') {
+							if(ds.ex == 0) {
+								swal({
+									title:'Success',
+									text:'บันทึกรายการเรียบร้อยแล้ว',
+									type:'success',
+									timer:1000
+								});
+
+								setTimeout(function() {
+									viewDetail(h.code);
+								}, 1200);
+							}
+							else {
+								swal({
+									title:'Info',
+									text:ds.message,
+									type:'info',
+								}, function() {
+									viewDetail(h.code);
+								});
+							}
+						}
+						else {
+							beep();
+							showError(ds.message);
+						}
 					}
 					else {
 						beep();
@@ -178,6 +198,7 @@ function finish(h) {
 					}
 				},
 				error:function(rs) {
+					click = 0;
 					beep();
 					showError(rs);
 				}
@@ -185,6 +206,7 @@ function finish(h) {
 		}, 100);
 	}
 	else {
+		click = 0;
 		beep();
 		showError('No data found');
 	}

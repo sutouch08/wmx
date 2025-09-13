@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Po extends PS_Controller
 {
   public $menu_code = 'PUPUOD';
-	public $menu_group_code = 'PU';
-  public $menu_sub_group_code = '';
+	public $menu_group_code = 'IC';
+  public $menu_sub_group_code = 'RECEIVE';
 	public $title;
   public $error;
   public $segment = 4;

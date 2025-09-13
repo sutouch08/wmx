@@ -158,8 +158,41 @@ function processMobile(code) {
 }
 
 
+function viewAll() {
+	window.location.href = HOME + 'all_list';
+}
+
+
+function viewPending() {
+	window.location.href = HOME + 'pending_list';
+}
+
+function viewProcess() {
+	window.location.href = HOME + 'process_list';
+}
+
+
 function viewDetail(code){
 	window.location.href = HOME + 'view_detail/'+ code;
+}
+
+
+function viewDetailMobile(code) {
+	window.location.href = HOME + 'view_detail_mobile/'+ code;
+}
+
+
+function resetFilter(tab) {
+	target = tab == 'pending' ? 'pending_list' : (tab == 'process' ? 'process_list' : 'all_list');
+
+	 $.ajax({
+		 url:HOME + 'clear_filter',
+		 type:'GET',
+		 cache:false,
+		 success:function() {
+			 window.location.href = HOME + target;
+		 }
+	 })
 }
 
 

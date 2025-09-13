@@ -1,8 +1,8 @@
 <?php
 class Receive_po_model extends CI_Model
 {
-  private $tb = "receive_product";
-  private $td = "receive_product_detail";
+  private $tb = "receive_po";
+  private $td = "receive_po_detail";
 
   public function __construct()
   {
@@ -47,7 +47,7 @@ class Receive_po_model extends CI_Model
   {
     $rs = $this->db
     ->select('re.*, po.reference')
-    ->from('receive_product AS re')
+    ->from('receive_po AS re')
     ->join('po', 're.po_code = po.code', 'left')
     ->where('re.code', $code)
     ->get();
@@ -243,16 +243,9 @@ class Receive_po_model extends CI_Model
       $this->db->where('date_add <=', to_date($ds['to_date']));
     }
 
-    if($ds['is_mobile'] === TRUE)
+    if($ds['status'] !== 'all')
     {
-      $this->db->where_in('status', ['O','R']);
-    }
-    else
-    {
-      if($ds['status'] !== 'all')
-      {
-        $this->db->where('status', $ds['statusx']);
-      }
+      $this->db->where('status', $ds['status']);
     }
 
     if(isset($ds['user']) && $ds['user'] != 'all')
@@ -309,16 +302,9 @@ class Receive_po_model extends CI_Model
       $this->db->where('date_add <=', to_date($ds['to_date']));
     }
 
-    if($ds['is_mobile'] === TRUE)
+    if($ds['status'] !== 'all')
     {
-      $this->db->where_in('status', ['O','R']);
-    }
-    else
-    {
-      if($ds['status'] !== 'all')
-      {
-        $this->db->where('status', $ds['statusx']);
-      }
+      $this->db->where('status', $ds['status']);
     }
 
     if(isset($ds['user']) && $ds['user'] != 'all')

@@ -4,8 +4,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Orders extends PS_Controller
 {
   public $menu_code = 'SOODSO';
-	public $menu_group_code = 'SO';
-  public $menu_sub_group_code = 'ORDER';
+	public $menu_group_code = 'IC';
+  public $menu_sub_group_code = 'PICKPACK';
 	public $title = 'ออเดอร์';
   public $filter;
   public $error;
@@ -2497,7 +2497,7 @@ class Orders extends PS_Controller
 
     if($sc === TRUE)
     {
-      $arr = array(        
+      $arr = array(
         'is_exported' => 0
       );
 

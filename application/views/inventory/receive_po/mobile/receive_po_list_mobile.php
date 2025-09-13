@@ -13,7 +13,7 @@
 		<?php $no = $this->uri->segment(4) + 1; ?>
 		<?php foreach($document as $rs) : ?>
 			<div class="move-list-item" style="background-color: <?php echo receive_status_color($rs->status); ?>">
-				<div class="col-xs-9 padding-5" style="overflow:auto;">
+				<div class="col-xs-9 padding-5" style="overflow:auto;" onclick="viewDetailMobile('<?php echo $rs->code; ?>')">
 					<p class="move-list-line bold">
 						<?php echo $rs->code; ?>
 						<?php echo (empty($rs->po_code) ? "" : "&nbsp;&nbsp;[{$rs->po_code}]"); ?>
@@ -60,4 +60,4 @@
 	}
 </script>
 
-<?php $this->load->view('include/footer'); ?>
+<?php $this->load->view('include/footer_mobile'); ?>
