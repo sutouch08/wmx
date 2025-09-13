@@ -5,7 +5,7 @@ class Return_order extends PS_Controller
 {
   public $menu_code = 'ICRTOR';
 	public $menu_group_code = 'IC';
-  public $menu_sub_group_code = 'RETURN';
+  public $menu_sub_group_code = 'RECEIVE';
 	public $title = 'คืนสินค้า(ลดหนี้ขาย)';
   public $segment = 4;
 
