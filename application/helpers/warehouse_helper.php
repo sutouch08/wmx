@@ -24,7 +24,7 @@ function select_warehouse($se = 0)
   $sc = '';
   $ci =& get_instance();
   $ci->load->model('masters/warehouse_model');
-  $options = $ci->warehouse_model->get_list();
+  $options = $ci->warehouse_model->get_all();
 
   if(!empty($options))
   {

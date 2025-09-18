@@ -1,15 +1,14 @@
 <?php $this->load->view('include/header'); ?>
 <div class="row">
-	<div class="col-lg-6 col-md-6 col-sm-8 col-xs-9 padding-5">
-    <h3 class="title"><?php echo $this->title; ?></h3>
-    </div>
-    <div class="col-lg-6 col-md-6 col-sm-4 col-xs-3 padding-5">
-    	<p class="pull-right top-p">
-      <?php if($this->pm->can_add) : ?>
-        <button type="button" class="btn btn-sm btn-success" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
-      <?php endif; ?>
-      </p>
-    </div>
+	<div class="col-lg-6 col-md-6 col-sm-8 col-xs-12 padding-5">
+		<h3 class="title"><?php echo $this->title; ?></h3>
+	</div>
+	<div class="col-lg-6 col-md-6 col-sm-4 col-xs-3 padding-5 text-right">
+		<button type="button" class="btn btn-white btn-purple top-btn" onclick="getTemplate()"><i class="fa fa-download"></i> Download Template</button>
+		<?php if($this->pm->can_add) : ?>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+		<?php endif; ?>
+	</div>
 </div><!-- End Row -->
 <hr/>
 <form id="searchForm" method="post" action="<?php echo current_url(); ?>">
@@ -85,8 +84,9 @@
 				<tr class="font-size-11">
 					<th class="fix-width-100"></th>
 					<th class="fix-width-40 middle text-center">#</th>
-          <th class="fix-width-100 middle">วันที่</th>
-					<th class="fix-width-100 middle">เลขที่</th>
+          <th class="fix-width-100 middle">Date</th>
+					<th class="fix-width-100 middle">Document No.</th>
+					<th class="fix-width-100 middle text-center">Reserv For</th>
 					<th class="fix-width-100 middle text-center">Start Date</th>
 					<th class="fix-width-100 middle text-center">End Date</th>
 					<th class="fix-width-100 middle text-center">Total SKU</th>
@@ -100,7 +100,8 @@
 			<?php if(!empty($data)) : ?>
 				<?php $no = $this->uri->segment(4) + 1; ?>
 				<?php foreach($data as $rs) : ?>
-					<tr class="font-size-11" id="row-<?php echo $rs->id; ?>">
+					<?php $color = $rs->status == 'A' ? 'green' : ($rs->status == 'P' ? 'blue' : ($rs->status == 'C' ? 'grey' : ($rs->status == 'R' ? 'red' : ''))); ?>
+					<tr class="font-size-11 <?php echo $color; ?>" id="row-<?php echo $rs->id; ?>">
 						<td class="">
 							<button type="button" class="btn btn-minier btn-info" onclick="viewDetail(<?php echo $rs->id; ?>)">
 								<i class="fa fa-eye"></i>
@@ -119,6 +120,7 @@
 						<td class="middle text-center no"><?php echo $no; ?></td>
             <td class="middle text-center"><?php echo thai_date($rs->date_add); ?></td>
 						<td class="middle"><?php echo $rs->code; ?></td>
+						<td class="middle text-center"><?php echo $rs->is_mkp == 1 ? 'Marketplace' : 'All'; ?></td>
 						<td class="middle text-center"><?php echo thai_date($rs->start_date); ?></td>
 						<td class="middle text-center"><?php echo thai_date($rs->end_date); ?></td>
 						<td class="middle text-center"><?php echo number($rs->totalSKU); ?></td>
@@ -139,6 +141,11 @@
 	</div>
 </div>
 
+<script>
+	function getTemplate() {
+		window.location.href = BASE_URL + 'orders/reserv_stock/get_template_file';
+	}
+</script>
 <script src="<?php echo base_url(); ?>scripts/reserv_stock/reserv_stock.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

@@ -40,7 +40,11 @@
 		<label>Return Ref.</label>
 		<input type="text" class="form-control input-sm text-center edit" id="reference" value="<?php echo $doc->reference; ?>" disabled />
 	</div>
-  <div class="col-lg-8 col-md-7-harf col-sm-6-harf col-xs-12 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-2 col-xs-4 padding-5">
+		<label>From Whs</label>
+		<input type="text" class="form-control input-sm text-center edit" id="from-warehouse" value="<?php echo $doc->from_warehouse; ?>" disabled />
+	</div>
+  <div class="col-lg-6-harf col-md-6 col-sm-4-harf col-xs-12 padding-5">
   	<label>หมายเหตุ</label>
     <input type="text" class="form-control input-sm edit" name="remark" id="remark" placeholder="ระบุหมายเหตุเอกสาร (ถ้ามี)" value="<?php echo $doc->remark; ?>" disabled />
   </div>
@@ -71,7 +75,7 @@
 					<?php  foreach($details as $rs) : ?>
 						<tr class="font-size-11" id="row_<?php echo $rs->id; ?>">
 							<td class="middle text-center no"><?php echo $no; ?></td>
-							<td class="middle <?php echo $rs->id; ?>"><?php echo $rs->bc; ?></td>
+							<td class="middle <?php echo $rs->id; ?>"><span class="bc"><?php echo $rs->bc; ?></span></td>
 							<td class="middle <?php echo $rs->id; ?>"><?php echo $rs->product_code; ?></td>
 							<td class="middle"><input type="text" class="form-control input-sm text-label" style="font-size:11px !important;" value="<?php echo $rs->product_name; ?>" readonly/></td>
 							<td class="middle text-right">

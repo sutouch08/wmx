@@ -299,11 +299,11 @@ class Receive_product extends PS_Controller
 
           if($sc === TRUE && is_true(getConfig('WRX_API')))
           {
-            if(is_true(getConfig('WRX_RETURN_INTERFACE')))
+            if(is_true(getConfig('WRX_GR_INTERFACE')))
             {
               $this->load->library('wrx_ib_api');
 
-              if( ! $this->wrx_ib_api->export_return($doc->code))
+              if( ! $this->wrx_ib_api->export_receive($doc->code))
               {
                 $sc = FALSE;
                 $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->wrx_ib_api->error;

@@ -53,7 +53,7 @@ class Stock extends PS_Controller
 
     $token = $this->input->post('token');
 
-    $data = $this->stock_model->get_list($arr);
+    $data = $this->stock_model->get_export_list($arr);
 
     if(!empty($data))
     {
@@ -76,15 +76,22 @@ class Stock extends PS_Controller
 
       foreach($data as $rs)
       {
-        $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
-        $this->excel->getActiveSheet()->setCellValue('B'.$row, $rs->product_code);
-        $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->zone_code);
-        $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->qty);
-        $this->excel->getActiveSheet()->setCellValue('E'.$row, get_buffer_qty_by_product_and_zone($rs->product_code, $rs->zone_code));
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, get_cancle_qty_by_product_and_zone($rs->product_code, $rs->zone_code));
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, "=SUM(D{$row}:F{$row})");
-        $no++;
-        $row++;
+        $bQty = get_buffer_qty_by_product_and_zone($rs->product_code, $rs->zone_code); // buffer
+        $cQty = get_cancle_qty_by_product_and_zone($rs->product_code, $rs->zone_code); // cancle
+        $total = $rs->qty + $bQty + $cQty;
+
+        if($total != 0)
+        {
+          $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
+          $this->excel->getActiveSheet()->setCellValue('B'.$row, $rs->product_code);
+          $this->excel->getActiveSheet()->setCellValue('C'.$row, $rs->zone_code);
+          $this->excel->getActiveSheet()->setCellValue('D'.$row, $rs->qty);
+          $this->excel->getActiveSheet()->setCellValue('E'.$row, $bQty);
+          $this->excel->getActiveSheet()->setCellValue('F'.$row, $cQty);
+          $this->excel->getActiveSheet()->setCellValue('G'.$row, "=SUM(D{$row}:F{$row})");
+          $no++;
+          $row++;
+        }
       }
     }
 

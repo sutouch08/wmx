@@ -130,835 +130,6 @@ class Orders extends PS_Controller
   }
 
 
-  //---- รายการรออนุมัติ
-  public function get_un_approve_list()
-  {
-    $role = $this->input->get('role');
-    $rows = $this->orders_model->count_un_approve_rows($role);
-    $limit = empty($this->input->get('limit')) ? 10 : intval($this->input->get('limit'));
-    $list = $this->orders_model->get_un_approve_list($role, $limit);
-
-
-    $result_rows = empty($list) ? 0 :count($list);
-
-    $ds = array();
-    if( ! empty($list))
-    {
-      foreach($list as $rs)
-      {
-        $arr = array(
-          'date_add' => thai_date($rs->date_add),
-          'code' => $rs->code,
-          'customer' => $rs->customer_name,
-          'empName' => $rs->empName
-        );
-
-        array_push($ds, $arr);
-      }
-    }
-
-    $data = array(
-      'result_rows' => $result_rows,
-      'rows' => $rows,
-      'data' => $ds
-    );
-
-    echo json_encode($data);
-  }
-
-
-  public function add_new()
-  {
-    $this->load->view('orders/orders_add');
-  }
-
-
-  public function add()
-  {
-    $sc = TRUE;
-    $data = json_decode($this->input->post('data'));
-
-    if( ! empty($data))
-    {
-      $this->load->model('inventory/invoice_model');
-			$this->load->model('masters/warehouse_model');
-			$this->load->model('masters/sender_model');
-      $this->load->model('address/address_model');
-      $date_add = db_date($data->date_add);
-      $code = $this->get_new_code($date_add);
-
-      $customer = $this->customers_model->get($data->customer_code);
-			$customer_ref = trim($data->customer_ref);
-      $role = 'S'; //--- S = ขาย
-      $payment = $this->payment_methods_model->get($data->payment_code);
-      $has_term = empty($payment) ? FALSE : ($payment->role == 4 ? FALSE : (is_true($payment->has_term)));
-
-      if($sc === TRUE)
-      {
-        $ds = array(
-          'date_add' => $date_add,
-          'code' => $code,
-          'role' => $role,
-          'reference' => get_null($data->reference),
-          'customer_code' => $customer->code,
-          'customer_name' => $customer->name,
-          'customer_ref' => $customer_ref,
-          'channels_code' => $data->channels_code,
-          'payment_code' => $data->payment_code,
-          'warehouse_code' => $data->warehouse_code,
-          'is_term' => ($has_term === TRUE ? 1 : 0),
-          'user' => $this->_user->uname,
-          'remark' => get_null($data->remark),
-					'id_sender' => $this->sender_model->get_main_sender($customer->code),
-          'is_pre_order' => $data->is_pre_order
-        );
-
-        if( ! $this->orders_model->add($ds))
-        {
-          $sc = FALSE;
-          $this->error = "เพิ่มเอกสารไม่สำเร็จ กรุณาลองใหม่อีกครั้ง";
-        }
-
-        if($sc === TRUE)
-        {
-          $arr = array(
-            'order_code' => $code,
-            'state' => 1,
-            'update_user' => $this->_user->uname
-          );
-
-          $this->order_state_model->add_state($arr);
-        }
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      set_error('required');
-    }
-
-    $arr = array(
-      'status' => $sc === TRUE ? 'success' : 'failed',
-      'message' => $sc === TRUE ? 'success' : $this->error,
-      'code' => $sc === TRUE ? $code : NULL
-    );
-
-    echo json_encode($arr);
-  }
-
-
-  public function add_detail($order_code)
-  {
-    $sc = TRUE;
-    $auz = getConfig('ALLOW_UNDER_ZERO');
-		$sync_stock = array();
-    $err = 0;
-    $data = $this->input->post('data');
-    $order = $this->orders_model->get($order_code);
-
-    if( empty($order))
-    {
-      $sc = FALSE;
-      $this->error = "Invalid order code";
-    }
-    else
-    {
-      if($order->state != 1)
-      {
-        $sc = FALSE;
-        $this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-      }
-    }
-
-    if($sc === TRUE)
-    {
-      if( ! empty($data))
-      {
-        foreach($data as $rs)
-        {
-          $code = $rs['code']; //-- รหัสสินค้า
-          $qty = $rs['qty'];
-          $item = $this->products_model->get($code);
-
-          if( $qty > 0 && !empty($item))
-          {
-            $qty = ceil($qty);
-
-            //---- ยอดสินค้าที่่สั่งได้
-            $sumStock = $this->get_sell_stock($item->code, $order->warehouse_code);
-
-
-            //--- ถ้ามีสต็อกมากว่าที่สั่ง หรือ เป็นสินค้าไม่นับสต็อก
-            if( $sumStock >= $qty OR $item->count_stock == 0 OR $auz == 1)
-            {
-              //---- ถ้ายังไม่มีรายการในออเดอร์
-              //--- อาจจะได้มากกกว่า 1 บรรทัด แต่จะเอามาแค่บรรทัดเดียว
-              $detail = $this->orders_model->get_exists_detail($order_code, $item->code, $item->price);
-
-              if(empty($detail))
-              {
-                //---- คำนวณ ส่วนลดจากนโยบายส่วนลด
-                $discount = array(
-                  'amount' => 0,
-                  'id_rule' => NULL,
-                  'discLabel1' => 0,
-                  'discLabel2' => 0,
-                  'discLabel3' => 0
-                );
-
-                if($order->role == 'S')
-                {
-                  $discount = $this->discount_model->get_item_discount($item->code, $order->customer_code, $qty, $order->payment_code, $order->channels_code, $order->date_add, $order->code);
-                }
-
-                if($order->role == 'C' OR $order->role == 'N')
-                {
-                  $gp = $order->gp;
-                  //------ คำนวณส่วนลดใหม่
-                  $step = explode('+', $gp);
-                  $discAmount = 0;
-                  $discLabel = array(0, 0, 0);
-                  $price = $item->price;
-                  $i = 0;
-                  foreach($step as $discText)
-                  {
-                    if($i < 3) //--- limit ไว้แค่ 3 เสต็ป
-                    {
-                      $disc = explode('%', $discText);
-                      $disc[0] = floatval(trim($disc[0])); //--- ตัดช่องว่างออก
-                      $amount = count($disc) == 1 ? $disc[0] : $price * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-                      $discLabel[$i] = count($disc) == 1 ? $disc[0] : $disc[0].'%';
-                      $discAmount += $amount;
-                      $price -= $amount;
-                    }
-
-                    $i++;
-                  }
-
-                  $total_discount = $qty * $discAmount; //---- ส่วนลดรวม
-                  //$total_amount = ( $qty * $price ) - $total_discount; //--- ยอดรวมสุดท้าย
-                  $discount['amount'] = $total_discount;
-                  $discount['discLabel1'] = $discLabel[0];
-                  $discount['discLabel2'] = $discLabel[1];
-                  $discount['discLabel3'] = $discLabel[2];
-                }
-
-                $arr = array(
-                  "order_code"	=> $order_code,
-                  "model_code"		=> $item->model_code,
-                  "product_code"	=> $item->code,
-                  "product_name"	=> addslashes($item->name),
-                  "unit_code" => $item->unit_code,
-                  "cost"  => $item->cost,
-                  "price"	=> $item->price,
-                  "qty"		=> $qty,
-                  "discount1"	=> $discount['discLabel1'],
-                  "discount2" => $discount['discLabel2'],
-                  "discount3" => $discount['discLabel3'],
-                  "discount_amount" => $discount['amount'],
-                  "total_amount"	=> ($item->price * $qty) - $discount['amount'],
-                  "id_rule"	=> get_null($discount['id_rule']),
-                  "is_count" => $item->count_stock
-                );
-
-                if( $this->orders_model->add_detail($arr) === FALSE )
-                {
-                  $sc = FALSE;
-                  $this->error = "Error : Insert fail";
-                  $err++;
-                }
-                else
-                {
-                  //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
-                  {
-                    if($order->warehouse_code == $this->ix_warehouse)
-                    {
-                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-                    }
-                  }
-                }
-              }
-              else  //--- ถ้ามีรายการในออเดอร์อยู่แล้ว
-              {
-                $qty = $qty + $detail->qty;
-
-                $discount = array(
-                  'amount' => 0,
-                  'id_rule' => NULL,
-                  'discLabel1' => 0,
-                  'discLabel2' => 0,
-                  'discLabel3' => 0
-                );
-
-                //---- คำนวณ ส่วนลดจากนโยบายส่วนลด
-                if($order->role == 'S')
-                {
-                  $discount 	= $this->discount_model->get_item_discount($item->code, $order->customer_code, $qty, $order->payment_code, $order->channels_code, $order->date_add, $order->code);
-                }
-
-                $arr = array(
-                  "qty"		=> $qty,
-                  "discount1"	=> $discount['discLabel1'],
-                  "discount2" => $discount['discLabel2'],
-                  "discount3" => $discount['discLabel3'],
-                  "discount_amount" => $discount['amount'],
-                  "total_amount"	=> ($item->price * $qty) - $discount['amount'],
-                  "id_rule"	=> get_null($discount['id_rule']),
-                  "valid" => 0,
-                  "valid_qc" => 0
-                );
-
-                if( $this->orders_model->update_detail($detail->id, $arr) === FALSE )
-                {
-                  $sc = FALSE;
-                  $this->error = "Error : Update Fail";
-                  $err++;
-                }
-                else
-                {
-                  //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
-                  {
-                    if($order->warehouse_code == $this->ix_warehouse)
-                    {
-                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-                    }
-                  }
-                }
-
-              }	//--- end if isExistsDetail
-            }
-            else 	// if getStock
-            {
-              $sc = FALSE;
-              $this->error = "Error : สินค้าไม่เพียงพอ : {$item->code}";
-              $err++;
-            } 	//--- if getStock
-          }	//--- if qty > 0
-        } //--- end foreach
-
-        if($sc === TRUE)
-        {
-          $doc_total = $this->orders_model->get_order_total_amount($order_code);
-          $arr = array(
-            'doc_total' => $doc_total,
-            'status' => 0
-          );
-
-          $this->orders_model->update($order_code, $arr);
-        }
-
-        if($this->sync_api_stock && !empty($sync_stock))
-        {
-          $this->update_api_stock($sync_stock);
-        }
-      }
-    }
-
-
-    echo $sc === TRUE ? 'success' : ( $err > 0 ? $this->error.' : '.$err.' item(s)' : $this->error);
-  }
-
-
-  public function add_free_detail($order_code)
-  {
-    $sc = TRUE;
-    $auz = getConfig('ALLOW_UNDER_ZERO');
-		$sync_stock = array();
-    $err = 0;
-    $data = $this->input->post('data');
-    $order = $this->orders_model->get($order_code);
-
-    if( empty($order))
-    {
-      $sc = FALSE;
-      $this->error = "Invalid order code";
-    }
-    else
-    {
-      if($order->state != 1)
-      {
-        $sc = FALSE;
-        $this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-      }
-    }
-
-    if($sc === TRUE)
-    {
-      if( ! empty($data))
-      {
-        foreach($data as $rs)
-        {
-          $code = $rs['code']; //-- รหัสสินค้า
-          $qty = $rs['qty'];
-          $item = $this->products_model->get($code);
-
-          if( $qty > 0 && !empty($item))
-          {
-            $qty = ceil($qty);
-
-            //---- ยอดสินค้าที่่สั่งได้
-            $sumStock = $this->get_sell_stock($item->code, $order->warehouse_code);
-
-
-            //--- ถ้ามีสต็อกมากว่าที่สั่ง หรือ เป็นสินค้าไม่นับสต็อก
-            if( $sumStock >= $qty OR $item->count_stock == 0 OR $auz == 1)
-            {
-              //---- ถ้ายังไม่มีรายการในออเดอร์
-              //--- อาจจะได้มากกกว่า 1 บรรทัด แต่จะเอามาแค่บรรทัดเดียว
-              $detail = $this->orders_model->get_exists_free_detail($order_code, $item->code);
-
-              if(empty($detail))
-              {
-                $arr = array(
-                  "order_code" => $order_code,
-                  "model_code" => $item->model_code,
-                  "product_code" => $item->code,
-                  "product_name" => addslashes($item->name),
-                  "unit_code" => $item->unit_code,
-                  "cost"  => $item->cost,
-                  "price"	=> $item->price,
-                  "qty" => $qty,
-                  "discount1"	=> '100%',
-                  "discount2" => 0,
-                  "discount3" => 0,
-                  "discount_amount" => $item->price * $qty,
-                  "total_amount"	=> 0.00,
-                  "id_rule"	=> NULL,
-                  "is_count" => $item->count_stock
-                );
-
-                if( $this->orders_model->add_detail($arr) === FALSE )
-                {
-                  $sc = FALSE;
-                  $this->error = "Error : Insert fail";
-                  $err++;
-                }
-                else
-                {
-                  //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
-                  {
-                    if($order->warehouse_code == $this->ix_warehouse)
-                    {
-                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-                    }
-                  }
-                }
-              }
-              else  //--- ถ้ามีรายการในออเดอร์อยู่แล้ว
-              {
-                $qty = $qty + $detail->qty;
-
-                $arr = array(
-                  "qty"		=> $qty,
-                  "discount_amount" => $item->price * $qty,
-                  "total_amount"	=> 0.00,
-                  "valid" => 0,
-                  "valid_qc" => 0
-                );
-
-                if( ! $this->orders_model->update_detail($detail->id, $arr))
-                {
-                  $sc = FALSE;
-                  $this->error = "Error : Update Fail";
-                  $err++;
-                }
-                else
-                {
-                  //---- update chatbot stock
-                  if($item->count_stock == 1 && $item->is_api == 1 && $this->sync_api_stock && ! $order->is_pre_order)
-                  {
-                    if($order->warehouse_code == $this->ix_warehouse)
-                    {
-                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-                    }
-                  }
-                }
-
-              }	//--- end if isExistsDetail
-            }
-            else 	// if getStock
-            {
-              $sc = FALSE;
-              $this->error = "Error : สินค้าไม่เพียงพอ : {$item->code}";
-              $err++;
-            } 	//--- if getStock
-          }	//--- if qty > 0
-        } //--- end foreach
-
-        if($this->sync_api_stock && !empty($sync_stock))
-        {
-          $this->update_api_stock($sync_stock);
-        }
-      }
-    }
-
-
-    echo $sc === TRUE ? 'success' : ( $err > 0 ? $this->error.' : '.$err.' item(s)' : $this->error);
-  }
-
-  //--- update item qty
-  public function update_item()
-	{
-		$sc = TRUE;
-    $auz = is_true(getConfig('ALLOW_UNDER_ZERO'));
-    $code = $this->input->post('order_code');
-		$id = $this->input->post('id');
-		$qty = $this->input->post('qty');
-
-		if( ! empty($id))
-		{
-      $order = $this->orders_model->get($code);
-
-      if( ! empty($order))
-      {
-        if( $order->state < 2)
-        {
-          $detail = $this->orders_model->get_detail($id);
-
-    			if( ! empty($detail))
-    			{
-            $this->db->trans_begin();
-
-            $valid = $detail->valid == 1 && $qty > $detail->qty ? 0 : $detail->valid;
-            $valid_qc = $detail->valid_qc == 1 && $qty > $detail->qty ? 0 : $detail->valid_qc;
-            $discount_label = discountLabel($detail->discount1, $detail->discount2, $detail->discount3);
-
-            if($order->is_pre_order OR $detail->is_count == 0 OR $auz)
-            {
-              $available = 1000000;
-            }
-            else
-            {
-              //---- สต็อกคงเหลือในคลัง
-              $sell_stock = $this->stock_model->get_sell_stock($detail->product_code, $order->warehouse_code);
-
-              //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
-              $ordered = $this->orders_model->get_reserv_stock_exclude($detail->product_code, $order->warehouse_code, $detail->id);
-              $reserv_stock = $this->reserv_stock_model->get_reserv_stock($detail->product_code, $order->warehouse_code);
-
-              $available = $sell_stock - $ordered - $reserv_stock;
-            }
-
-            if($qty <= $available OR $auz)
-            {
-              $discount = array(
-                'amount' => 0,
-                'id_rule' => NULL,
-                'discLabel1' => 0,
-                'discLabel2' => 0,
-                'discLabel3' => 0
-              );
-
-              //---- คำนวณ ส่วนลดจากนโยบายส่วนลด
-              if($order->role == 'S' && ! $order->is_pre_order)
-              {
-                $discount = $this->discount_model->get_item_discount($detail->product_code, $order->customer_code, $qty, $order->payment_code, $order->channels_code, $order->date_add, $order->code);
-              }
-
-              $arr = array(
-                "qty" => $qty,
-                "discount1"	=> $discount['discLabel1'],
-                "discount2" => $discount['discLabel2'],
-                "discount3" => $discount['discLabel3'],
-                "discount_amount" => $discount['amount'],
-                "total_amount"	=> ($detail->price * $qty) - $discount['amount'],
-                "id_rule"	=> get_null($discount['id_rule']),
-                "valid" => $valid,
-                "valid_qc" => $valid_qc
-              );
-
-              if( ! $this->orders_model->update_detail($id, $arr))
-      				{
-      					$sc = FALSE;
-      					$this->error = "Update failed";
-      				}
-              else
-              {
-                $discount_label = discountLabel($discount['discLabel1'], $discount['discLabel2'], $discount['discLabel3']);
-              }
-            }
-            else
-            {
-              $sc = FALSE;
-              $this->error = "สต็อกคงเหลือไม่พอ : คงเหลือ {$available}";
-            }
-
-            if($sc === TRUE)
-            {
-              $this->db->trans_commit();
-            }
-            else
-            {
-              $this->db->trans_rollback();
-            }
-
-            if($sc === TRUE)
-            {
-              $doc_total = $this->orders_model->get_order_total_amount($code);
-              $arr = array(
-                'doc_total' => $doc_total,
-                'status' => 0
-              );
-
-              $this->orders_model->update($code, $arr);
-
-              //--- update api stock
-              if($this->sync_api_stock && $detail->is_count == 1 && ! $order->is_pre_order && $order->warehouse_code == $this->ix_warehouse)
-              {
-                $sync_stock = array();
-                $item = $this->products_model->get($detail->product_code);
-
-                if( ! empty($item))
-                {
-                  if($item->is_api)
-                  {
-                    $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-
-                    $this->update_api_stock($sync_stock);
-                  }
-                }
-              }
-              //--- end update api stock
-            }
-    			}
-    			else
-    			{
-    				$sc = FALSE;
-    				$this->error = "Item Not found";
-    			}
-        }
-        else
-        {
-          $sc = FALSE;
-          $this->error = "Invalid order state";
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "Invalid order code";
-      }
-		}
-		else
-		{
-			$sc = FALSE;
-			set_error('required');
-		}
-
-    $arr = array(
-      'status' => $sc === TRUE ? 'success' : 'failed',
-      'message' => $sc === TRUE ? 'success' : $this->error,
-      'discLabel' => $sc === TRUE ? $discount_label : NULL
-    );
-
-		echo json_encode($arr);
-	}
-
-
-  public function add_pre_order_detail()
-  {
-    $sc = TRUE;
-    $order_code = $this->input->post('order_code');
-    $data = json_decode($this->input->post('data'));
-    $order = $this->orders_model->get($order_code);
-
-    if( ! empty($data))
-    {
-      if( ! empty($order))
-      {
-        if($order->state == 1)
-        {
-          foreach($data as $rs)
-          {
-            if($rs->qty > 0)
-            {
-              $item = $this->products_model->get($rs->code);
-
-              if( ! empty($item))
-              {
-                $qty = ceil($rs->qty);
-
-                $detail = $this->orders_model->get_exists_detail($order_code, $item->code, $item->price);
-
-                if(empty($detail))
-                {
-                  $arr = array(
-                    "order_code" => $order_code,
-                    "model_code" => $item->model_code,
-                    "product_code" => $item->code,
-                    "product_name" => addslashes($item->name),
-                    "unit_code" => $item->unit_code,
-                    "cost"  => $item->cost,
-                    "price"	=> $item->price,
-                    "qty"	=> $qty,
-                    "discount1"	=> 0,
-                    "discount2" => 0,
-                    "discount3" => 0,
-                    "discount_amount" => 0,
-                    "total_amount"	=> ($item->price * $qty),
-                    "id_rule"	=> NULL,
-                    "is_count" => $item->count_stock,
-                    "pre_order_detail_id" => $rs->id
-                  );
-
-                  if( ! $this->orders_model->add_detail($arr))
-                  {
-                    $sc = FALSE;
-                    $this->error = "Failed to insert item : {$item->code}";
-                  }
-                }
-                else //--- if ! empty detail
-                {
-                  $qty = $qty + $detail->qty;
-
-                  $arr = array(
-                    "qty"	=> $qty,
-                    "total_amount"	=> ($item->price * $qty),
-                    "valid" => 0
-                  );
-
-                  if( ! $this->orders_model->update_detail($detail->id, $arr))
-                  {
-                    $sc = FALSE;
-                    $this->error = "Failed to update item : {$item->code}";
-                  }
-                } //-- end if ! empty($detail)
-              } //-- end if ! empty($item)
-            } //-- end if $rs->qty > 0
-          } //--- end foreach
-
-          if( $sc === TRUE)
-          {
-            $doc_total = $this->orders_model->get_order_total_amount($order_code);
-            $arr = array(
-            'doc_total' => $doc_total,
-            'status' => 0
-            );
-
-            $this->orders_model->update($order_code, $arr);
-          }
-        }
-        else
-        {
-          $sc = FALSE;
-          $this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "Invalid Order number";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "ไม่พบรายการสินค้า";
-    }
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function remove_detail($id)
-  {
-		$sc = TRUE;
-    $detail = $this->orders_model->get_detail($id);
-		if( ! empty($detail))
-		{
-			$order = $this->orders_model->get($detail->order_code);
-
-			if( ! empty($order))
-			{
-				//--- อนุญาติให้ลบได้แค่ 1 สถานะ
-				if($order->state == 1)
-				{
-          $this->db->trans_begin();
-
-          if(! $this->orders_model->remove_detail($id))
-          {
-            $sc = FALSE;
-            $this->error = "Delete filed";
-          }
-
-          if($sc === TRUE)
-          {
-            $doc_total = $this->orders_model->get_order_total_amount($detail->order_code);
-            $arr = array('doc_total' => $doc_total);
-
-            if( ! $this->orders_model->update($detail->order_code, $arr))
-            {
-              $sc = FALSE;
-              $this->error = "Failed to update doc total amount";
-            }
-          }
-
-          if($sc === TRUE)
-          {
-            $this->db->trans_commit();
-          }
-          else
-          {
-            $this->db->trans_rollback();
-          }
-
-          if($sc === TRUE)
-          {
-            if($this->log_delete)
-            {
-              $arr = array(
-                'order_code' => $detail->order_code,
-                'product_code' => $detail->product_code,
-                'qty' => $detail->qty,
-                'user' => $this->_user->uname
-              );
-
-              $this->orders_model->log_delete($arr);
-            }
-
-            if($this->sync_api_stock && $detail->is_count == 1 && ! $order->is_pre_order && $order->warehouse_code == $this->ix_warehouse)
-            {
-              $item = $this->products_model->get($detail->product_code);
-
-              if(! empty($item))
-              {
-                if($item->is_api == 1)
-                {
-                  $sync_stock = array();
-                  $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
-                  $this->update_api_stock($sync_stock);
-                }
-              }
-            }
-            //--- sync api stock
-          }
-				}
-				else
-				{
-					$sc = FALSE;
-					$this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-				}
-			}
-			else
-			{
-				$sc = FALSE;
-				$this->error = "Order not found";
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Item not found";
-		}
-
-		echo $sc === TRUE ? 'success' : $this->error;
-
-  }
-
-
   public function edit_order($code)
   {
     $this->load->model('address/address_model');
@@ -1029,247 +200,6 @@ class Orders extends PS_Controller
 			$err = "ไม่พบเลขที่เอกสาร : {$code}";
 			$this->page_error($err);
 		}
-  }
-
-
-  public function update_order()
-  {
-    $sc = TRUE;
-
-    if($this->input->post('order_code'))
-    {
-      $this->load->model('inventory/invoice_model');
-			$this->load->model('masters/warehouse_model');
-      $code = $this->input->post('order_code');
-      $recal = $this->input->post('recal');
-      $payment = $this->payment_methods_model->get($this->input->post('payment_code'));
-      $has_term = empty($payment) ? FALSE : ($payment->role == 4 ? FALSE : (is_true($payment->has_term)));
-
-      $customer = $this->customers_model->get($this->input->post('customer_code'));
-
-      $order = $this->orders_model->get($code);
-
-      if( ! empty($order))
-      {
-        if( $order->state == 1)
-        {
-          $warehouse_code = $this->input->post('warehouse_code');
-
-          $ds = array(
-            'reference' => $this->input->post('reference'),
-            'customer_code' => empty($customer) ? $this->input->post('customer_code') : $customer->code,
-            'customer_name' => empty($customer) ? NULL : $customer->name,
-            'customer_ref' => $this->input->post('customer_ref'),
-            'channels_code' => $this->input->post('channels_code'),
-            'payment_code' => $this->input->post('payment_code'),
-            'is_term' => $has_term,
-            'date_add' => db_date($this->input->post('date_add')),
-            'warehouse_code' => $warehouse_code,
-            'remark' => $this->input->post('remark'),
-            'status' => 0,
-            'id_sender' => NULL
-          );
-
-          $rs = $this->orders_model->update($code, $ds);
-
-          if($rs === TRUE)
-          {
-            if($recal == 1)
-            {
-              //---- Recal discount
-              $details = $this->orders_model->get_order_details($code);
-
-              if( ! empty($details))
-              {
-                foreach($details as $detail)
-                {
-                  $qty	= $detail->qty;
-
-                  //---- คำนวณ ส่วนลดจากนโยบายส่วนลด
-                  $discount 	= $this->discount_model->get_item_recal_discount($detail->order_code, $detail->product_code, $detail->price, $order->customer_code, $qty, $order->payment_code, $order->channels_code, $order->date_add);
-
-                  $arr = array(
-                    "qty"		=> $qty,
-                    "discount1"	=> $discount['discLabel1'],
-                    "discount2" => $discount['discLabel2'],
-                    "discount3" => $discount['discLabel3'],
-                    "discount_amount" => $discount['amount'],
-                    "total_amount"	=> ($detail->price * $qty) - $discount['amount'],
-                    "id_rule"	=> $discount['id_rule']
-                  );
-
-                  $this->orders_model->update_detail($detail->id, $arr);
-                }
-              }
-
-              $doc_total = $this->orders_model->get_order_total_amount($code);
-              $arr = array(
-              'doc_total' => $doc_total,
-              'status' => 0
-              );
-
-              $this->orders_model->update($code, $arr);
-            }
-          }
-          else
-          {
-            $sc = FALSE;
-            $this->error = 'ปรับปรุงรายการไม่สำเร็จ';
-          }
-        }
-        else
-        {
-          $sc = FALSE;
-          $this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "Invalid order code";
-      }
-
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = 'ไม่พบเลขที่เอกสาร';
-    }
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function edit_detail($code)
-  {
-    $this->load->helper('product_tab');
-
-    $ds = array();
-    $rs = $this->orders_model->get($code);
-
-    if($rs->state == 1)
-    {
-      $rs->customer_name = $this->customers_model->get_name($rs->customer_code);
-      $ds['order'] = $rs;
-
-      $details = $this->orders_model->get_order_details($code);
-      $ds['details'] = $details;
-      $ds['allowEditDisc'] = getConfig('ALLOW_EDIT_DISCOUNT') == 1 ? TRUE : FALSE;
-      $ds['allowEditPrice'] = getConfig('ALLOW_EDIT_PRICE') == 1 ? TRUE : FALSE;
-      $ds['edit_order'] = FALSE; //--- ใช้เปิดปิดปุ่มแก้ไขราคาสินค้าไม่นับสต็อก
-      $this->load->view('orders/order_edit_detail', $ds);
-    }
-    else
-    {
-      $err = "สถานะเอกสารไม่ถูกต้อง";
-      $this->page_error($err);
-    }
-
-  }
-
-
-  public function save($code)
-  {
-    $sc = TRUE;
-
-		$id_sender = $this->input->post('id_sender');
-		$tracking = trim($this->input->post('tracking'));
-    $cod_amount = $this->input->post('cod_amount');
-
-		$arr = array();
-
-		if(! empty($id_sender))
-		{
-			$arr['id_sender'] = $id_sender;
-		}
-
-		if(! empty($tracking))
-		{
-			$arr['shipping_code'] = $tracking;
-		}
-
-    $arr['cod_amount'] = $cod_amount < 0 ? 0 : get_zero($cod_amount);
-
-    $order = $this->orders_model->get($code);
-
-		if(empty($order->id_sender))
-		{
-			$this->load->model('masters/sender_model');
-			$id_sender = NULL;
-
-			$sender = $this->sender_model->get_customer_sender_list($order->customer_code);
-
-			if( ! empty($sender))
-			{
-				if( ! empty($sender->main_sender))
-				{
-					$id_sender = $sender->main_sender;
-				}
-			}
-
-			if( ! empty($id_sender))
-			{
-        $arr['id_sender'] = $id_sender;
-			}
-		}
-
-
-    if(is_true(getConfig('IX_BACK_ORDER')) && $order->state <= 4 && $order->is_pre_order == 0)
-    {
-      $is_backorder = 0;
-      $total_amount = 0;
-
-      $this->orders_model->drop_backlogs_list($order->code);
-
-      $details = $this->orders_model->get_order_details($order->code);
-
-      if( ! empty($details))
-      {
-        foreach($details as $rs)
-        {
-          if($rs->is_count)
-          {
-            $sell_stock = $this->stock_model->get_sell_stock($rs->product_code, $order->warehouse_code);
-            $ordered = $this->orders_model->get_reserv_stock_exclude($rs->product_code, $order->warehouse_code, $rs->id);
-            $reserv_stock = $this->reserv_stock_model->get_reserv_stock($rs->product_code, $order->warehouse_code);
-
-            $available = $sell_stock - $ordered - $reserv_stock;
-
-            if($available < $rs->qty)
-            {
-              $is_backorder = 1;
-
-              $backlogs = array(
-                'order_code' => $rs->order_code,
-                'product_code' => $rs->product_code,
-                'order_qty' => $rs->qty,
-                'available_qty' => $available
-              );
-
-              $this->orders_model->add_backlogs_detail($backlogs);
-            }
-          }
-
-          $total_amount += $rs->total_amount;
-        }
-      }
-
-      $arr['doc_total'] = $total_amount;
-      $arr['is_backorder'] = $is_backorder;
-    }
-
-    if($sc === TRUE)
-    {
-      $arr['status'] = 1;
-
-      if( ! $this->orders_model->update($code, $arr))
-      {
-        $sc = FALSE;
-        $this->error = "บันทึกออเดอร์ไม่สำเร็จ";
-      }
-    }
-
-    echo $sc === TRUE ? 'success' : $this->error;
   }
 
 
@@ -1849,205 +779,6 @@ class Orders extends PS_Controller
   }
 
 
-  public function get_pay_amount()
-  {
-    $sc = TRUE;
-    $ds = array();
-
-    if($this->input->get('order_code'))
-    {
-      $order = $this->orders_model->get($this->input->get('order_code'));
-
-      if( ! empty($order))
-      {
-        //--- ยอดรวมหลังหักส่วนลด ตาม item
-        $amount = $this->orders_model->get_order_total_amount($order->code);
-
-        //--- ส่วนลดท้ายบิล
-        $bDisc = $order->bDiscAmount; //$this->orders_model->get_bill_discount($code);
-
-        $pay_amount = $amount - $bDisc;
-
-        $ds = array(
-          'pay_amount' => $pay_amount,
-          'id_sender' => empty($order->id_sender) ? FALSE : $order->id_sender
-        );
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "Invalid Order code";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "Missing required parameter : order code";
-    }
-
-    echo $sc === TRUE ? json_encode($ds) : $this->error;
-  }
-
-
-  public function get_account_detail($id)
-  {
-    $sc = 'fail';
-    $this->load->model('masters/bank_model');
-    $this->load->helper('bank');
-    $rs = $this->bank_model->get_account_detail($id);
-    if($rs !== FALSE)
-    {
-      $ds = bankLogoUrl($rs->bank_code).' | '.$rs->bank_name.' สาขา '.$rs->branch.'<br/>เลขที่บัญชี '.$rs->acc_no.'<br/> ชื่อบัญชี '.$rs->acc_name;
-      $sc = $ds;
-    }
-
-    echo $sc;
-  }
-
-
-  public function confirm_payment()
-  {
-    $sc = TRUE;
-
-    if($this->input->post('order_code'))
-    {
-      $this->load->helper('bank');
-      $this->load->model('orders/order_payment_model');
-
-      $file = isset( $_FILES['image'] ) ? $_FILES['image'] : FALSE;
-      $order_code = $this->input->post('order_code');
-      $date = $this->input->post('payDate');
-      $h = $this->input->post('payHour');
-      $m = $this->input->post('payMin');
-      $dhm = $date.' '.$h.':'.$m.':00';
-      $pay_date = db_date($dhm, TRUE);
-
-      $order = $this->orders_model->get($order_code);
-
-      $arr = array(
-        'order_code' => $order_code,
-        'order_amount' => $this->input->post('orderAmount'),
-        'pay_amount' => $this->input->post('payAmount'),
-        'pay_date' => $pay_date,
-        'id_account' => $this->input->post('id_account'),
-        'acc_no' => $this->input->post('acc_no'),
-        'user' => get_cookie('uname'),
-        'is_pre_order' => $order->is_pre_order
-      );
-
-      //--- บันทึกรายการ
-      if($this->order_payment_model->add($arr))
-      {
-        if($order->state == 1)
-        {
-          $rs = $this->orders_model->change_state($order_code, 2);  //--- แจ้งชำระเงิน
-
-          if($rs)
-          {
-            $arr = array(
-              'order_code' => $order_code,
-              'state' => 2,
-              'update_user' => get_cookie('uname')
-            );
-
-            $this->order_state_model->add_state($arr);
-          }
-
-          if($rs === FALSE)
-          {
-            $sc = FALSE;
-            $message = 'เปลี่ยนสถานะออเดอร์ไม่สำเร็จ';
-          }
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $message = 'บันทึกรายการไม่สำเร็จ';
-      }
-
-      if($file !== FALSE)
-      {
-        $rs = $this->do_upload($file, $order_code);
-        if($rs !== TRUE)
-        {
-          $sc = FALSE;
-          $message = $rs;
-        }
-      }
-    }
-
-    echo $sc === TRUE ? 'success' : $message;
-  }
-
-
-  public function do_upload($file, $code)
-	{
-    $this->load->library('upload');
-    $sc = TRUE;
-		$image_path = $this->config->item('image_path').'payments/';
-    $image 	= new Upload($file);
-    if( $image->uploaded )
-    {
-      $image->file_new_name_body = $code; 		//--- เปลี่ยนชือ่ไฟล์ตาม order_code
-      $image->image_resize			 = TRUE;		//--- อนุญาติให้ปรับขนาด
-      $image->image_retio_fill	 = TRUE;		//--- เติกสีให้เต็มขนาดหากรูปภาพไม่ได้สัดส่วน
-      $image->file_overwrite		 = TRUE;		//--- เขียนทับไฟล์เดิมได้เลย
-      $image->auto_create_dir		 = TRUE;		//--- สร้างโฟลเดอร์อัตโนมัติ กรณีที่ไม่มีโฟลเดอร์
-      $image->image_x					   = 500;		//--- ปรับขนาดแนวนอน
-      //$image->image_y					   = 800;		//--- ปรับขนาดแนวตั้ง
-      $image->image_ratio_y      = TRUE;  //--- ให้คงสัดส่วนเดิมไว้
-      $image->image_background_color	= "#FFFFFF";		//---  เติมสีให้ตามี่กำหนดหากรูปภาพไม่ได้สัดส่วน
-      $image->image_convert			= 'jpg';		//--- แปลงไฟล์
-
-      $image->process($image_path);						//--- ดำเนินการตามที่ได้ตั้งค่าไว้ข้างบน
-
-      if( ! $image->processed )	//--- ถ้าไม่สำเร็จ
-      {
-        $sc 	= $image->error;
-      }
-    } //--- end if
-
-    $image->clean();	//--- เคลียร์รูปภาพออกจากหน่วยความจำ
-
-		return $sc;
-	}
-
-
-  public function view_payment_detail()
-  {
-    $this->load->model('orders/order_payment_model');
-    $this->load->model('masters/bank_model');
-    $sc = TRUE;
-    $code = $this->input->post('order_code');
-    $rs = $this->order_payment_model->get($code);
-
-    if( ! empty($rs))
-    {
-      $bank = $this->bank_model->get_account_detail($rs->id_account);
-      $img  = payment_image_url($code); //--- order_helper
-      $ds   = array(
-        'order_code' => $code,
-        'orderAmount' => number($rs->order_amount, 2),
-        'payAmount' => number($rs->pay_amount, 2),
-        'payDate' => thai_date($rs->pay_date, TRUE, '/'),
-        'bankName' => $bank->bank_name,
-        'branch' => $bank->branch,
-        'accNo' => $bank->acc_no,
-        'accName' => $bank->acc_name,
-        'date_add' => thai_date($rs->date_upd, TRUE, '/'),
-        'imageUrl' => $img === FALSE ? '' : $img,
-        'valid' => "no"
-      );
-    }
-    else
-    {
-      $sc = FALSE;
-    }
-
-    echo $sc === TRUE ? json_encode($ds) : 'fail';
-  }
-
 
   public function update_shipping_code()
   {
@@ -2176,155 +907,6 @@ class Orders extends PS_Controller
 
 		echo $sc === TRUE ? 'success' : $this->error;
 	}
-
-
-  public function set_never_expire()
-  {
-    $code = $this->input->post('order_code');
-    $option = $this->input->post('option');
-    $rs = $this->orders_model->set_never_expire($code, $option);
-    echo $rs === TRUE ? 'success' : 'ทำรายการไม่สำเร็จ';
-  }
-
-
-  public function un_expired()
-  {
-		$sc = TRUE;
-    $code = $this->input->get('order_code');
-		$order = $this->orders_model->get($code);
-
-		if( ! empty($order))
-		{
-			if($order->role == 'U' OR $order->role == 'P')
-			{
-				if($order->role == 'U')
-				{
-					$this->load->model('orders/support_model');
-					$total_amount = $this->orders_model->get_order_total_amount($code);
-					$current = $this->support_model->get_budget($order->customer_code);
-					$used = $this->support_model->get_budget_used($order->customer_code);
-
-					$balance = $current - $used;
-
-					if($total_amount > $balance)
-					{
-						$sc = FALSE;
-						$this->error = "งบประมาณไม่เพียงพอ";
-					}
-				}
-
-				if($order->role == 'P')
-				{
-					$this->load->model('orders/sponsor_model');
-					$total_amount = $this->orders_model->get_order_total_amount($code);
-					$current = $this->sponsor_model->get_budget($order->customer_code);
-					$used = $this->sponsor_model->get_budget_used($order->customer_code);
-
-					$balance = $current - $used;
-
-					if($total_amount > $balance)
-					{
-						$sc = FALSE;
-						$this->error = "งบประมาณไม่เพียงพอ";
-					}
-				}
-			}
-		}
-		else
-		{
-			$sc = FALSE;
-			$this->error = "Invalid order number";
-		}
-
-		if($sc === TRUE)
-		{
-			if( ! $this->orders_model->un_expired($code))
-			{
-				$sc = FALSE;
-				$this->error = "ทำรายการไม่สำเร็จ";
-			}
-		}
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function do_approve($code)
-  {
-    $sc = TRUE;
-    $this->load->model('approve_logs_model');
-
-    $order = $this->orders_model->get($code);
-
-    if( ! empty($order))
-    {
-      if($order->state == 1)
-      {
-        $user = $this->_user->uname;
-        $rs = $this->orders_model->update_approver($code, $user);
-        if(! $rs)
-        {
-          $sc = FALSE;
-          $this->error = "อนุมัติไม่สำเร็จ";
-        }
-        else
-        {
-          $this->approve_logs_model->add($code, 1, $user);
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "สถานะเอกสารไม่ถูกต้อง";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "ไม่พบเลขที่เอกสาร";
-    }
-
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function un_approve($code)
-  {
-    $sc = TRUE;
-    $this->load->model('approve_logs_model');
-    $order = $this->orders_model->get($code);
-    if( ! empty($order))
-    {
-      if($order->state == 1 )
-      {
-        $user = $this->_user->uname;
-        $rs = $this->orders_model->un_approver($code, $user);
-        if(! $rs)
-        {
-          $sc = FALSE;
-          $this->error = "อนุมัติไม่สำเร็จ";
-        }
-        else
-        {
-          $this->approve_logs_model->add($code, 0, $user);
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "สถานะเอกสารไม่ถูกต้อง";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "ไม่พบเลขที่เอกสาร";
-    }
-
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
 
 
   public function order_state_change()
@@ -2664,7 +1246,7 @@ class Orders extends PS_Controller
 				'user' => $this->_user->uname
 			);
 
-			$this->orders_model->add_cancle_reason($reason);
+			$this->orders_model->add_cancel_reason($reason);
 		}
 
     if($state > 3 && $sc === TRUE)
@@ -2812,6 +1394,203 @@ class Orders extends PS_Controller
   }
 
 
+  public function cancel_order()
+  {
+    $sc = TRUE;
+
+    if($this->pm->can_delete)
+    {
+      $ds = json_decode($this->input->post('data'));
+
+      if( ! empty($ds))
+      {
+        $code = $ds->code;
+        $order = $this->orders_model->get($code);
+
+        if( ! empty($order))
+        {
+          $this->load->model('inventory/prepare_model');
+          $this->load->model('inventory/qc_model');
+          $this->load->model('inventory/invoice_model');
+          $this->load->model('inventory/buffer_model');
+          $this->load->model('inventory/cancle_model');
+      		$this->load->model('inventory/movement_model');
+          $this->load->model('masters/zone_model');
+
+          $this->db->trans_begin();
+
+          if( ! empty($ds->reason_id))
+      		{
+      			//----- add reason to table order_cancle_reason
+      			$reason = array(
+      				'code' => $code,
+              'reason_id' => $ds->reason_id,
+      				'reason' => get_null($ds->reason),
+      				'user' => $this->_user->uname
+      			);
+
+      			$this->orders_model->add_cancel_reason($reason);
+      		}
+
+          if($order->state > 3)
+          {
+            //--- put prepared product to cancle zone
+            $prepared = $this->prepare_model->get_details($code);
+
+            if( ! empty($prepared))
+            {
+              foreach($prepared AS $rs)
+              {
+                if($sc === FALSE)
+                {
+                  break;
+                }
+
+                $zone = $this->zone_model->get($rs->zone_code);
+
+                $arr = array(
+                  'order_code' => $rs->order_code,
+                  'product_code' => $rs->product_code,
+                  'warehouse_code' => empty($zone->warehouse_code) ? NULL : $zone->warehouse_code,
+                  'zone_code' => $rs->zone_code,
+                  'qty' => $rs->qty,
+                  'user' => $this->_user->uname,
+                  'order_detail_id' => $rs->order_detail_id
+                );
+
+                if( ! $this->cancle_model->add($arr) )
+                {
+                  $sc = FALSE;
+                  $this->error = "Move Items to Cancle failed";
+                }
+              }
+            }
+
+            //--- drop sold data
+            if($sc === TRUE)
+            {
+              if(! $this->invoice_model->drop_all_sold($code) )
+              {
+                $sc = FALSE;
+                $this->error = "Drop sold data failed";
+              }
+            }
+          }
+
+          if($sc === TRUE)
+          {
+            //--- 1. เคลียร์ buffer
+            if(! $this->buffer_model->delete_all($code) )
+            {
+              $sc = FALSE;
+              $this->error = "Delete buffer failed";
+            }
+
+            if($sc === TRUE)
+            {
+              if(! $this->prepare_model->clear_prepare($code) )
+              {
+                $sc = FALSE;
+                $this->error = "Delete prepared data failed";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              if(! $this->qc_model->clear_qc($code) )
+              {
+                $sc = FALSE;
+                $this->error = "Delete QC failed";
+              }
+            }
+
+      	    if($sc === TRUE)
+      	    {
+      	      if(! $this->movement_model->drop_movement($code) )
+      	      {
+      	        $sc = FALSE;
+      	        $this->error = "Drop movement failed";
+      	      }
+      	    }
+
+            if($sc === TRUE)
+            {
+              if(! $this->orders_model->cancle_order_detail($code) )
+              {
+                $sc = FALSE;
+                $this->error = "Cancle Order details failed";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              $arr = array(
+                'status' => 2,
+                'state' => 9,
+                'is_exported' => 0,
+                'update_user' => $this->_user->uname
+              );
+
+              if(! $this->orders_model->update($code, $arr) )
+              {
+                $sc = FALSE;
+                $this->error = "Change order status failed";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              $arr = array(
+                'order_code' => $code,
+                'state' => 9,
+                'update_user' => $this->_user->uname
+              );
+
+              if( ! $this->order_state_model->add_state($arr) )
+              {
+                $sc = FALSE;
+                $this->error = "Add state failed";
+              }
+            }
+          }
+
+          if($sc === TRUE)
+          {
+            $this->db->trans_commit();
+
+            if(is_true(getConfig('WRX_OB_INTERFACE')))
+            {
+              $this->load->library('wrx_ob_api');
+              $this->wrx_ob_api->update_status($code);
+            }
+          }
+          else
+          {
+            $this->db->trans_rollback();
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('notfound');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('required');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('permission');
+    }
+
+    $this->_response($sc);
+  }
+
+
   //--- เคลียร์ยอดค้างที่จัดเกินมาไปที่ cancle หรือ เคลียร์ยอดที่เป็น 0
   public function clear_buffer($code)
   {
@@ -2864,395 +1643,6 @@ class Orders extends PS_Controller
     }
 
     $this->_response($sc);
-  }
-
-
-  public function update_discount()
-  {
-    $sc = TRUE;
-    $this->load->model('orders/discount_logs_model');
-    $code = $this->input->post('order_code');
-    $discount = $this->input->post('discount');
-    $approver = $this->input->post('approver');
-    $user = $this->_user->uname;
-
-    $order = $this->orders_model->get($code);
-
-    if( ! empty($order))
-    {
-      if( $order->state == 1)
-      {
-        if( ! empty($discount))
-      	{
-      		foreach( $discount as $id => $value )
-      		{
-      			//----- ข้ามรายการที่ไม่ได้กำหนดค่ามา
-      			if( $value != "")
-      			{
-      				//--- ได้ Obj มา
-      				$detail = $this->orders_model->get_detail($id);
-
-      				//--- ถ้ารายการนี้มีอยู่
-      				if( $detail !== FALSE )
-      				{
-      					//------ คำนวณส่วนลดใหม่
-      					$step = explode('+', $value);
-      					$discAmount = 0;
-      					$discLabel = array(0, 0, 0);
-      					$price = $detail->price;
-      					$i = 0;
-      					foreach($step as $discText)
-      					{
-      						if($i < 3) //--- limit ไว้แค่ 3 เสต็ป
-      						{
-                    $discText = str_replace(' ', '', $discText);
-                    $discText = str_replace('๔', '%', $discText);
-      							$disc = explode('%', $discText);
-      							$disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-      							$discount = count($disc) == 1 ? floatval($disc[0]) : $price * (floatval($disc[0]) * 0.01); //--- ส่วนลดต่อชิ้น
-      							$discLabel[$i] = count($disc) == 1 ? $disc[0] : number($disc[0], 2).'%';
-      							$discAmount += $discount;
-      							$price -= $discount;
-      						}
-      						$i++;
-      					}
-
-      					$total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-      					$total_amount = ( $detail->qty * $detail->price ) - $total_discount; //--- ยอดรวมสุดท้าย
-
-      					$arr = array(
-                  "discount1" => $discLabel[0],
-                  "discount2" => $discLabel[1],
-                  "discount3" => $discLabel[2],
-                  "discount_amount"	=> $total_discount,
-                  "total_amount" => $total_amount ,
-                  "id_rule"	=> NULL,
-                  "update_user" => $user
-                );
-
-      					$cs = $this->orders_model->update_detail($id, $arr);
-
-                if($cs)
-                {
-                  $log_data = array(
-                    "order_code"		=> $code,
-                    "product_code"	=> $detail->product_code,
-                    "old_discount"	=> discountLabel($detail->discount1, $detail->discount2, $detail->discount3),
-                    "new_discount"	=> discountLabel($discLabel[0], $discLabel[1], $discLabel[2]),
-                    "user"	=> $user,
-                    "approver"		=> $approver
-                  );
-        					$this->discount_logs_model->logs_discount($log_data);
-                }
-
-      				}	//--- end if detail
-      			} //--- End if value
-      		}	//--- end foreach
-
-          $doc_total = $this->orders_model->get_order_total_amount($code);
-          $arr = array(
-            'doc_total' => $doc_total,
-            'status' => 0
-          );
-
-          $this->orders_model->update($code, $arr);
-      	}
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "สถานะออเดอร์ไม่ถูกต้อง กรุณาตรวจสอบ";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "เลขที่เอกสารไม่ถูกต้อง";
-    }
-
-
-
-    echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function update_gp()
-  {
-    $code = $this->input->post('code');
-    $gp = $this->input->post('gp');
-    $details = $this->orders_model->get_order_details($code);
-    $user = get_cookie('uname');
-    $this->load->model('orders/discount_logs_model');
-
-    if( ! empty($details))
-    {
-      foreach($details as $detail)
-      {
-        //------ คำนวณส่วนลดใหม่
-        $step = explode('+', $gp);
-        $discAmount = 0;
-        $discLabel = array(0, 0, 0);
-        $price = $detail->price;
-        $i = 0;
-        foreach($step as $discText)
-        {
-          if($i < 3) //--- limit ไว้แค่ 3 เสต็ป
-          {
-            $disc = explode('%', $discText);
-            $disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-            $discount = count($disc) == 1 ? $disc[0] : $price * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-            $discLabel[$i] = count($disc) == 1 ? $disc[0] : $disc[0].'%';
-            $discAmount += $discount;
-            $price -= $discount;
-          }
-          $i++;
-        }
-
-        $total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-        $total_amount = ( $detail->qty * $detail->price ) - $total_discount; //--- ยอดรวมสุดท้าย
-
-        $arr = array(
-              "discount1" => $discLabel[0],
-              "discount2" => $discLabel[1],
-              "discount3" => $discLabel[2],
-              "discount_amount"	=> $total_discount,
-              "total_amount" => $total_amount ,
-              "id_rule"	=> NULL,
-              "update_user" => $user
-            );
-
-        $cs = $this->orders_model->update_detail($detail->id, $arr);
-        if($cs)
-        {
-          $log_data = array(
-                        "order_code"		=> $code,
-                        "product_code"	=> $detail->product_code,
-                        "old_discount"	=> discountLabel($detail->discount1, $detail->discount2, $detail->discount3),
-                        "new_discount"	=> discountLabel($discLabel[0], $discLabel[1], $discLabel[2]),
-                        "user"	=> $user,
-                        "approver"		=> get_cookie('uname')
-                        );
-          $this->discount_logs_model->logs_discount($log_data);
-        }
-      }
-
-      $this->orders_model->set_status($code, 0);
-    }
-
-    echo 'success';
-  }
-
-
-  public function update_non_count_price()
-  {
-    $code = $this->input->post('order_code');
-    $id = $this->input->post('id_order_detail');
-    $price = $this->input->post('price');
-    $user = get_cookie('uname');
-
-    $order = $this->orders_model->get($code);
-    if($order->state == 8) //--- ถ้าเปิดบิลแล้ว
-    {
-      echo 'ไม่สามารถแก้ไขราคาได้ เนื่องจากออเดอร์ถูกเปิดบิลไปแล้ว';
-    }
-    else
-    {
-        //----- ข้ามรายการที่ไม่ได้กำหนดค่ามา
-        if( $price != "" )
-        {
-          //--- ได้ Obj มา
-          $detail = $this->orders_model->get_detail($id);
-
-          //--- ถ้ารายการนี้มีอยู่
-          if( $detail !== FALSE )
-          {
-            //------ คำนวณส่วนลดใหม่
-            $price_c = $price;
-  					$discAmount = 0;
-            $step = array($detail->discount1, $detail->discount2, $detail->discount3);
-            foreach($step as $discount)
-            {
-              $disc 	= explode('%', $discount);
-              $disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-              $discount = count($disc) == 1 ? $disc[0] : $price_c * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-              $discAmount += $discount;
-              $price_c -= $discount;
-            }
-
-            $total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-  					$total_amount = ( $detail->qty * $price ) - $total_discount; //--- ยอดรวมสุดท้าย
-
-            $arr = array(
-                  "price"	=> $price,
-                  "discount_amount"	=> $total_discount,
-                  "total_amount" => $total_amount,
-                  "update_user" => $user
-                );
-            $cs = $this->orders_model->update_detail($id, $arr);
-          }	//--- end if detail
-        } //--- End if value
-
-        $total_amount = $this->orders_model->get_order_total_amount($code);
-        $this->orders_model->update($code, ['doc_total' => $total_amount, 'status' => 0]);
-
-      echo 'success';
-    }
-  }
-
-
-  public function update_item_price()
-  {
-    $sc = TRUE;
-    $code = $this->input->post('order_code');
-    $value = $this->input->post('price');
-    $id = $this->input->post('id');
-
-    $order = $this->orders_model->get($code);
-
-    if( ! empty($order))
-    {
-      if($order->state < 8)
-      {
-        $detail = $this->orders_model->get_detail($id);
-
-        //--- ถ้ารายการนี้มีอยู่
-  			if( ! empty($detail))
-  			{
-					//------ คำนวณส่วนลดใหม่
-          $price = $value;
-					$discAmount = 0;
-					$step = array($detail->discount1, $detail->discount2, $detail->discount3);
-
-					foreach($step as $discount_text)
-					{
-						$disc 	= explode('%', $discount_text);
-						$disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-						$discount = count($disc) == 1 ? $disc[0] : $price * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-						$discAmount += $discount;
-						$price -= $discount;
-					}
-
-					$total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-					$total_amount = ( $detail->qty * $value ) - $total_discount; //--- ยอดรวมสุดท้าย
-
-					$arr = array(
-						'price' => $value,
-						'discount_amount' => $total_discount,
-						'total_amount' => $total_amount,
-						'update_user' => $this->_user->uname
-					);
-
-					if( ! $this->orders_model->update_detail($id, $arr))
-          {
-            $sc = FALSE;
-            $this->error = "Failed to update item price";
-          }
-          else
-          {
-            $total_amount = $this->orders_model->get_order_total_amount($code);
-            $this->orders_model->update($code, ['doc_total' => $total_amount, 'status' => 0]);
-          }
-  			}
-        else
-        {
-          $sc = FALSE;
-          $this->error = "Item not found in order or has removed from order";
-        }
-      }
-      else
-      {
-        $sc = FALSE;
-        $this->error = "Invalid order state";
-      }
-    }
-    else
-    {
-      $sc = FALSE;
-      $this->error = "Invalid order number";
-    }
-
-    $this->_response($sc);
-  }
-
-
-  public function update_price()
-  {
-    $code = $this->input->post('order_code');
-    $ds = $this->input->post('price');
-  	$approver	= $this->input->post('approver');
-  	$user = get_cookie('uname');
-    $this->load->model('orders/discount_logs_model');
-  	foreach( $ds as $id => $value )
-  	{
-  		//----- ข้ามรายการที่ไม่ได้กำหนดค่ามา
-  		if( $value != "" )
-  		{
-  			//--- ได้ Obj มา
-  			$detail = $this->orders_model->get_detail($id);
-
-  			//--- ถ้ารายการนี้มีอยู่
-  			if( ! empty($detail))
-  			{
-					//------ คำนวณส่วนลดใหม่
-					$price 	= $value;
-					$discAmount = 0;
-					$step = array($detail->discount1, $detail->discount2, $detail->discount3);
-					foreach($step as $discount_text)
-					{
-						$disc 	= explode('%', $discount_text);
-						$disc[0] = trim($disc[0]); //--- ตัดช่องว่างออก
-						$discount = count($disc) == 1 ? $disc[0] : $price * ($disc[0] * 0.01); //--- ส่วนลดต่อชิ้น
-						$discAmount += $discount;
-						$price -= $discount;
-					}
-
-					$total_discount = $detail->qty * $discAmount; //---- ส่วนลดรวม
-					$total_amount = ( $detail->qty * $value ) - $total_discount; //--- ยอดรวมสุดท้าย
-
-					$arr = array(
-						'price' => $value,
-						'discount_amount' => $total_discount,
-						'total_amount' => $total_amount,
-						'update_user' => $user
-					);
-
-					$cs = $this->orders_model->update_detail($id, $arr);
-
-					if($cs)
-					{
-						$log_data = array(
-							"order_code"		=> $code,
-							"product_code"	=> $detail->product_code,
-							"old_price"	=> $detail->price,
-							"new_price"	=> $value,
-							"user"	=> $user,
-							"approver"		=> $approver
-						);
-						$this->discount_logs_model->logs_price($log_data);
-					}
-
-  			}	//--- end if detail
-  		} //--- End if value
-  	}	//--- end foreach
-
-    $total_amount = $this->orders_model->get_order_total_amount($code);
-    $this->orders_model->update($code, ['doc_total' => $total_amount, 'status' => 0]);
-
-  	echo 'success';
-  }
-
-
-  public function get_summary()
-  {
-    $this->load->model('masters/bank_model');
-    $code = $this->input->post('order_code');
-    $order = $this->orders_model->get($code);
-    $details = $this->orders_model->get_order_details($code);
-    $bank = $this->bank_model->get_active_bank();
-    if( ! empty($details))
-    {
-      echo get_summary($order, $details, $bank); //--- order_helper;
-    }
   }
 
 
@@ -3319,57 +1709,6 @@ class Orders extends PS_Controller
   }
 
 
-
-  public function export_ship_to_address($id)
-  {
-    $this->load->model('address/customer_address_model');
-    $rs = $this->customer_address_model->get_customer_ship_to_address($id);
-    if( ! empty($rs))
-    {
-      $ex = $this->customer_address_model->is_sap_address_exists($rs->code, $rs->address_code, 'S');
-      if(! $ex)
-      {
-        $ds = array(
-          'Address' => $rs->address_code,
-          'CardCode' => $rs->customer_code,
-          'Street' => $rs->address,
-          'Block' => $rs->sub_district,
-          'ZipCode' => $rs->postcode,
-          'City' => $rs->province,
-          'County' => $rs->district,
-          'LineNum' => ($this->customer_address_model->get_max_line_num($rs->code, 'S') + 1),
-          'AdresType' => 'S',
-          'Address2' => '0000',
-          'Address3' => 'สำนักงานใหญ่',
-          'F_E_Commerce' => $ex ? 'U' : 'A',
-          'F_E_CommerceDate' => sap_date(now(), TRUE)
-        );
-
-        $this->customer_address_model->add_sap_ship_to($ds);
-      }
-      else
-      {
-        $ds = array(
-          'Address' => $rs->address_code,
-          'CardCode' => $rs->customer_code,
-          'Street' => $rs->address,
-          'Block' => $rs->sub_district,
-          'ZipCode' => $rs->postcode,
-          'City' => $rs->province,
-          'County' => $rs->district,
-          'AdresType' => 'S',
-          'Address2' => '0000',
-          'Address3' => 'สำนักงานใหญ่',
-          'F_E_Commerce' => $ex ? 'U' : 'A',
-          'F_E_CommerceDate' => sap_date(now(), TRUE)
-        );
-
-        $this->customer_address_model->update_sap_ship_to($rs->code, $rs->address_code, $ds);
-      }
-    }
-  }
-
-
   public function update_cod_amount()
   {
     $sc = TRUE;
@@ -3405,32 +1744,6 @@ class Orders extends PS_Controller
     }
 
     echo $sc === TRUE ? 'success' : $this->error;
-  }
-
-
-  public function get_template_file()
-  {
-    $path = $this->config->item('upload_path').'orders/';
-    $file_name = $path."import_order_template.xlsx";
-
-    if(file_exists($file_name))
-    {
-      header('Content-Description: File Transfer');
-      header('Content-Type:Application/octet-stream');
-      header('Cache-Control: no-cache, must-revalidate');
-      header('Expires: 0');
-      header('Content-Disposition: attachment; filename="'.basename($file_name).'"');
-      header('Content-Length: '.filesize($file_name));
-      header('Pragma: public');
-
-      flush();
-      readfile($file_name);
-      die();
-    }
-    else
-    {
-      echo "File Not Found";
-    }
   }
 
 }

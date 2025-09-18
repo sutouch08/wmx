@@ -1,121 +1,168 @@
 var zero_qty = 0;
+var click = 0;
 
-function saveConsign(){
-  var code = $('#consign_code').val();
-  var details = $('.rox').length;
-  if(details == 0){
-    swal("ไม่พบรายการสินค้า");
-    return false;
-  }
+function save() {
+  if(click == 0) {
+    click = 1;
+    clearErrorByClass('c');
+    error = 0;
 
-  check_zero();
+    let code = $('#consign_code').val();
+    let len = $('.input-qty').length;
 
-  if(zero_qty > 0){
-    swal("พบรายการที่เป็น 0");
-    return false;
-  }else{
-    $('.qty').css('color', '');
-  }
-
-  console.log(zero_qty);
-  swal({
-		title: "บันทึกขายและตัดสต็อก",
-		text: "เมื่อบันทึกแล้วจะไม่สามารถแก้ไขได้ ต้องการบันทึกหรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#8CC152",
-		confirmButtonText: 'บันทึก',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-		}, function(){
-      load_in();
-      $.ajax({
-        url: HOME + 'save_consign/'+code,
-        type:'POST',
-        cache:'false',
-        success:function(rs){
-          load_out();
-          if(rs == 'success'){
-            swal({
-              title:'Saved',
-              type:'success',
-              timer:1000
-            });
-
-            setTimeout(function(){
-              viewDetail(code);
-            },1500);
-          }else{
-            swal({
-              title:'Error!',
-              text: rs,
-              html:true,
-              type:'error'
-            })
-          }
-        }
-      });
-	});
-}
-
-
-function check_zero(){
-  zero_qty = 0;
-  $('.qty').each(function(){
-    var qty = parseInt($(this).text())
-    if(qty == 0){
-      var id = $(this).attr('id');
-      var arr = id.split('-');
-      if(arr.length == 2){
-        id = arr[1];
-        $('#row-'+id).css('color','red');
-        zero_qty++;
-      }
+    if(len == 0) {
+      swal("ไม่พบรายการสินค้า");
+      click = 0;
+      return false;
     }
-  })
+
+    $('.input-qty').each(function() {
+      let id = $(this).data('id');
+      let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+      let discount = $('#disc-'+id).val();
+      let disc = parseDiscount(discount, price);
+      let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
+      let amount = qty * (price - disc.discountAmount);
+
+      if(price < 0) {
+        $('#price-'+id).hasError();
+        error++;
+      }
+
+      if(disc.discountAmount < 0 || disc.discountAmount > price) {
+        $('#disc-'+id).hasError();
+        error++;
+      }
+
+      if(qty <= 0) {
+        $('#qty-'+id).hasError();
+        error++;
+      }
+    })
+
+    if(error > 0) {
+      click = 0;
+      swal("พบข้อผิดพลาด กรุณาแก้ไข");
+      return false;
+    }
+
+    swal({
+  		title: "บันทึกขายและตัดสต็อก",
+  		text: "เมื่อบันทึกแล้วจะไม่สามารถแก้ไขได้ ต้องการบันทึกหรือไม่ ?",
+  		type: "warning",
+  		showCancelButton: true,
+  		confirmButtonColor: "#8CC152",
+  		confirmButtonText: 'บันทึก',
+  		cancelButtonText: 'ยกเลิก',
+  		closeOnConfirm: true
+    },
+    function() {
+      load_in();
+
+      setTimeout(() => {
+        $.ajax({
+          url:HOME + 'save_consign/' + code,
+          type:'POST',
+          cache:false,
+          success:function(rs) {
+            click = 0;
+            load_out();
+
+            if(isJson(rs)) {
+              let ds = JSON.parse(rs);
+
+              if(ds.status === 'success') {
+
+                if(ds.ex == 1) {
+                  //-- ex = 1 mean save document success but export data to Oracle failed
+                  swal({
+                    title:'Oops !',
+                    text:ds.message,
+                    type:'info'
+                  }, function() {
+                    viewDetail(code);
+                  })
+                }
+                else {
+                  swal({
+                    title:'Success',
+                    type:'success',
+                    timer:1000
+                  });
+
+                  setTimeout(() => {
+                    viewDetail(code);
+                  }, 1200);
+                }
+              }
+              else {
+                beep();
+                showError(ds.message);
+              }
+            }
+            else {
+              beep();
+              showError(rs);
+            }
+          },
+          error:function(rs) {
+            beep();
+            showError(rs);
+            click = 0;
+          }
+        })
+      },100);
+    });
+  }
 }
 
-function unSaveConsign(){
-  var code = $('#consign_code').val();
-  msg  = '<center><span style="color:red;">ก่อนยืนยันการทำรายการนี้</span></center>';
-  msg += '<center><span style="color:red;">คุณต้องแน่ใจว่าได้ลบ เอกสารใน SAP แล้ว</span></center>';
-  msg += '<center><span style="color:red;">ต้องการยกเลิกการเปิดบิลหรือไม่</span></center>';
+
+function rollback() {
+  let code = $('#consign_code').val();
 
   swal({
-    title: "ยกเลิกการเปิดบิล ?",
-    text: msg,
+    title: "Rollback Status",
+    text: "ต้องการย้อนสถานะเอกสารกลับมาแก้ไขใหม่หรือไม่ ?",
     type: "warning",
-    html:true,
     showCancelButton: true,
-    confirmButtonColor: "#FA5858",
-    confirmButtonText: 'ใช่, ฉันต้องการ',
-    cancelButtonText: 'ยกเลิก',
-    closeOnConfirm: false
-    }, function(){
+    confirmButtonColor: "#8CC152",
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
+    closeOnConfirm: true
+  },
+  function() {
+    setTimeout(() => {
       load_in();
+
       $.ajax({
-        url: HOME + 'unsave_consign/'+code,
-        type:'POST',
-        cache:'false',
-        success:function(rs){
+        url:HOME + 'rollback/' + code,
+        typ:'GET',
+        cache:false,
+        success:function(rs) {
           load_out();
-          var rs = $.trim(rs);
-          if(rs == 'success'){
+
+          if(rs.trim() === 'success') {
             swal({
               title:'Success',
               type:'success',
               timer:1000
             });
 
-            setTimeout(function(){
+            setTimeout(() => {
               goEdit(code);
-            }, 1500);
-
-          }else{
-            swal('Error!', rs, 'error');
+            }, 1200);
           }
+          else {
+            beep();
+            showError(rs);
+          }
+        },
+        error:function(rs) {
+          beep();
+          showError(rs);
         }
-      });
+      })
+    }, 100)
   });
 }
 
@@ -272,6 +319,7 @@ function getEdit(){
 
 
 function update() {
+  
   let code = $('#consign_code').val();
   let date = $('#date').val();
   let remark = $('#remark').val();
@@ -346,15 +394,14 @@ function deleteDetail(id){
     url: HOME + 'delete_detail/'+id,
     type:'POST',
     cache:'false',
-    success:function(rs){
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-
+    success:function(rs) {
+      if(rs.trim() == 'success') {
         swal({
           title:'Deleted',
           type:'success',
           timer:1000
         });
+
         $('#row-'+id).remove();
         reIndex();
         updateTotalQty();
@@ -365,215 +412,6 @@ function deleteDetail(id){
 }
 
 
-
-function clearAll(){
-  swal({
-		title: "คุณแน่ใจ ?",
-		text: "ต้องการลบรายการทั้งหมด หรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#FA5858",
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-		}, function(){
-      deleteAllDetails();
-	});
-}
-
-
-function deleteAllDetails(){
-  var code = $('#consign_code').val();
-  $.ajax({
-    url: HOME + 'delete_all_details/'+code,
-    type:'POST',
-    cache:'false',
-    success:function(rs){
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-
-        swal({
-          title:'Deleted',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        }, 1500);
-      }
-    }
-  });
-}
-
-
-
-function unSave(id){
-  msg  = '<center><span style="color:red;">ก่อนยืนยันการทำรายการนี้</span></center>';
-  msg += '<center><span style="color:red;">คุณต้องแน่ใจว่าได้ลบ เอกสารใบสั่งซื้อ(SO) ใน Formula แล้ว</span></center>';
-  msg += '<center><span style="color:red;">ต้องการยกเลิกการเปิดบิลหรือไม่</span></center>';
-
-  swal({
-    title: "ยกเลิกการเปิดบิล ?",
-    text: msg,
-    type: "warning",
-    html:true,
-    showCancelButton: true,
-    confirmButtonColor: "#FA5858",
-    confirmButtonText: 'ใช่, ฉันต้องการลบ',
-    cancelButtonText: 'ยกเลิก',
-    closeOnConfirm: true
-    }, function(){
-      load_in();
-      $.ajax({
-        url:'controller/consignController.php?unSaveConsign',
-        type:'POST',
-        cache:'false',
-        data:{
-          'id_consign' : id
-        },
-        success:function(rs){
-          load_out();
-          var rs = $.trim(rs);
-          if(rs == 'success'){
-            swal({
-              title:'Success',
-              type:'success',
-              timer:1000
-            });
-
-            setTimeout(function(){
-              window.location.reload();
-            }, 1500);
-
-          }else{
-            swal('Error!', rs, 'error');
-          }
-        }
-      });
-  });
-}
-
-
-
-//--- ลบรายการนำเข้ายอดต่าง
-function clearImportDetail() {
-  let check_code = $('#ref_code').val();
-
-  if(check_code.length == 0) {
-    return false;
-  }
-
-  swal({
-		title: "คุณแน่ใจ ?",
-		text: "ต้องการลบรายการนำเข้าจาก '"+ check_code +"' หรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#FA5858",
-		confirmButtonText: 'ใช่, ฉันต้องการลบ',
-		cancelButtonText: 'ยกเลิก',
-    closeOnConfirm:false
-		}, function(){
-      load_in();
-      var code = $('#consign_code').val();
-
-      $.ajax({
-        url: HOME + 'remove_import_details/'+code,
-        type:'POST',
-        cache:'false',
-        data:{
-          'check_code' : check_code
-        },
-        success:function(rs){
-          load_out();
-          var rs = $.trim(rs);
-          if(rs == 'success'){
-            swal({
-              title:'Success',
-              type:'success',
-              timer:1000
-            });
-
-            setTimeout(function(){
-              window.location.reload();
-            }, 1500);
-
-          }else{
-            swal('Error!', rs, 'error');
-          }
-        }
-      });
-	});
-}
-
-
-function getActiveCheckList(){
-  var zone_code = $('#zone_code').val();
-  load_in();
-  $.ajax({
-    url:HOME + 'get_active_check_list/'+zone_code,
-    type:'GET',
-    cache:'false',
-    success:function(rs){
-      load_out();
-      if(isJson(rs)){
-        var source = $('#check-list-template').html();
-        var data = $.parseJSON(rs);
-        var output = $('#check-list-body');
-        render(source, data, output);
-        $('#check-list-modal').modal('show');
-      }else{
-        swal('Error', rs, 'error');
-      }
-    }
-  });
-}
-
-
-
-function loadCheckDiff(check_code){
-  $('#check-list-modal').modal('hide');
-  swal({
-    title: "นำเข้ายอดต่าง",
-		text: "ต้องการนำเข้ายอดต่างจากเอกสารกระทบยอด "+check_code+" หรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonText: 'ใช่, ฉันต้องการ',
-		cancelButtonText: 'ยกเลิก',
-		closeOnConfirm: false
-  },function(){
-    var code = $('#consign_code').val();
-    load_in();
-    $.ajax({
-      url: HOME + 'load_check_diff/'+code,
-      type:'POST',
-      cache:'false',
-      data:{
-        'check_code' : check_code
-      },
-      success:function(rs){
-        load_out();
-        var rs = $.trim(rs);
-        if(rs == 'success'){
-          swal({
-            title: 'Success',
-            type:'success',
-            timer:1000
-          });
-
-          setTimeout(function(){
-            window.location.reload();
-          },1500);
-        }else{
-          swal('Error!', rs, 'error');
-        }
-      }
-    });
-
-  });//--- swal
-}
-
-
 function getSample(){
   var token	= new Date().getTime();
 	get_download(token);
@@ -581,17 +419,14 @@ function getSample(){
 }
 
 
-
 function getUploadFile(){
   $('#upload-modal').modal('show');
 }
 
 
-
 function getFile(){
   $('#uploadFile').click();
 }
-
 
 $("#uploadFile").change(function(){
 	if($(this).val() != '')
@@ -611,7 +446,6 @@ $("#uploadFile").change(function(){
     $('#show-file-name').text(name);
 	}
 });
-
 
 
 function uploadfile(){

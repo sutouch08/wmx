@@ -130,6 +130,55 @@ class stock_model extends CI_Model
     return $stock + $buffer + $cancel;
   }
 
+  //---- ยอดรวมสินค้าในคลังที่สั่งได้ ยอดในโซน
+  public function get_sell_items_stock(array $items = array(), $warehouse = NULL, $zone = NULL)
+  {
+    $this->db
+    ->select('s.product_code')
+    ->select_sum('s.qty')
+    ->from('stock AS s')
+    ->join('zone AS z', 's.zone_code = z.code', 'left');
+
+    if(empty($warehouse))
+    {
+      $this->db
+      ->join('warehouse AS w', 'z.warehouse_code = w.code', 'left')
+      ->where_in('w.role', [1, 3, 5]);
+    }
+    else
+    {
+      $this->db->where('z.warehouse_code', $warehouse);
+    }
+
+    if( ! empty($zone))
+    {
+      $this->db->where('s.zone_code', $zone);
+    }
+
+    $rs = $this->db
+    ->where_in('s.product_code', $items)
+    ->group_by('s.product_code')
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      $stockList = [];
+
+      foreach($rs->result() as $ro)
+      {
+        $stock = intval($ro->qty);
+        $buffer = $this->get_buffer_stock($ro->product_code, $warehouse, $zone);
+        $cancel = $this->get_cancel_stock($ro->product_code, $warehouse, $zone);
+
+        $stockList[$ro->product_code] = $stock + $buffer + $cancel;
+      }
+
+      return $stockList;
+    }
+
+    return NULL;
+  }
+
 
   public function get_buffer_stock($sku, $warehouse_code = NULL, $zone_code = NULL)
   {
@@ -351,15 +400,12 @@ class stock_model extends CI_Model
 
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
-    if(!empty($ds['item_code']) OR !empty($ds['zone_code']))
+    if( ! empty($ds['item_code']) OR !empty($ds['zone_code']))
     {
-      $itemCode = $ds['item_code'];
-      $zoneCode = $ds['zone_code'];
-
       $this->db
       ->select('product_code, zone_code, qty')
-      ->select('qty, product_code, zone_code')
-      ->where('qty !=', 0);
+      ->select('qty, product_code, zone_code');
+      // ->where('qty !=', 0);
 
       if( ! empty($ds['item_code']))
       {
@@ -375,6 +421,40 @@ class stock_model extends CI_Model
       ->order_by('product_code', 'ASC')
       ->order_by('zone_code', 'ASC')
       ->limit($perpage, $offset)->get($this->tb);
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
+
+
+  public function get_export_list(array $ds = array())
+  {
+    if( ! empty($ds['item_code']) OR !empty($ds['zone_code']))
+    {
+      $this->db
+      ->select('product_code, zone_code, qty')
+      ->select('qty, product_code, zone_code');
+      // ->where('qty !=', 0);
+
+      if( ! empty($ds['item_code']))
+      {
+        $this->db->like('product_code', $ds['item_code']);
+      }
+
+      if( ! empty($ds['zone_code']))
+      {
+        $this->db->like('zone_code', $ds['zone_code']);
+      }
+
+      $rs = $this->db
+      ->order_by('product_code', 'ASC')
+      ->order_by('zone_code', 'ASC')
+      ->get($this->tb);
 
       if($rs->num_rows() > 0)
       {

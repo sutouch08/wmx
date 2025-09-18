@@ -541,67 +541,8 @@ function validUpdate(){
 }
 
 
-function updateOrder(recal){
-	var order_code = $("#order_code").val();
-	var date_add = $("#date").val();
-	var customer_code = $("#customerCode").val();
-  var customer_name = $("#customer").val();
-  var customer_ref = $('#customer_ref').val();
-	var channels_code = $("#channels").val();
-	var payment_code = $("#payment").val();
-	var reference = $('#reference').val();
-  var warehouse_code = $('#warehouse').val();
-	var transformed = $('#transformed').val();
-	var remark = $("#remark").val();
-
-	load_in();
-
-	$.ajax({
-		url:BASE_URL + 'orders/orders/update_order',
-		type:"POST",
-		cache:"false",
-		data:{
-      "order_code" : order_code,
-  		"date_add"	: date_add,
-  		"customer_code" : customer_code,
-      "customer_ref" : customer_ref,
-  		"channels_code" : channels_code,
-  		"payment_code" : payment_code,
-  		"reference" : reference,
-      "warehouse_code" : warehouse_code,
-  		"remark" : remark,
-			"transformed" : transformed,
-      "recal" : recal
-    },
-		success: function(rs){
-			load_out();
-			var rs = $.trim(rs);
-			if( rs == 'success' ){
-				swal({
-          title: 'Done !',
-          type: 'success',
-          timer: 1000
-        });
-
-				setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-
-			}else{
-				swal({
-          title: "Error!",
-          text: rs,
-          type: 'error',
-          html:true
-        });
-			}
-		}
-	});
-}
-
-
-function recalDiscount(){
-	updateOrder(1);
+function cancelOrder() {
+  showCancleModal();
 }
 
 
@@ -621,7 +562,6 @@ function changeState(){
     showCancleModal();
     return false;
   }
-
 
   if( state != 0){
     load_in();

@@ -1,58 +1,56 @@
 var click = 0;
 
-$('.input-qty').focus(function() {
-	$(this).select();
-})
+window.addEventListener('load', () => {
+	var whsCode = $('#warehouse-code').val();
+
+	$('.input-qty').focus(function() {
+		$(this).select();
+	})
 
 
-$('.input-qty').keyup(function(e) {
-	if(e.keyCode === 13) {
-		let no = parseDefault(parseInt($(this).data('no')), 1);
-		no++;
-		$('.input-'+no).focus().select();
-	}
-})
-
-
-$('#barcode-zone').keyup(function(e) {
-	if(e.keyCode === 13) {
-		setTimeout(() => {
-			getZone();
-		},200);
-	}
-})
-
-
-$('#barcode-zone').change(function() {
-	let code = $(this).val().trim();
-
-	if(code.length == 0) {
-		$('#zone-code').val('');
-		$('#zone-name').val('');
-	}
-	else {
-		getZone();
-	}
-})
-
-
-$('#barcode-zone').autocomplete({
-	source:BASE_URL + 'auto_complete/get_zone_code_and_name',
-	autoFocus:true,
-	close:function() {
-		let arr = $(this).val().split(' | ');
-
-		if(arr.length == 2) {
-			$(this).val(arr[0]);
-			$('#zone-code').val(arr[0]);
-			$('#zone-name').val(arr[1]);
+	$('.input-qty').keyup(function(e) {
+		if(e.keyCode === 13) {
+			let no = parseDefault(parseInt($(this).data('no')), 1);
+			no++;
+			$('.input-'+no).focus().select();
 		}
-		else {
-			$(this).val('');
-			$('#zone-code').val('');
-			$('#zone-name').val('');
+	})
+
+
+	$('#barcode-zone').keyup(function(e) {
+		if(e.keyCode === 13) {
+			setTimeout(() => {
+				getZone();
+			},200);
 		}
-	}
+	})
+
+
+	$('#barcode-zone').autocomplete({
+		source:BASE_URL + 'auto_complete/get_zone_code_and_name/' + whsCode,
+		autoFocus:true,
+		close:function() {
+			let arr = $(this).val().split(' | ');
+
+			if(arr.length == 2) {
+				$(this).val(arr[0]);
+				$('#zone-code').val(arr[0]);
+				$('#zone-name').val(arr[1]);
+
+				getZone();
+			}
+			else {
+				$(this).val('');
+				$('#zone-code').val('');
+				$('#zone-name').val('');
+			}
+		}
+	})
+
+	$('.bc').click(function() {
+		let bc = $(this).text().trim();
+		$('#barcode').val(bc).focus();
+	})
 })
 
 
@@ -252,12 +250,14 @@ function getZone() {
 					let ds = JSON.parse(rs);
 
 					if(ds.status === 'success') {
-
 						if(ds.data.active == 1) {
 							$('#zone-code').val(ds.data.code);
 							$('#zone-name').val(ds.data.name);
 							$('#qty').val(1);
-							$('#barcode').val('').focus();
+
+							setTimeout(() => {
+								$('#barcode').val('').focus();
+							}, 200)
 						}
 						else {
 							showError("This zone is inactive");

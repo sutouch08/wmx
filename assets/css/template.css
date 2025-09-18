@@ -910,8 +910,8 @@ hr.padding-5 {
     margin-bottom:10px;
     padding-top: 10px;
     padding-bottom: 10px;
-    text-align: center;
-    background-color: #eee;
+    /* text-align: center; */
+    /* background-color: #eee; */
   }
 
 }
@@ -1190,10 +1190,20 @@ hr.padding-5 {
   min-width: 100px;
 }
 
+.btn-80 {
+  min-width: 80px;
+}
+
 .btn-50 {
   min-width: 50px;
 }
 
+.goBack {
+  display: inline-table;
+  width:35px;
+  padding:3px;
+  cursor: pointer;
+}
 
 .btn-block + .btn-block {
   margin-top:0px !important;

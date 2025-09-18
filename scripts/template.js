@@ -425,6 +425,7 @@ $('.search-box').keyup(function(e){
 	}
 });
 
+
 $('.search').keyup(function(e){
 	if(e.keyCode === 13) {
 		getSearch();

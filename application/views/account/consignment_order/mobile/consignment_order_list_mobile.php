@@ -1,4 +1,4 @@
-<?php $this->load->view('include/header'); ?>
+<?php $this->load->view('include/header_mobile'); ?>
 <div class="row">
   <div class="col-lg-6 col-md-6 col-sm-8 col-xs-8 padding-5">
     <h4 class="title"><?php echo $this->title; ?></h4>
@@ -145,4 +145,4 @@
  </div>
  <?php $this->load->view('cancel_modal'); ?>
 <script src="<?php echo base_url(); ?>scripts/account/consignment_order/consignment_order.js?v=<?php echo date('Ymd'); ?>"></script>
-<?php $this->load->view('include/footer'); ?>
+<?php $this->load->view('include/footer_mobile'); ?>

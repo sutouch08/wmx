@@ -768,7 +768,7 @@ class Receive_po extends PS_Controller
 
           if($sc === TRUE)
           {
-            if(is_true(getConfig('WRX_IB_INTERFACE')))
+            if(is_true(getConfig('WRX_GRPO_INTERFACE')))
             {
               $this->load->library('wrx_ib_api');
 
@@ -816,7 +816,7 @@ class Receive_po extends PS_Controller
 
     if( ! empty($code))
     {
-      if(is_true(getConfig('WRX_IB_INTERFACE')))
+      if(is_true(getConfig('WRX_GRPO_INTERFACE')))
       {
         $doc = $this->receive_po_model->get($code);
 
@@ -1138,7 +1138,7 @@ class Receive_po extends PS_Controller
               {
                 if($ds->save_type == '1')
                 {
-                  if(is_true(getConfig('WRX_IB_INTERFACE')))
+                  if(is_true(getConfig('WRX_GRPO_INTERFACE')))
                   {
                     $this->load->library('wrx_ib_api');
 

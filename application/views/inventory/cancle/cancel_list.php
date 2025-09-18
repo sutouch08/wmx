@@ -53,7 +53,7 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-striped border-1 no-border-xs">
+		<table class="table table-striped border-1 no-border-xs" style="margin-bottom:100px;">
 			<tr class="font-size-11">
 				<th class="fix-width-50 text-center hidden-xs">#</th>
 				<th class="fix-width-100 text-center hidden-xs">วันที่</th>
@@ -62,7 +62,7 @@
 				<th class="fix-width-80 text-center hidden-xs">จำนวน</th>
 				<th class="fix-width-100 text-center hidden-xs">สถานะ</th>
 				<th class="fix-width-150 hidden-xs">โซน</th>
-				<th class="fix-width-80 hidden-xs"></th>
+				<th class="fix-width-40 hidden-xs"></th>
 				<th class="width-100 hide"></th>
 			</tr>
 			<tbody>
@@ -79,41 +79,57 @@
 							<td class=" hidden-xs"> <?php echo $rs->zone_code; ?></td>
 							<td class=" hidden-xs">
 								<?php if($this->pm->can_edit) : ?>
-								<button type="button"
-									class="btn btn-minier btn-primary"
-									onclick="moveBack(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')">
-									<i class="fa fa-reply"></i></button>
-								<?php endif; ?>
-								<?php if($this->pm->can_delete) : ?>
-									<button type="button"
-										class="btn btn-minier btn-danger"
-										onclick="removeCancel(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')">
-										<i class="fa fa-trash"></i></button>
+									<div class="btn-group">
+										<button data-toggle="dropdown" class="btn btn-link btn-options" style="padding: 0 !important;" aria-expanded="false">
+											<i class="ace-icon fa fa-bars icon-on-left fa-lg"></i>
+										</button>
+										<ul class="dropdown-menu dropdown-menu-right">
+											<li class="success">
+												<a href="#" onclick="moveBack(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-refresh"></i> &nbsp; ย้ายกลับที่เดิม</a>
+											</li>
+											<li class="primary hide">
+												<a href="#" onclick="moveTo(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-external-link"></i> &nbsp; ย้ายไปที่อื่น</a>
+											</li>
+											<?php if($this->_SuperAdmin) : ?>
+												<li class="danger">
+													<a href="#" onclick="removeCancel(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-trash"></i> &nbsp; ลบรายการ</a>
+												</li>
+											<?php endif; ?>
+										</ul>
+									</div>
 								<?php endif; ?>
 							</td>
 							<td class="visible-xs" style="border:0px; padding:3px; font-size:14px;">
 								<div class="col-xs-12" style="border:solid 1px #ccc; border-radius:5px; box-shadow:0px 1px 2px #f3ecec; padding:5px;">
 									<div class="width-100" style="padding: 3px 3px 3px 10px;">
-										<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>วันที่ : </b><?php echo thai_date($rs->date_upd,); ?></div>
-										<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>เลขที่ : </b><?php echo $rs->order_code; ?></div>
-										<div class="listing width-100 margin-bottom-3 font-size-11 pre-wrap"><b>สินค้า : </b><?php echo $rs->product_code; ?></div>
-										<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>โซน : </b> <?php echo $rs->zone_code; ?></div>
-										<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>จำนวน : </b> <?php echo number($rs->qty); ?></div>
-										<div class="listing width-50 margin-bottom-3 font-size-11 pre-wrap"><b>สถานะ : </b><?php echo $rs->state_name; ?></div>
-										<div class="listing width-50 margin-top-15 text-right">
+										<div class="listing width-60 margin-bottom-3 font-size-11 pre-wrap"><b>เลขที่ : </b><?php echo $rs->order_code; ?></div>
+										<div class="listing width-30 margin-bottom-3 font-size-11 pre-wrap"><b>วันที่ : </b><?php echo thai_date($rs->date_upd,); ?></div>
+										<div class="listing width-10 text-right">
 											<?php if($this->pm->can_edit) : ?>
-												<button type="button"
-												class="btn btn-minier btn-primary btn-50"
-												onclick="moveBack(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')">
-												<i class="fa fa-reply"></i>&nbsp; ย้ายกลับ</button>
-											<?php endif; ?>
-											<?php if($this->_SuperAdmin) : ?>
-												<button type="button"
-												class="btn btn-minier btn-danger"
-												onclick="removeCancel(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')">
-												<i class="fa fa-trash"></i></button>
+												<div class="btn-group">
+													<button data-toggle="dropdown" class="btn btn-link btn-options" style="padding: 0 !important;" aria-expanded="false">
+														<i class="ace-icon fa fa-bars icon-on-left"></i>
+													</button>
+													<ul class="dropdown-menu dropdown-menu-right">
+														<li class="success">
+															<a href="#" onclick="moveBack(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-refresh"></i> &nbsp; ย้ายกลับที่เดิม</a>
+														</li>
+														<li class="primary hide">
+															<a href="#" disabled onclick="moveTo(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-external-link"></i> &nbsp; ย้ายไปที่อื่น</a>
+														</li>
+														<?php if($this->_SuperAdmin) : ?>
+															<li class="danger">
+																<a href="#" onclick="removeCancel(<?php echo $rs->id; ?>, '<?php echo $rs->product_code; ?>', '<?php echo $rs->zone_name; ?>')"><i class="fa fa-trash"></i> &nbsp; ลบรายการ</a>
+															</li>
+														<?php endif; ?>
+													</ul>
+												</div>
 											<?php endif; ?>
 										</div>
+										<div class="listing width-60 margin-bottom-3 font-size-11 pre-wrap"><b>สินค้า : </b><?php echo $rs->product_code; ?></div>
+										<div class="listing width-40 margin-bottom-3 font-size-11 pre-wrap"><b>จำนวน : </b> <?php echo number($rs->qty); ?></div>
+										<div class="listing width-60 margin-bottom-3 font-size-11 pre-wrap"><b>โซน : </b> <?php echo $rs->zone_code; ?></div>
+										<div class="listing width-40 margin-bottom-3 font-size-11 pre-wrap"><b>สถานะ : </b><?php echo $rs->state_name; ?></div>
 									</div>
 								</div>
 

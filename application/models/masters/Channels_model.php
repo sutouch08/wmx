@@ -87,7 +87,7 @@ class Channels_model extends CI_Model
       $this->db->where('is_online', $ds['is_online']);
     }
 
-    $this->db->order_by('position', 'ASC')->order_by('id', 'ASC');
+    $this->db->order_by('position', 'ASC')->order_by('name', 'ASC');
 
     $rs = $this->db->limit($perpage, $offset)->get($this->tb);
 

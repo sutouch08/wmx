@@ -102,73 +102,6 @@
 
 <hr class="padding-5"/>
 
-<div class="modal fade" id="cancle-shipped-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
- <div class="modal-dialog" style="width:500px;">
-   <div class="modal-content">
-       <div class="modal-header">
-       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-       <h4 class="modal-title">เหตุผลในการยกเลิก</h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-sm-9">
-            <input type="text" class="form-control input-sm" id="cancle-shipped-reason" value=""/>
-          </div>
-          <div class="col-sm-3">
-            <button type="button" class="btn btn-sm btn-info" onclick="cancle_order_shipped()">ตกลง</button>
-          </div>
-        </div>
-
-       </div>
-      <div class="modal-footer">
-
-      </div>
-   </div>
- </div>
-</div>
-
-
-<div class="modal fade" id="tracking-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
- <div class="modal-dialog" style="width:500px;">
-   <div class="modal-content">
-       <div class="modal-header">
-       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-       <h4 class="modal-title">Tracking No</h4>
-      </div>
-      <div class="modal-body">
-        <div class="row">
-          <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive">
-            <table class="table table-striped">
-              <thead>
-                <tr>
-                  <th class="fix-width-150">Tracking No</th>
-                  <th class="fix-width-120">Carton No</th>
-                  <th class="fix-width-100">Qty</th>
-                </tr>
-              </thead>
-              <tbody>
-          <?php if( ! empty($tracking)) : ?>
-            <?php foreach($tracking as $rs) : ?>
-              <tr>
-                <td><?php echo $rs->tracking_no; ?></td>
-                <td><?php echo $rs->carton_code; ?></td>
-                <td><?php echo number($rs->qty); ?></td>
-              </tr>
-            <?php endforeach; ?>
-          <?php else : ?>
-            <tr>
-              <td colspan="3" class="text-center">-- No Tracking Number ---</td>
-            </tr>
-          <?php endif; ?>
-              </tbody>
-            </table>
-          </div>
-        </div>
-       </div>
-   </div>
- </div>
-</div>
-
 <div class="modal fade" id="backlogs-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
  <div class="modal-dialog" style="min-width:500px; max-width:95vw;">
    <div class="modal-content">
@@ -215,10 +148,6 @@
 
 function showBacklogs() {
   $('#backlogs-modal').modal('show');
-}
-
-function show_tracking() {
-  $('#tracking-modal').modal('show');
 }
 
 function updateShpToAddress() {

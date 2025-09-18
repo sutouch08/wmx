@@ -125,7 +125,7 @@ class Prepare extends PS_Controller
       $filter['orders'] = $orders;
 
   		$this->pagination->initialize($init);
-      
+
       if($this->is_mobile)
       {
         $this->load->view('inventory/prepare/prepare_view_process_mobile', $filter);

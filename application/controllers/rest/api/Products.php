@@ -117,42 +117,7 @@ class Products extends REST_Controller
 
     if($sc === TRUE)
     {
-      $id = $this->products_model->get_id(trim($ds->code));
-
-      // if( ! empty($ds->barcode))
-      // {
-      //   if($this->products_model->is_exists_barcode(trim($ds->barcode), $id))
-      //   {
-      //     $sc = FALSE;
-      //
-      //     $this->error = "Barcode {$ds->barcode} already exists with another SKU";
-      //
-      //     $arr = array(
-      //       'trans_id' => $trans_id,
-      //       'status' => FALSE,
-      //       'error' => $this->error
-      //     );
-      //
-      //     if($this->logs_json)
-      //     {
-      //       $logs = array(
-      //         'trans_id' => $trans_id,
-      //         'api_path' => $this->api_path,
-      //         'type' => $type,
-      //         'code' => $ds->code,
-      //         'action' => $action,
-      //         'status' => 'failed',
-      //         'message' => $this->error,
-      //         'request_json' => $json,
-      //         'response_json' => json_encode($arr)
-      //       );
-      //
-      //       $this->api_logs_model->add_logs($logs);
-      //     }
-      //
-      //     $this->response($arr, 200);
-      //   }
-      // }
+      $id = $this->products_model->get_id(trim($ds->code));      
 
       if($sc === TRUE)
       {

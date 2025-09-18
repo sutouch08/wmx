@@ -1,24 +1,54 @@
 function doCancle() {
-  $('#reason-id').removeClass('has-error');
-  $('#cancle-reason').removeClass('has-error');
+  $('#reason-id').clearError();
+  $('#cancle-reason').clearError();
 
-  let reason_id = $('#reason-id').val();
-  let reason = $.trim($('#cancle-reason').val());
+  let h = {
+    'code' : $('#order_code').val(),
+    'reason_id' : $('#reason-id').val(),
+    'reason' : $('#cancle-reason').val().trim()
+  };
 
-  if(reason_id == '') {
-    $('#reason-id').addClass('has-error');
+  if(h.reason_id == '') {
+    $('#reason-id').hasError();
     return false;
   }
 
-	if( reason.length < 10) {
-		$('#cancle-reason').addClass('has-error').focus();
-		return false;
-	}
-
 	$('#cancle-modal').modal('hide');
 
-	return changeState();
+	load_in();
+
+  $.ajax({
+    url:HOME + 'cancel_order',
+    type:'POST',
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 1200);
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+    }
+  })
 }
+
 
 $('#cancle-modal').on('shown.bs.modal', function() {
 	$('#cancle-reason').focus();

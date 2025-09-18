@@ -8,7 +8,7 @@ class Consign_order extends PS_Controller
 	public $title = 'ตัดยอดฝากขาย';
   public $filter;
   public $error = "";
-  
+
   public function __construct()
   {
     parent::__construct();
@@ -154,7 +154,9 @@ class Consign_order extends PS_Controller
   public function edit($code)
   {
     $doc = $this->consign_order_model->get($code);
+
     $details = $this->consign_order_model->get_details($code);
+
     if( ! empty($details))
     {
       foreach($details as $rs)
@@ -162,6 +164,7 @@ class Consign_order extends PS_Controller
         $rs->barcode = $this->products_model->get_barcode($rs->product_code);
       }
     }
+    
     $gb_auz = getConfig('ALLOW_UNDER_ZERO');
     $wh_auz = $this->warehouse_model->is_auz($doc->warehouse_code);
     $auz = $gb_auz == 1 ? 1 : ($wh_auz === TRUE ? 1 : 0);

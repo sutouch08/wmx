@@ -5,9 +5,9 @@
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
 		<?php if($this->pm->can_add) : ?>
-			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"></i class="fa fa-plus"></i> Add New</button>
+			<button type="button" class="btn btn-xs btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
 		<?php endif; ?>
-
+		<button type="button" class="btn btn-xs btn-white btn-purple top-btn" onclick="exportFilter()"><i class="fa fa-file-excel-o"></i> Export</button>
   </div>
 </div><!-- End Row -->
 <hr/>
@@ -18,13 +18,22 @@
 			<input type="text" class="form-control input-sm" name="code" id="code" value="<?php echo $code; ?>" />
 		</div>
 
-		<div class="col-lg-1-harf col-md-2 col-sm-3 col-xs-6 padding-5">
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 			<label>ประเภท</label>
 			<select class="form-control input-sm filter" name="role" id="role" onchange="getSearch()">
 				<option value="all">ทั้งหมด</option>
 				<?php echo select_warehouse_role($role); ?>
 			</select>
 		</div>
+
+		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
+	    <label>คลังเทียม</label>
+	    <select class="form-control input-sm filter" name="is_consignment" id="is_consignment" onchange="getSearch()">
+				<option value="all">ทั้งหมด</option>
+				<option value="1" <?php echo is_selected('1', $is_consignment); ?>>YES</option>
+				<option value="0" <?php echo is_selected('0', $is_consignment); ?>>NO</option>
+			</select>
+	  </div>
 
 		<div class="col-lg-1 col-md-1-harf col-sm-2 col-xs-4 padding-5">
 			<label>สถานะ</label>
@@ -71,10 +80,6 @@
 			<label class="display-block not-show">buton</label>
 			<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()">Reset</button>
 		</div>
-		<div class="col-lg-1 col-md-1-harf col-sm-1-harf hidden-xs padding-5">
-			<label class="display-block not-show">buton</label>
-			<button type="button" class="btn btn-xs btn-white btn-purple btn-block" onclick="exportFilter()"><i class="fa fa-file-excel-o"></i> Export</button>
-		</div>
 	</div>
 	<input type="hidden" name="search" value="1" />
 </form>
@@ -96,7 +101,7 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-hover border-1" style="min-width:1010px;">
+		<table class="table table-hover border-1" style="min-width:1090px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-100 middle"></th>
@@ -109,6 +114,7 @@
 					<th class="fix-width-60 middle text-center">จัด</th>
 					<th class="fix-width-60 middle text-center">ยืม</th>
 					<th class="fix-width-60 middle text-center">Active</th>
+					<th class="fix-width-80 middle text-center">คลังเทียม</th>
 					<th class="fix-width-100 middle text-center">แก้ไข</th>
 				</tr>
 			</thead>
@@ -138,6 +144,7 @@
 						<td class="middle text-center"><?php echo is_active($rs->prepare); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->lend); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->active); ?></td>
+						<td class="middle text-center"><?php echo is_active($rs->is_consignment); ?></td>
 						<td class="middle text-center"><?php echo $rs->update_user; ?></td>
 					</tr>
 					<?php $no++; ?>

@@ -66,20 +66,16 @@ class Consign_order_model extends CI_Model
   }
 
 
-
   public function update_ref_code($code, $check_code)
   {
     return $this->db->set('ref_code', $check_code)->where('code', $code)->update($this->tb);
   }
 
 
-
   public function drop_import_details($code, $check_code)
   {
     return $this->db->where('consign_code', $code)->where('ref_code', $check_code)->delete($this->td);
   }
-
-
 
 
   public function has_saved_imported($code, $check_code)
@@ -100,10 +96,10 @@ class Consign_order_model extends CI_Model
   }
 
 
-
   public function get($code)
   {
     $rs = $this->db->where('code', $code)->get($this->tb);
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -128,17 +124,7 @@ class Consign_order_model extends CI_Model
 
   public function get_details($code)
   {
-    $this->db
-    ->select('consign_order_detail.*')
-    ->from($this->td)
-    ->join('products', 'consign_order_detail.product_code = products.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left')
-    ->where('consign_code', $code)
-    ->order_by('products.style_code', 'ASC')
-    ->order_by('products.color_code', 'ASC')
-    ->order_by('product_size.position', 'ASC');
-
-    $rs = $this->db->get();
+    $rs = $this->db->where('consign_code', $code)->get($this->td);
 
     if($rs->num_rows() > 0)
     {
@@ -152,7 +138,7 @@ class Consign_order_model extends CI_Model
   public function get_detail($id)
   {
     $rs = $this->db->where('id', $id)->get($this->td);
-    
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();

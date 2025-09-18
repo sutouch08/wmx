@@ -1,11 +1,12 @@
 <?php
 class Consignment_order_model extends CI_Model
 {
+  private $tb = "consignment_order";
+  private $td = "consignment_order_detail";
 
   public function __construct()
   {
     parent::__construct();
-
   }
 
 
@@ -13,7 +14,7 @@ class Consignment_order_model extends CI_Model
   {
     if(!empty($ds))
     {
-      return $this->db->insert('consignment_order', $ds);
+      return $this->db->insert($this->tb, $ds);
     }
 
     return FALSE;
@@ -24,7 +25,7 @@ class Consignment_order_model extends CI_Model
   {
     if(!empty($ds))
     {
-      $this->db->insert('consignment_order_detail', $ds);
+      $this->db->insert($this->td, $ds);
       return $this->db->insert_id();
     }
 
@@ -36,7 +37,7 @@ class Consignment_order_model extends CI_Model
   {
     if(! empty($ds))
     {
-      return $this->db->where('code', $code)->update('consignment_order', $ds);
+      return $this->db->where('code', $code)->update($this->tb, $ds);
     }
 
     return FALSE;
@@ -47,27 +48,34 @@ class Consignment_order_model extends CI_Model
   {
     if(! empty($ds))
     {
-      return $this->db->where('id', $id)->update('consignment_order_detail', $ds);
+      return $this->db->where('id', $id)->update($this->td, $ds);
     }
 
     return FALSE;
   }
 
 
+  public function update_details($code, $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->where('consign_code', $code)->update($this->td, $ds);
+    }
+
+    return FALSE;
+  }
+
 
   public function update_ref_code($code, $check_code)
   {
-    return $this->db->set('ref_code', $check_code)->where('code', $code)->update('consignment_order');
+    return $this->db->set('ref_code', $check_code)->where('code', $code)->update($this->tb);
   }
-
 
 
   public function drop_import_details($code, $check_code)
   {
-    return $this->db->where('consign_code', $code)->where('ref_code', $check_code)->delete('consignment_order_detail');
+    return $this->db->where('consign_code', $code)->where('ref_code', $check_code)->delete($this->td);
   }
-
-
 
 
   public function has_saved_imported($code, $check_code)
@@ -77,7 +85,7 @@ class Consignment_order_model extends CI_Model
     ->where('ref_code', $check_code)
     ->where('status', 1)
     ->limit(1)
-    ->get('consignment_order_detail');
+    ->get($this->td);
 
     if($rs->num_rows() > 0)
     {
@@ -88,10 +96,9 @@ class Consignment_order_model extends CI_Model
   }
 
 
-
   public function get($code)
   {
-    $rs = $this->db->where('code', $code)->get('consignment_order');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -99,33 +106,25 @@ class Consignment_order_model extends CI_Model
 
     return FALSE;
   }
-
 
 
   public function get_details($code)
   {
-    $this->db
-    ->select('consignment_order_detail.*')
-    ->from('consignment_order_detail')
-    ->join('products', 'consignment_order_detail.product_code = products.code', 'left')
-    ->join('product_size', 'products.size_code = product_size.code', 'left')
-    ->where('consign_code', $code)
-    ->order_by('products.style_code', 'ASC')
-    ->order_by('products.color_code', 'ASC')
-    ->order_by('product_size.position', 'ASC');
-    $rs = $this->db->get();
+    $rs = $this->db->where('consign_code', $code)->get($this->td);
 
-    if($rs->num_rows() >0)
+    if($rs->num_rows() > 0)
     {
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
+
 
   public function get_detail($id)
   {
-    $rs = $this->db->where('id', $id)->get('consignment_order_detail');
+    $rs = $this->db->where('id', $id)->get($this->td);
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -133,7 +132,6 @@ class Consignment_order_model extends CI_Model
 
     return FALSE;
   }
-
 
 
   public function get_exists_detail($code, $product_code, $price, $discountLabel, $input_type)
@@ -145,7 +143,8 @@ class Consignment_order_model extends CI_Model
     ->where('discount', $discountLabel)
     ->where('input_type', $input_type)
     ->where('status', 0)
-    ->get('consignment_order_detail');
+    ->get($this->td);
+
     if($rs->num_rows() === 1)
     {
       return $rs->row();
@@ -155,22 +154,32 @@ class Consignment_order_model extends CI_Model
   }
 
 
-
   public function delete_detail($id)
   {
-    return $this->db->where('id', $id)->delete('consignment_order_detail');
+    return $this->db->where('id', $id)->delete($this->td);
+  }
+
+
+  public function delete_details_by_ids(array $ids = array())
+  {
+    if( ! empty($ids))
+    {
+      return $this->db->where_in('id', $ids)->delete($this->td);
+    }
+
+    return FALSE;
   }
 
 
   public function drop_details($code)
   {
-    return $this->db->where('consign_code', $code)->delete('consignment_order_detail');
+    return $this->db->where('consign_code', $code)->delete($this->td);
   }
 
 
   public function get_sum_amount($code)
   {
-    $rs = $this->db->select_sum('amount')->where('consign_code', $code)->get('consignment_order_detail');
+    $rs = $this->db->select_sum('amount')->where('consign_code', $code)->get($this->td);
 
     return $rs->row()->amount === NULL ? 0 : $rs->row()->amount;
   }
@@ -182,7 +191,7 @@ class Consignment_order_model extends CI_Model
     ->select_sum('qty')
     ->where('consign_code', $code)
     ->where('product_code', $product_code)
-    ->get('consignment_order_detail');
+    ->get($this->td);
 
     if($rs->num_rows() === 1)
     {
@@ -191,7 +200,6 @@ class Consignment_order_model extends CI_Model
 
     return 0;
   }
-
 
 
   public function get_item_gp($product_code, $zone_code)
@@ -216,19 +224,16 @@ class Consignment_order_model extends CI_Model
   }
 
 
-
   public function get_unsave_qty($code, $product_code)
   {
     $rs = $this->db
     ->select_sum('qty')
     ->where('consign_code', $code)
     ->where('product_code', $product_code)
-    ->where('status', 0)
-    ->get('consignment_order_detail');
+    ->get($this->td);
 
     return $rs->row()->qty === NULL ? 0 : $rs->row()->qty;
   }
-
 
 
   public function change_detail_status($id, $status)
@@ -236,15 +241,16 @@ class Consignment_order_model extends CI_Model
     $this->db
     ->set('status', $status)
     ->where('id', $id);
-    return $this->db->update('consignment_order_detail');
+    return $this->db->update($this->td);
   }
+
 
   public function change_all_detail_status($code, $status)
   {
-    $this->db
+    return $this->db
     ->set('status', $status)
-    ->where('consign_code', $code);
-    return $this->db->update('consignment_order_detail');
+    ->where('consign_code', $code)
+    ->update($this->td);
   }
 
 
@@ -254,7 +260,7 @@ class Consignment_order_model extends CI_Model
     ->set('status', $status)
     ->set('update_user', get_cookie('uname'))
     ->where('code', $code);
-    return $this->db->update('consignment_order');
+    return $this->db->update($this->tb);
   }
 
 
@@ -312,7 +318,7 @@ class Consignment_order_model extends CI_Model
       $this->db->limit($perpage, $offset);
     }
 
-    $rs = $this->db->get('consignment_order');
+    $rs = $this->db->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
@@ -321,8 +327,6 @@ class Consignment_order_model extends CI_Model
 
     return FALSE;
   }
-
-
 
 
   public function count_rows(array $ds = array())
@@ -370,9 +374,8 @@ class Consignment_order_model extends CI_Model
         ->group_end();
       }
 
-    return $this->db->count_all_results('consignment_order');
+    return $this->db->count_all_results($this->tb);
   }
-
 
 
   public function get_max_code($code)
@@ -383,7 +386,6 @@ class Consignment_order_model extends CI_Model
   }
 
 
-
   public function is_exists($code, $old_code = NULL)
   {
     if($old_code !== NULL)
@@ -391,7 +393,7 @@ class Consignment_order_model extends CI_Model
       $this->db->where('code !=', $old_code);
     }
 
-    $rs = $this->db->where('code', $code)->get('consignment_order');
+    $rs = $this->db->where('code', $code)->get($this->tb);
     if($rs->num_rows() > 0)
     {
       return TRUE;
@@ -399,32 +401,6 @@ class Consignment_order_model extends CI_Model
 
     return FALSE;
   }
-
-
-
-	public function get_non_inv_code($limit = 100)
-	{
-		$rs = $this->db
-    ->select('code')
-    ->where('status', 1)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get('consignment_order');
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-	}
-
-
-	public function update_inv($code, $doc_num)
-  {
-    return $this->db->set('inv_code', $doc_num)->where('code', $code)->update('consignment_order');
-  }
-
 
 } //--- end class
 ?>

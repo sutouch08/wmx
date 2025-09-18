@@ -21,7 +21,7 @@ class Wrx_ib_api
   }
 
 
-  public function export_receive_product($code)
+  public function export_receive($code)
   {
     $sc = TRUE;
     $this->ci->load->model('inventory/receive_product_model');
@@ -29,9 +29,9 @@ class Wrx_ib_api
     $this->ci->load->model('masters/zone_model');
 
     $action = "create";
-    $type = "ADD9X";
+    $type = "INT16.1";
     $url = $this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_RETURN_URL');
+    $url .= getConfig('WRX_GR_URL');
     $api_path = $url;
     $req_time = NULL;
     $headers = array(
@@ -50,9 +50,11 @@ class Wrx_ib_api
       {
         $playload = array(
           'company' => $this->company,
-          'referenceId' => $doc->referenceId,
-          'returnAuthNumber' => $doc->reference,
-          'tranDate' => $doc->shipped_date,
+          'referenceId' => $doc->code,
+          'transferOrder' => $doc->reference,
+          'fulfillmentNumber' => $doc->fulfillment_code,
+          'Date' => $doc->shipped_date,
+          'locationFrom' => $doc->
           'memoHeader' => "",
           'items' => []
         );
@@ -225,7 +227,7 @@ class Wrx_ib_api
     $action = "create";
     $type = "ADD24";
     $url = $this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_IB_URL');
+    $url .= getConfig('WRX_GRPO_URL');
     $api_path = $url;
     $req_time = NULL;
     $headers = array(

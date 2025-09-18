@@ -30,14 +30,30 @@
     <script src="<?php echo base_url(); ?>assets/js/sweet-alert.js"></script>
     <script src="<?php echo base_url(); ?>assets/js/handlebars-v3.js"></script>
 		<script src="<?php echo base_url(); ?>assets/js/select2.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/chosen.jquery.js"></script>
+    <script src="<?php echo base_url(); ?>assets/js/chosen.jquery.js"></script>	  
 	</head>
 
 	<body class="no-skin" id="mobile-body">
-		<script type="text/javascript">
+    <style>
+      .navbar {
+        position: fixed;
+        width: 100%;
+        z-index: 100;
+      }
+
+      .navbar-header {
+        height: 46px;
+        width:100vw;
+        overflow: hidden;
+        color: white;
+        text-align: center;
+        padding-top: 5px;
+      }
+    </style>
+    <script type="text/javascript">
 		var BASE_URL = '<?php echo base_url(); ?>';
 		var HOME = '<?php echo $this->home.'/'; ?>';
-		</script>
+	</script>
 
 		<div id="loader">
         <div class="loader"></div>
@@ -46,7 +62,7 @@
 		</div>
     <div id="navbar" class="navbar navbar-default">
 			<div class="navbar-container" id="navbar-container">
-				<div class="navbar-header" id="title"><?php echo $this->title; ?></div>
+				<div class="navbar-header" id="title"><?php echo $title; ?></div>
 			</div>
 		</div>
 
@@ -54,4 +70,13 @@
 			<div class="main-content">
 				<div class="main-content-inner">
 					<div class="page-content">
-						<?php	if($this->pm->can_view == 0) { $this->load->view('deny_page'); } ?>
+
+
+<?php
+//--- if user don't have permission to access this page then deny_page;
+//_can_view_page($this->pm->can_view);
+	if($this->pm->can_view == 0)
+	{
+		$this->load->view('deny_page');
+	}
+?>

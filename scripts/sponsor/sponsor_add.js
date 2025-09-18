@@ -200,7 +200,7 @@ function add() {
           let ds = JSON.parse(rs);
 
           if(ds.status == 'success') {
-            window.location.href = BASE_URL + 'orders/sponsor/edit_detail/'+ ds.code;
+            edit(ds.code);            
           }
           else {
             beep();

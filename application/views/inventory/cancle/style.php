@@ -8,17 +8,24 @@ li {
 }
 
 .pg-footer .pg-footer-inner .pg-footer-content {
-		position: fixed;
-		z-index: 100;
-		left: 0px;
-		right: 0px;
-		bottom: 0px;
-		padding: 8px;
-		padding-bottom: 15px;
-		line-height: 20px;
-		background-color:#438eb9;
+  position: fixed;
+  z-index: 100;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  padding: 8px;
+  padding-bottom: 15px;
+  line-height: 20px;
+  background-color:#438eb9;
 }
 
+.btn-options {
+  padding: 0 !important;
+}
+
+.btn-options:focus {
+  outline: none !important;
+}
 
 .footer-menu {
 	float: left;

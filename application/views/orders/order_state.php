@@ -23,7 +23,7 @@ $canSkip = ($pc->can_add + $pc->can_edit + $pc->can_delete) > 0 ? TRUE : FALSE;
                 <option value="3">รอจัดสินค้า</option>
                 <option value="5">รอตรวจ</option>
                 <option value="7">รอเปิดบิล</option>
-                <option value="9">ยกเลิก</option>
+                <!-- <option value="9">ยกเลิก</option> -->
               </select>
             </td>
             <td class="width-25" style="border:0px; padding:5px;">

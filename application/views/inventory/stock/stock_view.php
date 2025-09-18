@@ -19,17 +19,17 @@
     <label>โซน</label>
     <input type="text" class="form-control input-sm search" id="zone_code" name="zone_code" value="<?php echo $zone_code; ?>" />
   </div>
-  <div class="col-lg-1 col-md-1-harf col-sm-1-harfcol-xs-4 padding-5">
+  <div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> ค้นหา</button>
   </div>
-	<div class="col-lg-1 col-md-1-harf col-sm-1-harfcol-xs-4 padding-5">
+	<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     <label class="display-block not-show">buton</label>
     <button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
   </div>
-<div class="col-lg-1 col-md-1-harf col-sm-1-harfcol-xs-4 padding-5">
+<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-4 padding-5">
     <label class="display-block not-show">buton</label>
-    <button type="button" class="btn btn-xs btn-purple btn-block" onclick="doExport()"><i class="fa fa-file-excel-o"></i> Download</button>
+    <button type="button" class="btn btn-xs btn-purple btn-block" onclick="doExport()"><i class="fa fa-file-excel-o"></i> Export</button>
   </div>
 </div>
 <hr class="margin-top-15">
@@ -43,7 +43,7 @@
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
     <table class="table table-striped table-bordered" style="min-width:840px;">
-      <tr>
+      <tr class="font-size-11">
         <th class="fix-width-40 text-center">#</th>
         <th class="min-width-200">สินค้า</th>
     		<th class="fix-width-200">โซน</th>
@@ -58,16 +58,19 @@
     <?php foreach($data as $rs) : ?>
 			<?php $bQty = get_buffer_qty_by_product_and_zone($rs->product_code, $rs->zone_code); ?>
 			<?php $cQty = get_cancle_qty_by_product_and_zone($rs->product_code, $rs->zone_code); ?>
-      <tr class="font-size-12">
-        <td class="text-center"><?php echo $no; ?></td>
-        <td><?php echo $rs->product_code; ?></td>
-    		<td class=""><?php echo $rs->zone_code; ?></td>
-        <td class="text-center"> <?php echo number($rs->qty); ?></td>
-    		<td class="text-center"> <?php echo number($bQty); ?></td>
-				<td class="text-center"> <?php echo number($cQty); ?></td>
-				<td class="text-center"> <?php echo number($rs->qty + $bQty + $cQty); ?></td>
-      </tr>
-    <?php  $no++; ?>
+			<?php $total = $rs->qty + $bQty + $cQty; ?>
+			<?php if($total != 0) : ?>
+		     <tr class="font-size-12">
+		      <td class="text-center"><?php echo $no; ?></td>
+		      <td><?php echo $rs->product_code; ?></td>
+		   		<td class=""><?php echo $rs->zone_code; ?></td>
+		      <td class="text-center"> <?php echo number($rs->qty); ?></td>
+		   		<td class="text-center"> <?php echo number($bQty); ?></td>
+					<td class="text-center"> <?php echo number($cQty); ?></td>
+					<td class="text-center"> <?php echo number($total); ?></td>
+		     </tr>
+	    	<?php  $no++; ?>
+			<?php endif; ?>
     <?php endforeach; ?>
     <?php else : ?>
       <tr>

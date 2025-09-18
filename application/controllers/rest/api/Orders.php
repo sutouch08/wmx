@@ -10,6 +10,7 @@ class Orders extends REST_Controller
 	public $log_json = FALSE;
 	public $api = FALSE;
   public $checkBackorder = FALSE;
+  public $sync_api_stock = FALSE;
   private $type = 'INT20';
 
   public function __construct()
@@ -37,16 +38,17 @@ class Orders extends REST_Controller
 	    $this->user = 'api@warrix';
 			$this->logs_json = is_true(getConfig('IX_LOG_JSON'));
       $this->checkBackorder = is_true(getConfig('IX_BACK_ORDER'));
+      $this->sync_api_stock = is_true(getConfig('SYNC_IX_STOCK'));
 		}
 		else
 		{
 			$arr = array(
 				'status' => FALSE,
-				'error' => "Access denied",
+				'error' => "Service Unavailable",
         'retry' => FALSE
 			);
 
-			$this->response($arr, 400);
+			$this->response($arr, 503);
 		}
   }
 
@@ -207,6 +209,7 @@ class Orders extends REST_Controller
 
           $reason = array(
             'code' => $order->code,
+            'reason_id' => 6,
             'reason' => empty($data->cancel_reason) ? "No reason for cancellation" : $data->cancel_reason,
             'user' => $this->user
           );
@@ -566,8 +569,9 @@ class Orders extends REST_Controller
         $is_transfer = ($prefix == 'WT' OR $prefix == 'WQ' OR $prefix == 'WW') ? TRUE : FALSE;
 
         //---- check duplicate order number
-        $order = $this->orders_model->get_active_order_by_oracle_id($data->headerInternalId);
+        // $order = $this->orders_model->get_active_order_by_oracle_id($data->headerInternalId);
         // $order = $this->orders_model->get_active_order_by_so($data->order_number);
+        $order = $this->orders_model->get_active_order_by_fulfillment_code($data->fulfillment);
 
         $date_add = date('Y-m-d H:i:s');
         $doc_date = empty($data->doc_date) ? NULL : db_date($data->doc_date, TRUE);
@@ -592,8 +596,14 @@ class Orders extends REST_Controller
 
         $total_amount = 0;
         $is_hold = empty($data->on_hold) ? 0 : ($data->on_hold == 'Y' ? 1 : 0);
+        $is_pre_order = empty($data->is_pre_order) ? FALSE : (($data->is_pre_order == 'Y' OR $data->is_pre_order == 'y') ? TRUE : FALSE);
         $is_backorder = FALSE;
         $backorderList = [];
+        $sync_stock = []; //--- keep product to sync stock
+        $total_sku = [];
+        $shop_id = empty($data->shop_id) ? NULL : $data->shop_id;
+        $is_mkp = FALSE;
+        $is_reserv = isset($data->is_reserv) ? ($data->is_reserv == 'Y' ? TRUE : FALSE) : FALSE;
 
         $ship_to = empty($data->ship_to) ? NULL : (array) $data->ship_to;
         $customer_ref = empty(trim($data->customer_ref)) ? NULL : get_null(trim($data->customer_ref));
@@ -618,6 +628,7 @@ class Orders extends REST_Controller
             'budget_code' => empty($data->budget_code) ? NULL : $data->budget_code,
             'state' => 3,
             'status' => 1,
+            'is_pre_order' => $is_pre_order ? 1 : 0,
             'shipping_code' => $tracking,
             'user' => $this->user,
             'date_add' => $date_add,
@@ -625,7 +636,8 @@ class Orders extends REST_Controller
             'due_date' => $due_date,
             'warehouse_code' => $warehouse_code,
             'to_warehouse' => $to_warehouse,
-            'id_sender' => $id_sender
+            'id_sender' => $id_sender,
+            'shop_id' => $shop_id
           );
         }
         else
@@ -642,6 +654,7 @@ class Orders extends REST_Controller
             'cod_amount' => empty($data->cod_amount) ? 0 : $data->cod_amount,
             'budget_code' => empty($data->budget_code) ? NULL : $data->budget_code,
             'state' => 3,
+            'is_pre_order' => $is_pre_order ? 1 : 0,
             'shipping_code' => $tracking,
             'user' => $this->user,
             'date_add' => $date_add,
@@ -649,7 +662,8 @@ class Orders extends REST_Controller
             'due_date' => $due_date,
             'warehouse_code' => $warehouse_code,
             'to_warehouse' => $to_warehouse,
-            'id_sender' => $id_sender
+            'id_sender' => $id_sender,
+            'shop_id' => $shop_id
           );
         }
 
@@ -754,11 +768,6 @@ class Orders extends REST_Controller
                 $item = $rs->item;
                 $disc = $is_transfer ? 0 : ($rs->discount > 0 ? $rs->discount/$rs->qty : 0);
 
-                // if($data->channel == 'SHOPEE' && $rs->price == 0)
-                // {
-                //   $is_hold = 1;
-                // }
-
                 //--- ถ้ายังไม่มีรายการอยู่ เพิ่มใหม่
                 $arr = array(
                   "line_id" => $rs->line_item_id,
@@ -829,20 +838,38 @@ class Orders extends REST_Controller
                 {
                   $total_amount += round($rs->amount, 2);
 
-                  if($this->checkBackorder && $item->count_stock)
+                  if( ! isset($total_sku[$item->code]))
                   {
-                    $available = $this->get_available_stock($item->code, $warehouse_code);
+                    $total_sku[$item->code] = 1;
+                  }
 
-                    if($available < $rs->qty)
+                  if($item->count_stock)
+                  {
+                    if($is_reserv)
                     {
-                      $is_backorder = TRUE;
+                      $this->reserv_stock_model->deduct_reserv_qty($item->code, $rs->qty, $warehouse_code, $is_mkp);
+                    }
 
-                      $backorderList[] = (object) array(
-                        'order_code' => $order_code,
-                        'product_code' => $item->code,
-                        'order_qty' => $rs->qty,
-                        'available_qty' => $available
-                      );
+                    if($this->checkBackorder && ! $is_pre_order)
+                    {
+                      $available = $this->get_available_stock($item->code, $warehouse_code, $is_mkp);
+
+                      if($available < $rs->qty)
+                      {
+                        $is_backorder = TRUE;
+
+                        $backorderList[] = (object) array(
+                          'order_code' => $order_code,
+                          'product_code' => $item->code,
+                          'order_qty' => $rs->qty,
+                          'available_qty' => $available
+                        );
+                      }
+                    }
+
+                    if($this->sync_api_stock && $item->is_api && ! $is_pre_order)
+                    {
+                      $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                     }
                   }
                 }
@@ -884,11 +911,6 @@ class Orders extends REST_Controller
                   $item = $rs->item;
                   $disc = $is_transfer ? 0 : ($rs->discount > 0 ? $rs->discount/$rs->qty : 0);
 
-                  // if($data->channel == 'SHOPEE' && $rs->price == 0)
-                  // {
-                  //   $is_hold = 1;
-                  // }
-
                   //--- ถ้ายังไม่มีรายการอยู่ เพิ่มใหม่
                   $arr = array(
                     "line_id" => $rs->line_item_id,
@@ -918,20 +940,38 @@ class Orders extends REST_Controller
                   {
                     $total_amount += round($rs->amount, 2);
 
-                    if($this->checkBackorder && $item->count_stock)
+                    if( ! isset($total_sku[$item->code]))
                     {
-                      $available = $this->get_available_stock($item->code, $warehouse_code);
+                      $total_sku[$item->code] = 1;
+                    }
 
-                      if($available < $rs->qty)
+                    if($item->count_stock)
+                    {
+                      if($is_reserv)
                       {
-                        $is_backorder = TRUE;
+                        $this->reserv_stock_model->deduct_reserv_qty($item->code, $rs->qty, $warehouse_code, $is_mkp);
+                      }
 
-                        $backorderList[] = (object) array(
-                          'order_code' => $order_code,
-                          'product_code' => $item->code,
-                          'order_qty' => $rs->qty,
-                          'available_qty' => $available
-                        );
+                      if($this->checkBackorder && ! $is_pre_order)
+                      {
+                        $available = $this->get_available_stock($item->code, $warehouse_code, $is_mkp);
+
+                        if($available < $rs->qty)
+                        {
+                          $is_backorder = TRUE;
+
+                          $backorderList[] = (object) array(
+                            'order_code' => $order_code,
+                            'product_code' => $item->code,
+                            'order_qty' => $rs->qty,
+                            'available_qty' => $available
+                          );
+                        }
+                      }
+
+                      if($this->sync_api_stock && $item->is_api && ! $is_pre_order)
+                      {
+                        $sync_stock[] = (object) array('code' => $item->code, 'rate' => $item->api_rate);
                       }
                     }
                   }
@@ -1011,6 +1051,34 @@ class Orders extends REST_Controller
             );
 
             $this->api_logs_model->add_logs($logs);
+          }
+
+          if($this->sync_api_stock && ! empty($sync_stock))
+          {
+            $this->load->library('wrx_stock_api');
+            $warehouse_code = getConfig('IX_WAREHOUSE');
+
+            $i = 0;
+            $j = 0;
+
+            $items = [];
+
+            foreach($sync_stock as $rs)
+            {
+              if($i == 20)
+              {
+                $i = 0;
+                $j++;
+              }
+
+              $items[$j][$i] = $rs;
+              $i++;
+            }
+
+            foreach($items as $item)
+            {
+              $this->wrx_stock_api->update_available_stock($item, $warehouse_code);
+            }
           }
 
           $this->response($arr, 200);
@@ -1163,7 +1231,7 @@ class Orders extends REST_Controller
 	}
 
 
-  public function get_available_stock($item_code, $warehouse_code)
+  public function get_available_stock($item_code, $warehouse_code, $is_mkp = FALSE)
   {
     //---- สต็อกคงเหลือในคลัง
     $sell_stock = $this->stock_model->get_sell_stock($item_code, $warehouse_code);
@@ -1171,8 +1239,7 @@ class Orders extends REST_Controller
     //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
     $ordered = $this->orders_model->get_reserv_stock($item_code, $warehouse_code);
 
-    //---- ยอดจองสินค้า ไม่รวมรายการที่กำหนด
-    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item_code, $warehouse_code);
+    $reserv_stock = $this->reserv_stock_model->get_reserv_stock($item_code, $warehouse_code, $is_mkp);
 
     $available = $sell_stock - $ordered - $reserv_stock;
 

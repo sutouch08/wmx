@@ -10,12 +10,12 @@ class Reserv_stock_model extends CI_Model
   }
 
 
-  public function get_reserv_stock($product_code, $warehouse_code = NULL, $date = NULL)
+  public function get_reserv_stock($product_code, $warehouse_code = NULL, $is_mkp = FALSE)
   {
-    $date = empty($date) ? date('Y-m-d') : $date;
+    $date = date('Y-m-d');
 
     $this->db
-    ->select_sum('d.qty')
+    ->select_sum('d.reserv_qty', 'qty')
     ->from('reserv_stock_details AS d')
     ->join('reserv_stock AS o', 'd.reserv_id = o.id', 'left')
     ->where('o.status', 'A')
@@ -28,14 +28,69 @@ class Reserv_stock_model extends CI_Model
       $this->db->where('o.warehouse_code', $warehouse_code);
     }
 
+    //---- ไม่เอา mkp
+    if($is_mkp)
+    {
+      $this->db->where('o.is_mkp', 0);
+    }
+
     $rs = $this->db->where('d.product_code', $product_code)->get();
 
-    if($rs->num_rows() > 0)
+    if($rs->num_rows() === 1)
     {
-      return $rs->row()->qty;
+      return intval($rs->row()->qty);
     }
 
     return 0;
+  }
+
+
+  public function get_items_reserv_stock(array $items = array(), $warehouse_code = NULL, $is_mkp = FALSE)
+  {
+    $date = date('Y-m-d');
+
+    if( ! empty($items))
+    {
+      $this->db
+      ->select('d.product_code')
+      ->select_sum('d.reserv_qty', 'qty')
+      ->from('reserv_stock_details AS d')
+      ->join('reserv_stock AS o', 'd.reserv_id = o.id', 'left')
+      ->where('o.status', 'A')
+      ->where('o.active', 1)
+      ->where('o.start_date <=', $date)
+      ->where('o.end_date >=', $date);
+
+      if( ! empty($warehouse_code))
+      {
+        $this->db->where('o.warehouse_code', $warehouse_code);
+      }
+
+      //---- ไม่เอา mkp
+      if($is_mkp)
+      {
+        $this->db->where('o.is_mkp', 0);
+      }
+
+      $rs = $this->db
+      ->where_in('d.product_code', $items)
+      ->group_by('d.product_code')
+      ->get();
+
+      if($rs->num_rows() > 0)
+      {
+        $reserv = [];
+
+        foreach($rs->result() as $ro)
+        {
+          $reserv[$ro->product_code] = $ro->qty;
+        }
+
+        return $reserv;
+      }
+    }
+
+    return NULL;
   }
 
 
@@ -85,6 +140,38 @@ class Reserv_stock_model extends CI_Model
     if($rs->num_rows() === 1)
     {
       return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_details_by_product($item_code, $warehouse_code = NULL, $is_mkp = FALSE)
+  {
+    $date = date('Y-m-d');
+    $is_mkp = $is_mkp ? 1 : 0;
+
+    $this->db
+    ->select('d.*')
+    ->from('reserv_stock_details AS d')
+    ->join('reserv_stock AS o', 'd.reserv_id = o.id', 'left')
+    ->where('d.product_code', $item_code)
+    ->where('o.status', 'A')
+    ->where('o.active', 1)
+    ->where('o.start_date <=', $date)
+    ->where('o.end_date >=', $date)
+    ->where('o.is_mkp', $is_mkp);
+
+    if( ! empty($warehouse_code))
+    {
+      $this->db->where('o.warehouse_code', $warehouse_code);
+    }
+
+    $rs = $this->db->order_by('o.id', 'ASC')->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
     }
 
     return NULL;
@@ -141,6 +228,32 @@ class Reserv_stock_model extends CI_Model
   }
 
 
+  public function deduct_reserv_qty($item_code, $qty, $warehouse_code = NULL, $is_mkp = FALSE)
+  {
+    $rows = $this->get_details_by_product($item_code, $warehouse_code, $is_mkp);
+
+    if( ! empty($rows))
+    {
+      foreach($rows as $rs)
+      {
+        if($qty > 0)
+        {
+          $Qty =  $rs->reserv_qty >= $qty ? $qty : $rs->reserv_qty;
+
+          $dQty = $Qty * (-1);
+
+          if($this->db->set("reserv_qty", "reserv_qty + {$dQty}", FALSE)->where('id', $rs->id)->update($this->td))
+          {
+            $qty -= $Qty;
+          }
+        }
+      }
+    }
+
+    return TRUE;
+  }
+
+
   public function remove_items(array $ds = array())
   {
     //--- ds = array('id', 'id', 'id')
@@ -151,6 +264,12 @@ class Reserv_stock_model extends CI_Model
     }
 
     return FALSE;
+  }
+
+
+  public function remove_item($id)
+  {
+    return $this->db->where('id', $id)->delete($this->td);
   }
 
 

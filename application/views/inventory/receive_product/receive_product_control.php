@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-lg-2 col-md-2 col-sm-2-harf col-xs-6 padding-5">
     <label>บาร์โค้ดโซน</label>
-    <input type="text" class="form-control input-sm text-center" id="barcode-zone" value="<?php echo $doc->zone_code; ?>" onchange="getZone()" placeholder="ยิงบาร์โค้ดโซน"  />
+    <input type="text" class="form-control input-sm text-center" id="barcode-zone" value="<?php echo $doc->zone_code; ?>" placeholder="ยิงบาร์โค้ดโซน"  />
     <input type="hidden" id="zone-code" value="<?php echo $doc->zone_code; ?>" />
   </div>
   <div class="col-lg-3 col-md-3 col-sm-2-harf col-xs-6 padding-5">
@@ -24,5 +24,7 @@
     <label class="display-block not-show">OK</label>
     <button type="button" class="btn btn-xs btn-primary btn-block" onclick="doReceive()"><i class="fa fa-check"></i> ตกลง</button>
   </div>
+
+  <input type="hidden" id="warehouse-code" value="<?php echo getConfig('DEFAULT_WAREHOUSE'); ?>" />
 </div>
 <hr class="margin-top-15 margin-bottom-15"/>

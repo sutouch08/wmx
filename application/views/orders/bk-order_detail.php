@@ -99,3 +99,104 @@
     </div>
   </div> <!-- form horizontal -->
 </div>
+<!--  End Order Detail ----------------->
+<!-- order detail template ------>
+<script id="detail-table-template" type="text/x-handlebars-template">
+{{#each this}}
+	{{#if @last}}
+
+	{{else}}
+				<tr class="font-size-10" id="row_{{id}}">
+					<input type="hidden" id="currentQty-{{id}}" value="{{qty}}">
+					<input type="hidden" id="currentPrice-{{id}}" value="{{price}}">
+					<input type="hidden" id="currentDisc-{{id}}" value="{{discount}}">
+					<td class="middle text-center">{{no}}</td>
+					<td class="middle text-center">
+					<?php if( ( $order->is_paid == 0 && $order->state != 2 && $order->is_expired == 0 ) && ($edit OR $add)) : ?>
+						<?php if($order->state == 1 OR ($rs->is_count == 0 && $order->state != 8)) : ?>
+								<button type="button" class="btn btn-minier btn-danger" onclick="removeDetail({{id}}, '{{productCode}}')">
+									<i class="fa fa-trash"></i>
+								</button>
+						<?php endif; ?>
+					<?php endif; ?>
+					</td>
+
+					<td class="middle text-center padding-0">
+						<img src="{{imageLink}}" width="40px" height="40px"  />
+					</td>
+
+					<td class="middle">{{productCode}}</td>
+
+					<td class="middle">{{productName}}</td>
+
+					<td class="middle text-center">
+						<?php if( ($allowEditPrice && $order->state < 4) OR ($rs->is_count == 0 && $order->state < 8)  ) : ?>
+							<input type="number"
+								class="form-control input-sm text-right price-box e {{#if is_count}} hide {{/if}}"
+								id="price_{{id}}"
+								name="price[{{id}}]"
+								value="{{price}}"
+								data-price="{{price}}"
+								data-count="{{is_count}}"
+								onchange="recalItem({{id}}, '{{#if is_count}}N{{else}}Y{{/if}}')"/>
+						<?php endif; ?>
+						{{#if is_count}}
+						<span class="price-label" id="price-label-{{id}}">	{{price}}</span>
+						{{/if}}
+					</td>
+
+					<td class="middle text-center">
+						<?php if($order->state == 1 OR ($rs->is_count == 0 && $order->state < 8)) : ?>
+							<input type="number" class="form-control input-sm text-center line-qty e"
+								id="qty_{{id}}"
+								data-code="{{productCode}}"
+								data-id="{{id}}"
+								value="{{qty}}"
+								data-qty="{{qty}}"
+								data-count="{{is_count}}"
+								onchange="updateItem({{id}})"
+							/>
+						<?php else : ?>
+							{{qty}}
+						<?php endif; ?>
+					</td>
+
+					<td class="middle text-center">
+					<?php if( $order->state < 4 ) : ?>
+						<input type="text"
+							class="form-control input-sm text-center discount-box hide e"
+							id="disc_{{id}}"
+							name="disc[{{id}}]"
+							value="{{discount}}"
+							data-disc="{{discount}}"
+							onchange="recalItem({{id}})"
+							/>
+					<?php endif; ?>
+					<span class="discount-label" id="disc_label_{{id}}">{{discount}}</span>
+					</td>
+
+					<td class="middle text-right">
+					<?php if($order->state < 4 OR ($rs->is_count == 0 && $order->state < 8)) : ?>
+						<input type="text"
+							class="form-control input-sm line-total text-right e"
+							id="line_total_{{id}}"
+							data-id="{{id}}"
+							onkeyup="recalDiscount({{id}})"
+							value="{{amount}}"
+							data-total="{{amount}}"
+							readonly
+							 />
+					<?php else : ?>
+						{{amount}}
+					<?php endif; ?>
+					</td>
+			</tr>
+	{{/if}}
+{{/each}}
+</script>
+
+<script id="nodata-template" type="text/x-handlebars-template">
+	<tr>
+      <td colspan="11" class="text-center"><h4>ไม่พบรายการ</h4></td>
+  </tr>
+</script>

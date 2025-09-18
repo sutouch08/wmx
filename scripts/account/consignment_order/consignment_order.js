@@ -5,7 +5,7 @@ function goBack(){
 }
 
 
-function goAdd(){
+function addNew(){
   window.location.href = HOME + 'add_new';
 }
 
@@ -21,49 +21,54 @@ function goEdit(code)
 }
 
 
-//--- delete all data and cancle document
-function getDelete(code){
-	swal({
-		title: "คุณแน่ใจ ?",
-		text: "ต้องการยกเลิก '"+code+"' หรือไม่ ?",
-		type: "warning",
-		showCancelButton: true,
-		confirmButtonColor: "#DD6B55",
-		confirmButtonText: 'ใช่, ฉันต้องการ',
-		cancelButtonText: 'ไม่ใช่',
-		closeOnConfirm: true
-		}, function(){
-      $('#cancle-code').val(code);
-      $('#cancle-reason').val('').removeClass('has-error');
-      cancle(code);
-	});
+function cancel(code) {
+  swal({
+    title: "คุณแน่ใจ ?",
+    text: "ต้องการยกเลิก '"+code+"' หรือไม่ ?",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#DD6B55",
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
+    closeOnConfirm: true
+  },
+  function() {
+    $('#cancel-code').val(code);
+    $('#cancel-reason').val('').removeClass('has-error');
+    $('#cancel-modal').modal('show');
+  });
 }
 
 
-function cancle(code)
-{
-	var reason = $.trim($('#cancle-reason').val());
+function doCancel() {
+  $('#cancel-reason').clearError();
 
-	if(reason.length < 10)
-	{
-		$('#cancle-modal').modal('show');
-		return false;
-	}
+  let code = $('#cancel-code').val();
+  let reason = $('#cancel-reason').val().trim();
 
-	load_in();
+  if(reason.length < 10) {
+    $('#cancel-reason').hasError();
+    return false;
+  }
 
-  $.ajax({
-    url: HOME + 'cancle/'+code,
-    type:"POST",
-    cache:"false",
-    data:{
-      "reason" : reason
-    },
-    success: function(rs) {
-      var rs = $.trim(rs);
-      if( rs == 'success' ) {
-				setTimeout(function() {
-					swal({
+  $('#cancel-modal').modal('hide');
+
+  load_in();
+
+  setTimeout(() => {
+    $.ajax({
+      url:HOME + 'cancel',
+      type:'POST',
+      cache:false,
+      data:{
+        'code' : code,
+        'reason' : reason
+      },
+      success:function(rs) {
+        load_out();
+
+        if(rs.trim() === 'success') {
+          swal({
 						title: 'Cancled',
 						type: 'success',
 						timer: 1000
@@ -72,108 +77,54 @@ function cancle(code)
 					setTimeout(function(){
 						window.location.reload();
 					}, 1200);
-				}, 200);
-			}
-			else {
-				setTimeout(function() {
-					swal({
-						title:"Error!",
-						text:rs,
-						type:'error'
-					});
-				}, 200);
-			}
-    }
-  });
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }, 100);
 }
 
 
-function doCancle() {
-	let code = $('#cancle-code').val();
-	let reason = $.trim($('#cancle-reason').val());
-
-	if( reason.length < 10) {
-    $('#cancle-reason').addClass('has-error').focus();
-		return false;
-	}
-
-	$('#cancle-modal').modal('hide');
-
-	return cancle(code);
-}
-
-
-
-$('#cancle-modal').on('shown.bs.modal', function() {
-	$('#cancle-reason').focus();
+$('#cancel-modal').on('shown.bs.modal', function() {
+	$('#cancel-reason').focus();
 });
 
 
-
-function doExport(){
-  var code = $('#consign_code').val();
+function sendToErp(code) {
   load_in();
+
   $.ajax({
-    url: HOME + 'export_consign/'+code,
-    type:'POST',
-    cache:'false',
-    success:function(rs){
+    url:HOME + 'send_to_erp/' + code,
+    type:'GET',
+    cache:false,
+    success:function(rs) {
       load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-        swal({
-          title:'success',
-          type:'success',
-          timer:1000
-        });
 
-        setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-      }else{
-        swal({
-          title:'Error!',
-          text:rs,
-          type: 'error'
-        })
-      }
-    }
-  });
-}
-
-
-function sendToSAP(code){
-  load_in();
-  $.ajax({
-    url: HOME + 'export_consign/'+code,
-    type:'POST',
-    cache:'false',
-    success:function(rs){
-      load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
+      if(rs.trim() === 'success') {
         swal({
           title:'success',
           type:'success',
           timer:1000
         });
       }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
-  });
+  })
 }
-
-
-function getSearch(){
-	$("#searchForm").submit();
-}
-
-
-$(".search").keyup(function(e){
-	if( e.keyCode == 13 ){
-		getSearch();
-	}
-});
-
 
 
 $("#fromDate").datepicker({
@@ -200,13 +151,4 @@ function printConsignOrder(){
 	var center = ($(document).width() - 800) /2;
   var target = HOME + 'print_consign/'+ code;
   window.open(target, "_blank", "width=800, height=900, left="+center+", scrollbars=yes");
-}
-
-
-
-function clearFilter(){
-  var url = HOME + 'clear_filter';
-  $.get(url, function(rs){
-    goBack();
-  });
 }

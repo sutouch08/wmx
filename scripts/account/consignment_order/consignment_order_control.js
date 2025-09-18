@@ -1,15 +1,13 @@
+window.addEventListener('load', () => {
+  inputInit();
+})
+
 $('#barcode-item').keyup(function(e){
   if(e.keyCode == 13){
     if($(this).val() != ''){
       getItemByBarcode();
     }
   }
-});
-
-$('#barcode-item').focusout(function(e){
-    if($(this).val() != ''){
-      getItemByBarcode();
-    }
 });
 
 
@@ -20,30 +18,28 @@ $('#item-code').keyup(function(e) {
 });
 
 
-$('#item-code').focusout(function(e){
-  getItemByCode();
-});
-
-
-
 $('#item-code').autocomplete({
   source: BASE_URL + 'auto_complete/get_product_code',
   autoFocus:true,
   close:function(){
     var rs = $(this).val();
-    if( rs == 'no item found'){
+    if( rs == 'no item found') {
       $(this).val('');
+    }
+    else {
+      setTimeout(() => {
+        getItemByCode();
+      }, 100)
     }
   }
 });
 
 
-
-function getItemByCode(){
-  var code = $.trim($('#item-code').val());
+function getItemByCode() {
+  let code = $('#item-code').val().trim();
   var zone_code = $('#zone_code').val();
-  if(code.length > 0)
-  {
+
+  if(code.length > 0) {
     $.ajax({
       url: HOME + 'get_item_by_code',
       type:'GET',
@@ -52,38 +48,32 @@ function getItemByCode(){
         'code' : code,
         'zone_code' : zone_code
       },
-      success:function(rs){
-        var rs = $.trim(rs);
-        if( isJson(rs) ){
-          var ds = $.parseJSON(rs);
+      success:function(rs) {
+        if( isJson(rs) ) {
+          let ds = JSON.parse(rs);
+
           $('#product_code').val(ds.pdCode);
           $('#barcode-item').val(ds.barcode);
-          $('#txt-price').val(ds.price);
-          $('#txt-disc').val(ds.disc);
+          $('#item-price').val(ds.price);
+          $('#item-disc').val(ds.disc);
           $('#stock-qty').text(ds.stock);
           $('#count_stock').val(ds.count_stock);
-          $('#txt-price').focus();
-          $('#txt-price').select();
-        }else{
-          swal('Error', rs, 'error');
-          $('#product_code').val('');
-          $('#barcode-item').val('');
-          $('#txt-price').val('');
-          $('#txt-disc').val('');
-          $('#stock-qty').text(0);
-          $('#count_stock').val(1);
+          $('#item-price').focus().select();
+        }
+        else {
+          showError(rs);
+          clearFields();
         }
       }
     });
   }
-
 }
 
 
+function getItemByBarcode() {
+  let barcode = $('#barcode-item').val().trim();
+  let zone_code = $('#zone_code').val();
 
-function getItemByBarcode(){
-  var barcode = $.trim($('#barcode-item').val());
-  var zone_code = $('#zone_code').val();
   if(barcode.length > 0)
   {
     $.ajax({
@@ -94,167 +84,189 @@ function getItemByBarcode(){
         'barcode' : barcode,
         'zone_code' : zone_code
       },
-      success:function(rs){
-        var rs = $.trim(rs);
-        if( isJson(rs) ){
-          var ds = $.parseJSON(rs);
+      success:function(rs) {
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
           $('#product_code').val(ds.pdCode);
           $('#item-code').val(ds.product);
-          $('#txt-price').val(ds.price);
-          $('#txt-disc').val(ds.disc);
+          $('#item-price').val(ds.price);
+          $('#item-disc').val(ds.disc);
           $('#stock-qty').text(ds.stock);
           $('#count_stock').val(ds.count_stock);
-          $('#txt-price').focus();
-          $('#txt-price').select();
-        }else{
-          swal('Error', rs, 'error');
-          $('#product_code').val('');
-          $('#item-code').val('');
-          $('#txt-price').val('');
-          $('#txt-disc').val('');
-          $('#stock-qty').text(0);
-          $('#count_stock').val(1);
+          $('#item-price').focus().select();
+        }
+        else {
+          showError(rs);
+          clearFields();
         }
       }
     });
   }
-
 }
 
 
-$('#txt-price').keydown(function(e) {
-
-    //--- skip to qty if space bar key press
-    if(e.keyCode == 32){
-      e.preventDefault();
-      $('#txt-qty').focus();
-    }
+$('#item-price').keydown(function(e) {
+  if(e.keyCode == 32) {
+    e.preventDefault();
+    $('#item-qty').focus();
+  }
 });
 
 
-
-$('#txt-price').keyup(function(e){
-  if(e.keyCode == 13 && $(this).val() != ''){
-    $('#txt-disc').focus();
-    $('#txt-disc').select();
+$('#item-price').keyup(function(e) {
+  if(e.keyCode == 13) {
+    setTimeout(() => {
+      $('#item-disc').focus().select();
+    },50);
   }
-
-  calAmount();
 });
 
 
-
-$('#txt-price').focusout(function(event) {
-  var amount = parseFloat($(this).val());
-  if(amount <= 0){
-    $('#txt-disc').val(0);
-  }
-
-  if(amount < 0 ){
+$('#item-price').focusout(function() {
+  let amount = parseDefaultFloat($(this).val(), 0);
+  if(amount <= 0) {
     $(this).val(0);
+    $('#item-disc').val(0);
   }
 });
 
 
-
-
-
-
-$('#txt-disc').keyup(function(e){
-
-  if(e.keyCode == 13){
-    $('#txt-qty').focus();
-    $('#txt-qty').select();
+$('#item-disc').keyup(function(e) {
+  if(e.keyCode == 13) {
+    setTimeout(() => {
+      $('#item-qty').focus().select();
+    },50);
   }
+});
 
+
+$('#item-disc').keydown(function(e) {
+  if(e.keyCode == 32) {
+    e.preventDefault();
+    let val = $(this).val().trim();
+
+    if(val.length > 0) {
+      let lastChar = val.slice(-1);
+
+      if( ! isNaN(lastChar)) {
+        val = val + '%'
+        $(this).val(val);
+      }
+    }
+  }
+})
+
+
+$('#item-disc').focusout(function() {
   calAmount();
 });
 
 
-$('#txt-qty').keyup(function(e){
-  if(e.keyCode == 13){
-    var qty = parseInt($(this).val());
-    if(qty > 0){
+$('#item-qty').keyup(function(e) {
+  if(e.keyCode == 13) {
+    let qty = parseDefaultFloat($(this).val(), 1);
+
+    if(qty > 0) {
       addToDetail();
-      return;
     }
   }
 
   calAmount();
-
 });
 
 
-function calAmount(){
-  qty = parseDefault(parseInt($('#txt-qty').val()),0);
-  price = parseDefault(parseFloat($('#txt-price').val()), 0);
-  disc = parseDiscount($('#txt-disc').val(), price);
-  discount = disc.discountAmount * qty;
-  amount = (price * qty) - discount;
-  $('#txt-amount').text(addCommas(amount.toFixed(2)));
+function calAmount() {
+  let qty = parseDefaultFloat($('#item-qty').val(), 0);
+  let price = parseDefaultFloat($('#item-price').val(), 0);
+  let disc = parseDiscount($('#item-disc').val(), price);
+  let amount = qty * (price - disc.discountAmount);
+
+  $('#item-amount').val(addCommas(amount.toFixed(2)));
 }
 
 
+function addToDetail() {
+  clearErrorByClass('c');
 
+  let h = {
+    'code' : $('#consign_code').val(),
+    'product_code' : $('#product_code').val().trim(),
+    'qty' : parseDefaultFloat($('#item-qty').val(), 1),
+    'price' : parseDefaultFloat($('#item-price').val(), 0),
+    'disc' : $('#item-disc').val().trim(),
+    'auz' : $('#auz').val(),
+    'count_stock' : $('#count_stock').val()
+  }
 
-function addToDetail(){
-  var code = $('#consign_code').val();
-  var qty = parseInt($('#txt-qty').val());
-  var stock = parseInt($('#stock-qty').text());
-  var product_code = $('#product_code').val();
-  var price = $('#txt-price').val();
-  var disc = $('#txt-disc').val();
-  var auz = $('#auz').val();
-  var count_stock = $('#count_stock').val();
+  let stock = parseDefaultFloat($('#stock-qty').val(), 0);
 
-  if(qty <= 0){
-    swal('จำนวนไม่ถูกต้อง');
+  if(h.product_code.length == 0) {
+    beep();
+    $('#item-code').hasError();
     return false;
   }
 
-  if(qty > stock && auz == 0 && count_stock == 1){
-    swal('ยอดในโซนไม่พอตัด');
+  if(h.qty < 0) {
+    beep();
+    $('#item-qty').hasError();
     return false;
   }
 
-  if(product_code == ''){
-    swal('สินค้าไม่ถูกต้อง');
+  if(h.qty > stock && h.auz == 0 && h.count_stock == 1) {
+    beep();
+    $('#stock-qty').hasError();
+    $('#item-qty').hasError();
     return false;
   }
 
   load_in();
+
   $.ajax({
-    url: HOME + 'add_detail/' + code,
+    url: HOME + 'add_detail',
     type:'POST',
-    cache:'false',
+    cache:false,
     data:{
-      'product_code' : product_code,
-      'qty' : qty,
-      'price' : price,
-      'disc' : disc
+      'data' : JSON.stringify(h)
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      if(isJson(rs)){
-        var data = $.parseJSON(rs);
-        var id = data.id;
-        if($('#row-'+id).length == 1)
-        {
-          $('#input-qty-'+id).val(data.qty);
-          $('#qty-'+id).text(addCommas(data.qty));
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status === 'success') {
+          let id = ds.data.id;
+
+          if($('#row-'+id).length) {
+            $('#qty-'+id).val(ds.data.qty);
+
+            reCal(id);
+            clearFields();
+          }
+          else {
+            let source = $('#new-row-template').html();
+            let output = $('#detail-table');
+
+            render_prepend(source, ds.data, output);
+            inputInit();
+            reIndex();
+            reCalAll();
+            clearFields();
+          }
         }
-        else
-        {
-          var source = $('#new-row-template').html();
-          var output = $('#detail-table');
-          render_prepend(source, data, output);
+        else {
+          beep();
+          showError(ds.message);
         }
-        reIndex();
-        reCalAll();
-        clearFields();
-      }else{
-        swal('Error!', rs, 'error');
       }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
   })
 }
@@ -263,350 +275,338 @@ function addToDetail(){
 function clearFields(){
   $('#barcode-item').val('');
   $('#item-code').val('');
-  $('#txt-price').val('');
-  $('#txt-disc').val('');
+  $('#item-price').val('');
+  $('#item-disc').val('');
   $('#stock-qty').text(0);
-  $('#txt-qty').val('');
-  $('#txt-amount').text('');
+  $('#item-qty').val('');
+  $('#item-amount').text('');
   $('#product_code').val('');
   $('#barcode-item').focus();
 }
 
 
+function reCal(id) {
+  let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+  let disc = parseDiscount($('#disc-'+id).val(), price);
+  let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
+  let amount = qty * (price - disc.discountAmount);
 
-
-function focusRow(id){
-  $('.rox').removeClass('blue');
-  $('#row-'+id).addClass('blue');
-}
-
-
-function reCal(id){
-  var price = parseDefault(parseFloat(removeCommas($('#input-price-'+id).val())), 0);
-  var disc = parseDiscount($('#input-disc-'+id).val(), price);
-  var qty  = parseDefault(parseFloat(removeCommas($('#qty-'+id).text())),1);
-  var amount = qty * (price - disc.discountAmount);
-  $('#amount-'+id).text(addCommas(amount.toFixed(2)));
-  updateTotalAmount();
-}
-
-
-
-function reCalAll(){
-  $('.rox').each(function(index, el) {
-    var ids = $(this).attr('id').split('-');
-    var id = ids[1];
-    reCal(id);
-  });
+  $('#amount-'+id).val(addCommas(amount.toFixed(2)));
 
   updateTotalQty();
   updateTotalAmount();
 }
 
 
+function reCalAll() {
+  let totalAmount = 0;
+  let totalQty = 0;
 
-function updateTotalAmount(){
-  var total = 0;
-  $('.amount').each(function(index, el) {
-    var amount = parseDefault(parseFloat(removeCommas($(this).text())), 0);
-    total += amount;
+  $('.input-price').each(function() {
+    let id = $(this).data('id');
+    let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+    let disc = parseDiscount($('#disc-'+id).val(), price);
+    let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
+    let amount = qty * (price - disc.discountAmount);
+    $('#amount-'+id).val(addCommas(amount.toFixed(2)));
+
+    totalAmount += amount;
+    totalQty += qty;
   });
 
-  total = parseFloat(total).toFixed(2);
-  $('#total-amount').text(addCommas(total));
+  $('#total-amount').text(addCommas(totalAmount.toFixed(2)));
+  $('#total-qty').text(addCommas(totalQty.toFixed(2)));
 }
 
 
+function updateTotalAmount() {
+  let total = 0;
+
+  $('.amount').each(function() {
+    let amount = parseDefaultFloat(removeCommas($(this).val()), 0);
+    total += amount;
+    console.log(amount);
+  });
+
+  $('#total-amount').text(addCommas(total.toFixed(2)));
+}
 
 
+function updateTotalQty() {
+  let total = 0;
 
-function updateTotalQty(){
-  var total = 0;
-  $('.qty').each(function(index, el) {
-    var qty = parseInt(removeCommas($(this).text()));
+  $('.input-qty').each(function() {
+    let qty = parseDefaultFloat(removeCommas($(this).val()), 0);
     total += qty;
   });
 
-  $('#total-qty').text(addCommas(total));
+  $('#total-qty').text(addCommas(total.toFixed(2)));
 }
 
 
-
-function getEditDiscount(){
-  $('.disc').addClass('hide');
-  $('.input-disc').removeClass('hide');
-  $('#btn-edit-disc').addClass('hide');
-  $('#btn-update-disc').removeClass('hide');
+function moveCursorToEnd(el) {
+  len = el.val().length;
+  el[0].setSelectionRange(len, len);
 }
 
 
-function getEditPrice()
-{
-  $('.price').addClass('hide');
-  $('.input-price').removeClass('hide');
-  $('#btn-edit-price').addClass('hide');
-  $('#btn-update-price').removeClass('hide');
-}
+function inputInit() {
+  $('.input-price').click(function() {
+    moveCursorToEnd($(this));
+  })
 
-function nextFocus(el, className){
-  var cl = $('.'+className);
-  var idx = cl.index(el);
-  cl.eq(idx+1).focus();
-}
-
-
-$('.input-price').keyup(function(e){
-  var ids = $(this).attr('id').split('-');
-  var id = ids[2];
-  var price = parseDefault(parseFloat($(this).val()), 0);
-  if(price < 0){
-    swal('ราคาน้อยกว่า 0');
-    $(this).val(0);
-  }
-
-  reCal(id);
-
-  if(e.keyCode == 13){
-    nextFocus($(this), 'input-price');
-  }
-});
-
-
-$('.input-disc').keyup(function(e){
-  var ids = $(this).attr('id').split('-');
-  var id = ids[2];
-  var price = parseDefault(parseFloat($('#input-price-'+id).val()), 0);
-  var disc = parseDiscount($(this).val(), price);
-
-  if(disc.discountAmount > price){
-    swal('ส่วนลดเกินราคา');
-    $(this).val('');
-  }
-
-  if(disc.discountAmount < 0 ){
-    swal('ส่วนลดน้อยกว่า 0');
-    $(this).val('');
-  }
-
-  reCal(id);
-
-  if(e.keyCode == 13){
-    nextFocus($(this), 'input-disc');
-  }
-});
-
-
-
-
-function updatePrice(){
-  var code = $('#consign_code').val();
-  var empty_qty = 0;
-  var ds = [];
-
-  $('.input-price').each(function(index, el){
-    var ids = $(this).attr('id').split('-');
-    var id = ids[2];
-    if($(this).val() == ''){
-      empty_qty++;
-      $(this).addClass('has-error');
-    }else{
-      var pName  = 'price['+id+']';
-      var price  = $(this).val();
-      var qty    = removeCommas($('#qty-'+id).text());
-      ds.push(
-        {'name' : pName, 'value' : price},
-      );
-
-      $(this).removeClass('has-error');
-    }
-
+  $('.input-price').focusin(function() {
+    let val = $(this).val();
+    $(this).val(removeCommas(val));
+    moveCursorToEnd($(this));
   });
 
-  if(empty_qty > 0){
-    swal('พบรายการที่ไม่ถูกต้อง '+ empty_qty+' รายการ');
+  $('.input-price').focusout(function() {
+    let val = parseDefaultFloat($(this).val(), 0);
+    $(this).val(addCommas(val.toFixed(2)));
+  })
+
+  $('.input-price').change(function() {
+    $(this).clearError();
+
+    let id = $(this).data('id');
+    updateRow(id);
+  })
+
+  $('.input-price').keyup(function(e) {
+    if(e.keyCode == 13) {
+      let id = $(this).data('id');
+      $('#disc-'+id).focus();
+    }
+  })
+
+  $('.input-disc').click(function() {
+    moveCursorToEnd($(this));
+  })
+
+  $('.input-disc').focusin(function() {
+    moveCursorToEnd($(this));
+  })
+
+  $('.input-disc').change(function() {
+    $(this).clearError();
+    let id = $(this).data('id');
+    updateRow(id);
+
+    // let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+    // let disc = parseDiscount($(this).val(), price);
+    //
+    // if(disc.discountAmount < 0 || disc.discountAmount > price ) {
+    //   $(this).hasError();
+    // }
+    //
+    // reCal(id);
+  })
+
+  $('.input-disc').keyup(function(e) {
+    if(e.keyCode == 13) {
+      let id = parseDefaultInt($(this).data('id'), 1);
+      $('#qty-'+id).focus();
+    }
+  })
+
+  $('.input-disc').keydown(function(e) {
+    if(e.keyCode == 32) {
+      e.preventDefault();
+      let val = $(this).val().trim();
+
+      if(val.length > 0) {
+        let lastChar = val.slice(-1);
+
+        if( ! isNaN(lastChar)) {
+          val = val + '%'
+          $(this).val(val);
+        }
+      }
+    }
+  })
+
+  $('.input-qty').click(function() {
+    moveCursorToEnd($(this));
+  })
+
+  $('.input-qty').focusin(function() {
+    let val = $(this).val();
+    $(this).val(removeCommas(val));
+    moveCursorToEnd($(this));
+  })
+
+  $('.input-qty').focusout(function() {
+    let val = $(this).val();
+    $(this).val(addCommas(val));
+  })
+
+  $('.input-qty').change(function() {
+    $(this).clearError();
+
+    let id = $(this).data('id');
+    updateRow(id);
+    // let qty = parseDefaultFloat(removeCommas($(this).val(), 0));
+    //
+    // if(qty <= 0) {
+    //   $(this).hasError();
+    // }
+    //
+    // reCal(id);
+  })
+
+  $('.input-qty').keyup(function(e) {
+    if(e.keyCode == 13) {
+      let id = parseDefaultInt($(this).data('id'), 1);
+      id++;
+      $('#price-'+id).focus();
+    }
+  })
+
+}
+
+
+function checkAll() {
+  if($('#chk-all').is(':checked')) {
+    $('.chk').prop('checked', true);
+  }
+  else {
+    $('.chk').prop('checked', false);
+  }
+}
+
+
+function removeChecked() {
+  let count = $('.chk:checked').length;
+
+  if(count) {
+    swal({
+      title:'Are you sure ?',
+      text:'ต้องการลบ ' + count + ' รายการที่เลือกหรือไม่ ?',
+      type:'warning',
+      showCancelButton:true,
+      confirmButtonText:'Yes',
+      cancelButtonText:'No',
+      confirmButtonColor:'#FA5858',
+      closeOnConfirm:true
+    }, function() {
+      load_in();
+
+      setTimeout(() => {
+        let code = $('#consign_code').val();
+        let ids = [];
+
+        $('.chk:checked').each(function() {
+          ids.push( $(this).val());
+        })
+
+        if(ids.length > 0) {
+          $.ajax({
+            url:HOME + 'delete_details',
+            type:'POST',
+            cache:false,
+            data:{
+              'code' : code,
+              'ids' : ids
+            },
+            success:function(rs) {
+              load_out();
+
+              if(rs.trim() === 'success') {
+                swal({
+                  title:'Deleted',
+                  type:'success',
+                  timer:1000
+                });
+
+                $('.chk:checked').each(function() {
+                  let id = $(this).val();
+
+                  $('#row-'+id).remove();
+                });
+
+                reIndex();
+                reCalAll();
+              }
+              else {
+                beep();
+                showError(rs);
+              }
+            },
+            error:function(rs) {
+              beep();
+              showError(rs);
+            }
+          })
+        }
+      }, 200);
+    })
+  }
+}
+
+
+function updateRow(id) {
+  let error = 0;
+
+  let code = $('#consign_code').val();
+  let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+  let discount = $('#disc-'+id).val();
+  let disc = parseDiscount(discount, price);
+  let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
+  let amount = qty * (price - disc.discountAmount);
+
+  if(price < 0) {
+    $('#price-'+id).hasError();
+    error++;
+  }
+
+  if(disc.discountAmount < 0 || disc.discountAmount > price) {
+    $('#disc-'+id).hasError();
+    error++;
+  }
+
+  if(qty <= 0) {
+    $('#qty-'+id).hasError();
+    error++;
+  }
+
+  if(error > 0) {
     return false;
   }
 
+  let h = {
+    'id' : id,
+    'code' : code,
+    'price' : price,
+    'qty' : qty,
+    'discount' : discount,
+    'discount_amount' : disc.discountAmount,
+    'amount' : amount
+  };
 
-  if(ds.length == 0){
-    swal('ไม่พบรายการ');
-    return false;
-  }
-
-  load_in();
   $.ajax({
-    url: HOME + 'update_price/'+code,
+    url:HOME + 'update_detail',
     type:'POST',
-    cache:'false',
-    data: ds,
-    success:function(rs){
-      load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-        swal({
-          title:'Updated',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-      }else{
-        swal('Error!', rs, 'error');
+    cache:false,
+    data:{
+      'data' : JSON.stringify(h)
+    },
+    success:function(rs) {
+      if(rs.trim() === 'success') {
+        reCal(id);
       }
-    }
-  });
-}
-
-
-
-
-function updateDiscount(){
-  var code = $('#consign_code').val();
-  var ds = [];
-
-  $('.input-disc').each(function(index, el){
-    var ids = $(this).attr('id').split('-');
-    var id = ids[2];
-    var disc = $('#input-disc-'+id).val();
-
-    var name = 'disc['+id+']';
-
-    ds.push(
-      {'name' : name, 'value' : disc}
-    );
-  });
-
-  load_in();
-  $.ajax({
-    url:HOME + 'update_discount/'+code,
-    type:'POST',
-    cache:'false',
-    data: ds,
-    success:function(rs){
-      load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
-        swal({
-          title:'Updated',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-      }else{
-        swal('Error!', rs, 'error');
+      else {
+        beep();
+        showError(rs);
       }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
     }
-  });
-}
+  })
 
 
-function getStockGrid(){
-
-}
-
-
-// JavaScript Document
-function getProductGrid(){
-	var pdCode 	= $("#pd-box").val();
-  var zoneCode = $('#zone_code').val();
-	var whCode = "";
-  	if( pdCode.length > 0  ){
-		load_in();
-		$.ajax({
-			url: BASE_URL + 'orders/orders/get_order_grid',
-			type:"GET",
-			cache:"false",
-			data:{
-				"style_code" : pdCode,
-				"warehouse_code" : whCode,
-        "zone_code" : zoneCode
-			},
-			success: function(rs){
-				load_out();
-				var rs = rs.split(' | ');
-				if( rs.length == 4 ){
-					var grid = rs[0];
-					var width = rs[1];
-					var pdCode = rs[2];
-					var style = rs[3];
-					if(grid == 'notfound'){
-						swal("ไม่พบสินค้า");
-						return false;
-					}
-					$("#modal").css("width", width +"px");
-					$("#modalTitle").html(pdCode);
-					$("#id_style").val(style);
-					$("#modalBody").html(grid);
-					$("#orderGrid").modal('show');
-				}else{
-					swal("สินค้าไม่ถูกต้อง");
-				}
-			}
-		});
-	}
-}
-
-
-
-//---- เพิ่มรายการสินค้าเช้าออเดอร์
-function addToOrder(){
-  var order_code = $('#consign_code').val();
-  var discount = $('#discountLabel').val();
-	//var count = countInput();
-  var data = [];
-  $(".order-grid").each(function(index, element){
-    if($(this).val() != ''){
-      var code = $(this).attr('id');
-      var arr = code.split('qty_');
-      data.push({'code' : arr[1], 'qty' : $(this).val()});
-    }
-  });
-
-	if(data.length > 0 ){
-		$("#orderGrid").modal('hide');
-		$.ajax({
-			url: HOME + 'add_details/'+order_code,
-			type:"POST",
-      cache:"false",
-      data: {
-        'data' : data,
-        'discount' : discount
-      },
-			success: function(rs){
-				load_out();
-				var rs = $.trim(rs);
-				if( rs == 'success' ){
-					swal({
-            title: 'success',
-            type: 'success',
-            timer: 1000
-          });
-					$("#btn-save-order").removeClass('hide');
-          setTimeout(function(){
-            window.location.reload();
-          }, 1500);
-					//updateDetailTable(); //--- update list of order detail
-				}else{
-					swal("Error", rs, "error");
-				}
-			}
-		});
-	}
-}
-
-
-
-
-function valid_qty(el, qty){
-	var order_qty = el.val();
-	if(parseInt(order_qty) > parseInt(qty) )	{
-		swal('สั่งได้ '+qty+' เท่านั้น');
-		el.val('');
-		el.focus();
-	}
+  updateTotalQty();
+  updateTotalAmount();
 }
