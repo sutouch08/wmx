@@ -63,7 +63,7 @@
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-striped border-1" style="min-width:1100px;">
+    <table class="table table-striped border-1" style="min-width:1200px;">
       <thead>
         <tr class="font-size-11">
           <th class="fix-width-100"></th>
@@ -74,6 +74,7 @@
           <th class="fix-width-100">Ref No.</th>
           <th class="fix-width-100">Fultillment No.</th>
           <th class="fix-width-100">From Whs</th>
+          <th class="fix-width-100">To Whs</th>
 					<th class="min-width-150">To Zone</th>
           <th class="fix-width-80 text-right">Qty</th>
           <th class="fix-width-100">User</th>
@@ -110,6 +111,7 @@
             <td class="middle"><?php echo $rs->reference; ?></td>
             <td class="middle"><?php echo $rs->fulfillment_code; ?></td>
             <td class="middle"><?php echo $rs->from_warehouse; ?></td>
+            <td class="middle"><?php echo $rs->warehouse_code; ?></td>
 						<td class="middle"><?php echo $rs->zone_name; ?></td>
             <td class="middle text-right"><?php echo number($rs->total_qty); ?></td>
             <td class="middle"><?php echo $rs->user; ?></td>

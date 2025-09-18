@@ -1117,7 +1117,7 @@ class Orders extends REST_Controller
   } //--- create_post
 
 
-  public function get_new_code($date, $prefix = 'WO', $run_digit = 5)
+  public function get_new_code($date, $prefix = 'WO', $run_digit = 6)
   {
     $date = empty($date) ? date('Y-m-d') : $date;
     $prefix = empty($prefix) ? getConfig('PREFIX_ORDER') : $prefix;
