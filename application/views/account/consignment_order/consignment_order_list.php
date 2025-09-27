@@ -5,7 +5,7 @@
   </div>
   <div class="col-lg-6 col-md-6 col-sm-4 col-xs-4 padding-5 text-right">
     <?php if( $this->pm->can_add ) : ?>
-      <button type="button" class="btn btn-xs btn-white btn-success top-btn" onclick="goAdd()">
+      <button type="button" class="btn btn-xs btn-white btn-success top-btn" onclick="addNew()">
         <i class="fa fa-plus"></i> สร้างใหม่
       </button>
     <?php endif; ?>

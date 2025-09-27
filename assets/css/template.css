@@ -713,6 +713,14 @@ hr.padding-5 {
 	display:inline;
 }
 
+.float-left {
+  float:left;
+}
+
+.float-right {
+  float: right;
+}
+
 .col-1-harf, .col-2-harf, .col-3-harf, .col-4-harf, .col-5-harf, .col-6-harf, .col-7-harf, .col-8-harf, .col-9-harf, .col-10-harf, .col-11-harf {
 	float:left;
 }
@@ -1287,12 +1295,14 @@ hr.padding-5 {
 }
 
 
-
-
 .font-size-14 {
 	font-size: 14px;
 }
 
+
+.font-size-16 {
+  font-size: 16px !important;
+}
 
 
 .font-size-18 {
@@ -1329,6 +1339,19 @@ hr.padding-5 {
 	font-size: 28px;
 }
 
+
+.font-size-30 {
+  font-size: 30px;
+}
+
+.font-size-32 {
+  font-size: 32px;
+}
+
+
+.font-size-34 {
+  font-size: 34px;
+}
 
 
 .font-size-36 {

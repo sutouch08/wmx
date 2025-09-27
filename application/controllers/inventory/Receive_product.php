@@ -446,7 +446,7 @@ class Receive_product extends PS_Controller
     {
       if(is_true(getConfig('WRX_API')))
       {
-        if(is_true(getConfig('WRX_RETURN_INTERFACE')))
+        if(is_true(getConfig('WRX_GR_INTERFACE')))
         {
           $doc = $this->receive_product_model->get($code);
 
@@ -456,7 +456,7 @@ class Receive_product extends PS_Controller
             {
               $this->load->library('wrx_ib_api');
 
-              if( ! $this->wrx_ib_api->export_return($code))
+              if( ! $this->wrx_ib_api->export_receive($code))
               {
                 $sc = FALSE;
                 $this->error = "Send data failed : ERP Error - ".$this->wrx_ib_api->error;
@@ -499,7 +499,7 @@ class Receive_product extends PS_Controller
         else
         {
           $sc = FALSE;
-          $this->error = "Return Interface is inactive";
+          $this->error = "Goods Receive Interface is inactive";
         }
       }
       else

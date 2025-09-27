@@ -40,20 +40,70 @@
 
 .menu-card {
   position: relative;
-  width: 100px;
-  height: 100px;
-  font-size: 14px;
+  width: 45%;
+  height: 80px;
+  font-size: 12px;
   border:solid 1px #d7d7d7;
   border-radius: 10px;
   cursor: pointer;
-  padding: 20px 0 20px;
+  padding: 10px 10px;
   text-align: center;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
 }
 
 .menu-card > .badge {
   position: absolute;
   top:-4px;
   right:-4px;
+}
+
+.menu-card > .icon-badge {
+  width:38px;
+  height: 38px;
+  padding:10px;
+  background-color: #ededed;
+  border-radius: 50%;
+}
+
+.menu-card > .menu-text {
+  padding-left: 10px;
+}
+
+.more-menu {
+  width:70px;
+  position: fixed;
+  bottom: 120px;
+  right: -80px;
+  padding:5px;
+  background-color: #667c89fa;
+  border-radius: 10px;
+}
+
+.more-menu.run-out {
+  transition: right 0.3s ease-in-out;
+  right: -110%;
+}
+
+.more-menu.run-in {
+  transition: right 0.3s ease-in-out;
+  right: 10px;
+}
+
+.btn-close {
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 18px;
+  font-weight: normal;
+  line-height: 1;
+  color:#979797;
+  background-color: #06060633;
 }
 
 .navbar {
@@ -81,6 +131,35 @@ li {
 .active > a , .active > a:hover {
 	background: none;
 }
+
+.pg-summary {
+  position: fixed;
+  left: 0;
+  bottom: 74px;
+  height: 40px;
+  background-color: black;
+  color:white;
+  width: 100vw;
+  z-index: 2;
+}
+
+.pg-summary.pg-top {
+  top:45px !important;
+}
+
+.pg-summary-inner {
+  width: 100%;
+  padding:5px 15px;
+}
+
+.pg-summary-content {
+  width:100%;
+}
+
+.summary-text {
+  float: left;
+}
+
 
 .pg-footer {
   position: fixed;
@@ -199,6 +278,19 @@ li {
   margin-bottom: 10px;
 }
 
+.header-info-icon {
+  position: fixed;
+  top:10px;
+  right:10px;
+  width: 25px;
+  height: 25px;
+  border:solid 2px white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .fi {
   margin-bottom: 20px;
 }
@@ -227,6 +319,11 @@ li {
   border-bottom-right-radius: 5px !important;
 }
 
+.input-group > input.from-date {
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
 
 #fromDate, #toDate {
   z-index: 11;
@@ -235,43 +332,16 @@ li {
 .filter-pad {
   position: fixed;
   top: 0px;
+  left: 0px;
   background-color: white;
-  height:100vh;
+  width: 100vw;
+  height: 100vh;
   box-shadow: #20202021 1px 0px 5px 1px;
   z-index: 10;
-  padding: 50px 15px 100px 15px;
+  padding: 45px 0px 0px 0px;
   overflow: auto;
 }
 
-/* xs */
-@media (max-width:767px) {
-  .filter-pad, .extra-menu {
-    width:100vw;
-  }
-
-}
-
-/* sm */
-@media (min-width: 768px) {
-  .filter-pad {
-    width:300px;
-  }
-}
-
-/* md */
-@media (min-width: 992px) and (max-width: 1199px) {
-  .filter-pad {
-    width: 300px;
-  }
-}
-
-/* lg */
-@media (min-width: 1200px) {
-  .filter-pad {
-    width: 300px;
-    left:0px !important;
-  }
-}
 
 .right-out {
   transition: right 0.4s ease-in-out;
@@ -306,11 +376,10 @@ li {
 
 .extra-menu {
   position: absolute;
-  width: 80%;
+  width: 100vw;
   left: 10%;
-  min-height: 150px;
   bottom: 150px;
-  padding: 8px 8px 30px;
+  padding: 8px 8px 0px;
   background-color: #ffffffed;
   border-radius: 10px;
   box-shadow: #20202021 -2px 0px 5px 2px;
@@ -324,7 +393,7 @@ li {
 
 .slide-in {
   transition: bottom 0.5s ease-in-out;
-  bottom: 100px;
+  bottom: 150px;
 }
 
 .no-border-xs {
@@ -353,8 +422,18 @@ li {
   background-color: #f5f7fa;
   border: solid 1px #dddddd;
   border-radius: 5px;
-  padding: 8px 18px 8px 18px;
+  padding: 8px;
   margin-bottom: 5px;
+}
+
+
+.list-block.closed {
+  background-color: #dff1ff !important;
+}
+
+.list-block.active {
+  border:solid 1px #2196f3;
+  background-color: #dff1ff !important;
 }
 
 .list-link {
@@ -374,6 +453,38 @@ li {
   align-items: center;
 }
 
+.list-link-inner > .no {
+  width:30px;
+  height: 30px;
+  background-color: #ffffff00;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.closed {
+  background-color: #8BC34A !important;
+}
+
+.canceled {
+  color: white;
+  background-color: #757575 !important;
+}
+
+.draft {
+  background-color: #ffffff !important;
+  border: solid 1px #dddddd;
+}
+
+.release {
+  background-color: #e0b0ff !important;
+}
+
+.picking {
+  background-color: #b0d3ff !important;
+}
+
 .form-control {
   border-radius: 5px;
 }
@@ -391,52 +502,37 @@ input.form-control {
   border-radius: 5px !important;
 }
 
-/******  close btn ********/
-.close-button {
-  background: none;
-  border: 0;
+.select2-container.form-control {
+  padding:0 !important;
+  border:0;
+}
+
+.select2-container .select2-choice {
+  height: 37px;
+  line-height: 34px;
   border-radius: 5px;
-  box-sizing: border-box;
-  color: transparent;
-  cursor: pointer;
-  font-family: 'Josefin Sans', sans-serif;
-  font-size: 18px;
-  left: 25px;
-  letter-spacing: 1.5px;
-  line-height: 15px;
-  outline: none;
-  overflow: hidden;
-  padding: 10px 0;
-  position: absolute;
-  text-transform: uppercase;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  transition: all 0.2s ease-in;
-  width: 25px;
-  height: 25px;
+  border:1px solid #d5d5d5;
+  background:#ffffff;
+  color:#858585;
 }
 
-.close-button::before,
-.close-button::after {
-  background-color: black;
-  content: '';
-  display: block;
-  height: 1px;
+.select2-container-active.select2-dropdown-open .select2-choice {
+  background: none;
+}
+
+.select2-drop {
+  border-radius: 0;
+  border:1px solid #d5d5d5;
+  border-width: 0 1px 3px;
+}
+
+.paginater {
+  width: 100vw;
+  position: fixed;
   left: 0;
-  position: absolute;
-  transform-origin: center left;
-  transition: all 0.2s ease-in;
-  width: 50px;
-  z-index: -1;
+  bottom: 75px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 0px -2px 5px 0px #cccccc50;
 }
-
-.close-button::before {
-  top: 0;
-  transform: rotate(45deg);
-}
-
-.close-button::after {
-  bottom: 0;
-  transform: rotate(-45deg);
-}
-/******** end close btn *****/

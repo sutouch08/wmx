@@ -7,7 +7,7 @@
 		<title><?php echo $this->title; ?></title>
 		<meta name="description" content="" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-		<link rel="shortcut icon" href="<?php echo base_url(); ?>assets/img/favicon.ico">
+		<link rel="icon" type="image/x-icon" href="<?php echo base_url(); ?>assets/images/logo.png">
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/chosen.css">
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/select2.css">
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
@@ -16,7 +16,7 @@
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
     <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery-ui-1.10.4.custom.min.css " />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css?v=<?php echo date('Ymd'); ?>"/>
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/mobile.css?v=<?php echo date('Ymd'); ?>"/>
+		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/mobile.css?v=<?php echo date('YmdHi'); ?>"/>
 		<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/sweet-alert.css">
 		<link rel="manifest" href="<?php echo base_url(); ?>manifest.json"/>
 		<!-- ace settings handler -->
@@ -31,13 +31,14 @@
     <script src="<?php echo base_url(); ?>assets/js/handlebars-v3.js"></script>
 		<script src="<?php echo base_url(); ?>assets/js/select2.js"></script>
     <script src="<?php echo base_url(); ?>assets/js/chosen.jquery.js"></script>
+
 	</head>
 
 	<body class="no-skin" id="mobile-body">
-		<script type="text/javascript">
+    <script type="text/javascript">
 		var BASE_URL = '<?php echo base_url(); ?>';
 		var HOME = '<?php echo $this->home.'/'; ?>';
-		</script>
+	</script>
 
 		<div id="loader">
         <div class="loader"></div>

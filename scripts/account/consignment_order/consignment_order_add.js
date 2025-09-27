@@ -136,7 +136,7 @@ function rollback() {
 
       $.ajax({
         url:HOME + 'rollback/' + code,
-        typ:'GET',
+        type:'GET',
         cache:false,
         success:function(rs) {
           load_out();
@@ -319,7 +319,7 @@ function getEdit(){
 
 
 function update() {
-  
+
   let code = $('#consign_code').val();
   let date = $('#date').val();
   let remark = $('#remark').val();

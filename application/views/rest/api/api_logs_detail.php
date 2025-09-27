@@ -7,16 +7,24 @@
 </style>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-		<label>Date Time</label>
-		<input type="text" class="form-control input-sm" value="<?php echo thai_date($date_upd, TRUE); ?>" disabled />
-	</div>
-	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 		<label>TransId</label>
 		<input type="text" class="form-control input-sm" value="<?php echo $trans_id; ?>" disabled />
 	</div>
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 		<label>Api path</label>
 		<input type="text" class="form-control input-sm" value="<?php echo $api_path; ?>" disabled />
+	</div>
+	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+		<label>Date Time</label>
+		<input type="text" class="form-control input-sm" value="<?php echo thai_date($date_upd, TRUE); ?>" disabled />
+	</div>
+	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+		<label>Request Time</label>
+		<input type="text" class="form-control input-sm" value="<?php echo thai_date($req_start, TRUE); ?>" disabled />
+	</div>
+	<div class="col-lg-4 col-md-4 col-sm-4 col-xs-12">
+		<label>Response Time</label>
+		<input type="text" class="form-control input-sm" value="<?php echo thai_date($req_end, TRUE); ?>" disabled />
 	</div>
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 		<label>Code</label>
@@ -39,7 +47,7 @@
 
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 		<label>Message</label>
-		<textarea class="form-control input-sm" disabled><?php echo $message; ?></textarea>		
+		<textarea class="form-control input-sm" disabled><?php echo $message; ?></textarea>
 	</div>
 
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">

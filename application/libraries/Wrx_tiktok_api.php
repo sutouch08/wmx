@@ -26,12 +26,12 @@ class Wrx_tiktok_api
   }
 
 
-  public function get_order_detail($reference)
+  public function get_order_detail($reference, $shop_id)
   {
     $action = "get_order_detail";
     $type = "status";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/order/{$reference}";
+    $url .= "tiktok/{$shop_id}/order/{$reference}";
     $api_path = $url;
 
     $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -60,7 +60,7 @@ class Wrx_tiktok_api
           return (object) array(
             'package_id' => $ds->package_list[0]->package_id,
             'order_status' => $ds->order_status,
-            'tracking_number' => $ds->tracking_number
+            'tracking_number' => empty($ds->tracking_number) ? NULL : $ds->tracking_number
           );
         }
       }
@@ -72,12 +72,12 @@ class Wrx_tiktok_api
   }
 
 
-  public function ship_package($package_id)
+  public function ship_package($package_id, $shop_id)
   {
     $action = "ship-package";
     $type = "Shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/ship-package";
+    $url .= "tiktok/{$shop_id}/ship-package";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -106,6 +106,11 @@ class Wrx_tiktok_api
       {
         return TRUE;
       }
+      else
+      {
+        $this->error = $res->serviceMessage;
+        return FALSE;
+      }
     }
 
     $this->error = $response;
@@ -114,12 +119,12 @@ class Wrx_tiktok_api
   }
 
 
-  public function get_shipping_label($package_id)
+  public function get_shipping_label($package_id, $shop_id)
   {
     $action = "get-ship-document";
     $type = "Shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/ship-document";
+    $url .= "tiktok/{$shop_id}/ship-document";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -148,21 +153,33 @@ class Wrx_tiktok_api
 
     if( ! empty($res) && ! empty($res->code))
     {
-      return $res;
+      if($res->code === 200 && $res->status === 'success')
+      {
+        return $res->data;
+      }
+      else
+      {
+        $this->error = $res->serviceMessage;
+        return FALSE;
+      }
     }
-
-    $this->error = $response;
+    else
+    {
+      $this->error = "Cannot get data from Tiktok api at this time";
+      return FALSE;
+    }
+    // $this->error = $response;
 
     return FALSE;
   }
 
 
-  public function get_order_status($reference)
+  public function get_order_status($reference, $shop_id)
   {
     $action = "get_order_detail";
     $type = "status";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/order/{$reference}";
+    $url .= "tiktok/{$shop_id}/order/{$reference}";
     $api_path = $url;
 
     $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -204,7 +221,7 @@ class Wrx_tiktok_api
     }
 
     return FALSE;
-  }  
+  }
 } //-- end class
 
 

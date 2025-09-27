@@ -542,7 +542,7 @@ function reloadComplete() {
 
         if(ds.status === 'success') {
           let source = $('#complete-template').html();
-          let output = $('#complete-box');
+          let output = $('#complete-list');
 
           render(source, ds.data, output);
 
@@ -583,7 +583,7 @@ function reloadTransection() {
 
         if(ds.status === 'success') {
           let source = $('#trans-template').html();
-          let output = $('#trans-box');
+          let output = $('#trans-list');
 
           render(source, ds.data, output);
 

@@ -103,9 +103,11 @@ class Wrx_ob_api
           curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
           curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
+          $req_start = date('Y-m-d H:i:s');
           $response = curl_exec($curl);
           curl_close($curl);
           $res = json_decode($response);
+          $req_end = date('Y-m-d H:i:s');
 
           if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
           {
@@ -126,7 +128,9 @@ class Wrx_ob_api
                 'status' => $sc === TRUE ? 'success' : 'failed',
                 'message' => $res->serviceMessage,
                 'request_json' => $json,
-                'response_json' => $response
+                'response_json' => $response,
+                'req_start' => $req_start,
+                'req_end' => $req_end
               );
 
               $this->ci->api_logs_model->add_logs($logs);
@@ -148,7 +152,9 @@ class Wrx_ob_api
                 'status' => 'failed',
                 'message' => 'No response',
                 'request_json' => $json,
-                'response_json' => NULL
+                'response_json' => NULL,
+                'req_start' => $req_start,
+                'req_end' => $req_end
               );
 
               $this->ci->api_logs_model->add_logs($logs);
@@ -165,21 +171,7 @@ class Wrx_ob_api
     else
     {
       $sc = FALSE;
-      $this->error = "Order not found !";
-
-      $logs = array(
-        'trans_id' => genUid(),
-        'type' => $type,
-        'api_path' => $api_path,
-        'code' => $code,
-        'action' => $action,
-        'status' => 'failed',
-        'message' => $this->error,
-        'request_json' => NULL,
-        'response_json' => NULL
-      );
-
-      $this->ci->api_logs_model->add_api_logs($logs);
+      $this->error = "Order not found !";      
     }
 
     return $sc;

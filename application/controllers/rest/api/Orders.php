@@ -564,6 +564,38 @@ class Orders extends REST_Controller
         $ref_code = $data->order_number;
 
         $prefix = substr($ref_code, 0, 2);
+
+        if(empty($roleMap($prefix)))
+        {
+          $sc = FALSE;
+          $this->error = "Invalid order_number prefix - prefix must be [WO, WC, WT, WQ, WV, WW, WS, WU]";
+
+          $arr = array(
+            'status' => FALSE,
+            'error' => $this->error,
+            'retry' => FALSE
+          );
+
+          if($this->logs_json)
+          {
+            $logs = array(
+              'trans_id' => genUid(),
+              'api_path' => $this->api_path,
+              'type' => $this->type,
+              'code' => $data->order_number,
+              'action' => $action,
+              'status' => 'failed',
+              'message' => $this->error,
+              'request_json' => $json,
+              'response_json' => json_encode($arr)
+            );
+
+            $this->api_logs_model->add_logs($logs);
+          }
+
+          $this->response($arr, 400);
+        }
+
         $role = empty($roleMap[$prefix]) ? 'S' : $roleMap[$prefix];
 
         $is_transfer = ($prefix == 'WT' OR $prefix == 'WQ' OR $prefix == 'WW') ? TRUE : FALSE;

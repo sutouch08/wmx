@@ -14,4 +14,4 @@
 <script src="<?php echo base_url(); ?>scripts/inventory/pick_list/mobile/pick_process_mobile.js?v=<?php echo date('YmdH'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/beep.js"></script>
 
-<?php $this->load->view('include/footer'); ?>
+<?php $this->load->view('include/footer_mobile'); ?>

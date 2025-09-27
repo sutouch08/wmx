@@ -140,17 +140,7 @@
     padding:10px;
     height: 45px;
     color: white;
-  }
-
-  .move-out {
-    transition: right 0.3s ease-in-out;
-    right:-100vw;
-  }
-
-  .move-in {
-    transition: right 0.3s ease-in-out;
-     right:0px;
-  }
+  }  
 
   .item-bc {
     margin-bottom: 120px !important;

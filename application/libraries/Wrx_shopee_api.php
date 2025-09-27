@@ -13,13 +13,11 @@ class Wrx_shopee_api
   public function __construct()
   {
     $this->ci =& get_instance();
-		$this->ci->load->model('rest/api/api_logs_model');
+		$this->ci->load->model('rest/V1/wrx_api_logs_model');
     $this->ci->load->model('orders/orders_model');
     $this->ci->load->model('inventory/qc_model');
 
     $this->api = getWrxApiConfig();
-    $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
-    $this->test = is_true($this->api['WRX_API_TEST']);
   }
 
   public function test()
@@ -28,88 +26,49 @@ class Wrx_shopee_api
   }
 
 
-  public function get_order_status($reference)
+  public function get_order_status($reference, $shop_id)
   {
     $action = "get_order_detail";
     $type = "status";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/order/{$reference}";
+    $url .= "shopee/{$shop_id}/order/{$reference}";
     $api_path = $url;
 
     $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
     $apiUrl = str_replace(" ","%20",$url);
     $method = 'GET';
 
-    if($this->test)
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+    $response = curl_exec($curl);
+    curl_close($curl);
+    $res = json_decode($response);
+
+    if( ! empty($res) && ! empty($res->code))
     {
-      if($this->logs_json)
+      if($res->code == 200 && $res->status == 'success')
       {
-        $logs = array(
-          'trans_id' => genUid(),
-          'type' => $type,
-          'api_path' => $api_path,
-          'code' => NULL,
-          'action' => 'test',
-          'status' => 'test',
-          'message' => 'test',
-          'request_json' => $json,
-          'response_json' => NULL
-        );
-
-        $this->ci->api_logs_model->add_logs($logs);
-      }
-    }
-    else
-    {
-      $curl = curl_init();
-      curl_setopt($curl, CURLOPT_URL, $url);
-      curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
-      curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-      curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-      curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-
-      $response = curl_exec($curl);
-      curl_close($curl);
-      $res = json_decode($response);
-
-      if( ! empty($res) && ! empty($res->code))
-      {
-        if($res->code == 200 && $res->status == 'success')
+        if( ! empty($res->data))
         {
-          if($this->logs_json)
-          {
-            $logs = array(
-              'trans_id' => genUid(),
-              'type' => $type,
-              'api_path' => $api_path,
-              'code' => NULL,
-              'action' => 'test',
-              'status' => 'test',
-              'message' => 'test',
-              'request_json' => $json,
-              'response_json' => NULL
-            );
-
-            $this->ci->api_logs_model->add_logs($logs);
-          }
-
-          if( ! empty($res->data))
-          {
-            /*
-              return status text
-              - UNPAID:Order is created, buyer has not paid yet.
-              - READY_TO_SHIP:Seller can arrange shipment.
-              - PROCESSED:Seller has arranged shipment online and got tracking number from 3PL.
-              - RETRY_SHIP:3PL pickup parcel fail. Need to re arrange shipment.
-              - SHIPPED:The parcel has been drop to 3PL or picked up by 3PL.
-              - TO_CONFIRM_RECEIVE:The order has been received by buyer.
-              - IN_CANCEL:The order's cancelation is under processing.
-              - CANCELLED:The order has been canceled.
-              - TO_RETURN:The buyer requested to return the order and order's return is processing.
-              - COMPLETED:The order has been completed.
-            */
-            return $res->data[0]->order_status;
-          }
+          /*
+            return status text
+            - UNPAID:Order is created, buyer has not paid yet.
+            - READY_TO_SHIP:Seller can arrange shipment.
+            - PROCESSED:Seller has arranged shipment online and got tracking number from 3PL.
+            - RETRY_SHIP:3PL pickup parcel fail. Need to re arrange shipment.
+            - SHIPPED:The parcel has been drop to 3PL or picked up by 3PL.
+            - TO_CONFIRM_RECEIVE:The order has been received by buyer.
+            - IN_CANCEL:The order's cancelation is under processing.
+            - CANCELLED:The order has been canceled.
+            - TO_RETURN:The buyer requested to return the order and order's return is processing.
+            - COMPLETED:The order has been completed.
+          */
+          return $res->data[0]->order_status;
         }
       }
     }
@@ -119,12 +78,12 @@ class Wrx_shopee_api
 
 
   //--- for shopee
-  public function get_shipping_param($reference)
+  public function get_shipping_param($reference, $shop_id)
   {
     $action = "get_shipping_param";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/shipping-parameter?orderSN={$reference}";
+    $url .= "shopee/{$shop_id}/shipping-parameter?orderSN={$reference}";
     $api_path = $url;
 
     $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -169,12 +128,12 @@ class Wrx_shopee_api
   }
 
 
-  public function ship_order($reference, $pickup_data)
+  public function ship_order($reference, $pickup_data, $shop_id)
   {
     $action = "ship_order";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/ship-order";
+    $url .= "shopee/{$shop_id}/ship-order";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -221,12 +180,12 @@ class Wrx_shopee_api
   }
 
 
-  public function get_tracking_number($reference)
+  public function get_tracking_number($reference, $shop_id)
   {
     $action = "get_tracking_number";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/tracking-number?orderSN={$reference}";
+    $url .= "shopee/{$shop_id}/tracking-number?orderSN={$reference}";
     $api_path = $url;
 
     $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -256,12 +215,12 @@ class Wrx_shopee_api
   }
 
 
-  public function create_shipping_document($reference, $tracking_number)
+  public function create_shipping_document($reference, $tracking_number, $shop_id)
   {
     $action = "create_shipping_document";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/shipping-document-create";
+    $url .= "shopee/{$shop_id}/shipping-document-create";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -320,12 +279,12 @@ class Wrx_shopee_api
     return FALSE;
   }
 
-  public function shipping_document_result($reference)
+  public function shipping_document_result($reference, $shop_id)
   {
     $action = "shipping_document_result";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/shipping-document-result";
+    $url .= "shopee/{$shop_id}/shipping-document-result";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
@@ -385,12 +344,12 @@ class Wrx_shopee_api
   }
 
 
-  public function shipping_document_download($reference)
+  public function shipping_document_download($reference, $shop_id)
   {
     $action = "shipping_document_result";
     $type = "shipping";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "shopee/shipping-document-download";
+    $url .= "shopee/{$shop_id}/shipping-document-download";
     $api_path = $url;
 
     $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");

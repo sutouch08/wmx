@@ -60,7 +60,6 @@ class Pick_list extends PS_Controller
 
       if($this->is_mobile)
       {
-        $this->title = "Pick List - รอจัด";
         $this->load->view('inventory/pick_list/mobile/pick_list_mobile', $filter);
       }
       else
@@ -409,7 +408,7 @@ class Pick_list extends PS_Controller
             else
             {
               $this->db->trans_rollback();
-            }            
+            }
           }
           else
           {

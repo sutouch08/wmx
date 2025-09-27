@@ -79,6 +79,7 @@ class Consignment_order extends PS_Controller
     $this->load->view('account/consignment_order/consignment_order_add');
   }
 
+
   public function is_exists($code, $old_code = NULL)
   {
     $exists = $this->consignment_order_model->is_exists($code, $old_code);
@@ -91,6 +92,7 @@ class Consignment_order extends PS_Controller
       echo 'not_exists';
     }
   }
+
 
   public function add()
   {
@@ -153,7 +155,6 @@ class Consignment_order extends PS_Controller
     }
 
   }
-
 
 
   public function edit($code)
@@ -289,7 +290,6 @@ class Consignment_order extends PS_Controller
 
     $this->_response($sc);
   }
-
 
 
   public function view_detail($code)

@@ -84,17 +84,7 @@ li {
     padding-right: 15px;
     padding-left: 15px;
     overflow: auto;
-  }
-
-  .move-out {
-    transition: right 0.3s ease-in-out;
-    right:-100vw;
-  }
-
-  .move-in {
-    transition: right 0.3s ease-in-out;
-     right:0px;
-  }
+  }  
 
   .extra-menu {
     position: fixed;

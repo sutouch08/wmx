@@ -29,7 +29,7 @@ class Wrx_ib_api
     $this->ci->load->model('masters/zone_model');
 
     $action = "create";
-    $type = "INT16.1";
+    $type = "INT16";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_GR_URL');
     $api_path = $url;
@@ -53,8 +53,11 @@ class Wrx_ib_api
           'referenceId' => $doc->code,
           'transferOrder' => $doc->reference,
           'fulfillmentNumber' => $doc->fulfillment_code,
-          'Date' => $doc->shipped_date,
-          'locationFrom' => $doc->
+          'date' => $doc->shipped_date,
+          'fromLocation' => $doc->from_warehouse,
+          'toLocation' => $doc->warehouse_code,
+          'source' => "WMS",
+          'department' => "",
           'memoHeader' => "",
           'items' => []
         );
@@ -66,11 +69,9 @@ class Wrx_ib_api
           foreach($details as $rs)
           {
             $playload['items'][] = array(
-              'orderLine' => intval($rs->line_num),
+              'lineNumber' => intval($rs->line_num),
               'itemNumber' => $rs->product_code,
-              'returnQty' => floatval($rs->receive_qty),
-              'location' => $doc->warehouse_code,
-              'uom' => $rs->unit_code
+              'qty' => floatval($rs->receive_qty)
             );
           }
         }
@@ -100,7 +101,7 @@ class Wrx_ib_api
           }
           else
           {
-            $req_time = date('Y-m-d H:i:s');
+            $req_start = date('Y-m-d H:i:s');
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -114,6 +115,8 @@ class Wrx_ib_api
             curl_close($curl);
             $res = json_decode($response);
 
+            $req_end = date('Y-m-d H:i:s');
+
             if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
             {
               if($res->status == 'success' && ! empty($res->data))
@@ -123,7 +126,7 @@ class Wrx_ib_api
                 if($ds->status == 'Success' OR $ds->status == 'success')
                 {
                   $arr = array(
-                    'oracle_id' => $ds->itemReceiptId,
+                    'oracle_id' => $ds->referenceId,
                     'DocNum' => $ds->itemReceiptNumber
                   );
 
@@ -159,7 +162,9 @@ class Wrx_ib_api
                   'status' => $sc === TRUE ? 'success' : 'failed',
                   'message' => $res->serviceMessage,
                   'request_json' => $json,
-                  'response_json' => $response
+                  'response_json' => $response,
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
@@ -171,9 +176,7 @@ class Wrx_ib_api
               $this->error = "No response from ERP";
               $resp = array(
                 'status' => 'failed',
-                'message' => $this->error,
-                'request_start' => $req_time,
-                'request_end' => date('Y-m-d H:i:s')
+                'message' => $this->error
               );
 
               if($this->logs_json)
@@ -187,7 +190,9 @@ class Wrx_ib_api
                   'status' => 'failed',
                   'message' => 'No response',
                   'request_json' => $json,
-                  'response_json' => json_encode($resp)
+                  'response_json' => json_encode($resp),
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
@@ -293,7 +298,7 @@ class Wrx_ib_api
           }
           else
           {
-            $req_time = date('Y-m-d H:i:s');
+            $req_start = date('Y-m-d H:i:s');
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -306,6 +311,7 @@ class Wrx_ib_api
             $response = curl_exec($curl);
             curl_close($curl);
             $res = json_decode($response);
+            $req_end = date('Y-m-d H:i:s');
 
             if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
             {
@@ -361,7 +367,9 @@ class Wrx_ib_api
                   'status' => $sc === TRUE ? 'success' : 'failed',
                   'message' => $res->serviceMessage,
                   'request_json' => $json,
-                  'response_json' => $response
+                  'response_json' => $response,
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
@@ -373,9 +381,7 @@ class Wrx_ib_api
               $this->error = "No response from ERP";
               $resp = array(
                 'status' => 'failed',
-                'message' => $this->error,
-                'request_start' => $req_time,
-                'request_end' => date('Y-m-d H:i:s')
+                'message' => $this->error
               );
 
               if($this->logs_json)
@@ -389,7 +395,9 @@ class Wrx_ib_api
                   'status' => 'failed',
                   'message' => 'No response',
                   'request_json' => $json,
-                  'response_json' => json_encode($resp)
+                  'response_json' => json_encode($resp),
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
@@ -496,7 +504,7 @@ class Wrx_ib_api
           }
           else
           {
-            $req_time = date('Y-m-d H:i:s');
+            $req_start = date('Y-m-d H:i:s');
 
             $curl = curl_init();
             curl_setopt($curl, CURLOPT_URL, $url);
@@ -509,6 +517,8 @@ class Wrx_ib_api
             $response = curl_exec($curl);
             curl_close($curl);
             $res = json_decode($response);
+
+            $req_end = date('Y-m-d H:i:s');
 
             if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
             {
@@ -555,7 +565,9 @@ class Wrx_ib_api
                   'status' => $sc === TRUE ? 'success' : 'failed',
                   'message' => $res->serviceMessage,
                   'request_json' => $json,
-                  'response_json' => $response
+                  'response_json' => $response,
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);
@@ -567,9 +579,7 @@ class Wrx_ib_api
               $this->error = "No response from ERP";
               $resp = array(
                 'status' => 'failed',
-                'message' => $this->error,
-                'request_start' => $req_time,
-                'request_end' => date('Y-m-d H:i:s')
+                'message' => $this->error
               );
 
               if($this->logs_json)
@@ -583,7 +593,9 @@ class Wrx_ib_api
                   'status' => 'failed',
                   'message' => 'No response',
                   'request_json' => $json,
-                  'response_json' => json_encode($resp)
+                  'response_json' => json_encode($resp),
+                  'req_start' => $req_start,
+                  'req_end' => $req_end
                 );
 
                 $this->ci->api_logs_model->add_logs($logs);

@@ -10,7 +10,7 @@ class Goods_receive extends REST_Controller
 	public $log_json = FALSE;
 	public $api = FALSE;
   public $checkBackorder = FALSE;
-  private $type = 'INT21.2';
+  private $type = 'INT21.3';
 
   public function __construct()
   {
