@@ -22,22 +22,8 @@ class Main extends PS_Controller
 
 
 	public function index()
-	{
-		if($this->isViewer)
-		{
-			redirect('view_stock');
-		}
-		else
-		{
-			if($this->agent->is_mobile())
-			{
-				redirect(base_url().'/mobile/main');
-			}
-			else
-			{
-				$this->load->view('main_view');
-			}
-		}
+	{		
+		$this->load->view('main_view');
 	}
 
 

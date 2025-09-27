@@ -5,8 +5,7 @@ class PS_Controller extends CI_Controller
 {
   public $pm;
   public $home;
-  public $close_system;
-  public $isViewer;
+  public $close_system;  
 	public $_user;
 	public $_SuperAdmin = FALSE;
   public $error;
@@ -27,7 +26,6 @@ class PS_Controller extends CI_Controller
     {
 
       $this->_user = $this->user_model->get_user_by_uid($uid);
-      $this->isViewer = $this->_user->is_viewer == 1 ? TRUE : FALSE;
       $this->_SuperAdmin = $this->_user->id_profile == -987654321 ? TRUE : FALSE;
 
       $this->close_system   = getConfig('CLOSE_SYSTEM'); //--- ปิดระบบทั้งหมดหรือไม่
@@ -38,7 +36,7 @@ class PS_Controller extends CI_Controller
         exit();
       }
 
-      if(!$this->isViewer && $this->is_expire_password($this->_user->last_pass_change))
+      if($this->is_expire_password($this->_user->last_pass_change))
       {
         redirect(base_url().'change_password');
         exit();

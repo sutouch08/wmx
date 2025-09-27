@@ -1,17 +1,19 @@
 <?php $this->load->view('include/header'); ?>
-<div class="row" style="margin-top:30px;">
-	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-6 padding-5">
+<div class="row margin-top-30">
+	<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12 padding-5">
 		<label>รหัสสินค้า</label>
 		<input type="text" class="width-100 text-center" id="search-text" placeholder="พิมพ์รหัสสินค้า 4 ตัวอักษรขึ้นไป" />
 	</div>
+	<div class="divider-hidden visible-xs"></div>
 
-	<div class="col-lg-3 col-md-4 col-sm-4 col-xs-6 padding-5">
+	<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 padding-5">
 		<label>คลัง</label>
 		<select class="width-100" id="warehouse" name="warehouse">
 			<option value="">ทั้งหมด</option>
 			<?php echo select_warehouse(); ?>
 		</select>
 	</div>
+	<div class="divider-hidden visible-xs"></div>
 
 	<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 		<label class="display-block not-show">stock</label>
@@ -22,7 +24,6 @@
 		<button type="button" class="btn btn-xs btn-info btn-block" onclick="findOrder()">ตรวจสอบออเดอร์</button>
 	</div>
 </div>
-
 <hr class="margin-top-15 margin-bottom-15"/>
 
 <div class="row">

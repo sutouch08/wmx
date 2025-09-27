@@ -55,20 +55,12 @@
 				</button>
 				<?php endif; ?>
 				<div class="navbar-header pull-left">
-					<a href="<?php echo ((empty($approve_view) && !isset($_GET['nomenu']) && !$this->isViewer) ? base_url() : '#'); ?>" class="navbar-brand">
-						<small>
-							<?php echo getConfig('COMPANY_NAME'); ?>
-						</small>
+					<a href="<?php echo ( ! isset($_GET['nomenu']) ? base_url() : '#'); ?>" class="navbar-brand">
+						<small><?php echo getConfig('COMPANY_NAME'); ?></small>
 					</a>
 				</div>
-				<?php if(! isset($_GET['nomenu'])) : ?>
-					<?php
-
-					if(!$this->isViewer)
-					{
-						$this->load->view('include/top_menu');
-					}
-					 ?>
+				<?php if( ! isset($_GET['nomenu'])) : ?>
+					<?php	$this->load->view('include/top_menu'); ?>
 
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
@@ -91,7 +83,6 @@
 										Clear cache
 									</a>
 								</li>
-								<?php if(!$this->isViewer) : ?>
 								<li>
 									<a href="JavaScript:void(0)" onclick="changeUserPwd('<?php echo get_cookie('uname'); ?>')">
 										<i class="ace-icon fa fa-keys"></i>
@@ -99,7 +90,6 @@
 									</a>
 								</li>
 								<li class="divider"></li>
-								<?php endif; ?>
 								<li>
 									<a href="<?php echo base_url(); ?>users/authentication/logout">
 										<i class="ace-icon fa fa-power-off"></i>
@@ -128,9 +118,7 @@
 					try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
 				</script>
 						<!--- side menu  ------>
-				<?php if($this->isViewer === FALSE) : ?>
 				<?php $this->load->view("include/side_menu"); ?>
-				<?php endif; ?>
 
 				<!-- #section:basics/sidebar.layout.minimize -->
 				<div class="sidebar-toggle sidebar-collapse" id="sidebar-collapse" onclick="toggle_layout()">
@@ -142,20 +130,13 @@
 			<!-- /section:basics/sidebar -->
 			<div class="main-content">
 				<div class="main-content-inner">
-                <?php if($this->session->flashdata("error") != null) :?>
-					<input type="hidden" id="error" value="<?php echo $this->session->flashdata("error"); ?>">
-                <?php elseif( $this->session->flashdata("success") != null ) : ?>
-                	<input type="hidden" id="success" value="<?php echo $this->session->flashdata("success"); ?>">
-               <?php endif; ?>
 					<div class="page-content">
-
 								<!-- PAGE CONTENT BEGINS -->
 
-<?php
-//--- if user don't have permission to access this page then deny_page;
-//_can_view_page($this->pm->can_view);
-	if($this->pm->can_view == 0)
-	{
-		$this->load->view('deny_page');
-	}
-?>
+						<?php
+						//--- if user don't have permission to access this page then deny_page;						
+							if($this->pm->can_view == 0)
+							{
+								$this->load->view('deny_page');
+							}
+						?>

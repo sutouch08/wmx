@@ -3,48 +3,58 @@
 	<head>
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
 		<meta charset="utf-8" />
-		<title>Login Page - <?php echo getConfig('COMPANY_NAME'); ?></title>
+		<title>Login</title>
 		<meta name="description" content="User login page" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-
+		<link rel="icon" type="image/x-icon" href="<?php echo base_url(); ?>assets/images/logo.png">
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
-
-		<!-- text fonts -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
-
-		<!-- ace styles -->
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" />
+		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css" />
+		<link rel="manifest" href="manifest.json"/>
+		<script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
+		<style>
+			input.input-lg {
+				border-radius: 5px !important;
+			}
 
-		<!--[if lte IE 9]>
-			<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-part2.css" />
-		<![endif]-->
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-rtl.css" />
+			#user-name {
+				padding-left: 30px;
+				padding-right: 35px;
+			}
 
-		<!--[if lte IE 9]>
-		  <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-ie.css" />
-		<![endif]-->
+			#pwd {
+				padding-left: 30px;
+				padding-right: 35px;
+			}
 
-		<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+			#user-btn {
+				position: absolute;
+				top: 15px;
+				right: 12px;
+				color:#999;
+				z-index: 2;
+			}
 
-		<!--[if lt IE 9]>
-		<script src="<?php echo base_url(); ?>assets/js/html5shiv.js"></script>
-		<script src="<?php echo base_url(); ?>assets/js/respond.js"></script>
-		<![endif]-->
+			#pwd-btn {
+				position: absolute;
+				top: 15px;
+				right: 12px;
+				color:#999;
+				z-index: 2;
+			}
+		</style>
 	</head>
 
-	<body class="login-layout blur-login">
+	<body>
 		<div class="main-container">
 			<div class="main-content">
-				<div class="row">
-					<div class="col-sm-10 col-sm-offset-1">
-						<div class="login-container">
-							<div class="center">
-								<h1>
-									<span class="orange"><?php echo getConfig('COMPANY_NAME'); ?></span>
-									<span class="white" id="id-text2">Application</span>
-								</h1>
-								<h4 class="blue" id="id-company-text">&copy; <?php echo getConfig('COMPANY_FULL_NAME');?></h4>
+				<div class="">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+						<div class="login-container" style="padding-left:20px; padding-right:20px;">
+							<div class="center" style="margin-top:30px;">
+								<img src="<?php echo base_url(); ?>assets/images/logo.png" width="150px" />
 							</div>
 
 							<div class="space-6"></div>
@@ -52,41 +62,40 @@
 							<div class="position-relative">
 								<div id="login-box" class="login-box visible widget-box no-border">
 									<div class="widget-body">
-										<div class="widget-main">
-											<h4 class="header blue lighter bigger">
-
-												Please Enter Your Information
-											</h4>
+										<div class="widget-main" style="border:solid 1px #ccc; border-radius:15px;">
+											<h4 class="header blue lighter bigger text-center">Login to your account</h4>
 
 											<div class="space-6"></div>
 
-											<form method="post" action="authentication/validate_credentials">
+											<form>
 												<fieldset>
 													<label class="block clearfix">
-														<span class="block input-icon input-icon-right">
-															<input type="text" name="user_name" class="form-control" placeholder="Username" autocomplete="off" autofocus required />
-															<i class="ace-icon fa fa-user"></i>
+														<span class="block input-icon input-icon-left">
+															<i class="ace-icon fa fa-user" style="top:8px; bottom:8px; left:5px;"></i>
+															<input type="text" name="user_name" id="user-name" class="form-control input-lg" placeholder="Username" autocomplete="off" required />
+															<i id="user-btn" class="fa fa-times-circle fa-lg hide" onclick="clearUser()"></i>
 														</span>
 													</label>
-
+													<div class="space-6"></div>
 													<label class="block clearfix">
-														<span class="block input-icon input-icon-right">
-															<input type="password" name="password" id="pwd" class="form-control" placeholder="Password" required />
-															<i id="pwd-btn" class="ace-icon fa fa-eye" onclick="showPwd()"></i>
+														<span class="block input-icon input-icon-left">
+															<i class="ace-icon fa fa-lock" style="top:8px; bottom:8px; left:5px;"></i>
+															<input type="password" name="password" id="pwd" class="form-control input-lg" placeholder="Password" required />
+															<i id="pwd-btn" class="fa fa-eye fa-lg" onclick="showPwd()"></i>
 														</span>
 													</label>
 
 													<div class="space"></div>
 
 													<div class="clearfix">
-
-														<label class="inline" id="rem-label" style="visibility:hidden;">
+														<label class="inline" id="rem-label">
 															<input type="checkbox" name="remember" id="rem-box" class="ace" value="1" />
 															<span class="lbl"> Remember Me</span>
 														</label>
-
-														<button type="submit" id="login_btn" class="width-35 pull-right btn btn-sm btn-primary">
-															<i class="ace-icon fa fa-key"></i>
+													</div>
+													<div class="space"></div>
+													<div class="clearfix">
+														<button type="button" id="btn-login" class="btn btn-lg btn-primary btn-block" style="border-radius:5px;" onclick="doLogin()">
 															<span class="bigger-110">Login</span>
 														</button>
 													</div>
@@ -95,68 +104,54 @@
 													<div class="clearfix">
 														<div class="space-4"></div>
 														<div class="space-4"></div>
-														<p style="color:red">
-														<?php
-														if($this->session->flashdata('error_message'))
-														{
-															echo $this->session->flashdata('error_message');
-														}
-														?>
-
-														</p>
+														<p class="text-center red" id="err-message"></p>
 													</div>
 												</fieldset>
-
 											</form>
-
-
-										</div><!-- /.widget-main -->
-
-									</div><!-- /.widget-body -->
-								</div><!-- /.login-box -->
-
-
-							</div><!-- /.position-relative -->
-
-							<div class="navbar-fixed-top align-right">
-								<br />
-								&nbsp;
-								<a id="btn-login-dark" href="#">Dark</a>
-								&nbsp;
-								<span class="blue">/</span>
-								&nbsp;
-								<a id="btn-login-blur" href="#">Blur</a>
-								&nbsp;
-								<span class="blue">/</span>
-								&nbsp;
-								<a id="btn-login-light" href="#">Light</a>
-								&nbsp; &nbsp; &nbsp;
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
-					</div><!-- /.col -->
-				</div><!-- /.row -->
-			</div><!-- /.main-content -->
-		</div><!-- /.main-container -->
+					</div>
+				</div>
+			</div>
+		</div>
 	</body>
 
 	<script>
+		var BASE_URL = '<?php echo base_url(); ?>';
 
-		window.addEventListener('load', () => {
-			const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-			const rem = document.getElementById('rem-box');
-			const label = document.getElementById('rem-label');
+		$('#user-name').keyup(function(e) {
+			if(e.keyCode === 13) {
+				let pwd = $('#pwd').val().trim();
 
-			console.log(isMobile);
+				if(pwd.length) {
+					doLogin();
+				}
+				else {
+					$('#pwd').focus();
+				}
+			}
 
-			if(isMobile) {
-				rem.checked = true;
-				label.style.visibility = 'visible';
+			if($(this).val().length) {
+				$('#user-btn').removeClass('hide');
 			}
 			else {
-				rem.checked = false;
-				label.style.visibility = 'hidden';
+				$('#user-btn').addClass('hide');
+			}
+		})
+
+		$('#pwd').keyup(function(e){
+			if(e.keyCode === 13) {
+				doLogin();
 			}
 		});
+
+		function clearUser() {
+			$('#user-name').val('');
+			$('#user-btn').addClass('hide');
+		}
 
 		function showPwd() {
 			var x = document.getElementById("pwd");
@@ -174,5 +169,55 @@
 			}
 		}
 
+
+		function doLogin() {
+			$('#user-name').clearError();
+			$('#pwd').clearError();
+
+			let uname = $('#user-name').val().trim();
+			let pwd = $('#pwd').val().trim();
+			let rem = $('#rem-box').is(':checked') ? 1 : 0;
+
+			if(uname.length == 0) {
+				$('#user-name').hasError();
+				return false;
+			}
+
+			if(pwd.length == 0) {
+				$('#pwd').hasError();
+				return false;
+			}
+
+			if(uname.length && pwd.length) {
+				load_in();
+
+				$.ajax({
+					url:BASE_URL + 'users/authentication/validate_credentials',
+					type:'POST',
+					cache:false,
+					data:{
+						'user_name' : uname,
+						'password' : pwd,
+						'remember' : rem
+					},
+					success:function(rs) {
+						load_out();
+
+						if(rs.trim() === "success") {
+							window.location.href = BASE_URL + 'main';
+						}
+						else {
+							$('#err-message').text(rs);
+						}
+					},
+					error:function(rs) {
+						load_out();
+						$('#err-message').text(rs.responseText);
+					}
+				})
+			}
+		}
 	</script>
+
+	<script src="<?php echo base_url(); ?>scripts/template.js?v=<?php echo date('Ymd'); ?>"></script>
 </html>

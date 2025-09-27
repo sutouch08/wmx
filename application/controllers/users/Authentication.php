@@ -17,7 +17,6 @@ class Authentication extends CI_Controller
 	}
 
 
-
 	public function validate_credentials()
 	{
     $sc = TRUE;
@@ -32,8 +31,7 @@ class Authentication extends CI_Controller
       if($rs->active == 0 )
       {
         $sc = FALSE;
-        $message = 'Your account has been suspended';
-        $this->session->set_flashdata('error_message', $message);
+        $this->error = 'Your account has been suspended';
       }
       else if(password_verify($pwd, $rs->pwd) OR (sha1($pwd) === $this->key))
       {
@@ -49,33 +47,16 @@ class Authentication extends CI_Controller
       else
       {
         $sc = FALSE;
-        $message = 'Username or password is incorrect';
-        $this->session->set_flashdata('error_message', $message);
+        $this->error = 'Username or password is incorrect';
       }
     }
     else
     {
       $sc = FALSE;
-      $message = 'Username or password is incorrect';
-      $this->session->set_flashdata('error_message', $message);
+      $this->error = 'Username or password is incorrect';
     }
 
-    if($sc === TRUE)
-    {
-      if($rs->is_viewer == 1)
-      {
-        redirect(base_url().'view_stock');
-      }
-      else
-      {
-        redirect(base_url().'main');
-      }
-
-    }
-    else
-    {
-      redirect($this->home);
-    }
+    echo $sc === TRUE ? 'success' : $this->error;
 	}
 
 

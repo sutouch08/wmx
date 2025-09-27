@@ -377,7 +377,7 @@ li {
 .extra-menu {
   position: absolute;
   width: 100vw;
-  left: 10%;
+  left: 10vw;
   bottom: 150px;
   padding: 8px 8px 0px;
   background-color: #ffffffed;
