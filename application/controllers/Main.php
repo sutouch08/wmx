@@ -17,6 +17,7 @@ class Main extends PS_Controller
     $this->load->model('main_model');
 		$this->load->helper('warehouse');
 		$this->load->helper('product_color');
+		$this->load->library('user_agent');
 	}
 
 
@@ -28,9 +29,15 @@ class Main extends PS_Controller
 		}
 		else
 		{
-			$this->load->view('main_view');
+			if($this->agent->is_mobile())
+			{
+				redirect(base_url().'/mobile/main');
+			}
+			else
+			{
+				$this->load->view('main_view');
+			}
 		}
-
 	}
 
 
