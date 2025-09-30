@@ -565,7 +565,7 @@ class Orders extends REST_Controller
 
         $prefix = substr($ref_code, 0, 2);
 
-        if(empty($roleMap($prefix)))
+        if(empty($roleMap[$prefix]))
         {
           $sc = FALSE;
           $this->error = "Invalid order_number prefix - prefix must be [WO, WC, WT, WQ, WV, WW, WS, WU]";
