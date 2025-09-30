@@ -181,25 +181,6 @@ class Delivery_order extends PS_Controller
 			$date_add = getConfig('ORDER_SOLD_DATE') == 'D' ? $order->date_add : now();
       $toWhsCode = NULL;
 
-      if($order->role == 'T' OR $order->role == 'Q')
-      {
-        $this->load->model('inventory/transform_model');
-        $toWhsCode = $this->zone_model->get_warehouse_code($order->zone_code);
-      }
-
-      if($order->role == 'L')
-      {
-        $this->load->model('inventory/lend_model');
-        $toWhsCode = $this->zone_model->get_warehouse_code($order->zone_code);
-      }
-
-      //---- กรณีฝากขาย (โอนคลัง)
-      if($order->role == 'N' OR $order->role == 'C')
-      {
-        $this->load->model('orders/consign_model');
-        $toWhsCode = $this->zone_model->get_warehouse_code($order->zone_code);
-      }
-
       //-- กรณี สปอนเซอร์
       if($order->role == 'P')
       {
@@ -299,35 +280,6 @@ class Delivery_order extends PS_Controller
                       break;
                     }
 
-                    //--- กรณีที่ต้องมีการโอนสินค้าเข้าปลายทาง
-                    if($order->role === 'N' OR $order->role === 'C' OR $order->role === 'T' OR $order->role === 'Q' OR $order->role === 'L')
-                    {
-                      //--- 1. เพิ่มสต็อกเข้าโซนปลายทาง
-                      if( ! $this->stock_model->update_stock_zone($order->zone_code, $rm->product_code, $buffer_qty))
-                      {
-                        $sc = FALSE;
-                        $this->error = 'โอนสินค้าเข้าโซนปลายทางไม่สำเร็จ';
-                      }
-
-                      //--- 2. เพิ่ม movement เข้าปลายทาง
-                      $arr = array(
-                        'reference' => $order->code,
-                        'warehouse_code' => $toWhsCode,
-                        'zone_code' => $order->zone_code,
-                        'product_code' => $rm->product_code,
-                        'move_in' => $buffer_qty,
-                        'move_out' => 0,
-                        'date_add' => $date_add
-                      );
-
-                      if( ! $this->movement_model->add($arr))
-                      {
-                        $sc = FALSE;
-                        $this->error = 'บันทึก movement ขาเข้าไม่สำเร็จ';
-                        break;
-                      }
-                    }
-
                     $total_amount = $rs->final_price * $buffer_qty;
                     $docTotal += $total_amount;
 
@@ -376,66 +328,6 @@ class Delivery_order extends PS_Controller
                 } //--- end foreach $buffers
               } //--- end if wmpty ($buffers)
 
-
-              //------ ส่วนนี้สำหรับโอนเข้าคลังระหว่างทำ
-              //------ หากเป็นออเดอร์เบิกแปรสภาพ
-              if($order->role == 'T' OR $order->role == 'Q')
-              {
-                //--- ตัวเลขที่มีการเปิดบิล
-                $sold_qty = ($rs->order_qty >= $rs->qc) ? $rs->qc : $rs->order_qty;
-
-                //--- ยอดสินค้าที่มีการเชื่อมโยงไว้ในตาราง tbl_order_transform_detail (เอาไว้โอนเข้าคลังระหว่างทำ รอรับเข้า)
-                //--- ถ้ามีการเชื่อมโยงไว้ ยอดต้องมากกว่า 0 ถ้ายอดเป็น 0 แสดงว่าไม่ได้เชื่อมโยงไว้
-                $trans_list = $this->transform_model->get_transform_product($rs->id);
-
-                if( ! empty($trans_list))
-                {
-                  //--- ถ้าไม่มีการเชื่อมโยงไว้
-                  foreach($trans_list as $ts)
-                  {
-                    //--- ถ้าจำนวนที่เชื่อมโยงไว้ น้อยกว่า หรือ เท่ากับ จำนวนที่ตรวจได้ (ไม่เกินที่สั่งไป)
-                    //--- แสดงว่าได้ของครบตามที่ผูกไว้ ให้ใช้ตัวเลขที่ผูกไว้ได้เลย
-                    //--- แต่ถ้าได้จำนวนที่ผูกไว้มากกว่าที่ตรวจได้ แสดงว่า ได้สินค้าไม่ครบ ให้ใช้จำนวนที่ตรวจได้แทน
-                    $move_qty = $ts->order_qty <= $sold_qty ? $ts->order_qty : $sold_qty;
-
-                    if( $move_qty > 0)
-                    {
-                      //--- update ยอดเปิดบิลใน tbl_order_transform_detail field sold_qty
-                      if($this->transform_model->update_sold_qty($ts->id, $move_qty) === TRUE )
-                      {
-                        $sold_qty -= $move_qty;
-                      }
-                      else
-                      {
-                        $sc = FALSE;
-                        $this->error = 'ปรับปรุงยอดรายการค้างรับไม่สำเร็จ';
-                      }
-                    }
-                  }
-                }
-              }
-
-
-              //--- if lend
-              if($order->role == 'L')
-              {
-                //--- ตัวเลขที่มีการเปิดบิล
-                $sold_qty = ($rs->order_qty >= $rs->qc) ? $rs->qc : $rs->order_qty;
-
-                $arr = array(
-                  'order_code' => $code,
-                  'product_code' => $rs->product_code,
-                  'product_name' => $rs->product_name,
-                  'qty' => $sold_qty,
-                  'empID' => $order->empID
-                );
-
-                if($this->lend_model->add_detail($arr) === FALSE)
-                {
-                  $sc = FALSE;
-                  $this->error = 'เพิ่มรายการค้างรับไม่สำเร็จ';
-                }
-              }
             }
           } //--- end foreach $bill
         } //--- end if empty($bill)

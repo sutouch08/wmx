@@ -71,7 +71,7 @@
 		    </div>
 				<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 				 	<label>ผู้เบิก</label>
-					<input type="text" class="form-control input-sm edit" value="<?php echo $order->user_ref; ?>" disabled />
+					<input type="text" class="form-control input-sm edit" value="" disabled />
 				</div>
 			<?php else : ?>
 				<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
@@ -80,7 +80,7 @@
 				</div>
 				<div class="col-lg-2-harf col-md-2 col-sm-2 col-xs-6 padding-5">
 				 	<label>ผู้รับ</label>
-					<input type="text" class="form-control input-sm" value="<?php echo $order->user_ref; ?>" disabled />
+					<input type="text" class="form-control input-sm" value="" disabled />
 				</div>
 				<div class="col-lg-4-harf col-md-4-harf col-sm-4-harf col-xs-6 padding-5">
 					<label>โซนยืมสินค้า</label>
