@@ -22,7 +22,7 @@
             <div class="width-33 float-left">คงเหลือ : <span id="balance-qty-<?php echo $rs->id; ?>"><?php echo number($rs->balance); ?></span></div>
           </div>
           <div class="divider margin-top-10 margin-bottom-10"></div>
-          <button type="button" class="btn btn-minier btn-info stock-reload" onclick="reloadPickRow(<?php echo $rs->id; ?>)"><i class="fa fa-refresh"></i></button>
+          <span class="btn btn-minier btn-info stock-reload" onclick="reloadPickRow(<?php echo $rs->id; ?>)"><i class="fa fa-refresh"></i></span>
           <div class="margin-bottom-3 pre-wrap" id="stock-in-zone-<?php echo $rs->id; ?>">Location : <?php echo $rs->stock_in_zone; ?></div>
         </div>
         <span class="badge-qty" id="badge-qty-<?php echo $rs->id; ?>"><?php echo number($rs->balance); ?></span>

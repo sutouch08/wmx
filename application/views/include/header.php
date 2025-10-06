@@ -91,7 +91,7 @@
 								</li>
 								<li class="divider"></li>
 								<li>
-									<a href="<?php echo base_url(); ?>users/authentication/logout">
+									<a href="javascript:void(0)" onclick="logout()">
 										<i class="ace-icon fa fa-power-off"></i>
 										ออกจากระบบ
 									</a>
@@ -134,7 +134,7 @@
 								<!-- PAGE CONTENT BEGINS -->
 
 						<?php
-						//--- if user don't have permission to access this page then deny_page;						
+						//--- if user don't have permission to access this page then deny_page;
 							if($this->pm->can_view == 0)
 							{
 								$this->load->view('deny_page');

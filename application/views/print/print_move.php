@@ -7,8 +7,7 @@
 	$header	= array(
     'เลขที่' => $doc->code,
     'วันที่'  => thai_date($doc->date_add, FALSE, '/'),
-    'ต้นทาง' => $doc->from_warehouse_name,
-    'ปลายทาง' => $doc->to_warehouse_name,
+    'คลัง' => $doc->warehouse_name,
     'พนักงาน' => $this->user_model->get_name($doc->user)
 	);
 
@@ -34,12 +33,12 @@
 	//**************  กำหนดหัวตาราง  ******************************//
   //------- กำหนดส่วนหัวตารางรายการที่จะพิมพ์
 	$thead	= array(
-						array("ลำดับ", "width:5%; text-align:center; border-top:0px; border-top-left-radius:10px;"),
-						array("รหัส", "width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("สินค้า", "width:25%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("ต้นทาง","width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("ปลายทาง", "width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("จำนวน", "width:10%; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
+						array("ลำดับ", "width:10mm; text-align:center; border-top:0px; border-top-left-radius:10px;"),
+						array("รหัส", "width:45mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+						array("สินค้า", "width:55mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+						array("ต้นทาง","width:30mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+						array("ปลายทาง", "width:30mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+						array("จำนวน", "width:20mm; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
 						);
 
 	$this->printer->add_subheader($thead);
@@ -124,12 +123,12 @@
           array(
           "<td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
           border-bottom:0px; border-left:0px; text-align:right;
-          width:85.1%;'>
+          width:170mm;'>
           <strong>รวม</strong>
           </td>
           <td style='height:".$this->printer->row_height."mm; border: solid 1px #ccc;
           border-right:0px; border-bottom:0px; border-bottom-right-radius:10px;
-          text-align:right;'>".number($total_qty)."</td>")
+          text-align:right; width:20mm;'>".number($total_qty)."</td>")
 
 			);
 

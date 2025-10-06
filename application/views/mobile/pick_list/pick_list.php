@@ -5,17 +5,17 @@
     <?php $no = 1; ?>
     <?php if( ! empty($data)) : ?>
       <?php foreach($data as $rs) : ?>
-				<?php $channels = empty($rs->channels_code) ?  "" : $this->channels_model->get_name($rs->channels_code); ?>
+				<?php $channels = empty($rs->channels_code) ?  "ไม่ระบุ" : $this->channels_model->get_name($rs->channels_code); ?>
         <div class="list-block" onclick="goProcess('<?php echo $rs->code; ?>')">
           <div class="list-link" >
             <div class="list-link-inner">
               <div class="margin-right-10 no <?php echo status_color($rs->status); ?>"><?php echo $no; ?></div>
               <div class="display-inline-block">
-                <span class="display-block font-size-11"><?php echo $rs->code; ?> [<?php echo status_text($rs->status); ?>] - [<?php echo thai_date($rs->date_add, FALSE, '/'); ?>]</span>
-                <span class="display-block font-size-11"><?php echo $channels; ?> &nbsp;&nbsp;&nbsp;[<?php echo $this->zone_model->get_name($rs->zone_code); ?>]</span>
+                <span class="display-block font-size-14"><?php echo $rs->code; ?> &nbsp;&nbsp; - &nbsp;&nbsp; <?php echo status_text($rs->status); ?></span>
+                <span class="display-block font-size-11">วันที่ :  <?php echo thai_date($rs->date_add, FALSE, '/'); ?>&nbsp;&nbsp;&nbsp; ช่องทาง : <?php echo $channels; ?></span>
+                <span class="display-block font-size-11">ต้นทาง :  <?php echo $rs->warehouse_code; ?>  &nbsp;&nbsp;&nbsp; ปลายทาง : <?php echo $this->zone_model->get_name($rs->zone_code); ?></span>
               </div>
             </div>
-            <i class="fa fa-angle-right fa-2x light-grey"></i>
           </div>
         </div>
         <?php $no++; ?>
@@ -25,6 +25,7 @@
 </div>
 
 <div class="paginater">
+  <div class="paginater-toggle"><i class="fa fa-angle-up fa-lg"></i></div>
 	<?php echo $this->pagination->create_links(); ?>
 </div>
 

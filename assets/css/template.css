@@ -521,6 +521,18 @@ hr.padding-5 {
 	border-top: solid 2px #333 !important;
 }
 
+.border-radius-5 {
+  border-radius: 5px !important;
+}
+
+.border-radius-10 {
+  border-radius: 10px !important;
+}
+
+.border-radius-50 {
+  border-radius: 50% !important;
+}
+
 .help-block {
 	color:#AAA;
 	display:block;
@@ -555,6 +567,31 @@ hr.padding-5 {
 
 .yellow {
 	color:yellow;
+}
+
+.closed {
+  background-color: #f0ffdf !important;
+}
+
+.shipped {
+  background-color: #b0d3ff !important;
+}
+
+.canceled {
+  color: #060606;
+  background-color: #9d9d9d !important;
+}
+
+.draft {
+  background-color: #ffffff !important;
+}
+
+.release {
+  background-color: #e0b0ff !important;
+}
+
+.picking {
+  background-color: #b0d3ff !important;
 }
 
 .has-error{
@@ -918,8 +955,8 @@ hr.padding-5 {
     margin-bottom:10px;
     padding-top: 10px;
     padding-bottom: 10px;
-    /* text-align: center; */
-    /* background-color: #eee; */
+    text-align: center;
+    background-color: #eee;
   }
 
 }

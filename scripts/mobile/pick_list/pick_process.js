@@ -660,9 +660,7 @@ function removeTransection(id, qty, product_code, zone_code) {
 }
 
 
-function confirmClose(){
-  closeExtraMenu();
-
+function confirmClose(){  
   setTimeout(() => {
     swal({
       title: "Force Close",

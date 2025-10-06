@@ -5,7 +5,7 @@ class PS_Controller extends CI_Controller
 {
   public $pm;
   public $home;
-  public $close_system;  
+  public $close_system;
 	public $_user;
 	public $_SuperAdmin = FALSE;
   public $error;

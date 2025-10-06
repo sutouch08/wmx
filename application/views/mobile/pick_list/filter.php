@@ -52,7 +52,7 @@
 				</select>
 			</div>
 
-			<div class="col-xs-8 padding-5 fi">
+			<div class="col-xs-12 padding-5 fi">
 				<label>พนักงาน</label>
 				<select class="form-control" name="user" id="user">
 					<option value="all">ทั้งหมด</option>
@@ -60,24 +60,9 @@
 				</select>
 			</div>
 
-			<?php $perpage = get_rows();?>
-
-			<div class="col-xs-4 padding-5 fi">
-				<label>รายการต่อหน้า</label>
-				<select class="form-control" id="set_rows" onchange="setRows()">
-					<option value="20" <?php echo is_selected('20', $perpage); ?>>20</option>
-					<option value="50" <?php echo is_selected('50', $perpage); ?>>50</option>
-					<option value="100" <?php echo is_selected('100', $perpage); ?>>100</option>
-					<option value="200" <?php echo is_selected('200', $perpage); ?>>200</option>
-					<option value="300" <?php echo is_selected('300', $perpage); ?>>300</option>
-				</select>
-			</div>
-
-			<div class="col-xs-9 padding-5 fi">
+			<div class="col-xs-12 padding-5">
+				<label class="not-show">Submit</label>
 				<button type="submit" class="btn btn-xs btn-primary btn-block"><i class="fa fa-search"></i> Search</button>
-			</div>
-			<div class="col-xs-3 padding-5 fi">
-				<button type="button" class="btn btn-xs btn-warning btn-block" onclick="clearFilter()"><i class="fa fa-retweet"></i> Reset</button>
 			</div>
 		</div>
 	</div>

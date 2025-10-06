@@ -138,10 +138,10 @@
 		<tr>
 			<td align="center">{{ no }}</td>
 		  <td align="center">{{ barcode }}</td>
-		  <td>{{ products }}</td>
+		  <td>{{product_code}} | {{product_name}}</td>
 		  <td align="center" class="qty-label">{{ qty }}</td>
 		  <td align="center">
-		  	<input type="number" class="form-control input-sm text-center input-qty" name="items[{{products}}]" data-products="{{products}}" max="{{qty}}" id="item_{{no}}" />
+		  	<input type="number" class="form-control input-sm text-center input-qty" id="item-{{no}}" data-code="{{product_code}}" data-name="{{product_name}}" data-qty="{{qty}}" />
 		  </td>
 		</tr>
 	{{/if}}

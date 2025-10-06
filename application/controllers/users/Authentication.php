@@ -89,7 +89,8 @@ class Authentication extends CI_Controller
 		delete_cookie('uid');
     delete_cookie('displayName');
     delete_cookie('id_profile');
-    redirect($this->home);
+
+    echo "success";    
 	}
 
 

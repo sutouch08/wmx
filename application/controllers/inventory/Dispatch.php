@@ -24,8 +24,6 @@ class Dispatch extends PS_Controller
     $this->load->helper('sender');
     $this->load->helper('order');
     $this->load->helper('warehouse');
-
-    $this->load->library('user_agent');
   }
 
 
@@ -493,7 +491,6 @@ class Dispatch extends PS_Controller
 
   public function edit($code)
   {
-    $this->load->library('user_agent');
 
     if($this->pm->can_add OR $this->pm->can_edit)
     {
@@ -512,16 +509,8 @@ class Dispatch extends PS_Controller
           'total_orders' => $totalOrder,
           'total_qty' => empty($details) ? 0 : count($details)
         );
-
-        if($this->agent->is_mobile())
-        {
-          $ds['title'] = "Dispatch<br/>".$doc->code." | ".$this->channels_model->get_name($doc->channels_code);
-          $this->load->view('inventory/dispatch/dispatch_edit_mobile', $ds);
-        }
-        else
-        {
-          $this->load->view('inventory/dispatch/dispatch_edit', $ds);
-        }
+        
+        $this->load->view('inventory/dispatch/dispatch_edit', $ds);
       }
       else
       {

@@ -24,25 +24,6 @@ function goTo(page) {
   window.location.href = BASE_URL + page;
 }
 
-function checkError(){
-	if($('#error').length){
-		swal({
-			title:'Error!',
-			text: $('#error').val(),
-			type:'error'
-		})
-	}
-
-	if($('#success').length){
-			swal({
-				title:'Success',
-				text:$('#success').val(),
-				type:'success',
-				timer:1500
-			});
-	}
-}
-
 
 function showError(response) {
   load_out();
@@ -190,19 +171,6 @@ function render_before(source, data, output) {
 	$(html).insertBefore(output);
 }
 
-function setRows() {
-  var rows = $('#set_rows').val();
-	$.ajax({
-		url:BASE_URL+'tools/set_rows',
-		type:'POST',
-		cache:false,
-		data:{
-			'set_rows' : rows
-		},
-		success:function(){			
-		}
-	});
-}
 
 function set_rows()
 {
@@ -511,34 +479,13 @@ function refresh() {
 }
 
 
-function toggleFilter() {
-  let filter = $('#filter-pad');
-
-  if(filter.hasClass('move-in')) {
-    filter.removeClass('move-in');
-  }
-  else {
-    filter.addClass('move-in');
-  }
-}
-
-
-function closeFilter() {
-  $('#filter-pad').removeClass('move-in');
-}
-
-function toggleExtraMenu() {
-  let menu = $('#extra-menu');
-
-  if(menu.hasClass('slide-in')) {
-    menu.removeClass('slide-in');
-  }
-  else {
-    menu.addClass('slide-in');
-  }
-}
-
-
-function closeExtraMenu() {
-  $('#extra-menu').removeClass('slide-in');
+function logout() {
+  $.ajax({
+    url:BASE_URL + 'users/authentication/logout',
+    type:'POST',
+    cache:false,
+    success:function() {
+      goTo('main');
+    }
+  })
 }

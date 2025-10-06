@@ -66,11 +66,7 @@ li {
   .tab-content {
     margin-top:-30px;
   }
-
-  #fromDate, #toDate {
-    z-index: 11;
-  }
-
+  
   .filter-pad {
     position: fixed;
     top: 0px;

@@ -74,7 +74,7 @@ li {
   .filter-pad {
     position: fixed;
     top: 0px;
-    right: 0px;
+    right: -100vw;
     background-color: white;
     height:100vh;
     width:100vw;
@@ -84,7 +84,17 @@ li {
     padding-right: 15px;
     padding-left: 15px;
     overflow: auto;
-  }  
+  }
+
+  .move-out {
+    transition: right 0.3s ease-in-out;
+    right:-110vw ;
+  }
+
+  .move-in {
+    transition: right 0.3s ease-in-out;
+    right:0px;
+  }
 
   .extra-menu {
     position: fixed;

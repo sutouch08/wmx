@@ -1,5 +1,5 @@
 function deleteMoveItem(id, code){
-	var move_code = $('#move_code').val();
+	var move_code = $('#move-code').val();
 
   swal({
 		title: 'คุณแน่ใจ ?',
@@ -47,22 +47,18 @@ function deleteMoveItem(id, code){
 
 
 function reCal(){
-	var total = 0;
-	$('.qty').each(function(){
-		var qty = parseInt(removeCommas($(this).text()));
-		if(!isNaN(qty))
-		{
-			total += qty;
-		}
+	let total = 0;
+	$('.qty').each(function() {
+		let qty = parseDefaultFloat(removeCommas($(this).text()), 0);
+		total += qty;
 	});
 
 	$('#total').text(addCommas(total));
 }
 
 
-//------------  ตาราง move_detail
 function getMoveTable(){
-	var code	= $("#move_code").val();
+	var code	= $("#move-code").val();
 	$.ajax({
 		url: HOME + 'get_move_table/'+ code,
 		type:"GET",
@@ -79,8 +75,8 @@ function getMoveTable(){
 }
 
 
-function getTempTable(){
-	var code = $("#move_code").val();
+function getTempTable() {
+	var code = $("#move-code").val();
 	$.ajax({
 		url: HOME + 'get_temp_table/'+code,
 		type:"GET",
@@ -107,103 +103,116 @@ function getTempTable(){
 	});
 }
 
-//--- เพิ่มรายการลงใน move detail
-//---	เพิ่มลงใน move_temp
-//---	update stock ตามรายการที่ใส่ตัวเลข
-function addToMove(){
-	var code	= $('#move_code').val();
 
-	//---	โซนต้นทาง
-	var from_zone = $("#from_zone_code").val();
+function addToMove() {
+	if(click == 0) {
+		click = 1;
 
-	if(from_zone.length == 0)
-	{
-		swal('โซนต้นทางไม่ถูกต้อง');
-		return false;
-	}
+		error = 0;
 
-	//--- โซนปลายทาง
-	var to_zone = $('#to_zone_code').val();
-	if(to_zone.length == 0)
-	{
-		swal('โซนปลายทางไม่ถูกต้อง');
-		return false;
-	}
+		$('#from-zone').clearError();
+		$('#to-zone').clearError();
+		clearErrorByClass('input-qty');
 
-	//---	จำนวนช่องที่มีการป้อนตัวเลขเพื่อย้ายสินค้าออก
-	var count  = countInput();
-	if(count == 0)
-	{
-		swal('ข้อผิดพลาด !', 'กรุณาระบุจำนวนในรายการที่ต้องการย้าย อย่างน้อย 1 รายการ', 'warning');
-		return false;
-	}
+		let h = {
+			'code' : $('#move-code').val(),
+			'from_zone' : $('#from_zone_code').val(),
+			'to_zone' : $('#to_zone_code').val(),
+			'items' : []
+		};
 
-	//---	ตัวแปรสำหรับเก็บ ojbect ข้อมูล
-	var ds  = [];
+		if(h.from_zone.length == 0) {
+			$('#from-zone').hasError();
+			click = 0;
+			return false;
+		}
 
-	ds.push(
-		{'name' : 'move_code', 'value' : code},
-		{'name' : 'from_zone', 'value' : from_zone},
-		{'name' : 'to_zone', 'value' : to_zone}
-	);
+		if(h.to_zone.length == 0) {
+			$('#to-zone').hasError();
+			click = 0;
+			return false;
+		}
 
-	no = 0;
-	var items = [];
-	$('.input-qty').each(function(index, element) {
-	    var qty = $(this).val();
-			if( qty != '' && qty != 0 ){
-				var pd_code  = $(this).data('products')
-				item = {"code" : pd_code, "qty" : qty };
-				items.push(item);
+		if(h.from_zone == h.to_zone) {
+			click = 0;
+			$('#from-zone').hasError();
+			$('#to-zone').hasError();
+			showError("โซนต้นทาง - ปลายทาง ต้องเป็นคนละโซนกัน");
+			return false;
+		}
+
+		$('.input-qty').each(function() {
+			let limit = parseDefaultFloat($(this).data('qty'), 0);
+			let qty = parseDefaultFloat($(this).val(), 0);
+
+			if(qty < 0 || qty > limit) {
+				$(this).hasError();
+				error++;
 			}
-    });
 
-		ds.push({"name" : "items", "value" : JSON.stringify(items)});
+			if(qty > 0 && qty <= limit) {
+				let row = {
+					'code' : $(this).data('code'),
+					'name' : $(this).data('name'),
+					'qty' : qty
+				};
 
-	if( count > 0 ){
+				h.items.push(row);
+			}
+		});
+
+
+		if(h.items.length == 0) {
+			click = 0;
+			return false;
+		}
+
+		if(error > 0) {
+			click = 0;
+			showError('กรุณาแก้ไขรายการที่ไม่ถูกต้อง');
+			return false;
+		}
+
 		load_in();
-		setTimeout(function(){
-			$.ajax({
-				url: HOME + 'add_to_move',
-				type:"POST",
-				cache:"false",
-				data: ds ,
-				success: function(rs){
-					load_out();
-					var rs = $.trim(rs);
-					if( rs == 'success' ){
-						swal({
-							title: 'success',
-							text: 'เพิ่มรายการเรียบร้อยแล้ว',
-							type: 'success',
-							timer: 1000
-						});
 
-						setTimeout( function(){
-							showMoveTable();
-							getProductInZone();
-						}, 1200);
-					}
-					else{
-						showError(rs);
-					}
+		$.ajax({
+			url:HOME + 'add_to_move',
+			type:'POST',
+			cache:false,
+			data: {
+				'data' : JSON.stringify(h)
+			},
+			success:function(rs) {
+				load_out();
+				click = 0;
+				if(rs.trim() === 'success') {
+					swal({
+						title:'Success',
+						type:'success',
+						timer:1000
+					});
+
+					setTimeout(() => {
+						showMoveTable();
+						getProductInZone();
+					}, 1200);
 				}
-			});
-		}, 500);
-	}
-	else
-	{
-
-		swal('ข้อผิดพลาด !', 'กรุณาระบุจำนวนในรายการที่ต้องการย้าย อย่างน้อย 1 รายการ', 'warning');
-
+				else {
+					showError(rs);
+				}
+			},
+			error:function(rs) {
+				click = 0;
+				showError(rs);
+			}
+		})
 	}
 }
 
 
-function selectAll(){
-	$('.input-qty').each(function(index, el){
-		var qty = $(this).attr('max');
-		$(this).val(qty);
+function selectAll() {
+	$('.input-qty').each(function(index, el) {
+		$(this).val($(this).data('qty'));
 	});
 }
 
@@ -212,14 +221,4 @@ function clearAll(){
 	$('.input-qty').each(function(index, el){
 		$(this).val('');
 	});
-}
-
-
-//----- นับจำนวน ช่องที่มีการใส่ตัวเลข
-function countInput(){
-	var count = 0;
-	$(".input-qty").each(function(index, element) {
-        count += ($(this).val() == "" ? 0 : 1 );
-    });
-	return count;
 }

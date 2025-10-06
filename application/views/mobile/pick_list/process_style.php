@@ -42,12 +42,31 @@
     color:blue;
   }
 
+  #complete-list {
+    position: absolute;
+    top: 45px;
+    left: 0px;
+    height: calc(100vh - 120px);
+    padding: 15px;
+    overflow: auto;;
+  }
+
+  #trans-list {
+    position: absolute;
+    top: 45px;
+    left: 0px;
+    height: calc(100vh - 120px);
+    padding: 15px;
+    overflow: auto;;
+  }
+
   #incomplete-box {
     position: fixed;
     top: 85px;
     left: 0px;
     width: 100vw;
     overflow: auto;
+    font-size:11px;
   }
 
   #complete-box {

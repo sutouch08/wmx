@@ -12,7 +12,7 @@
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" />
 		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css" />
-		<link rel="manifest" href="manifest.json"/>
+		<link rel="manifest" href="<?php echo base_url(); ?>manifest.json"/>
 		<script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
 		<style>
 			input.input-lg {

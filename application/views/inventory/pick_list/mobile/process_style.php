@@ -100,7 +100,7 @@
   .trans-box {
     position: fixed;
     top:0px;
-    right: 0px;
+    right: -100vw;
     width: 100vw;
     height: 100vh;
     overflow: auto;
@@ -140,7 +140,7 @@
     padding:10px;
     height: 45px;
     color: white;
-  }  
+  }
 
   .item-bc {
     margin-bottom: 120px !important;

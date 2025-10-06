@@ -513,28 +513,35 @@ function pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment 
 function mobile_pagination_config( $base_url, $total_rows = 0, $perpage = 20, $segment = 3)
 {
 	$rows = get_rows();
-	$config['full_tag_open'] 		= '<div><ul class="pagination">';
-	$config['full_tag_close'] 		= '</ul></div>';
-	$config['first_link'] 				= 'First';
-	$config['first_tag_open'] 		= '<li>';
-	$config['first_tag_close'] 		= '</li>';
-	$config['next_link'] 				= '<i class="ace-icon fa fa-angle-double-right"></i>';
-	$config['next_tag_open'] 		= '<li>';
-	$config['next_tag_close'] 	= '</li>';
-	$config['prev_link'] 			= '<i class="ace-icon fa fa-angle-double-left"></i>';
-	$config['prev_tag_open'] 	= '<li>';
-	$config['prev_tag_close'] 	= '</li>';
-	$config['last_link'] 				= 'Last';
-	$config['last_tag_open'] 		= '<li>';
-	$config['last_tag_close'] 		= '</li>';
-	$config['cur_tag_open'] 		= '<li class="active"><a href="#">';
-	$config['cur_tag_close'] 		= '</a></li>';
-	$config['num_tag_open'] 		= '<li>';
-	$config['num_tag_close'] 		= '</li>';
-	$config['uri_segment'] 		= $segment;
-	$config['per_page']			= $perpage;
-	$config['total_rows']			= $total_rows != false ? $total_rows : 0 ;
-	$config['base_url']				= $base_url;
+	$input_rows  = '<div class="text-center pagination">';
+	$input_rows .= 'ทั้งหมด '.number($total_rows).' รายการ';
+	$input_rows .= '<input type="number" input-mode="numeric" name="set_rows" id="set_rows" class="input-mini text-center margin-left-15 margin-right-10 border-radius-5" value="'.$rows.'" />';
+	$input_rows .= 'ต่อหน้า ';
+	$input_rows .= '<buton class="btn btn-white btn-success btn-50" style="height:31px !important; line-height:1;" type="button" onClick="set_rows()">แสดง</button>';
+	$input_rows .= '</div>';
+
+	$config['full_tag_open'] = '<div style="width:100%; display:flex; justify-content:center;"><ul class="pagination">';
+	$config['full_tag_close'] = '</ul></div>'.$input_rows;
+	$config['first_link'] = 'First';
+	$config['first_tag_open'] = '<li>';
+	$config['first_tag_close'] = '</li>';
+	$config['next_link'] = '<i class="ace-icon fa fa-angle-double-right"></i>';
+	$config['next_tag_open'] = '<li>';
+	$config['next_tag_close'] = '</li>';
+	$config['prev_link'] = '<i class="ace-icon fa fa-angle-double-left"></i>';
+	$config['prev_tag_open'] = '<li>';
+	$config['prev_tag_close'] = '</li>';
+	$config['last_link'] = 'Last';
+	$config['last_tag_open'] = '<li>';
+	$config['last_tag_close'] = '</li>';
+	$config['cur_tag_open'] = '<li class="active"><a href="#">';
+	$config['cur_tag_close'] = '</a></li>';
+	$config['num_tag_open'] = '<li>';
+	$config['num_tag_close'] = '</li>';
+	$config['uri_segment'] = $segment;
+	$config['per_page'] = $perpage;
+	$config['total_rows'] = $total_rows != false ? $total_rows : 0 ;
+	$config['base_url'] = $base_url;
 
 	return $config;
 }

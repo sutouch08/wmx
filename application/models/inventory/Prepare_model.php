@@ -261,7 +261,7 @@ class Prepare_model extends CI_Model
 
   public function count_rows(array $ds = array(), $state = 3)
   {
-    $this->db		
+    $this->db
     ->from('orders AS o')
     ->join('channels AS ch', 'o.channels_code = ch.code', 'left');
 
@@ -390,7 +390,7 @@ class Prepare_model extends CI_Model
     $this->db
 		->select('o.id, o.code, o.role, o.so_no, o.fulfillment_code, o.oracle_id')
     ->select('o.reference, o.customer_code, o.customer_name, o.customer_ref')
-    ->select('o.date_add, o.channels_code, o.is_cancled')
+    ->select('o.date_add, o.channels_code, o.is_cancled, o.is_backorder')
     ->select('o.warehouse_code, o.to_warehouse, o.user, o.update_user')
     ->select('ch.code AS channels_code, ch.name AS channels_name')
     ->from('orders AS o')

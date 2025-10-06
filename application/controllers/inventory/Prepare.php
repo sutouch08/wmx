@@ -53,7 +53,11 @@ class Prepare extends PS_Controller
       'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all')
     );
 
-    if($this->input->post('search'))
+    if($this->is_mobile)
+    {
+      redirect(base_url()."mobile/prepare");
+    }
+    else if($this->input->post('search'))
     {
       redirect($this->home);
     }
@@ -62,25 +66,18 @@ class Prepare extends PS_Controller
       //--- แสดงผลกี่รายการต่อหน้า
   		$perpage = get_rows();
   		$segment  = 4; //-- url segment
-  		$rows     = $this->prepare_model->count_rows($filter, 3, $this->full_mode);
+  		$rows = $this->prepare_model->count_rows($filter, 3, $this->full_mode);
   		//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-  		$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-  		$orders   = $this->prepare_model->get_list($filter, $perpage, $this->uri->segment($segment), 3, $this->full_mode);
-
+  		$init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+  		$orders = $this->prepare_model->get_list($filter, $perpage, $this->uri->segment($segment), 3, $this->full_mode);
       $filter['orders'] = $orders;
 
   		$this->pagination->initialize($init);
 
-      if($this->is_mobile)
-      {
-        $this->load->view('inventory/prepare/prepare_list_mobile', $filter);
-      }
-      else
-      {
-        $this->load->view('inventory/prepare/prepare_list', $filter);
-      }
+      $this->load->view('inventory/prepare/prepare_list', $filter);
     }
   }
+
 
   public function view_process()
   {
@@ -108,7 +105,11 @@ class Prepare extends PS_Controller
       'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all')
     );
 
-    if($this->input->post('search'))
+    if($this->is_mobile)
+    {
+      redirect(base_url()."mobile/prepare/view_process");
+    }
+    else if($this->input->post('search'))
     {
       redirect($this->home.'/view_process/');
     }
@@ -125,15 +126,7 @@ class Prepare extends PS_Controller
       $filter['orders'] = $orders;
 
   		$this->pagination->initialize($init);
-
-      if($this->is_mobile)
-      {
-        $this->load->view('inventory/prepare/prepare_view_process_mobile', $filter);
-      }
-      else
-      {
-        $this->load->view('inventory/prepare/prepare_view_process', $filter);
-      }
+      $this->load->view('inventory/prepare/prepare_view_process', $filter);
     }
   }
 

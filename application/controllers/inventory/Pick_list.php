@@ -46,7 +46,11 @@ class Pick_list extends PS_Controller
       'to_date' => get_filter('to_date', 'pl_to_date', '')
     );
 
-    if($this->input->post('search'))
+    if($this->is_mobile)
+    {
+      redirect(base_url()."mobile/pick_list");
+    }
+    else if($this->input->post('search'))
     {
       redirect($this->home);
     }
@@ -58,14 +62,7 @@ class Pick_list extends PS_Controller
   		$init = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
       $this->pagination->initialize($init);
 
-      if($this->is_mobile)
-      {
-        $this->load->view('inventory/pick_list/mobile/pick_list_mobile', $filter);
-      }
-      else
-      {
-        $this->load->view('inventory/pick_list/pick_list', $filter);
-      }
+      $this->load->view('inventory/pick_list/pick_list', $filter);
     }
   }
 

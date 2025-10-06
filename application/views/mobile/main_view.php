@@ -46,6 +46,8 @@
 	</div>
 </div>
 
+<div id="backdrop" class="backdrop" onclick="toggleUsermenu()"></div>
+
 <div class="pg-footer">
 	<div class="pg-footer-inner">
 		<div class="pg-footer-content text-right">
@@ -73,7 +75,7 @@
 			</div>
 
 			<div class="footer-menu">
-				<span class="pg-icon" onclick="toggleExtraMenu()">
+				<span class="pg-icon" onclick="toggleUsermenu()">
 					<i class="fa fa-user fa-2x"></i><span>Account</span>
 				</span>
 			</div>

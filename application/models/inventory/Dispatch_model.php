@@ -350,7 +350,7 @@ class Dispatch_model extends CI_Model
   {
     $state_in = $channels_code === 'SHOPEE' ? ['8', '7'] : ['8'];
 
-    $this->db->where('is_wms', 0)->where_in('state', $state_in)->where('dispatch_id IS NULL', NULL, FALSE);
+    $this->db->where_in('state', $state_in)->where('dispatch_id IS NULL', NULL, FALSE);
 
     if( ! empty($channels_code))
     {
@@ -370,8 +370,7 @@ class Dispatch_model extends CI_Model
     $state_in = $channels_code === 'SHOPEE' ? ['8', '7'] : ['8'];
 
     $this->db
-    ->select('code, reference, customer_code, customer_name, channels_code')
-    ->where('is_wms', 0)
+    ->select('code, reference, customer_code, customer_name, channels_code')    
     ->where_in('state', $state_in)
     ->where('dispatch_id IS NULL', NULL, FALSE);
 

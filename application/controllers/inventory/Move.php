@@ -19,7 +19,7 @@ class Move extends PS_Controller
     $this->load->model('masters/zone_model');
     $this->load->model('stock/stock_model');
     $this->load->helper('warehouse');
-    $this->load->library('user_agent');
+    $this->load->helper('move');
 
     $this->is_mobile = $this->agent->is_mobile();
   }
@@ -33,12 +33,14 @@ class Move extends PS_Controller
       'user' => get_filter('user', 'move_user', 'all'),
       'from_date' => get_filter('fromDate', 'move_fromDate', ''),
       'to_date' => get_filter('toDate', 'move_toDate', ''),
-      'status' => get_filter('status', 'move_status', ($this->is_mobile ? '0' : 'all')),
-      'is_export' => get_filter('is_export', 'move_is_export', 'all'),
-      'must_accept' => get_filter('must_accept', 'move_must_accept', 'all')
+      'status' => get_filter('status', 'move_status', ($this->is_mobile ? '0' : 'all'))
     );
 
-    if($this->input->post('search'))
+    if($this->is_mobile)
+    {
+      redirect(base_url().'mobile/move');
+    }
+    else if($this->input->post('search'))
     {
       redirect($this->home);
     }
@@ -50,14 +52,7 @@ class Move extends PS_Controller
       $init = pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
       $this->pagination->initialize($init);
 
-      if($this->is_mobile)
-      {
-        $this->load->view('move/move_list_mobile', $filter);
-      }
-      else
-      {
-        $this->load->view('move/move_list', $filter);
-      }
+      $this->load->view('move/move_list', $filter);
     }
   }
 
@@ -65,6 +60,11 @@ class Move extends PS_Controller
   public function view_detail($code)
   {
     $doc = $this->move_model->get($code);
+
+    if( ! empty($doc))
+    {
+      $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
+    }
 
     $details = $this->move_model->get_details($code);
 
@@ -79,7 +79,6 @@ class Move extends PS_Controller
     $ds = array(
       'doc' => $doc,
       'details' => $details,
-      'accept_list' => $doc->must_accept == 1 ? $this->move_model->get_accept_list($code) : NULL,
       'barcode' => FALSE
     );
 
@@ -105,7 +104,6 @@ class Move extends PS_Controller
       if( ! empty($ds))
       {
         $date_add = db_date($ds->date_add);
-        $bookcode = getConfig('BOOK_CODE_MOVE');
 
         if(empty($ds->warehouse_code))
         {
@@ -119,10 +117,8 @@ class Move extends PS_Controller
 
           $arr = array(
             'code' => $code,
-            'bookcode' => $bookcode,
             'reference' => get_null(trim($ds->reference)),
-            'from_warehouse' => $ds->warehouse_code,
-            'to_warehouse' => $ds->warehouse_code,
+            'warehouse_code' => $ds->warehouse_code,
             'remark' => get_null(trim($ds->remark)),
             'user' => $this->_user->uname
           );
@@ -157,23 +153,21 @@ class Move extends PS_Controller
 
     if( ! empty($doc))
     {
-      $doc->warehouse_name = $this->warehouse_model->get_name($doc->from_warehouse);
+      $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
     }
 
-    if($doc->status == 1)
+    if($doc->status == 'C' OR $doc->status == 'D')
     {
       redirect($this->home."/view_detail/{$code}");
       exit();
     }
 
-    $details = $this->is_mobile ? NULL : $this->move_model->get_details($code);
+    $details = $this->move_model->get_details($code);
 
     if( ! empty($details))
     {
       foreach($details as $rs)
       {
-        $rs->from_zone_name = $this->zone_model->get_name($rs->from_zone);
-        $rs->to_zone_name = $this->zone_model->get_name($rs->to_zone);
         $rs->temp_qty = $this->move_model->get_temp_qty($code, $rs->product_code, $rs->from_zone);
       }
     }
@@ -184,21 +178,13 @@ class Move extends PS_Controller
       'barcode' => $barcode == 'N' ? FALSE : TRUE
     );
 
-    if($this->is_mobile)
+    if($barcode == 'N')
     {
-      $ds['title'] = $doc->code."<br/>".$doc->from_warehouse." | ".$doc->warehouse_name;
-      $this->load->view('move/move_edit_mobile', $ds);
+      $this->load->view('move/move_edit', $ds);
     }
     else
     {
-      if($barcode == 'N')
-      {
-        $this->load->view('move/move_edit', $ds);
-      }
-      else
-      {
-        $this->load->view('move/move_edit_barcode', $ds);
-      }
+      $this->load->view('move/move_edit_barcode', $ds);
     }
   }
 
@@ -229,7 +215,7 @@ class Move extends PS_Controller
       $this->load->model('stock/stock_model');
       $this->load->model('inventory/movement_model');
 
-      if($doc->status == 0)
+      if($doc->status == 'P')
       {
         $details = $this->move_model->get_details($code);
 
@@ -272,7 +258,7 @@ class Move extends PS_Controller
                 //--- 2. update movement
                 $move_out = array(
                   'reference' => $code,
-                  'warehouse_code' => $doc->from_warehouse,
+                  'warehouse_code' => $doc->warehouse_code,
                   'zone_code' => $rs->from_zone,
                   'product_code' => $rs->product_code,
                   'move_in' => 0,
@@ -301,7 +287,7 @@ class Move extends PS_Controller
               {
                 $move_in = array(
                   'reference' => $code,
-                  'warehouse_code' => $doc->to_warehouse,
+                  'warehouse_code' => $doc->warehouse_code,
                   'zone_code' => $rs->to_zone,
                   'product_code' => $rs->product_code,
                   'move_in' => $rs->qty,
@@ -330,8 +316,17 @@ class Move extends PS_Controller
 
           if($sc === TRUE)
           {
+            if( ! $this->move_model->update_details($doc->code, ['line_status' => 'C']))
+            {
+              $sc = FALSE;
+              $this->error = "Failed to close items rows";
+            }
+          }
+
+          if($sc === TRUE)
+          {
             $arr = array(
-              'status' => 1,
+              'status' => 'C',
               'shipped_date' => $date_add,
               'update_user' => $this->_user->uname
             );
@@ -371,40 +366,37 @@ class Move extends PS_Controller
 
   public function add_to_move()
   {
+    $sc = TRUE;
     $this->load->model('masters/products_model');
 
-    $sc = TRUE;
+    $ds = json_decode($this->input->post('data'));
 
-    $code = $this->input->post('move_code');
-    if( ! empty($code))
+    if( ! empty($ds))
     {
+      $code = $ds->code;
+
       $doc = $this->move_model->get($code);
 
       if( ! empty($doc))
       {
-        if($doc->status == 0)
+        if($doc->status == 'P')
         {
-          $from_zone = $this->input->post('from_zone');
-          $to_zone = $this->input->post('to_zone');
-
-          if( $from_zone != $to_zone )
+          if($ds->from_zone != $ds->to_zone)
           {
-            $fzone = $this->zone_model->get($from_zone);
-            $tzone = $this->zone_model->get($to_zone);
+            $fzone = $this->zone_model->get($ds->from_zone);
+            $tzone = $this->zone_model->get($ds->to_zone);
 
             if( ! empty($fzone) && ! empty($tzone))
             {
-              $items = json_decode($this->input->post('items'));
-
-              if( ! empty($items))
+              if( ! empty($ds->items))
               {
                 $this->db->trans_begin();
 
-                foreach($items as $item)
+                foreach($ds->items as $item)
                 {
                   if( $sc === FALSE) { break; }
 
-                  $id = $this->move_model->get_id($code, $item->code, $from_zone, $to_zone);
+                  $id = $this->move_model->get_id($code, $item->code, $ds->from_zone, $ds->to_zone);
 
                   if( ! empty($id))
                   {
@@ -419,9 +411,9 @@ class Move extends PS_Controller
                     $arr = array(
                       'move_code' => $code,
                       'product_code' => $item->code,
-                      'product_name' => $this->products_model->get_name($item->code),
-                      'from_zone' => $from_zone,
-                      'to_zone' => $to_zone,
+                      'product_name' => $item->name,
+                      'from_zone' => $ds->from_zone,
+                      'to_zone' => $ds->to_zone,
                       'qty' => $item->qty
                     );
 
@@ -462,6 +454,7 @@ class Move extends PS_Controller
                 $this->error = "โซนปลายทางไม่ถูกต้อง";
               }
             }
+
           }
           else
           {
@@ -472,22 +465,22 @@ class Move extends PS_Controller
         else
         {
           $sc = FALSE;
-          $this->error = "Invalid Document Status";
+          set_error('status');
         }
       }
       else
       {
         $sc = FALSE;
-        $this->error = "Invalid Document Number";
+        set_error('notfound');
       }
     }
     else
     {
       $sc = FALSE;
-      $this->error = "Missing Required Parameter";
+      set_error('required');
     }
 
-    echo $sc === TRUE ? 'success' : $this->error;
+    $this->_response($sc);
   }
 
 
@@ -928,6 +921,7 @@ class Move extends PS_Controller
       $zone_code = $this->input->get('zone_code');
       $move_code = $this->input->get('move_code');
       $stock = $this->stock_model->get_all_stock_in_zone($zone_code);
+
       if( ! empty($stock))
       {
         $no = 1;
@@ -944,8 +938,9 @@ class Move extends PS_Controller
           {
             $arr = array(
               'no' => $no,
-              'barcode' => $this->products_model->get_barcode($rs->product_code),
-              'products' => $rs->product_code,
+              'barcode' => $rs->barcode,
+              'product_code' => $rs->product_code,
+              'product_name' => $rs->product_name,
               'qty' => $qty
             );
 
@@ -1018,64 +1013,202 @@ class Move extends PS_Controller
   }
 
 
-  public function delete_move($code)
+  function rollback()
   {
     $sc = TRUE;
-    $this->load->model('stock/stock_model');
-    $this->load->model('inventory/movement_model');
+    $code = $this->input->post('code');
 
-    $doc = $this->move_model->get($code);
-
-    if( ! empty($doc))
+    if( ! empty($code))
     {
-      if($doc->status != 2)
+      if($this->pm->can_delete)
       {
-        if($doc->status == 1)
+        $doc = $this->move_model->get($code);
+
+        if( ! empty($doc))
         {
-          $details = $this->move_model->get_details($code);
+          $this->load->model('inventory/movement_model');
 
-          if( ! empty($details))
+          if($doc->status != 'P')
           {
-            foreach($details as $rs)
+            $this->db->trans_begin();
+
+            if($doc->status == 'C')
             {
-              if($sc === FALSE) { break; }
+              $details = $this->move_model->get_details($code);
 
-              $stock = $this->stock_model->get_stock_zone($rs->to_zone, $rs->product_code);
-
-              if($stock < $rs->qty)
+              if( ! empty($details))
               {
-                $sc = FALSE;
-                $this->error = "สต็อกคงเหลือในโซนไม่พอย้ายกลับ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty} / {$stock}";
-              }
-            }
-          }
-        }
-
-        if($sc === TRUE)
-        {
-          $this->db->trans_begin();
-
-          if($doc->status == 1 && ! empty($details))
-          {
-            foreach($details as $rs)
-            {
-              if($sc === FALSE) { break; }
-
-              if( ! $this->stock_model->update_stock_zone($rs->to_zone, $rs->product_code, ($rs->qty * -1)))
-              {
-                $sc = FALSE;
-                $this->error = "ตัดสต็อกในโซนไม่สำเร็จ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
-              }
-
-              if($sc === TRUE)
-              {
-                if( ! $this->stock_model->update_stock_zone($rs->from_zone, $rs->product_code, $rs->qty))
+                foreach($details as $rs)
                 {
-                  $this->error = "ย้ายสต็อกเข้าโซนไม่สำเร็จ <br/>Zone : {$rs->from_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
+                  if($sc === FALSE) { break; }
+
+                  $stock = $this->stock_model->get_stock_zone($rs->to_zone, $rs->product_code);
+
+                  if($stock < $rs->qty)
+                  {
+                    $sc = FALSE;
+                    $this->error = "สต็อกคงเหลือในโซนไม่พอย้ายกลับ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty} / {$stock}";
+                  }
+                }
+
+
+                if($sc === TRUE)
+                {
+                  foreach($details as $rs)
+                  {
+                    if($sc === FALSE) { break; }
+
+                    if( ! $this->stock_model->update_stock_zone($rs->to_zone, $rs->product_code, ($rs->qty * -1)))
+                    {
+                      $sc = FALSE;
+                      $this->error = "ตัดสต็อกในโซนไม่สำเร็จ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
+                    }
+
+                    if($sc === TRUE)
+                    {
+                      if( ! $this->stock_model->update_stock_zone($rs->from_zone, $rs->product_code, $rs->qty))
+                      {
+                        $this->error = "ย้ายสต็อกเข้าโซนไม่สำเร็จ <br/>Zone : {$rs->from_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
+                      }
+                    }
+                  }
                 }
               }
             }
+
+            if($sc === TRUE)
+            {
+              //--- drop movement
+              if( ! $this->movement_model->drop_movement($code))
+              {
+                $sc = FALSE;
+                $this->error = "ลบ Movement ไม่สำเร็จ";
+              }
+            }
+
+            //--- Mare as Cancled
+            if( $sc === TRUE)
+            {
+              $arr = array(
+                'status' => 'P',
+                'update_user' => $this->_user->uname
+              );
+
+              if( ! $this->move_model->update($code, $arr))
+              {
+                $sc = FALSE;
+                $this->error = "ย้อนสถานะเอกสารไม่สำเร็จ";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              $arr = array(
+                'line_status' => 'P',
+                'valid' => 0
+              );
+
+              if( ! $this->move_model->update_details($code, $arr))
+              {
+                $sc = FALSE;
+                $this->error = "Failed to update item rows status";
+              }
+            }
+
+            if($sc === TRUE)
+            {
+              $this->db->trans_commit();
+            }
+            else
+            {
+              $this->db->trans_rollback();
+            }
           }
+        }
+        else
+        {
+          $sc = FALSE;
+          set_error('notfound');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('permission');
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $this->_response($sc);
+  }
+
+
+  public function cancel()
+  {
+    $sc = TRUE;
+    $code = $this->input->post('code');
+
+    if($this->pm->can_delete)
+    {
+      if( ! empty($code))
+      {
+        $doc = $this->move_model->get($code);
+
+        if( ! empty($doc))
+        {
+          $this->load->model('inventory/movement_model');
+
+          $this->db->trans_begin();
+
+          if($doc->status == 'C')
+          {
+            $details = $this->move_model->get_details($code);
+
+            if( ! empty($details))
+            {
+              foreach($details as $rs)
+              {
+                if($sc === FALSE) { break; }
+
+                $stock = $this->stock_model->get_stock_zone($rs->to_zone, $rs->product_code);
+
+                if($stock < $rs->qty)
+                {
+                  $sc = FALSE;
+                  $this->error = "สต็อกคงเหลือในโซนไม่พอย้ายกลับ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty} / {$stock}";
+                }
+              } //- end foreach
+            } //-- end if ! empty($details)
+
+            if($sc === TRUE)
+            {
+              if($doc->status == 'C' && ! empty($details))
+              {
+                foreach($details as $rs)
+                {
+                  if($sc === FALSE) { break; }
+
+                  if( ! $this->stock_model->update_stock_zone($rs->to_zone, $rs->product_code, ($rs->qty * -1)))
+                  {
+                    $sc = FALSE;
+                    $this->error = "ตัดสต็อกในโซนไม่สำเร็จ <br/>Zone : {$rs->to_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
+                  }
+
+                  if($sc === TRUE)
+                  {
+                    if( ! $this->stock_model->update_stock_zone($rs->from_zone, $rs->product_code, $rs->qty))
+                    {
+                      $this->error = "ย้ายสต็อกเข้าโซนไม่สำเร็จ <br/>Zone : {$rs->from_zone} <br/>SKU : {$rs->product_code}<br/>Qty: {$rs->qty}";
+                    }
+                  }
+                }
+              }
+            }
+          } //--- statu == 'C'
 
           if($sc === TRUE)
           {
@@ -1084,16 +1217,6 @@ class Move extends PS_Controller
             {
               $sc = FALSE;
               $this->error = "ลบ temp ไม่สำเร็จ";
-            }
-          }
-
-          if($sc === TRUE)
-          {
-            //--- delete detail
-            if(! $this->move_model->drop_all_detail($code))
-            {
-              $sc = FALSE;
-              $this->error = "ลบรายการไม่สำเร็จ";
             }
           }
 
@@ -1111,8 +1234,8 @@ class Move extends PS_Controller
           if( $sc === TRUE)
           {
             $arr = array(
-              'status' => 2,
-              'cancle_reason' => trim($this->input->post('reason')),
+              'status' => 'D',
+              'update_user' => $this->_user->uname,
               'cancle_user' => $this->_user->uname
             );
 
@@ -1125,6 +1248,20 @@ class Move extends PS_Controller
 
           if($sc === TRUE)
           {
+            $arr = array(
+              'line_status' => 'D',
+              'valid' => 0
+            );
+
+            if( ! $this->move_model->update_details($code, $arr))
+            {
+              $sc = FALSE;
+              $this->error = "Failed to update item rows status";
+            }
+          }
+
+          if($sc === TRUE)
+          {
             $this->db->trans_commit();
           }
           else
@@ -1132,12 +1269,22 @@ class Move extends PS_Controller
             $this->db->trans_rollback();
           }
         }
+        else
+        {
+          $sc = FALSE;
+          set_error('notfound');
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        set_error('required');
       }
     }
     else
     {
       $sc = FALSE;
-      set_error('notfound');
+      set_error('permission');
     }
 
     $this->_response($sc);
@@ -1148,13 +1295,14 @@ class Move extends PS_Controller
   {
     $this->load->library('printer');
     $doc = $this->move_model->get($code);
+
     if( ! empty($doc))
     {
-      $doc->from_warehouse_name = $this->warehouse_model->get_name($doc->from_warehouse);
-      $doc->to_warehouse_name = $this->warehouse_model->get_name($doc->to_warehouse);
+      $doc->warehouse_name = $this->warehouse_model->get_name($doc->warehouse_code);
     }
 
     $details = $this->move_model->get_details($code);
+
     if( ! empty($details))
     {
       foreach($details as $rs)
@@ -1180,13 +1328,10 @@ class Move extends PS_Controller
       'move_user',
       'move_fromDate',
       'move_toDate',
-      'move_status',
-      'move_is_export',
-      'move_must_accept'
+      'move_status'
     );
 
-    clear_filter($filter);
-    echo 'done';
+    return clear_filter($filter);
   }
 
 } //--- end class

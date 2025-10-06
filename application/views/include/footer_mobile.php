@@ -15,6 +15,7 @@ window.jQuery || document.write("<script src='<?php echo base_url(); ?>assets/js
 <script src="<?php echo base_url(); ?>assets/js/ace/ace.submenu-hover.js"></script>
 <script src="<?php echo base_url(); ?>scripts/beep.js"></script>
 <script src="<?php echo base_url(); ?>scripts/template.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile.js?v=<?php echo date('Ymd'); ?>"></script>
 <script>
 
 function changeUserPwd(uname)

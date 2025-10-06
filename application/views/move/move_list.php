@@ -5,7 +5,7 @@
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
 		<?php if($this->pm->can_add) : ?>
-			<button type="button" class="btn btn-sm btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
+			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> เพิมใหม่</button>
 		<?php endif; ?>
   </div>
 </div><!-- End Row -->
@@ -37,11 +37,9 @@
 			<label>สถานะ</label>
 			<select class="form-control input-sm" name="status" onchange="getSearch()">
 				<option value="all">ทั้งหมด</option>
-				<option value="0" <?php echo is_selected('0', $status); ?>>ยังไม่บันทึก</option>
-				<option value="1" <?php echo is_selected('1', $status); ?>>บันทึกแล้ว</option>
-				<option value="2" <?php echo is_selected('2', $status); ?>>ยกเลิก</option>
-				<option value="4" <?php echo is_selected('4', $status); ?>>รอยืนยัน</option>
-				<option value="5" <?php echo is_selected('5', $status); ?>>หมดอายุ</option>
+				<option value="P" <?php echo is_selected('P', $status); ?>>Draft</option>
+				<option value="C" <?php echo is_selected('C', $status); ?>>Closed</option>
+				<option value="D" <?php echo is_selected('D', $status); ?>>Canceled</option>
 			</select>
 		</div>
 
@@ -78,8 +76,8 @@
 		<table class="table table-striped table-hover border-1" style="min-width:750px;">
 			<thead>
 				<tr class="font-size-11">
-					<th class="fix-width-120 middle"></th>
-					<th class="fix-width-40 middle">สถานะ</th>
+					<th class="fix-width-100 middle"></th>
+					<th class="fix-width-60 middle">สถานะ</th>
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-100 middle text-center">วันที่</th>
 					<th class="fix-width-100 middle">เลขที่เอกสาร</th>
@@ -90,38 +88,26 @@
 			<tbody>
         <?php if(!empty($list)) : ?>
           <?php $no = $this->uri->segment(4) + 1; ?>
+					<?php $whs = []; ?>
           <?php foreach($list as $rs) : ?>
-            <tr class="font-size-11" id="row-<?php echo $rs->code; ?>">
+						<?php $whsName = empty($whs[$rs->warehouse_code]) ? $this->warehouse_model->get_name($rs->warehouse_code) : $whs[$rs->warehouse_code]; ?>
+						<?php if(empty($whs[$rs->warehouse_code])) { $whs[$rs->warehouse_code] = $whsName; } ?>
+            <tr class="font-size-11 <?php echo status_color($rs->status); ?>" id="row-<?php echo $rs->id; ?>">
 							<td class="middle">
-								<button type="button" class="btn btn-minier btn-info" onclick="goDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
-								<?php if($rs->status == 0 && $this->pm->can_edit) : ?>
+								<button type="button" class="btn btn-minier btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
+								<?php if($rs->status == 'P' && $this->pm->can_edit) : ?>
 									<button type="button" class="btn btn-minier btn-warning" onclick="goEdit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
 								<?php endif; ?>
-								<?php if($rs->status != 2 && empty($rs->inv_code) && $this->pm->can_delete) : ?>
-									<button type="button" class="btn btn-minier btn-danger" onclick="goDelete('<?php echo $rs->code; ?>', <?php echo $rs->status; ?>)"><i class="fa fa-trash"></i></button>
+								<?php if($rs->status != 'D' && $this->pm->can_delete) : ?>
+									<button type="button" class="btn btn-minier btn-danger" onclick="confirmCancel('<?php echo $rs->code; ?>')"><i class="fa fa-times"></i></button>
 								<?php endif; ?>
 							</td>
-							<td class="middle text-center">
-								<?php if($rs->is_expire OR $rs->status == 2) : ?>
-									<?php if($rs->status == 2) : ?>
-										<span class="red">CN</span>
-									<?php else : ?>
-										<span class="dark">EXP</span>
-									<?php endif; ?>
-								<?php else : ?>
-									<?php if($rs->status == 0) : ?>
-										<span class="blue">NC</span>
-									<?php endif; ?>
-									<?php if($rs->status == 4) : ?>
-										<span class="orange">WC</span.
-									<?php endif; ?>
-								<?php endif; ?>
-							</td>
+							<td class="middle text-center"><?php echo status_text($rs->status); ?></td>
               <td class="middle text-center"><?php echo $no; ?></td>
               <td class="middle text-center"><?php echo thai_date($rs->date_add); ?></td>
               <td class="middle"><?php echo $rs->code; ?></td>
-              <td class="middle" style="max-width:250px !important;"><?php echo $rs->warehouse_name; ?></td>
-              <td class="middle"><?php echo $rs->display_name; ?></td>
+              <td class="middle"><?php echo $whsName; ?></td>
+              <td class="middle"><?php echo $rs->user; ?></td>
             </tr>
             <?php $no++; ?>
           <?php endforeach; ?>
@@ -136,37 +122,7 @@
 <?php $this->load->view('cancle_modal'); ?>
 
 <script src="<?php echo base_url(); ?>scripts/move/move.js?v=<?php echo date('Ymd'); ?>"></script>
-<script>
-	$('#warehouse').select2();
-	$('#user').select2();
+<script src="<?php echo base_url(); ?>scripts/move/move_add.js?v=<?php echo date('Ymd'); ?>"></script>
 
-	function export_to_sap(code)
-	{
-		load_in();
-		$.ajax({
-			url:HOME + 'export_move/' + code,
-			type:'POST',
-			cache:false,
-			success:function(rs){
-				load_out();
-				if(rs == 'success'){
-					$('#row-'+code).remove();
-					swal({
-						title:'Success',
-						text:'ส่งข้อมูลไป SAP เรียบร้อยแล้ว',
-						type:'success',
-						timer:1000
-					});
-				}else{
-					swal({
-						title:'Error!',
-						text:rs,
-						type:'error'
-					});
-				}
-			}
-		});
-	}
-</script>
 
 <?php $this->load->view('include/footer'); ?>
