@@ -14,6 +14,22 @@ function receive_status_color($status = 'P')
   return ! empty($colors[$status]) ? $colors[$status] : $default;
 }
 
+function status_color($status = 'P')
+{
+  $default = 'draft';
+
+  $text = array(
+    'P' => 'draft',
+    'O' => 'release',
+    'R' => 'picking',
+    'C' => 'closed',
+    'D' => 'canceled'
+  );
+
+  return ! empty($text[$status]) ? $text[$status] : $default;
+}
+
+
 function receive_status_text($status = 'P')
 {
   $default = 'Draft';

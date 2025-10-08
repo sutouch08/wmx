@@ -25,6 +25,7 @@ function processList() {
 
 
 function goPrepare(code) {
+  load_in();
   window.location.href = HOME + 'process/'+code;
 }
 

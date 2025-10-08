@@ -316,7 +316,7 @@ li {
 }
 
 .fi {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .help-block {
@@ -493,7 +493,19 @@ li {
 
 
 .list-block.closed {
-  background-color: #dff1ff !important;
+  background-color: #f4ffe7 !important;
+}
+
+.list-block.picking {
+  background-color: #b9e8ff !important;
+}
+
+.list-block.canceled {
+  background-color: #c5c4c4 !important;
+}
+
+.list-block.release {
+  background-color: #f0d9ff !important;
 }
 
 .list-block.active {
