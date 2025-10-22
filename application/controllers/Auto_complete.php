@@ -338,6 +338,56 @@ class Auto_complete extends CI_Controller
   }
 
 
+  public function get_customer_by_warehouse($whsCode = NULL)
+  {
+    $txt = trim($_REQUEST['term']);
+    $sc = [];
+
+    if(empty($whsCode))
+    {
+      $this->db->select('code, name')->where('CardType', 'C')->where('active', 1);
+
+      if($txt != '*')
+      {
+        $this->db
+        ->group_start()
+        ->like('code', $txt)
+        ->or_like('name', $txt)
+        ->group_end();
+      }
+
+      $rs = $this->db->limit(50)->get('customers');
+    }
+    else
+    {
+      $this->db
+      ->select('customer_code AS code, customer_name AS name')
+      ->where('warehouse_code', $whsCode);
+
+      if($txt != '*')
+      {
+        $this->db
+        ->group_start()
+        ->like('customer_code', $txt)
+        ->or_like('customer_name', $txt)
+        ->group_end();
+      }
+
+      $rs = $this->db->limit(50)->get('warehouse_customer');
+    }
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $sc[] = $rd->code.' | '.$rd->name;
+      }
+    }
+
+    echo json_encode($sc);
+  }
+
+
   public function get_model_code()
   {
     $sc = array();

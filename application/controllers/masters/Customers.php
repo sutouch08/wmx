@@ -141,6 +141,7 @@ class Customers extends PS_Controller
             'type_code' => get_null($ds->type),
             'class_code' => get_null($ds->class),
             'area_code' => get_null($ds->area),
+            'gp' => empty($ds->gp) ? 0 : round($ds->gp ,2),
             'active' => $ds->active == 0 ? 0 : 1
           );
 

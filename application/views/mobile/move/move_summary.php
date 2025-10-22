@@ -55,24 +55,24 @@
 
       <div class="footer-menu">
 				<span class="pg-icon" onclick="showMoveTable('move_out')">
-					<i class="fa fa-upload fa-2x"></i><span>ย้ายออก</span>
+					<i class="fa fa-sign-out fa-2x"></i><span>ย้ายออก</span>
 				</span>
 			</div>
 
       <div class="footer-menu">
 				<span class="pg-icon" onclick="showMoveTable('move_in')">
-					<i class="fa fa-download fa-2x"></i><span>ย้ายเข้า</span>
+					<i class="fa fa-sign-in fa-2x"></i><span>ย้ายเข้า</span>
 				</span>
 			</div>
 
-      <div class="footer-menu">
-        <span class="pg-icon" onclick="deleteMoveItems()">
-          <i class="fa fa-times fa-2x"></i><span>ลบ</span>
-        </span>
-      </div>
+      <div class="footer-menu display-block">
+    		<span class="pg-icon" onclick="findItem()">
+    			<i class="fa fa-search fa-2x"></i><span>Items</span>
+    		</span>
+    	</div>
 
 			<div class="footer-menu">
-				<span class="pg-icon" onclick="toggleExtramenu()">
+				<span class="pg-icon" onclick="toggleMoreMenu()">
 					<i class="fa fa-bars fa-2x"></i><span>เพิ่มเติม</span>
 				</span>
 			</div>
@@ -80,35 +80,25 @@
  </div>
 </div>
 
-<div class="extra-menu slide-out" id="extra-menu">
-  <div class="pg-footer-inner">
-    <div class="pg-footer-content text-right">
-      <div class="footer-menu not-show">
-        <span class="pg-icon">
-          <i class="fa fa-search fa-2x"></i><span>Dummy</span>
-        </span>
-      </div>
-      <div class="footer-menu not-show">
-        <span class="pg-icon">
-          <i class="fa fa-search fa-2x"></i><span>Dummy</span>
-        </span>
-      </div>
-      <div class="footer-menu">
-        <span class="pg-icon" onclick="confirmCancel()">
-          <i class="fa fa-exclamation-triangle fa-2x"></i><span>ยกเลิก</span>
-        </span>
-      </div>
-      <div class="footer-menu">
-        <span class="pg-icon" onclick="findItem()">
-          <i class="fa fa-search fa-2x"></i><span>Find item</span>
-        </span>
-      </div>
-
-      <div class="footer-menu">
-				<span class="pg-icon" onclick="confirmSave()">
-					<i class="fa fa-save fa-2x"></i><span>Save</span>
-				</span>
-			</div>
-    </div>
+<div class="more-menu run-out" id="more-menu">
+  <div class="more-menu-close">
+    <span class="more-menu-close-icon" onclick="closeMoreMenu()">
+			<i class="fa fa-times fa-2x"></i>
+		</span>
+  </div>
+	<div class="footer-menu display-block">
+		<span class="pg-icon" onclick="confirmCancel()">
+			<i class="fa fa-exclamation-triangle fa-2x"></i><span>ยกเลิก</span>
+		</span>
+	</div>
+  <div class="footer-menu display-block">
+		<span class="pg-icon" onclick="confirmSave()">
+			<i class="fa fa-save fa-2x"></i><span>บันทึก</span>
+		</span>
+	</div>
+  <div class="footer-menu">
+    <span class="pg-icon" onclick="deleteMoveItems()">
+      <i class="fa fa-trash fa-2x"></i><span>ลบ</span>
+    </span>
   </div>
 </div>

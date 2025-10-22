@@ -64,6 +64,11 @@ function showMoveTable(table) {
 }
 
 
+function findItem() {
+  showMoveTable('items');
+}
+
+
 function showKeyboard() {
   $('#barcode-zone').attr('inputmode', 'text');
   $('#barcode-item').attr('inputmode', 'text');
@@ -102,8 +107,13 @@ $('#barcode-item').keyup(function(e) {
       if(tab == 'move_in') {
         moveToZone();
       }
-      else {
+
+      if(tab == 'move_out') {
         addToTemp();
+      }
+
+      if(tab == 'items') {
+        getItemZone();
       }
     }
   }
@@ -286,6 +296,8 @@ function deleteTemp() {
   let count = $('.temp-chk:checked').length;
 
   if(count > 0) {
+    closeMoreMenu();
+    
     swal({
       title:'คุณแน่ใจ ?',
       text:'ต้องการลบ '+count+' รายการที่เลือกหรือไม่ ?',
@@ -327,7 +339,7 @@ function deleteTemp() {
 
                  reIndex();
                  recalTemp();
-                 toggleExtramenu();
+                 toggleMoreMenu();
                }
                else {
                  beep();
@@ -440,6 +452,8 @@ function deleteMoveItems() {
   let count = $('.move-chk:checked').length;
 
   if(count > 0) {
+    closeMoreMenu();
+
     swal({
       title:'คุณแน่ใจ ?',
       text:'ต้องการลบ '+count+' รายการที่เลือกหรือไม่ ? <br/>รายการที่ลบจะถูกเพิ่มกลับเข้า Temp',
@@ -481,7 +495,7 @@ function deleteMoveItems() {
 
                 reIndex();
                 reCal();
-                toggleExtramenu();
+                toggleMoreMenu();
               }
               else {
                 beep();
@@ -558,16 +572,78 @@ function toggleMoveChecked(id) {
 }
 
 
-function toggleExtramenu() {
-  if($('#extra-menu').hasClass('slide-in')) {
-    $('#extra-menu').removeClass('slide-in');
+function toggleMoreMenu() {
+  if($('#more-menu').hasClass('run-in')) {
+    $('#more-menu').removeClass('run-in');
   }
   else {
-    $('#extra-menu').addClass('slide-in');
+    $('#more-menu').addClass('run-in');
   }
 }
 
 
-function closeExtramenu() {
-  $('#extra-menu').removeClass('slide-in');
+function closeMoreMenu() {
+  $('#more-menu').removeClass('run-in');
+}
+
+
+function getItemZone() {
+  let warehouse_code = $('#warehouse').val();
+  let barcode = $('#barcode-item').val().trim();
+
+  $('#barcode-item').val('').blur();
+
+  if(barcode.length == 0) {
+    beep();
+    showError("กรุณาแสกนสินค้า");
+    $('#barcode-item').focus();
+    return false;
+  }
+
+  if(warehouse_code.length == 0) {
+    beep();
+    showError('ไม่พบคลังสินค้า');
+    $('#barcode-item').focus();
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'get_product_zone',
+    type:'POST',
+    cache:false,
+    data:{
+      "warehouse_code" : warehouse_code,
+      "barcode" : barcode,
+    },
+    success:function(rs) {
+      load_out();
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status === 'success') {
+          $('#txt-item-code').text(ds.sku);
+          let source = $('#items-template').html();
+          let output = $('#items-list');
+
+          render(source, ds.data, output);
+        }
+        else {
+          $('#txt-item-code').text('ค้นหาสินค้า');
+          beep();
+          showError(ds.message);
+        }
+      }
+      else {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+    }
+  })
 }

@@ -73,7 +73,6 @@ class Consignment_order extends PS_Controller
   }
 
 
-
   public function add_new()
   {
     $this->load->view('account/consignment_order/consignment_order_add');

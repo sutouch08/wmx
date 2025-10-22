@@ -83,18 +83,18 @@
 
       <div class="footer-menu">
 				<span class="pg-icon" onclick="showMoveTable('summary')">
-					<i class="fa fa-list fa-2x"></i><span>รายการโอน</span>
+					<i class="fa fa-tasks fa-2x"></i><span>รายการโอน</span>
 				</span>
 			</div>
 
       <div class="footer-menu">
 				<span class="pg-icon" onclick="showMoveTable('move_in')">
-					<i class="fa fa-download fa-2x"></i><span>ย้ายเข้า</span>
+					<i class="fa fa-sign-in fa-2x"></i><span>ย้ายเข้า</span>
 				</span>
 			</div>
 
 			<div class="footer-menu">
-				<span class="pg-icon" onclick="toggleExtramenu()">
+				<span class="pg-icon" onclick="toggleMoreMenu()">
 					<i class="fa fa-bars fa-2x"></i><span>เพิ่มเติม</span>
 				</span>
 			</div>
@@ -102,36 +102,22 @@
  </div>
 </div>
 
-<div class="extra-menu slide-out" id="extra-menu">
-	<div class="pg-footer-inner">
-		<div class="pg-footer-content text-right">
-      <div class="footer-menu not-show">
-				<span class="pg-icon">
-					<i class="fa fa-search fa-2x"></i><span>Dummy</span>
-				</span>
-			</div>
-      <div class="footer-menu not-show">
-				<span class="pg-icon">
-					<i class="fa fa-search fa-2x"></i><span>Dummy</span>
-				</span>
-			</div>
-      <div class="footer-menu not-show">
-        <span class="pg-icon">
-          <i class="fa fa-search fa-2x"></i><span>Dummy</span>
-        </span>
-      </div>
-      <div class="footer-menu">
-				<span class="pg-icon" onclick="findItem()">
-					<i class="fa fa-search fa-2x"></i><span>Find item</span>
-				</span>
-			</div>
-			<div class="footer-menu">
-				<span class="pg-icon" onclick="deleteTemp()">
-					<i class="fa fa-times fa-2x"></i><span>ลบ</span>
-				</span>
-			</div>
-		</div>
- </div>
+<div class="more-menu run-out" id="more-menu">
+  <div class="more-menu-close">
+    <span class="more-menu-close-icon" onclick="closeMoreMenu()">
+			<i class="fa fa-times fa-2x"></i>
+		</span>
+  </div>
+	<div class="footer-menu display-block">
+		<span class="pg-icon" onclick="deleteTemp()">
+			<i class="fa fa-trash fa-2x"></i><span>ลบ</span>
+		</span>
+	</div>
+	<div class="footer-menu display-block">
+		<span class="pg-icon" onclick="findItem()">
+			<i class="fa fa-search fa-2x"></i><span>Items</span>
+		</span>
+	</div>
 </div>
 
 

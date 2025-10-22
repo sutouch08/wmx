@@ -55,12 +55,12 @@
 			</div>
       <div class="footer-menu">
 				<span class="pg-icon" onclick="allList()">
-					<i class="fa fa-tasks fa-2x"></i><span>Listing</span>
+					<i class="fa fa-cubes fa-2x"></i><span>ทั้งหมด</span>
 				</span>
 			</div>
       <div class="footer-menu">
 				<span class="pg-icon" onclick="pendingList()">
-					<i class="fa fa-tasks fa-2x"></i><span>Pending</span>
+					<i class="fa fa-cube fa-2x"></i><span>รอรับ</span>
 				</span>
 			</div>
       <div class="footer-menu">

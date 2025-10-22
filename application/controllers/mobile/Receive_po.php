@@ -29,7 +29,7 @@ class Receive_po extends PS_Controller
 
   public function index()
   {
-    $this->title = "Goods Receipt PO - Pending List";
+    $this->title = "รับจากใบสั่งซื้อ - รอรับ";
 
     $filter = array(
       'code' => get_filter('code', 'receive_code', ''),
@@ -58,7 +58,7 @@ class Receive_po extends PS_Controller
 
   public function all_list()
   {
-    $this->title = "Goods Receipt PO - All List";
+    $this->title = "รับจากใบสั่งซื้อ - ทั้งหมด";
 
     $filter = array(
       'code' => get_filter('code', 'receive_code', ''),
@@ -87,7 +87,7 @@ class Receive_po extends PS_Controller
 
   public function process_list()
   {
-    $this->title = "Goods Receipt PO - Receiving List";
+    $this->title = "รับจากใบสั่งซื้อ - กำลังรับ";
     $filter = array(
       'code' => get_filter('code', 'receive_code', ''),
       'invoice' => get_filter('invoice', 'receive_invoice', ''),

@@ -187,6 +187,31 @@
 		<div class="divider"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
+			<span class="form-control left-label">Consign Interface (INT12)</span>
+		</div>
+		<div class="col-lg-8 col-md-8 col-sm-8">
+			<label style="padding-top:5px; margin-bottom:0px;">
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_CONSIGN_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_CONSIGN_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
+			</label>
+			<input type="hidden" name="WRX_CONSIGN_INTERFACE" value="<?php echo $WRX_CONSIGN_INTERFACE; ?>"/>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+			<span class="form-control left-label">Consign api endpoint</span>
+		</div>
+		<div class="col-lg-8 col-md-8 col-sm-8">
+			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_CONSIGN_URL"  value="<?php echo $WRX_CONSIGN_URL; ?>" />
+		</div>
+		<div class="divider-hidden"></div>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+			<span class="form-control left-label">Consign Sale Channel</span>
+		</div>
+		<div class="col-lg-8 col-md-8 col-sm-8">
+			<input type="text" class="form-control input-sm input-xlarge" name="WRX_CONSIGN_CHANNEL"  value="<?php echo $WRX_CONSIGN_CHANNEL; ?>" />
+		</div>
+		<div class="divider"></div>
+
+		<div class="col-lg-4 col-md-4 col-sm-4">
 			<span class="form-control left-label">Logs Json</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">

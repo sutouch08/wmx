@@ -1,8 +1,8 @@
 var click = 0;
 
 function confirmSave() {
-  closeExtramenu();
-  
+  closeMoreMenu();
+
   let code = $('#code').val();
 
   swal({
@@ -183,7 +183,7 @@ function rollback() {
 
 function confirmCancel() {
   let code = $('#code').val();
-  closeExtramenu();
+  closeMoreMenu();
 
   swal({
 		title: 'คุณแน่ใจ ?',

@@ -25,8 +25,10 @@ class Consign_order_model extends CI_Model
   {
     if( ! empty($ds))
     {
-      $this->db->insert($this->td, $ds);
-      return $this->db->insert_id();
+      if($this->db->insert($this->td, $ds))
+      {
+        return $this->db->insert_id();
+      }
     }
 
     return FALSE;
@@ -52,6 +54,17 @@ class Consign_order_model extends CI_Model
     }
 
     return FALSE;
+  }
+
+
+  public function recal_summary($code)
+  {
+    $qr  = "UPDATE consign_order ";
+    $qr .= "SET DocTotal = (SELECT SUM(amount) FROM consign_order_detail WHERE consign_code = '{$code}'), ";
+    $qr .= "TotalQty = (SELECT SUM(qty) FROM consign_order_detail WHERE consign_code = '{$code}') ";
+    $qr .= "WHERE code = '{$code}'";
+
+    return $this->db->query($qr);
   }
 
 
@@ -148,8 +161,7 @@ class Consign_order_model extends CI_Model
   }
 
 
-
-  public function get_exists_detail($code, $product_code, $price, $discountLabel, $input_type)
+  public function get_exists_detail($code, $product_code, $price, $discountLabel, $input_type = 1)
   {
     $rs = $this->db
     ->where('consign_code', $code)
@@ -157,7 +169,7 @@ class Consign_order_model extends CI_Model
     ->where('price', $price)
     ->where('discount', $discountLabel)
     ->where('input_type', $input_type)
-    ->where('status', 0)
+    ->where('status', 'O')
     ->get($this->td);
 
     if($rs->num_rows() === 1)
@@ -165,9 +177,19 @@ class Consign_order_model extends CI_Model
       return $rs->row();
     }
 
-    return FALSE;
+    return NULL;
   }
 
+
+  public function remove_rows(array $ids = array())
+  {
+    if( ! empty($ids))
+    {
+      return $this->db->where_in('id', $ids)->delete($this->td);
+    }
+
+    return FALSE;
+  }
 
 
   public function delete_detail($id)
@@ -180,15 +202,6 @@ class Consign_order_model extends CI_Model
   {
     return $this->db->where('consign_code', $code)->delete($this->td);
   }
-
-
-  public function get_sum_amount($code)
-  {
-    $rs = $this->db->select_sum('amount')->where('consign_code', $code)->get($this->td);
-
-    return $rs->row()->amount === NULL ? 0 : $rs->row()->amount;
-  }
-
 
 
   public function get_sum_order_qty($code, $product_code)
@@ -208,31 +221,7 @@ class Consign_order_model extends CI_Model
   }
 
 
-
-  public function get_item_gp($product_code, $zone_code)
-  {
-    $rs = $this->db
-    ->select('order_sold.discount_label')
-    ->from('order_sold')
-    ->join('orders', 'order_sold.reference = orders.code', 'left')
-    ->where_in('order_sold.role', array('C', 'N'))
-    ->where('orders.zone_code', $zone_code)
-    ->where('order_sold.product_code', $product_code)
-    ->order_by('orders.date_add', 'DESC')
-    ->limit(1)
-    ->get();
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->row()->discount_label;
-    }
-
-    return 0;
-  }
-
-
-
-  public function get_unsave_qty($code, $product_code, $price, $discount, $input_type)
+  public function get_unsave_qty($code, $product_code, $price, $discount)
   {
     $rs = $this->db
     ->select_sum('qty')
@@ -240,68 +229,39 @@ class Consign_order_model extends CI_Model
     ->where('product_code', $product_code)
     ->where('price', $price, FALSE)
     ->where('discount', $discount)
-    ->where('status', 0)
+    ->where('status', 'O')
     ->get($this->td);
 
     return $rs->row()->qty === NULL ? 0 : $rs->row()->qty;
   }
 
 
-
-  public function change_detail_status($id, $status)
+  public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
-    $this->db
-    ->set('status', $status)
-    ->where('id', $id);
-    return $this->db->update($this->td);
-  }
-
-  public function change_all_detail_status($code, $status)
-  {
-    $this->db
-    ->set('status', $status)
-    ->where('consign_code', $code);
-    return $this->db->update($this->td);
-  }
-
-
-  public function change_status($code, $status)
-  {
-    $this->db
-    ->set('status', $status)
-    ->set('inv_code', NULL)
-    ->set('update_user', get_cookie('uname'))
-    ->where('code', $code);
-    return $this->db->update($this->tb);
-  }
-
-
-  public function get_list(array $ds = array(), $perpage = NULL, $offset = NULL)
-  {
-    //--- status
-    if($ds['status'] !== 'all')
+    if($ds['status'] != 'all')
     {
       $this->db->where('status', $ds['status']);
     }
 
-    //--- document date
-    if( ! empty($ds['from_date']) && !empty($ds['to_date']))
+    if(isset($ds['is_exported']) && $ds['is_exported'] != 'all')
     {
-      $this->db->where('date_add >=', from_date($ds['from_date']))->where('date_add <=', to_date($ds['to_date']));
+      $this->db->where('is_exported', $ds['is_exported']);
     }
 
+    if( ! empty($ds['from_date']))
+    {
+      $this->db->where('date_add >=', from_date($ds['from_date']));
+    }
+
+    if( ! empty($ds['to_date']))
+    {
+      $this->db->where('date_add <=', to_date($ds['to_date']));
+    }
 
     if( ! empty($ds['code']))
     {
       $this->db->like('code', $ds['code']);
     }
-
-    //--- อ้างอิงเลขที่กระทบยอดสินค้า
-    if( ! empty($ds['ref_code']))
-    {
-      $this->db->like('ref_code', $ds['ref_code']);
-    }
-
 
     if( ! empty($ds['customer']))
     {
@@ -312,88 +272,56 @@ class Consign_order_model extends CI_Model
       ->group_end();
     }
 
-    if( ! empty($ds['zone']))
+    if(isset($ds['warehouse']) && $ds['warehouse'] != 'all')
     {
-      $this->db
-      ->group_start()
-      ->like('zone_code', $ds['zone'])
-      ->or_like('zone_name', $ds['zone'])
-      ->group_end();
+      $this->db->where('warehouse_code', $ds['warehouse']);
     }
 
-    if( isset($ds['is_api']) && $ds['is_api'] != 'all')
+    if(isset($ds['user']) && $ds['user'] != 'all')
     {
-      $this->db->where('is_api', $ds['is_api']);
+      $this->db->where('user', $ds['user']);
     }
 
-    if( isset($ds['sap']) && $ds['sap'] != 'all')
-    {
-      if($ds['sap'] == '1')
-      {
-        $this->db->where('inv_code IS NOT NULL', NULL, FALSE);
-      }
-
-      if($ds['sap'] == '0')
-      {
-        $this->db->where('inv_code IS NULL', NULL, FALSE);
-      }
-    }
-
-    if(isset($ds['tax_status']) && $ds['tax_status'] != 'all')
-    {
-      $this->db->where('tax_status', $ds['tax_status']);
-    }
-
-    if(isset($ds['is_etax']) && $ds['is_etax'] != 'all')
-    {
-      $this->db->where('is_etax', $ds['is_etax']);
-    }
-
-    $this->db->order_by('date_add', 'DESC');
-
-    if( ! empty($perpage))
-    {
-      $offset = $offset === NULL ? 0 : $offset;
-      $this->db->limit($perpage, $offset);
-    }
-
-    $rs = $this->db->get($this->tb);
+    $rs = $this->db
+    ->order_by('code', 'DESC')
+    ->limit($perpage, $offset)
+    ->get($this->tb);
 
     if($rs->num_rows() > 0)
     {
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
 
 
   public function count_rows(array $ds = array())
   {
-    //--- status
     if($ds['status'] !== 'all')
     {
       $this->db->where('status', $ds['status']);
     }
 
-    //--- document date
-    if( ! empty($ds['from_date']) && !empty($ds['to_date']))
+    if(isset($ds['is_exported']) && $ds['is_exported'] != 'all')
     {
-      $this->db->where('date_add >=', from_date($ds['from_date']))->where('date_add <=', to_date($ds['to_date']));
+      $this->db->where('is_exported', $ds['is_exported']);
     }
 
+    if( ! empty($ds['from_date']))
+    {
+      $this->db->where('date_add >=', from_date($ds['from_date']));
+    }
+
+    if( ! empty($ds['to_date']))
+    {
+      $this->db->where('date_add <=', to_date($ds['to_date']));
+    }
 
     if( ! empty($ds['code']))
     {
       $this->db->like('code', $ds['code']);
     }
-
-    //--- อ้างอิงเลขที่กระทบยอดสินค้า
-    if( ! empty($ds['ref_code']))
-    {
-      $this->db->like('ref_code', $ds['ref_code']);
-    }
-
 
     if( ! empty($ds['customer']))
     {
@@ -404,41 +332,14 @@ class Consign_order_model extends CI_Model
       ->group_end();
     }
 
-    if( ! empty($ds['zone']))
+    if(isset($ds['warehouse']) && $ds['warehouse'] != 'all')
     {
-      $this->db
-      ->group_start()
-      ->like('zone_code', $ds['zone'])
-      ->or_like('zone_name', $ds['zone'])
-      ->group_end();
+      $this->db->where('warehouse_code', $ds['warehouse']);
     }
 
-    if( isset($ds['is_api']) && $ds['is_api'] != 'all')
+    if(isset($ds['user']) && $ds['user'] != 'all')
     {
-      $this->db->where('is_api', $ds['is_api']);
-    }
-
-    if( isset($ds['sap']) && $ds['sap'] != 'all')
-    {
-      if($ds['sap'] == '1')
-      {
-        $this->db->where('inv_code IS NOT NULL', NULL, FALSE);
-      }
-
-      if($ds['sap'] == '0')
-      {
-        $this->db->where('inv_code IS NULL', NULL, FALSE);
-      }
-    }
-
-    if(isset($ds['tax_status']) && $ds['tax_status'] != 'all')
-    {
-      $this->db->where('tax_status', $ds['tax_status']);
-    }
-
-    if(isset($ds['is_etax']) && $ds['is_etax'] != 'all')
-    {
-      $this->db->where('is_etax', $ds['is_etax']);
+      $this->db->where('user', $ds['user']);
     }
 
     return $this->db->count_all_results($this->tb);
@@ -468,42 +369,6 @@ class Consign_order_model extends CI_Model
     }
 
     return FALSE;
-  }
-
-
-  public function is_exists_pos_ref($pos_ref)
-  {
-    $count = $this->db
-    ->where('pos_ref', $pos_ref)
-    ->where('status !=', 2)
-    ->count_all_results($this->tb);
-
-    return $count > 0 ? TRUE : FALSE;
-  }
-
-
-
-	public function get_non_inv_code($limit = 100)
-	{
-		$rs = $this->db
-    ->select('code')
-    ->where('status', 1)
-    ->where('inv_code IS NULL', NULL, FALSE)
-    ->limit($limit)
-    ->get($this->tb);
-
-    if($rs->num_rows() > 0)
-    {
-      return $rs->result();
-    }
-
-    return NULL;
-	}
-
-
-	public function update_inv($code, $doc_num)
-  {
-    return $this->db->set('inv_code', $doc_num)->where('code', $code)->update($this->tb);
   }
 
 } //--- end class

@@ -441,6 +441,11 @@ function validCode(input){
 }
 
 
+function showModal(name) {
+  $('#'+name).modal('show');
+}
+
+
 function closeModal(name) {
   $('#'+name).modal('hide');
 }

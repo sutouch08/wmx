@@ -7,25 +7,28 @@
 </div>
 
 <!-- ใช้ tab เป็นตัดกำหนดว่า ยิงบาร์โค้ดแล้วจะทำ function อะไร -->
-<!-- tab == 'move_out' => addToTemp(),  tab == 'move_in' => moveToZone() -->
+<!-- tab == 'move_out' => addToTemp(),  tab == 'move_in' => moveToZone(), tab === 'items' => getItemZone() -->
 <input type="hidden" id="tab" value="<?php echo $tab; ?>" />
 
 <?php
 $this->load->view('mobile/move/header_panel');
 
-if($tab == 'summary')
-{
-	$this->load->view('mobile/move/move_summary');
-}
-
-if($tab == 'move_out')
-{
-	$this->load->view('mobile/move/move_out');
-}
-
-if($tab == 'move_in')
-{
-	$this->load->view('mobile/move/move_in');
+switch ($tab) {
+	case 'summary':
+		$this->load->view('mobile/move/move_summary');
+	break;
+	case 'move_out':
+		$this->load->view('mobile/move/move_out');
+		break;
+	case 'move_in':
+		$this->load->view('mobile/move/move_in');
+		break;
+	case 'items':
+		$this->load->view('mobile/move/move_find_items');
+		break;
+	default:
+		$this->load->view('mobile/move/move_summary');
+		break;
 }
 
 ?>

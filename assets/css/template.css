@@ -579,7 +579,7 @@ hr.padding-5 {
 
 .canceled {
   color: #060606;
-  background-color: #9d9d9d !important;
+  background-color: #d9d9d9 !important;
 }
 
 .draft {
@@ -592,6 +592,10 @@ hr.padding-5 {
 
 .picking {
   background-color: #b0d3ff !important;
+}
+
+.approval {
+  background-color: #d0faff !important;
 }
 
 .has-error{
@@ -1267,7 +1271,7 @@ hr.padding-5 {
 }
 
 .btn-xs {
-  height: 31px;
+  height: 30px;
 }
 
 

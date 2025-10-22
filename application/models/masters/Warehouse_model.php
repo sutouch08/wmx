@@ -370,6 +370,79 @@ class Warehouse_model extends CI_Model
   }
 
 
+  public function get_consign_warehouse_by_customer($customer_code = NULL)
+  {
+    $this->db
+    ->distinct()
+    ->select('wh.code, wh.name')
+    ->from('warehouse as wh')
+    ->join('warehouse_customer AS wc', 'wh.code = wc.warehouse_code', 'left')
+    ->where('wh.role', 2)
+    ->where('wh.active', 1)
+    ->group_start()
+    ->where('wh.is_consignment IS NULL', NULL, FALSE)
+    ->or_where('wh.is_consignment', 0)
+    ->group_end();
+
+    if( ! empty($customer_code))
+    {
+      $this->db->where('wc.customer_code', $customer_code);
+    }
+
+    $rs = $this->db->order_by('wh.code', 'ASC')->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_warehouse_customer($warehouse_code, $customer_code = NULL)
+  {
+    $this->db
+    ->where('warehouse_code', $warehouse_code);
+
+    if( ! empty($customer_code))
+    {
+      $this->db->where('customer_code', $customer_code);
+    }
+
+    $rs = $this->db
+    ->order_by('customer_code', 'DESC')
+    ->limit(1)
+    ->get('warehouse_customer');
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function is_exists_consign_warehouse_customer($warehouse_code, $customer_code)
+  {
+    $count = $this->db
+    ->from('warehouse_customer AS wc')
+    ->join('warehouse AS wh', 'wc.warehouse_code = wh.code', 'left')
+    ->where('wh.role', 2)
+    ->where('wh.active', 1)
+    ->group_start()
+    ->where('wh.is_consignment IS NULL', NULL, FALSE)
+    ->or_where('wh.is_consignment', 0)
+    ->group_end()
+    ->where('wc.warehouse_code', $warehouse_code)
+    ->where('wc.customer_code', $customer_code)
+    ->count_all_results();
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
+
   //---- เอาเฉพาะคลังฝากขายเทียม
   public function get_consignment_list()
   {
@@ -388,7 +461,50 @@ class Warehouse_model extends CI_Model
   }
 
 
-	public function get_common_list()
+  public function is_exists_consignment_warehouse_customer($warehouse_code, $customer_code)
+  {
+    $count = $this->db
+    ->from('warehouse_customer AS wc')
+    ->join('warehouse AS wh', 'wc.warehouse_code = wh.code', 'left')
+    ->where('wh.role', 2)
+    ->where('wh.active', 1)
+    ->where('wh.is_consignment', 1)
+    ->where('wc.code', $warehouse_code)
+    ->where('wc.customer_code', $customer_code)
+    ->get();
+
+    return $count > 0 ? TRUE : FALSE;
+  }
+
+
+  public function get_consignment_warehouse_by_customer($customer_code = NULL)
+  {
+    $this->db
+    ->distinct()
+    ->select('wh.code, wh.name')
+    ->from('warehouse as wh')
+    ->join('warehouse_customer AS wc', 'wh.code = wc.warehouse_code', 'left')
+    ->where('wh.role', 2)
+    ->where('wh.active', 1)
+    ->where('wh.is_consignment', 1);
+
+    if( ! empty($customer_code))
+    {
+      $this->db->where('wc.customer_code', $customer_code);
+    }
+
+    $rs = $this->db->order_by('wh.code', 'ASC')->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_common_list()
 	{
 		$rs = $this->db
 		->where_in('role', array(1, 3, 4, 5))

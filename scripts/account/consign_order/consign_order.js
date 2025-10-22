@@ -1,152 +1,187 @@
-function goAdd(){
+function addNew(){
   window.location.href = HOME + 'add_new';
 }
 
 
-function viewDetail(code){
+function viewDetail(code) {
   window.location.href = HOME + 'view_detail/'+code;
 }
 
 
-function goEdit(code)
-{
+function goEdit(code) {
   window.location.href = HOME + 'edit/'+code;
 }
 
 
-//--- delete all data and cancle document
-function getDelete(code){
+function sendToErp(code) {
+  load_in();
+
+  $.ajax({
+    url:HOME + 'do_export',
+    type:'POST',
+    cache:false,
+    data:{
+      'code' : code
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
+
+
+function rollback(code) {
+  swal({
+    title: "ย้อนสถานะ",
+    text: "ต้องการย้อนสถานะ '"+code+"' กลับมาแก้ไขหรือไม่ ?",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#DD6B55",
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
+    closeOnConfirm: true
+  }, function() {
+    load_in();
+    setTimeout(() => {
+      $.ajax({
+        url:HOME + 'rollback',
+        type:'POST',
+        cache:false,
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
+          load_out();
+
+          if(rs.trim() === 'success') {
+            swal({
+              title:'Success',
+              type:'success',
+              timer:1000
+            });
+
+            setTimeout(() => {
+              refresh();
+            }, 1200);
+          }
+          else {
+            showError(rs);
+          }
+        },
+        error:function(rs) {
+          showError(rs);
+        }
+      })
+    }, 100);
+  });
+}
+
+
+function confirmCancel(code) {
   swal({
     title: "คุณแน่ใจ ?",
     text: "ต้องการยกเลิก '"+code+"' หรือไม่ ?",
     type: "warning",
     showCancelButton: true,
     confirmButtonColor: "#DD6B55",
-    confirmButtonText: 'ใช่, ฉันต้องการ',
-    cancelButtonText: 'ไม่ใช่',
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
     closeOnConfirm: true
-  }, function(){
-    $('#cancle-code').val(code);
-    $('#cancle-reason').val('').removeClass('has-error');
-    cancle(code);
+  }, function() {
+    $('#cancel-code').val(code);
+    $('#cancel-reason').val('').removeClass('has-error');
+
+    setTimeout(() => {
+      showModal('cancel-modal');
+    }, 100);
   });
 }
 
 
-function cancle(code)
-{
-	var reason = $.trim($('#cancle-reason').val());
+function doCancel() {
+  $('#cancel-reason').clearError();
 
-	if(reason.length < 10)
-	{
-		$('#cancle-modal').modal('show');
-		return false;
-	}
-
-	load_in();
-
-  $.ajax({
-    url: HOME + 'cancle/'+code,
-    type:"POST",
-    cache:"false",
-    data:{
-      "reason" : reason
-    },
-    success: function(rs) {
-      var rs = $.trim(rs);
-      if( rs == 'success' ) {
-				setTimeout(function() {
-					swal({
-						title: 'Cancled',
-						type: 'success',
-						timer: 1000
-					});
-
-					setTimeout(function(){
-						window.location.reload();
-					}, 1200);
-				}, 200);
-			}
-			else {
-				setTimeout(function() {
-					swal({
-						title:"Error!",
-						text:rs,
-						type:'error'
-					});
-				}, 200);
-			}
-    }
-  });
-}
-
-
-function doCancle() {
-	let code = $('#cancle-code').val();
-	let reason = $.trim($('#cancle-reason').val());
+	let code = $('#cancel-code').val();
+	let reason = $('#cancel-reason').val().trim();
 
 	if( reason.length < 10) {
-    $('#cancle-reason').addClass('has-error').focus();
+    $('#cancel-reason').hasError().focus();
 		return false;
 	}
 
-	$('#cancle-modal').modal('hide');
+	closeModal('cancel-modal');
 
-	return cancle(code);
-}
+  setTimeout(() => {
+    load_in();
 
+    $.ajax({
+      url:HOME + 'cancel',
+      type:'POST',
+      cache:false,
+      data:{
+        'code' : code,
+        'reason' : reason
+      },
+      success:function(rs) {
+        load_out();
 
+        if(rs.trim() === 'success') {
+          swal({
+            title:'Canceled',
+            type:'success',
+            timer:1000
+          });
 
-$('#cancle-modal').on('shown.bs.modal', function() {
-	$('#cancle-reason').focus();
-});
+          setTimeout(() => {
+            refresh();
+          }, 1200);
+        }
+        else {
+          swal({
+            title:'Error !',
+            text:rs,
+            type:'error',
+            html:true
+          }, function() {
+            showModal('cancel-modal');
+          })
+        }
+      },
+      error:function(rs) {
+        load_out();
 
-
-
-
-function doExport(){
-  var code = $('#consign_code').val();
-  load_in();
-  $.ajax({
-    url: HOME + 'export_consign/'+code,
-    type:'POST',
-    cache:'false',
-    success:function(rs){
-      load_out();
-      var rs = $.trim(rs);
-      if(rs == 'success'){
         swal({
-          title:'success',
-          type:'success',
-          timer:1000
-        });
-
-        setTimeout(function(){
-          window.location.reload();
-        }, 1200);
-      }else{
-        swal({
-          title:'Error!',
-          text:rs,
-          type: 'error'
+          title:'Error !',
+          text:rs.responseText,
+          type:'error',
+          html:true
+        }, function() {
+          showModal('cancel-modal');
         })
       }
-    }
-  });
+    });
+
+  }, 200);
 }
 
 
-function getSearch(){
-	$("#searchForm").submit();
-}
-
-
-$(".search").keyup(function(e){
-	if( e.keyCode == 13 ){
-		getSearch();
-	}
+$('#cancel-modal').on('shown.bs.modal', function() {
+	$('#cancel-reason').focus();
 });
-
 
 
 $("#fromDate").datepicker({
@@ -157,7 +192,6 @@ $("#fromDate").datepicker({
 });
 
 
-
 $("#toDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(ds){
@@ -166,20 +200,10 @@ $("#toDate").datepicker({
 });
 
 
-
 // JavaScript Document
 function printConsignOrder(){
   var code = $('#consign_code').val();
 	var center = ($(document).width() - 800) /2;
   var target = HOME + 'print_consign/'+ code;
   window.open(target, "_blank", "width=800, height=900, left="+center+", scrollbars=yes");
-}
-
-
-
-function clearFilter(){
-  var url = HOME + 'clear_filter';
-  $.get(url, function(rs){
-    goBack();
-  });
 }

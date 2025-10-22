@@ -42,6 +42,13 @@
     height: calc(100vh - 295px);
   }
 
+  #items-list {
+    position: fixed;
+    top: 85px;
+    left: 0;
+    height: calc(100vh - 239px);
+  }
+
   .bottom-info {
     position: fixed;
     left: 0px;
@@ -126,5 +133,10 @@
     background-color: white;
     border: 1px solid green;
     border-radius: 50%;
+  }
+
+  .more-menu {
+    bottom:90px;
+    z-index: 10;
   }
 </style>

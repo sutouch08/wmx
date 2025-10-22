@@ -414,6 +414,7 @@ function set_error($key, $name = "data")
 	$error = array(
 		'insert' => "Insert {$name} failed.",
 		'update' => "Update {$name} failed.",
+		'cancel' => "Failed to cancel document.",
 		'delete' => "Delete {$name} failed.",
 		'permission' => "You don't have permission to perform this operation.",
 		'required' => "Missing required parameter.",

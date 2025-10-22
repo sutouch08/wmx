@@ -152,6 +152,7 @@ class Move extends PS_Controller
 
     $totalQty = 0;
     $zoneName = [];
+    $details = NULL;
 
     if($tab == "summary")
     {
@@ -926,6 +927,74 @@ class Move extends PS_Controller
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
       'zone' => $sc === TRUE ? $zone : NULL
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function get_product_zone()
+  {
+    $sc = TRUE;
+    $ds = [];
+
+    $barcode = trim($this->input->post('barcode'));
+    $warehouse_code = trim($this->input->post('warehouse_code'));
+
+    if( ! empty($barcode) && ! empty($warehouse_code))
+    {
+      $this->load->model('masters/products_model');
+      $this->load->model('inventory/buffer_model');
+
+      $pd = $this->products_model->get_product_by_barcode($barcode);
+
+      if( ! empty($pd))
+      {
+        $stock = $this->stock_model->get_stock_in_zone($pd->code, $warehouse_code);
+
+        if( ! empty($stock))
+        {
+          foreach($stock as $rs)
+          {
+            if($rs->qty > 0)
+            {
+              $ds[] = (object)array(
+                'zone_code' => $rs->zone_code,
+                'zone_name' => $rs->name,
+                'product_code' => $pd->code,
+                'product_name' => $pd->name,
+                'qty' => number($rs->qty)
+              );
+            }
+          }
+
+          if(empty($ds))
+          {
+            $ds[] = ['nodata' => 'nodata'];
+          }
+        }
+        else
+        {
+          $ds[] = ['nodata' => 'nodata'];
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Invalid barcode";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'sku' => $sc === TRUE ? $pd->code : 'ไม่พบรายการสินค้า',
+      'data' => $ds
     );
 
     echo json_encode($arr);

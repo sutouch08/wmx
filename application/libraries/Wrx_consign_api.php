@@ -1,5 +1,5 @@
 <?php
-class Wrx_consignment_api
+class Wrx_consign_api
 {
   private $token;
   private $api;
@@ -8,7 +8,7 @@ class Wrx_consignment_api
   public $logs_json = FALSE;
   public $test = FALSE;
   public $url;
-  public $company = "Consignment";
+  public $company = "WARRIX SPORT PUBLIC COMPANY LIMITED";
 
   public function __construct()
   {
@@ -21,12 +21,12 @@ class Wrx_consignment_api
   }
 
 
-  public function get_onhand_stock($code, $warehouse_code, $zone_code = "Store")
+  public function get_onhand_stock($code, $warehouse_code)
   {
     $sc = TRUE;
-    $qty = 0;
+    $qty = 1000;
     $action = "check stock";
-    $type = "ADD16";
+    $type = "INT03";
     $url = $this->api['WRX_API_HOST'];
     $url .= "ns/check-stock";
     $api_path = $url;
@@ -60,7 +60,7 @@ class Wrx_consignment_api
       "subColor" => "",
       "size" => "",
       "location" => $warehouse_code,
-      "bin" => $zone_code,
+      "bin" => "",
       "limit" => 1,
       "offset" => 0
     );
@@ -180,21 +180,19 @@ class Wrx_consignment_api
       }
     }
 
-    return $sc === TRUE ? $qty : $sc;
+    return $qty;
   }
 
 
-  public function export_consignment($code)
+  public function export_consign($code)
   {
     $sc = TRUE;
-    $this->ci->load->model('account/consignment_order_model');
-    $this->ci->load->model('masters/warehouse_model');
-    $this->ci->load->model('masters/zone_model');
+    $this->ci->load->model('account/consign_order_model');    
 
     $action = "create";
-    $type = "INT17.1";
+    $type = "INT12";
     $url = $this->api['WRX_API_HOST'];
-    $url .= getConfig('WRX_CONSIGNMENT_URL');
+    $url .= getConfig('WRX_CONSIGN_URL');
     $api_path = $url;
     $req_time = NULL;
     $headers = array(
@@ -205,36 +203,78 @@ class Wrx_consignment_api
     $apiUrl = str_replace(" ","%20",$url);
     $method = 'POST';
 
-    $doc = $this->ci->consignment_order_model->get($code);
+    $doc = $this->ci->consign_order_model->get($code);
+    $playload = [];
 
     if( ! empty($doc))
     {
-      if($doc->status == 1)
+      if($doc->status == 'C')
       {
-        $playload = array(
-          'company' => $this->company,
-          'customer' => $doc->customer_code,
-          'saleChannel' => getConfig('WRX_CONSIGNMENT_CHANNEL'),
-          'Date' => $doc->date_add,
-          'documentId' => $doc->code,
-          'memoMain' => $doc->remark,
-          'line' => []
-        );
+        $playload = [
+          "source" => "WMS",
+          "company" => $this->company,
+          "referenceId" => $doc->code,
+          "customerNumber" => $doc->customer_code,
+          "onetimeCustomerName" => "",
+          "onetimeBranchCode" => "",
+          "onetimeCustomerAddress" => "",
+          "onetimeTel" => "",
+          "onetimeEmail" => "",
+          "onetimeTaxId" => "",
+          "status" => "Approved",
+          "refer1OrderNumber" => "",
+          "refer2OrderNumber" => "",
+          "billToCode" => "",
+          "shipToCode" => "" ,
+          "salesPerson" => "",
+          "salesChannel" => getConfig('WRX_CONSIGN_CHANNEL'),
+          "salesType" => "Collection",
+          "orderDate" => db_date($doc->shipped_date, FALSE),
+          "paymentOption" => "Credit",
+          "currency" => "THB",
+          "memoHeader" => $doc->remark,
+          "items" => []
+        ];
 
-        $details = $this->ci->consignment_order_model->get_details($code);
+        $details = $this->ci->consign_order_model->get_details($code);
 
         if( ! empty($details))
         {
           $line = 1;
+          $rate = getConfig('SALE_VAT_RATE');
+          $rate = ($rate == "" OR $rate == NULL) ? 7.00 : $rate;
+
           foreach($details as $rs)
           {
-            $playload['line'][] = array(
-              "line" => $line,
-              'itemNumber' => $rs->product_code,
-              'location' => $doc->warehouse_code,
-              'quantity' => floatval($rs->qty),
-              'memo' => "",
-              'binNumber' => $doc->zone_code
+            $playload['items'][] = array(
+              "orderLine" => $line,
+              "itemNumber" => $rs->product_code,
+              "orderQty" => intval($rs->qty),
+              "uom" => $rs->unit_code,
+              "unitPriceBfVat" => floatval(round(remove_vat($rs->sell_price, $rate), 2)),
+              "unitPriceIncVat" => floatval(round($rs->sell_price, 2)),
+              "unitPriceTag" => floatval($rs->price),
+              "discountUnitPrice" => floatval(round($rs->price - $rs->sell_price, 2)),
+              "amountBfVat" => floatval(round(remove_vat($rs->amount, $rate), 2)),
+              "taxAmount" => floatval(round(get_vat_amount($rs->amount, $rate), 2)),
+              "grossAmount" => floatval(round($rs->amount, 2)),
+              "priceTagAmount" => floatval(round($rs->price * $rs->qty, 2)),
+              "discountLineAmt" => floatval(round($rs->discount_amount, 2)),
+              "discountLinePct" => $rs->discount_amount > 0 ? floatval(round(($rs->discount_amount / ($rs->qty * $rs->price)), 2)) * 100 : 0,
+              "refer1OrderNumber" => "no-referece",
+              "refer2OrderNumber" => "no-reference",
+              "deposit" => "No",
+              "depositFundAmt" => 0,
+              "depositAccount" => "",
+              // "depositDate" => "",
+              "depositMemo" => "",
+              "depositPaymentOption" => "",
+              "preOrder" => "No",
+              "shipDate" => db_date($doc->shipped_date, FALSE),
+              "lineLocation" => $doc->warehouse_code,
+              "memoLine" => "",
+              "lineAttachmentFile" => "",
+              "employee" => ""
             );
 
             $line++;
@@ -242,8 +282,9 @@ class Wrx_consignment_api
         }
 
         $json = json_encode($playload);
+        $json = "[".$json."]";
 
-        if( ! empty($playload['line']))
+        if( ! empty($playload['items']))
         {
           if($this->test)
           {
@@ -285,22 +326,23 @@ class Wrx_consignment_api
             {
               if($res->code == 200 && ! empty($res->data))
               {
-                $ds = $res->data;
+                $ds = $res->data[0];
 
-                if($ds->Status == 'Success' OR $ds->Status == 'success')
+                if($ds->status == 'Success' OR $ds->status == 'success')
                 {
                   $docNum = NULL;
 
-                  if( ! empty($ds->reference))
+                  if( ! empty($ds->receiptNumber))
                   {
-                    $docNum = trim($ds->reference);
+                    $docNum = trim($ds->receiptNumber);
                   }
 
                   $arr = array(
-                    'DocNum' => $docNum
+                    'DocNum' => $docNum,
+                    'is_exported' => 'Y'
                   );
 
-                  if( ! $this->ci->consignment_order_model->update($code, $arr))
+                  if( ! $this->ci->consign_order_model->update($code, $arr))
                   {
                     $sc = FALSE;
                     $this->error = "Export data success but update document failed";
@@ -319,6 +361,12 @@ class Wrx_consignment_api
               {
                 $sc = FALSE;
                 $this->error = $res->serviceMessage;
+
+                if($doc->is_exported != 'Y')
+                {
+                  $arr = array('is_exported' => 'E');
+                  $this->ci->consign_order_model->update($code, $arr);
+                }
               }
 
               if($this->logs_json)

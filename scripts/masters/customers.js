@@ -121,6 +121,7 @@ function update() {
       'type' : $('#type').val(),
       'class' : $('#class').val(),
       'area' : $('#area').val(),
+      'gp' : $('#gp').val(),
       'active' : $('#active').is(':checked') ? 1 : 0
     }
 
@@ -134,7 +135,7 @@ function update() {
       click = 0;
       $('#name').hasError('Required');
       return false;
-    }    
+    }
 
     load_in();
 

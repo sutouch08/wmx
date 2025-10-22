@@ -111,6 +111,28 @@
   right: 10px;
 }
 
+.more-menu-close {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.more-menu-close-icon {
+  height: 35px;
+  width: 35px;
+  background-color: #6d7e8ad1;
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
 .btn-close {
   width: 40px;
   height: 40px;

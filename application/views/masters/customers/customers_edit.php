@@ -92,6 +92,13 @@
 		</div>
 
 		<div class="form-group">
+	    <label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">GP (%)</label>
+	    <div class="col-lg-1 col-md-1-harf col-sm-2 col-xs-12">
+				<input type="number" name="gp" id="gp" class="width-100 text-right" value="<?php echo round($ds->gp, 2); ?>" />
+	    </div>
+	  </div>
+
+		<div class="form-group">
 			<label class="col-lg-3 col-md-3 col-sm-3 col-xs-12 control-label no-padding-right">Active</label>
 			<div class="col-lg-3 col-md-3 col-sm-3 col-xs-12">
 				<label style="padding-top:5px;">
