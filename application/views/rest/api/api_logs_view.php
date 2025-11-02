@@ -26,19 +26,22 @@
     <label>Type</label>
     <select class="width-100 filter" name="type" id="type">
 			<option value="all">ทั้งหมด</option>
+			<option value="ADD23" <?php echo is_selected('ADD23', $type); ?>>ADD23 | (Purchase Order)</option>
+			<option value="ADD24" <?php echo is_selected('ADD24', $type); ?>>ADD24 | (Goods Receipt PO)</option>
+			<option value="ADD40" <?php echo is_selected('ADD40', $type); ?>>ADD40 | (Transfer out)</option>
+			<option value="ADD90" <?php echo is_selected('ADD90', $type); ?>>ADD90 | (Return Order)</option>
+			<option value="ADD91" <?php echo is_selected('ADD91', $type); ?>>ADD91 | (Return Receipt)</option>
+			<option value="ADD122" <?php echo is_selected('ADD122', $type); ?>>ADD122 | (Customer Master)</option>
+			<option value="ADD123" <?php echo is_selected('ADD123', $type); ?>>ADD123 | (Warehouse Master)</option>
+			<option value="INT03" <?php echo is_selected('INT03', $type);?>>INT03 | (Check Stock)</option>
 			<option value="INT10" <?php echo is_selected('INT10', $type);?>>INT10 | (Products Master)</option>
 			<option value="INT11" <?php echo is_selected('INT11', $type);?>>INT11 | (Price List)</option>
+			<option value="INT16" <?php echo is_selected('INT16', $type); ?>>INT16 | (Goods Receipt)</option>
 			<option value="INT17" <?php echo is_selected('INT17', $type);?>>INT17 | (Adjust Stock)</option>
 			<option value="INT20" <?php echo is_selected('INT20', $type); ?>>INT20 | (Orders)</option>
 			<option value="INT21" <?php echo is_selected('INT21', $type); ?>>INT21 | (WH-Transaction) </option>
-			<option value="ADD23" <?php echo is_selected('ADD23', $type); ?>>ADD23 | (Purchase Order)</option>
-			<option value="ADD24" <?php echo is_selected('ADD24', $type); ?>>ADD24 | (Goods Receipt PO)</option>
-			<option value="ADD90" <?php echo is_selected('ADD90', $type); ?>>ADD90 | (Return Order)</option>
-			<option value="ADD91" <?php echo is_selected('ADD91', $type); ?>>ADD91 | (Return Receipt)</option>
 			<option value="INT21.3" <?php echo is_selected('INT21.3', $type); ?>>INT21.3 | (Receive Product)</option>
-			<option value="INT16" <?php echo is_selected('INT16', $type); ?>>INT16 | (Goods Receipt)</option>
-			<option value="ADD122" <?php echo is_selected('ADD122', $type); ?>>ADD122 | (Customer Master)</option>
-			<option value="ADD123" <?php echo is_selected('ADD123', $type); ?>>ADD123 | (Warehouse Master)</option>
+			<option value="INT23" <?php echo is_selected('INT23', $type); ?>>INT23 | (Consign Order)</option>
 		</select>
   </div>
 

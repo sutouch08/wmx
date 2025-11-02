@@ -43,6 +43,11 @@
 			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
 			<span class="menu-text text-left">ลดหนี้ขาย</span>
 		</div>
+
+		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/consign_order')">
+			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+			<span class="menu-text text-left">ตัดยอดฝากขาย (WM)</span>
+		</div>
 	</div>
 </div>
 

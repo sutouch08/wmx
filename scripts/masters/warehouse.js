@@ -10,6 +10,11 @@ function getEdit(code){
 }
 
 
+function viewDetail(code) {
+  window.location.href = HOME + 'view_detail/'+code;
+}
+
+
 function add() {
   if(click == 0) {
     click = 1;
@@ -155,6 +160,143 @@ function update() {
       }
     })
   }
+}
+
+
+
+$('#search-box').autocomplete({
+  source:BASE_URL + 'auto_complete/get_customer_code_and_name',
+  autoFocus:true,
+  close:function() {
+    let arr = $(this).val().split(' | ');
+
+    if(arr.length == 2) {
+      let code = arr[0];
+      let name = arr[1];
+      $(this).val(name);
+      $('#customer-code').val(code);
+    }
+    else {
+      $(this).val('');
+      $('#customer-code').val('');
+    }
+  }
+});
+
+
+$('#search-box').keyup(function(e){
+  if(e.keyCode == 13){
+    addCustomer();
+  }
+});
+
+
+function addCustomer() {
+  let code = $('#code').val().trim();
+  let customer_code = $('#customer-code').val().trim();
+  let customer_name = $('#search-box').val().trim();
+  let exists = 0;
+
+  if(customer_code == '' || customer_name.length == 0){
+    swal('ชื่อลูกค้าไม่ถูกต้อง');
+    return false;
+  }
+
+  $('.customer-code').each(function() {
+    if($(this).data('code') == customer_code) {
+      exists++;
+    }
+  });
+
+  if(exists > 0) {
+    $('#customer-code').val('');
+    $('#search-box').val('').focus();
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'add_customer',
+    type:'POST',
+    cache:false,
+    data:{
+      'warehouse_code' : code,
+      'customer_code' : customer_code,
+      'customer_name' : customer_name
+    },
+    success:function(rs) {
+      load_out();
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status === 'success') {
+          let source = $('#customer-template').html();
+          let output = $('#cust-table');
+
+          render_append(source, ds.data, output);
+
+          reIndex();
+
+          $('#customer-code').val('');
+          $('#search-box').val('').focus();
+        }
+        else {
+          showError(ds.message);
+        }
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  });
+}
+
+
+function deleteCustomer(id,code){
+  swal({
+    title:'Are sure ?',
+    text:'ต้องการลบ ' + code + ' หรือไม่ ?',
+    type:'warning',
+    showCancelButton: true,
+		confirmButtonColor: '#FA5858',
+		confirmButtonText: 'ใช่, ฉันต้องการลบ',
+		cancelButtonText: 'ยกเลิก',
+		closeOnConfirm: false
+  },function(){
+    $.ajax({
+      url: HOME + 'delete_customer',
+      type:'POST',
+      cache:false,
+      data:{
+        'id' : id
+      },
+      success:function(rs){
+        if(rs.trim() === 'success') {
+          swal({
+            title:'Deleted',
+            type:'success',
+            timer:1000
+          });
+
+          $('#row-'+id).remove();
+          reIndex();
+          $('#search-box').focus();
+        }
+        else{
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        showError(rs);
+      }
+    })
+
+  })
 }
 
 

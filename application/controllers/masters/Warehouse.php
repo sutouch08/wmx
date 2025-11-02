@@ -47,13 +47,14 @@ class Warehouse extends PS_Controller
         foreach($list as $rs)
         {
           $rs->zone_count = $this->warehouse_model->count_zone($rs->code);
+          $rs->customer_count = $this->warehouse_model->count_customer($rs->code);
         }
       }
 
       $filter['list'] = $list;
 
       $this->pagination->initialize($init);
-      $this->load->view('masters/warehouse/warehouse_list', $filter);      
+      $this->load->view('masters/warehouse/warehouse_list', $filter);
     }
   }
 
@@ -133,12 +134,12 @@ class Warehouse extends PS_Controller
     if($this->pm->can_edit)
     {
       $ds['ds'] = $this->warehouse_model->get($code);
+      $ds['customers'] = $this->warehouse_model->get_warehouse_customers($code);
       $this->load->view('masters/warehouse/warehouse_edit', $ds);
     }
     else
     {
-      set_error("คุณไม่มีสิทธิ์แก้ไขคลังสินค้า");
-      redirect($this->home);
+      $this->deny_page();
     }
   }
 
@@ -194,6 +195,14 @@ class Warehouse extends PS_Controller
   }
 
 
+  public function view_detail($code)
+  {
+    $ds['ds'] = $this->warehouse_model->get($code);
+    $ds['customers'] = $this->warehouse_model->get_warehouse_customers($code);
+    $this->load->view('masters/warehouse/warehouse_detail', $ds);
+  }
+
+
   public function delete()
   {
     $sc = TRUE;
@@ -215,6 +224,10 @@ class Warehouse extends PS_Controller
           $sc = FALSE;
           set_error('delete');
         }
+        else
+        {
+          $this->warehouse_model->delete_all_customer($code);
+        }
       }
       else
       {
@@ -232,90 +245,79 @@ class Warehouse extends PS_Controller
   }
 
 
-  public function syncData()
+  public function add_customer()
   {
-    $last_sync = $this->warehouse_model->get_last_sync_date();
-    //$last_sync = date('Y-m-d H:i:s', strtotime('2019-01-01 00:00:00'));
-    $newData = $this->warehouse_model->get_new_data($last_sync);
+    $sc = TRUE;
+    $code = $this->input->post('warehouse_code');
+    $customer_code = $this->input->post('customer_code');
+    $customer_name = $this->input->post('customer_name');
+    $ds = [];
 
-    if( ! empty($newData))
+    if( ! empty($code) && ! empty($customer_code) && ! empty($customer_name))
     {
-      foreach($newData as $rs)
+      if( ! $this->warehouse_model->is_exists_customer($code, $customer_code))
       {
-        if($this->warehouse_model->is_exists($rs->code))
-        {
-          $ds = array(
-            'name' => $rs->name,
-            'active' => $rs->Inactive == 'Y' ? 0 : 1,
-            'last_sync' => date('Y-m-d H:i:s'),
-            'update_user' => 'SAP',
-            'old_code' => $rs->old_code,
-            'limit_amount' => $rs->limit_amount
-          );
+        $ds = array(
+          'warehouse_code' => $code,
+          'customer_code' => $customer_code,
+          'customer_name' => $customer_name,
+          'user' => $this->_user->uname
+        );
 
-          $this->warehouse_model->update($rs->code, $ds);
+        $id = $this->warehouse_model->add_customer($ds);
+
+        if( ! empty($id))
+        {
+          $ds['id'] = $id;
         }
         else
         {
-          $ds = array(
-            'code' => $rs->code,
-            'name' => $rs->name,
-            'active' => $rs->Inactive == 'Y' ? 0 : 1,
-            'last_sync' => date('Y-m-d H:i:s'),
-            'update_user' => 'SAP',
-            'old_code' => $rs->old_code,
-            'limit_amount' => $rs->limit_amount
-          );
-
-          $this->warehouse_model->add($ds);
+          $sc = FALSE;
+          set_error('insert', $customer_code);
         }
       }
+      else
+      {
+        $sc = FALSE;
+        set_error('exists', $customer_code);
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
     }
 
-    echo 'done';
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
   }
 
 
-  public function syncAllData()
+  public function delete_customer()
   {
-    $last_sync = date('Y-m-d H:i:s', strtotime('2019-01-01 00:00:00'));
-    $newData = $this->warehouse_model->get_new_data($last_sync);
+    $sc = TRUE;
+    $id = $this->input->post('id');
 
-    if( ! empty($newData))
+    if( ! empty($id))
     {
-      foreach($newData as $rs)
+      if( ! $this->warehouse_model->delete_customer($id))
       {
-        if($this->warehouse_model->is_exists($rs->code))
-        {
-          $ds = array(
-            'name' => $rs->name,
-            'active' => $rs->Inactive == 'Y' ? 0 : 1,
-            'last_sync' => date('Y-m-d H:i:s'),
-            'update_user' => 'SAP',
-            'old_code' => $rs->old_code,
-            'limit_amount' => $rs->limit_amount
-          );
-
-          $this->warehouse_model->update($rs->code, $ds);
-        }
-        else
-        {
-          $ds = array(
-            'code' => $rs->code,
-            'name' => $rs->name,
-            'active' => $rs->Inactive == 'Y' ? 0 : 1,
-            'last_sync' => date('Y-m-d H:i:s'),
-            'update_user' => 'SAP',
-            'old_code' => $rs->old_code,
-            'limit_amount' => $rs->limit_amount
-          );
-
-          $this->warehouse_model->add($ds);
-        }
+        $sc = FALSE;
+        set_error('delete');
       }
     }
+    else
+    {
+      $sc = FALSE;
+      set_error('required');
+    }
 
-    echo 'done';
+    $this->_response($sc);
   }
 
 

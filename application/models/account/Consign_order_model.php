@@ -91,24 +91,6 @@ class Consign_order_model extends CI_Model
   }
 
 
-  public function has_saved_imported($code, $check_code)
-  {
-    $rs = $this->db
-    ->where('consign_code', $code)
-    ->where('ref_code', $check_code)
-    ->where('status', 1)
-    ->limit(1)
-    ->get($this->td);
-
-    if($rs->num_rows() > 0)
-    {
-      return TRUE;
-    }
-
-    return FALSE;
-  }
-
-
   public function get($code)
   {
     $rs = $this->db->where('code', $code)->get($this->tb);

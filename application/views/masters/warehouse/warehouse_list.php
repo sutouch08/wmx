@@ -3,10 +3,7 @@
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
     <h3 class="title"><?php echo $this->title; ?></h3>
   </div>
-  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-		<?php if($this->pm->can_add) : ?>
-			<button type="button" class="btn btn-xs btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
-		<?php endif; ?>
+  <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">		
 		<button type="button" class="btn btn-xs btn-white btn-purple top-btn" onclick="exportFilter()"><i class="fa fa-file-excel-o"></i> Export</button>
   </div>
 </div><!-- End Row -->
@@ -101,21 +98,21 @@
 
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-hover border-1" style="min-width:1090px;">
+		<table class="table table-hover border-1" style="min-width:1070px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-100 middle"></th>
 					<th class="fix-width-40 middle text-center">#</th>
-					<th class="fix-width-100 middle">รหัสคลัง</th>
-					<th class="min-width-250 middle">ชื่อคลัง</th>
-					<th class="fix-width-100 middle">ประเภทคลัง</th>
-					<th class="fix-width-80 middle text-center">โซน</th>
+					<th class="fix-width-100 middle">Code</th>
+					<th class="min-width-250 middle">Name</th>
+					<th class="fix-width-100 middle">Role</th>
+					<th class="fix-width-80 middle text-center">Location</th>
+					<th class="fix-width-80 middle text-center">Customer</th>
 					<th class="fix-width-60 middle text-center">ขาย</th>
 					<th class="fix-width-60 middle text-center">จัด</th>
 					<th class="fix-width-60 middle text-center">ยืม</th>
 					<th class="fix-width-60 middle text-center">Active</th>
 					<th class="fix-width-80 middle text-center">คลังเทียม</th>
-					<th class="fix-width-100 middle text-center">แก้ไข</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -124,15 +121,12 @@
 				<?php foreach($list as $rs) : ?>
 					<tr class="font-size-11" id="row-<?php echo $rs->code; ?>">
 						<td class="">
+							<button type="button" class="btn btn-minier btn-info" onclick="viewDetail('<?php echo $rs->code; ?>')"><i class="fa fa-eye"></i></button>
 							<?php if($this->pm->can_edit) : ?>
-								<button type="button" class="btn btn-minier btn-warning" onclick="getEdit('<?php echo $rs->code; ?>')">
-									<i class="fa fa-pencil"></i>
-								</button>
+								<button type="button" class="btn btn-minier btn-warning" onclick="getEdit('<?php echo $rs->code; ?>')"><i class="fa fa-pencil"></i></button>
 							<?php endif; ?>
 							<?php if($this->pm->can_delete) : ?>
-								<button type="button" class="btn btn-minier btn-danger" onclick="getDelete('<?php echo $rs->code; ?>')" <?php echo ($rs->zone_count > 0 ? 'disabled' :''); ?>>
-									<i class="fa fa-trash"></i>
-								</button>
+								<button type="button" class="btn btn-minier btn-danger" onclick="getDelete('<?php echo $rs->code; ?>')" <?php echo ($rs->zone_count > 0 ? 'disabled' :''); ?>><i class="fa fa-trash"></i></button>
 							<?php endif; ?>
 						</td>
 						<td class="middle text-center no"><?php echo $no; ?></td>
@@ -140,12 +134,12 @@
 						<td class="middle"><?php echo $rs->name; ?></td>
 						<td class="middle"><?php echo $rs->role_name; ?></td>
 						<td class="middle text-center"><?php echo number($rs->zone_count); ?></td>
+						<td class="middle text-center"><?php echo number($rs->customer_count); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->sell); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->prepare); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->lend); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->active); ?></td>
 						<td class="middle text-center"><?php echo is_active($rs->is_consignment); ?></td>
-						<td class="middle text-center"><?php echo $rs->update_user; ?></td>
 					</tr>
 					<?php $no++; ?>
 				<?php endforeach; ?>

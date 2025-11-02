@@ -81,6 +81,7 @@ function warehouseInit() {
 
 function updateCustomer() {
   let whsCode = $('#warehouse').val();
+  let customer_code = $('#customer-code').val().trim();
 
   if(whsCode != "") {
     $.ajax({
@@ -88,7 +89,8 @@ function updateCustomer() {
       type:'POST',
       cache:false,
       data:{
-        'warehouse_code' : whsCode
+        'warehouse_code' : whsCode,
+        'customer_code' : customer_code
       },
       success:function(rs) {
         if(isJson(rs)) {

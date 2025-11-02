@@ -187,10 +187,10 @@ class Wrx_consign_api
   public function export_consign($code)
   {
     $sc = TRUE;
-    $this->ci->load->model('account/consign_order_model');
+    $this->ci->load->model('account/consign_order_model');    
 
     $action = "create";
-    $type = "INT23";
+    $type = "INT12";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_CONSIGN_URL');
     $api_path = $url;
@@ -211,54 +211,29 @@ class Wrx_consign_api
       if($doc->status == 'C')
       {
         $playload = [
-          "source" => "IX",
+          "source" => "WMS",
           "company" => $this->company,
           "referenceId" => $doc->code,
-          "salesorderNumber" => "",
           "customerNumber" => $doc->customer_code,
-          "onetimeCustName" => "",
-          "customerNameOnline" => "",
+          "onetimeCustomerName" => "",
           "onetimeBranchCode" => "",
-          "onetimeCustAddress" => "",
+          "onetimeCustomerAddress" => "",
           "onetimeTel" => "",
           "onetimeEmail" => "",
           "onetimeTaxId" => "",
-          "shipToAttention" => "",
-          "shipToAddressee" => "",
-          "shipToPhone" => "",
-          "shippingMethod" => "SPX Express",
-          "mfgStatus" => "",
+          "status" => "Approved",
+          "refer1OrderNumber" => "",
+          "refer2OrderNumber" => "",
           "billToCode" => "",
-          "shipToCode" => "",
-          "orderStatus" => "Pending Approval",
+          "shipToCode" => "" ,
           "salesPerson" => "",
           "salesChannel" => getConfig('WRX_CONSIGN_CHANNEL'),
           "salesType" => "Collection",
-          "department" => "",
           "orderDate" => db_date($doc->shipped_date, FALSE),
           "paymentOption" => "Credit",
-          "primaryCurrency" => "THB",
+          "currency" => "THB",
           "memoHeader" => $doc->remark,
-          "attachslip" => "No",
-          "headerAttachFile" => "",
-          "depositAttachFile" => "",
-          "deposit" => "No",
-          "depositfundAmt" => 0,
-          "depositAccount" => "",
-          "depositDate" => now(),
-          "depositMemo" => "",
-          "depositPaymentOption" => "Cash",
-          "discountHeaderAmt" => 0,
-          "discountHeaderPct" => 0,
-          "discountItem" => "",
-          "refer1Order" => $doc->code,
-          "refer2Order" => "",
-          "autoFulfill" => "Yes",
-          "cod" => "No",
-          "codAmount" => 0,
-          "preOrder" => "No",
-          "headerAction" => "A",
-          "line" => []
+          "items" => []
         ];
 
         $details = $this->ci->consign_order_model->get_details($code);
@@ -271,29 +246,35 @@ class Wrx_consign_api
 
           foreach($details as $rs)
           {
-            $playload['line'][] = array(
+            $playload['items'][] = array(
               "orderLine" => $line,
               "itemNumber" => $rs->product_code,
-              "itemDescription" => $rs->product_name,
               "orderQty" => intval($rs->qty),
               "uom" => $rs->unit_code,
-              "unitPriceBfVAT" => round(floatval(remove_vat($rs->sell_price, $rate)), 2),
-              "unitPriceIncVAT" => round(floatval($rs->sell_price), 2),
-              "unitPriceTag" => round(floatval($rs->price), 2),
-              "discountUnitPrice" => round(floatval($rs->price - $rs->sell_price), 2),
-              "amountBfVAT" => round(floatval(remove_vat($rs->amount, $rate)), 2),
-              "taxAmount" => round(floatval(get_vat_amount($rs->amount, $rate)), 2),
-              "grossAmount" => round(floatval($rs->amount), 2),
-              "priceTagAmount" => round(floatval($rs->price * $rs->qty), 2),
-              "discountLineAmt" => round(floatval($rs->discount_amount), 2),
-              "discountLinePct" => $rs->discount_amount > 0 ? round(floatval(($rs->discount_amount / ($rs->qty * $rs->price))), 2) * 100 : 0,
+              "unitPriceBfVat" => floatval(round(remove_vat($rs->sell_price, $rate), 2)),
+              "unitPriceIncVat" => floatval(round($rs->sell_price, 2)),
+              "unitPriceTag" => floatval($rs->price),
+              "discountUnitPrice" => floatval(round($rs->price - $rs->sell_price, 2)),
+              "amountBfVat" => floatval(round(remove_vat($rs->amount, $rate), 2)),
+              "taxAmount" => floatval(round(get_vat_amount($rs->amount, $rate), 2)),
+              "grossAmount" => floatval(round($rs->amount, 2)),
+              "priceTagAmount" => floatval(round($rs->price * $rs->qty, 2)),
+              "discountLineAmt" => floatval(round($rs->discount_amount, 2)),
+              "discountLinePct" => $rs->discount_amount > 0 ? floatval(round(($rs->discount_amount / ($rs->qty * $rs->price)), 2)) * 100 : 0,
+              "refer1OrderNumber" => "no-referece",
+              "refer2OrderNumber" => "no-reference",
+              "deposit" => "No",
+              "depositFundAmt" => 0,
+              "depositAccount" => "",
+              // "depositDate" => "",
+              "depositMemo" => "",
+              "depositPaymentOption" => "",
+              "preOrder" => "No",
               "shipDate" => db_date($doc->shipped_date, FALSE),
-              "location" => $doc->warehouse_code,
+              "lineLocation" => $doc->warehouse_code,
               "memoLine" => "",
-              "lineAttachFile" => "",
-              "ref1OrderLine" => "",
-              "ref2OrderLine" => "",
-              "lineAction" => "A"
+              "lineAttachmentFile" => "",
+              "employee" => ""
             );
 
             $line++;
@@ -301,8 +282,9 @@ class Wrx_consign_api
         }
 
         $json = json_encode($playload);
+        $json = "[".$json."]";
 
-        if( ! empty($playload['line']))
+        if( ! empty($playload['items']))
         {
           if($this->test)
           {
@@ -344,12 +326,16 @@ class Wrx_consign_api
             {
               if($res->code == 200 && ! empty($res->data))
               {
-                $docNum = NULL;
-                $ds = $res->data;
+                $ds = $res->data[0];
 
-                if( ! empty($ds->salesorderNumber))
+                if($ds->status == 'Success' OR $ds->status == 'success')
                 {
-                  $docNum = trim($ds->salesorderNumber);
+                  $docNum = NULL;
+
+                  if( ! empty($ds->receiptNumber))
+                  {
+                    $docNum = trim($ds->receiptNumber);
+                  }
 
                   $arr = array(
                     'DocNum' => $docNum,

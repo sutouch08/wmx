@@ -1,15 +1,16 @@
 <?php
 
   $this->load->helper('print');
+
   $page = '';
   $page .= $this->printer->doc_header();
 	$this->printer->add_title("ใบโอนสินค้า (ระหว่างคลัง)");
 	$header	= array(
     'เลขที่' => $doc->code,
-    'วันที่'  => thai_date($doc->date_add, FALSE, '/'),
-    'ต้นทาง' => $doc->from_warehouse_name,
-    'ปลายทาง' => $doc->to_warehouse_name,
-    'พนักงาน' => $this->user_model->get_name($doc->user)
+    'วันที่'  => thai_date($doc->shipped_date, FALSE, '/'),
+    'ต้นทาง' => warehouse_name($doc->from_warehouse),
+    'ปลายทาง' => warehouse_name($doc->to_warehouse),
+    'พนักงาน' => display_name($doc->user)
 	);
 
   if($doc->remark != '')
@@ -20,6 +21,7 @@
 	$this->printer->add_header($header);
 
 	$total_row 	= empty($details) ? 0 : count($details);
+
 	$config = array(
     'total_row' => $total_row,
     'font_size' => 10,
@@ -33,36 +35,35 @@
 	$total_qty 	= 0;
 	//**************  กำหนดหัวตาราง  ******************************//
   //------- กำหนดส่วนหัวตารางรายการที่จะพิมพ์
-	$thead	= array(
-						array("ลำดับ", "width:5%; text-align:center; border-top:0px; border-top-left-radius:10px;"),
-						array("รหัส", "width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("สินค้า", "width:25%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("ต้นทาง","width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("ปลายทาง", "width:20%; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
-						array("จำนวน", "width:10%; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
-						);
+  $thead	= array(
+    array("ลำดับ", "width:10mm; text-align:center; border-top:0px; border-top-left-radius:10px;"),
+    array("รหัส", "width:50mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+    array("สินค้า", "width:70mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+    array("ต้นทาง","width:40mm; text-align:center; border-left: solid 1px #ccc; border-top:0px;"),
+    array("จำนวน", "width:20mm; text-align:center; border-left: solid 1px #ccc; border-top:0px; border-top-right-radius:10px")
+  );
 
 	$this->printer->add_subheader($thead);
 
 	//***************************** กำหนด css ของ td *****************************//
   //---	กำหนดการแสดงผลให้กับช่องแต่ละช่องในแต่ละบรรทัด
   $pattern = array(
-              "text-align: center; border-top:0px;",
-              "border-left: solid 1px #ccc; border-top:0px;",
-              "border-left: solid 1px #ccc; border-top:0px;",
-              "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-              "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-              "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
-              "text-align:right; border-left: solid 1px #ccc; border-top:0px;"
-              );
+    "text-align: center; border-top:0px;",
+    "border-left: solid 1px #ccc; border-top:0px;",
+    "border-left: solid 1px #ccc; border-top:0px;",
+    "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
+    "text-align:center; border-left: solid 1px #ccc; border-top:0px;",
+    "text-align:right; border-left: solid 1px #ccc; border-top:0px;"
+  );
+
 	$this->printer->set_pattern($pattern);
 
 	//*******************************  กำหนดช่องเซ็นของ footer *******************************//
-	$footer	= array(
-						array("ผู้จัดทำ", "", "วันที่ ............................."),
-						array("ผู้ตรวจสอบ", "","วันที่ ............................."),
-						array("ผู้อนุมัติ", "","วันที่ .............................")
-						);
+  $footer	= array(
+    array("ผู้จัดทำ", "", "วันที่ ............................."),
+    array("ผู้ตรวจสอบ", "","วันที่ ............................."),
+    array("ผู้อนุมัติ", "","วันที่ .............................")
+  );
 
   $this->printer->set_footer($footer);
 
@@ -93,15 +94,15 @@
               $n,
 							inputRow($rs->product_code),
 							inputRow($rs->product_name),
-              inputRow($rs->from_zone),
-              inputRow($rs->to_zone),
+              inputRow($rs->from_zone, 'text-align:center;'),
 							number($rs->qty)
 						);
+
             $total_qty += $rs->qty;
           }
           else
           {
-            $data = array("", "", "", "", "", "");
+            $data = array("", "", "", "", "");
           }
 					$page .= $this->printer->print_row($data);
 					$n++;

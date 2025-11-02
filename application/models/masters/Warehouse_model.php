@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Warehouse_model extends CI_Model
 {
   private $tb = "warehouse";
+  private $tc = "warehouse_customer";
 
   public function __construct()
   {
@@ -93,6 +94,32 @@ class Warehouse_model extends CI_Model
   public function delete($code)
   {
     return $this->db->where('code', $code)->delete($this->tb);
+  }
+
+
+  public function add_customer(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      if($this->db->insert($this->tc, $ds))
+      {
+        return $this->db->insert_id();
+      }
+    }
+
+    return FALSE;
+  }
+
+
+  public function delete_customer($id)
+  {
+    return $this->db->where('id', $id)->delete($this->tc);
+  }
+
+
+  public function delete_all_customer($warehouse_code)
+  {
+    return $this->db->where('warehouse_code', $warehouse_code)->delete($this->tc);
   }
 
 
@@ -318,6 +345,24 @@ class Warehouse_model extends CI_Model
   }
 
 
+  public function get_warehouse_customers($code)
+  {
+    $rs = $this->db
+    ->select('w.id, c.code, c.name')
+    ->from('warehouse_customer AS w')
+    ->join('customers AS c', 'w.customer_code = c.code', 'left')
+    ->where('w.warehouse_code', $code)
+    ->get();
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
   ///---- คลังฝากขายทั้งหมด
   public function get_consign_warehouse_list()
   {
@@ -413,7 +458,7 @@ class Warehouse_model extends CI_Model
     $rs = $this->db
     ->order_by('customer_code', 'DESC')
     ->limit(1)
-    ->get('warehouse_customer');
+    ->get($this->tc);
 
     if($rs->num_rows() === 1)
     {
@@ -421,6 +466,17 @@ class Warehouse_model extends CI_Model
     }
 
     return NULL;
+  }
+
+
+  public function is_exists_customer($warehouse_code, $customer_code)
+  {
+    $count = $this->db
+    ->where('warehouse_code', $warehouse_code)
+    ->where('customer_code', $customer_code)
+    ->count_all_results($this->tc);
+
+    return $count > 0 ? TRUE : FALSE;
   }
 
 
@@ -539,6 +595,12 @@ class Warehouse_model extends CI_Model
   public function count_zone($code)
   {
     return $this->db->where('warehouse_code', $code)->count_all_results('zone');
+  }
+
+
+  public function count_customer($code)
+  {
+    return $this->db->where('warehouse_code', $code)->count_all_results($this->tc);
   }
 
 

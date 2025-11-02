@@ -24,15 +24,18 @@
 
   <div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-sm-6 col-xs-6 padding-5">
     <label>วันที่</label>
-    <input type="text" class="form-control input-sm text-center h" name="date" id="date" value="<?php echo date('d-m-Y'); ?>" readonly required />
+    <input type="text" class="form-control input-sm text-center h" id="date" value="<?php echo date('d-m-Y'); ?>" readonly />
   </div>
 
-	<div class="col-lg-4-harf col-md-4-harf col-sm-4-harf col-xs-6 padding-5">
+	<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-sm-6 col-xs-6 padding-5">
+    <label>Posting date</label>
+    <input type="text" class="form-control input-sm text-center h" id="posting-date" value="" readonly />
+  </div>
+
+	<div class="col-lg-3 col-md-4-harf col-sm-4-harf col-xs-6 padding-5">
 		<label>คลังต้นทาง</label>
-		<select class="width-100 h f" id="from-warehouse">
-			<option value="">เลือกคลังต้นทาง</option>
-			<?php echo select_warehouse(); ?>
-		</select>
+		<input type="text" class="form-control input-sm h" id="fromWhs" value="<?php echo $whsCode.' | '.$whsName; ?>" readonly disabled />
+		<input type="hidden" id="from-warehouse" value="<?php echo $whsCode; ?>" />
 	</div>
   <div class="col-lg-4-harf col-md-4-harf col-sm-4-harf col-xs-6 padding-5">
     <label>คลังปลายทาง</label>
@@ -55,7 +58,6 @@
 
 
 <script>
-	$('#from-warehouse').select2();
 	$('#to-warehouse').select2();
 </script>
 <script src="<?php echo base_url(); ?>scripts/transfer/transfer.js?v=<?php echo date('Ymd'); ?>"></script>

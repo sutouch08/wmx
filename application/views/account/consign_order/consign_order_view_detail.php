@@ -23,7 +23,7 @@
 							<a href="javascript:goEdit('<?php echo $doc->code; ?>')"><i class="fa fa-pencil"></i>&nbsp; Edit</a>
 						</li>
 					<?php endif; ?>
-					<?php if($doc->status == 'C' && is_true(getConfig('WRX_CONSIGN_INTERFACE'))) : ?>
+					<?php if($doc->status == 'C' && is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGN_INTERFACE'))) : ?>
 						<li class="success">
 							<a href="javascript:sendToErp('<?php echo $doc->code; ?>')"><i class="fa fa-send"></i>&nbsp; Send To ERP</a>
 						</li>

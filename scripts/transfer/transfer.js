@@ -3,29 +3,8 @@ function addNew(){
 }
 
 
-function goEdit(code) {
-  let uuid = get_uuid();
-  $.ajax({
-    url:HOME + 'is_document_avalible',
-    type:'GET',
-    cache:false,
-    data:{
-      'code' : code,
-      'uuid' : uuid
-    },
-    success:function(rs) {
-      if(rs === 'available') {
-        window.location.href = HOME + 'edit/'+code+'/'+uuid;
-      }
-      else {
-        swal({
-          title:'Oops!',
-          text:'เอกสารกำลังถูกเปิด/แก้ไข โดยเครื่องอื่นอยู่ ไม่สามารถแก้ไขได้ในขณะนี้',
-          type:'warning'
-        });
-      }
-    }
-  });
+function edit(code) {
+  window.location.href = HOME + 'edit/'+code;
 }
 
 
@@ -34,67 +13,56 @@ function goDetail(code){
 }
 
 
-//--- สลับมาใช้บาร์โค้ดในการคีย์สินค้า
-function goUseBarcode(){
-  let code = $('#transfer_code').val();
-  let uuid = get_uuid();
-  window.location.href = HOME + 'edit/'+code+'/'+uuid+'/barcode';
+function goCancel(code) {
+  swal({
+    title:'คุณแต่ใจ ?',
+    text:'ต้องการยกเลิกเอกสารนี้หรือไม่ ?',
+    type:'warning',
+    html:true,
+    showCancelButton:true,
+    confirmButtonText:'#DD6B55',
+    confirmButtonText:'Yes',
+    cancelButtonText:'No',
+    closeOnConfirm:true
+  }, function() {
+    $('#cancel-code').val(code);
+    $('#cancel-reason').val('');
+    $('#cancel-modal').modal('show');
+  })
 }
 
 
-//--- สลับมาใช้การคื่ย์มือในการย้ายสินค้า
-function goUseKeyboard(){
-  let code = $('#transfer_code').val();
-  let uuid = get_uuid();
-  window.location.href = HOME + 'edit/'+code+'/'+uuid;
-}
+$('#cancel-modal').on('shown.bs.modal', function() {
+  $('#cancel-reason').focus();
+});
 
 
-function goDelete(code, status){
-  var title = 'ต้องการยกเลิก '+ code +' หรือไม่ ?';
+function doCancel() {
+  let code = $('#cancel-code').val();
+  let reason = $('#cancel-reason').val().trim();
 
-	swal({
-		title: 'คุณแน่ใจ ?',
-		text: title,
-		type: 'warning',
-		showCancelButton: true,
-		confirmButtonColor: '#DD6B55',
-		confirmButtonText: 'ใช่ ฉันต้องการ',
-		cancelButtonText: 'ไม่ใช่',
-		closeOnConfirm: true
-	}, function(){
-    $('#cancle-code').val(code);
-    $('#cancle-reason').val('').removeClass('has-error');
-    cancle(code);
-	});
-}
+  if( reason.length < 10) {
+    $('#cancel-reason').hasError().focus();
+    return false;
+  }
 
+  $('#cancel-modal').modal('hide');
 
-function cancle(code){
-	let reason = $.trim($('#cancle-reason').val());
-  let force_cancel = $('#force-cancel').is(':checked') ? 1 : 0;
+  setTimeout(() => {
+    load_in();
 
-	if(reason.length < 10)
-	{
-		$('#cancle-modal').modal('show');
-		return false;
-	}
+    $.ajax({
+      url:HOME + 'cancel',
+      type:"POST",
+      cache:"false",
+      data:{
+        "code" : code,
+        "reason" : reason
+      },
+      success: function(rs) {
+        load_out();
 
-  load_in();
-
-  $.ajax({
-    url:HOME + 'delete_transfer/'+code,
-    type:"POST",
-    cache:"false",
-    data:{
-      "reason" : reason,
-      "force_cancel" : force_cancel
-    },
-    success: function(rs) {
-      load_out();
-      var rs = $.trim(rs);
-      if( rs == 'success' ) {
-        setTimeout(() => {
+        if( rs.trim() == 'success' ) {
           swal({
             title:'Success',
             text: 'ยกเลิกเอกสารเรียบร้อยแล้ว',
@@ -103,39 +71,19 @@ function cancle(code){
           });
 
           setTimeout(function(){
-            goBack();
+            refresh();
           }, 1200);
-        }, 200);
-
+        }
+        else {
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        showError(rs);
       }
-      else {
-        setTimeout(() => {
-          swal("ข้อผิดพลาด", rs, "error");
-        }, 200);
-      }
-    }
-  });
+    });
+  }, 200);
 }
-
-
-function doCancle() {
-	let code = $('#cancle-code').val();
-	let reason = $.trim($('#cancle-reason').val());
-
-	if( reason.length < 10) {
-		$('#cancle-reason').addClass('has-error').focus();
-		return false;
-	}
-
-	$('#cancle-modal').modal('hide');
-
-	return cancle(code);
-}
-
-
-$('#cancle-modal').on('shown.bs.modal', function() {
-	$('#cancle-reason').focus();
-});
 
 
 $('#fromDate').datepicker({
@@ -159,9 +107,48 @@ $('#date').datepicker({
 });
 
 
-function printTransfer(){
-	var center = ($(document).width() - 800) /2;
-  var code = $('#transfer_code').val();
-  var target = HOME + 'print_transfer/'+code;
+$('#posting-date').datepicker({
+  dateFormat:'dd-mm-yy'
+})
+
+
+function printTransfer(code) {
+  let center = ($(document).width() - 800) /2;
+  let target = HOME + 'print_transfer/'+code;
   window.open(target, "_blank", "width=800, height=900, left="+center+", scrollbars=yes");
+}
+
+
+function sendToERP(code) {
+  load_in();
+
+  $.ajax({
+    url:HOME + 'send_to_erp',
+    type:'POST',
+    cache:false,
+    data:{
+      'code' : code
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+
+        setTimeout(() => {
+          refresh();
+        }, 1200);
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
 }

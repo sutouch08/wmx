@@ -73,14 +73,28 @@
 		<div class="col-xs-8 padding-top-5">GRPO Interface (ADD24)</div>
 		<div class="col-xs-4 text-right">
 			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_IB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_IB_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_GR_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_GR_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
 				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
 			</label>
-			<input type="hidden" name="WRX_IB_INTERFACE" value="<?php echo $WRX_IB_INTERFACE; ?>"/>
+			<input type="hidden" name="WRX_GR_INTERFACE" value="<?php echo $WRX_GR_INTERFACE; ?>"/>
 		</div>
 		<div class="col-xs-12 padding-top-5">GRPO api endpoint</div>
 		<div class="col-xs-12 text-right">
-			<input type="text" class="form-control input-sm" name="WRX_IB_URL"  value="<?php echo $WRX_IB_URL; ?>" />
+			<input type="text" class="form-control input-sm" name="WRX_GR_URL"  value="<?php echo $WRX_GR_URL; ?>" />
+		</div>
+		<div class="divider"></div>
+
+		<div class="col-xs-8 padding-top-5">Transfer Interface (ADD40)</div>
+		<div class="col-xs-4 text-right">
+			<label style="padding-top:5px; margin-bottom:0px;">
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_TR_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_TR_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
+			</label>
+			<input type="hidden" name="WRX_TR_INTERFACE" value="<?php echo $WRX_TR_INTERFACE; ?>"/>
+		</div>
+		<div class="col-xs-12 padding-top-5">Transfer api endpoint</div>
+		<div class="col-xs-12 text-right">
+			<input type="text" class="form-control input-sm" name="WRX_TR_URL"  value="<?php echo $WRX_TR_URL; ?>" />
 		</div>
 		<div class="divider"></div>
 

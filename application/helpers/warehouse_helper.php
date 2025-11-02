@@ -19,6 +19,19 @@ function select_warehouse_role($se = NULL)
 }
 
 
+function warehouse_role_name($role = 1)
+{
+  $roles = array(
+    '1' => 'คลังซื้อขาย',
+    '2' => 'คลังฝากขาย',
+    '7' => 'คลังระหว่างทำ',
+    '8' => 'คลังยืมสินค้า'
+  );
+
+  return isset($roles[$role]) ? $roles[$role] : $roles[1];
+}
+
+
 function select_warehouse($se = 0)
 {
   $sc = '';

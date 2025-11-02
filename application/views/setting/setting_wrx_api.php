@@ -137,6 +137,24 @@
 		<div class="divider"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
+			<span class="form-control left-label">Transfer Interface (ADD40)</span>
+		</div>
+		<div class="col-lg-8 col-md-8 col-sm-8">
+			<label style="padding-top:5px; margin-bottom:0px;">
+				<input class="ace ace-switch ace-switch-7" data-name="WRX_TR_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_TR_INTERFACE , '1'); ?> onchange="toggleOption($(this))"/>
+				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
+			</label>
+			<input type="hidden" name="WRX_TR_INTERFACE" value="<?php echo $WRX_TR_INTERFACE; ?>"/>
+		</div>
+		<div class="col-lg-4 col-md-4 col-sm-4">
+			<span class="form-control left-label">Transfer api endpoint</span>
+		</div>
+		<div class="col-lg-8 col-md-8 col-sm-8">
+			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_TR_URL"  value="<?php echo $WRX_TR_URL; ?>" />
+		</div>
+		<div class="divider"></div>
+
+		<div class="col-lg-4 col-md-4 col-sm-4">
 			<span class="form-control left-label">Adjust Interface (INT17)</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">

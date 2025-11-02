@@ -12,7 +12,7 @@
             <textarea class="form-control input-sm" id="cancel-reason" maxlength="250" style="min-height:100px;" placeholder="กรุณาระบุเหตุผลในการยกเลิกอย่างน้อย 10 ตัวอักษร"></textarea>
             <input type="hidden" id="cancel-code" value="" />
           </div>
-        </div>
+        </div>        
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-sm btn-info" onclick="doCancel()">Submit</button>
