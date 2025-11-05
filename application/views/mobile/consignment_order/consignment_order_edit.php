@@ -113,10 +113,10 @@
 	</div>
 </script>
 
-<?php $this->load->view('mobile/consign_order/header_panel'); ?>
-<?php $this->load->view('mobile/consign_order/item_panel'); ?>
+<?php $this->load->view('mobile/consignment_order/header_panel'); ?>
+<?php $this->load->view('mobile/consignment_order/item_panel'); ?>
 <?php $this->load->view('include/barcode_reader'); ?>
-<?php $this->load->view('mobile/consign_order/item_search'); ?>
+<?php $this->load->view('mobile/consignment_order/item_search'); ?>
 <?php $this->load->view('cancel_modal'); ?>
 
 <div class="pg-footer">
@@ -179,8 +179,8 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order_add.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order_add.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/scanner.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer_mobile'); ?>

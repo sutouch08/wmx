@@ -45,7 +45,7 @@ function warehouseInit() {
   let whsCode = $('#warehouse').val();
 
   $.ajax({
-    url:HOME + 'get_consign_warehouse_by_customer',
+    url:HOME + 'get_consignment_warehouse_by_customer',
     type:'POST',
     cache:false,
     data:{
@@ -85,7 +85,7 @@ function updateCustomer() {
 
   if(whsCode != "") {
     $.ajax({
-      url:HOME + 'get_consign_customer_by_warehouse',
+      url:HOME + 'get_consignment_customer_by_warehouse',
       type:'POST',
       cache:false,
       data:{

@@ -398,10 +398,7 @@ class Warehouse_model extends CI_Model
   {
     $rs = $this->db
     ->where('role', 2)
-    ->group_start()
-    ->where('is_consignment IS NULL', NULL, FALSE)
-    ->or_where('is_consignment', 0)
-    ->group_end()
+    ->where('is_consignment', 0)
     ->where('active', 1)
     ->order_by('code', 'ASC')
     ->get($this->tb);
@@ -424,10 +421,7 @@ class Warehouse_model extends CI_Model
     ->join('warehouse_customer AS wc', 'wh.code = wc.warehouse_code', 'left')
     ->where('wh.role', 2)
     ->where('wh.active', 1)
-    ->group_start()
-    ->where('wh.is_consignment IS NULL', NULL, FALSE)
-    ->or_where('wh.is_consignment', 0)
-    ->group_end();
+    ->where('wh.is_consignment', 0);
 
     if( ! empty($customer_code))
     {
@@ -445,10 +439,16 @@ class Warehouse_model extends CI_Model
   }
 
 
-  public function get_warehouse_customer($warehouse_code, $customer_code = NULL)
+  public function get_warehouse_customer($warehouse_code, $customer_code = NULL, $is_consignment = 0)
   {
     $this->db
-    ->where('warehouse_code', $warehouse_code);
+    ->select('wc.*')
+    ->from('warehouse_customer AS wc')
+    ->join('warehouse AS w', 'wc.warehouse_code = w.code', 'left')
+    ->where('w.role', 2)
+    ->where('w.is_consignment', $is_consignment)
+    ->where('w.active', 1)
+    ->where('wc.warehouse_code', $warehouse_code);
 
     if( ! empty($customer_code))
     {
@@ -458,7 +458,7 @@ class Warehouse_model extends CI_Model
     $rs = $this->db
     ->order_by('customer_code', 'DESC')
     ->limit(1)
-    ->get($this->tc);
+    ->get();
 
     if($rs->num_rows() === 1)
     {
@@ -525,9 +525,9 @@ class Warehouse_model extends CI_Model
     ->where('wh.role', 2)
     ->where('wh.active', 1)
     ->where('wh.is_consignment', 1)
-    ->where('wc.code', $warehouse_code)
+    ->where('wc.warehouse_code', $warehouse_code)
     ->where('wc.customer_code', $customer_code)
-    ->get();
+    ->count_all_results();
 
     return $count > 0 ? TRUE : FALSE;
   }

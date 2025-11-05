@@ -1,19 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-class Consign_order extends PS_Controller
+class Consignment_order extends PS_Controller
 {
-  public $menu_code = 'ACCSOD';
+  public $menu_code = 'ACCMOD';
 	public $menu_group_code = 'AC';
   public $menu_sub_group_code = '';
-	public $title = 'ตัดยอดฝากขายแท้ (WM)';
+	public $title = 'ตัดยอดฝากขายเทียม (WD)';
   public $filter;
   public $segment = 4;
 
   public function __construct()
   {
     parent::__construct();
-    $this->home = base_url().'mobile/consign_order';
-    $this->load->model('account/consign_order_model');
+    $this->home = base_url().'mobile/consignment_order';
+    $this->load->model('account/consignment_order_model');
     $this->load->model('masters/warehouse_model');
     $this->load->model('masters/products_model');
     $this->load->model('masters/customers_model');
@@ -45,18 +45,18 @@ class Consign_order extends PS_Controller
     else
     {
       $perpage = get_rows();
-      $rows = $this->consign_order_model->count_rows($filter);
+      $rows = $this->consignment_order_model->count_rows($filter);
       $init	= mobile_pagination_config($this->home.'/index/', $rows, $perpage, $this->segment);
-      $filter['data'] = $this->consign_order_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
+      $filter['data'] = $this->consignment_order_model->get_list($filter, $perpage, $this->uri->segment($this->segment));
       $this->pagination->initialize($init);
-      $this->load->view('mobile/consign_order/consign_order_list', $filter);
+      $this->load->view('mobile/consignment_order/consignment_order_list', $filter);
     }
   }
 
 
   public function add_new()
   {
-    $this->load->view('mobile/consign_order/consign_order_add');
+    $this->load->view('mobile/consignment_order/consignment_order_add');
   }
 
 
@@ -71,7 +71,7 @@ class Consign_order extends PS_Controller
 
       if( ! empty($ds) && ! empty($ds->warehouse_code) && ! empty($ds->customer_code))
       {
-        if($this->warehouse_model->is_exists_consign_warehouse_customer($ds->warehouse_code, $ds->customer_code))
+        if($this->warehouse_model->is_exists_consignment_warehouse_customer($ds->warehouse_code, $ds->customer_code))
         {
           $date_add = db_date($ds->date_add, TRUE);
           $code = $this->get_new_code($date_add);
@@ -89,7 +89,7 @@ class Consign_order extends PS_Controller
             'user' => $this->_user->uname
           );
 
-          if( ! $this->consign_order_model->add($arr))
+          if( ! $this->consignment_order_model->add($arr))
           {
             $sc = FALSE;
             set_error('insert');
@@ -125,9 +125,9 @@ class Consign_order extends PS_Controller
 
   public function edit($code)
   {
-    $doc = $this->consign_order_model->get($code);
+    $doc = $this->consignment_order_model->get($code);
 
-    $details = $this->consign_order_model->get_details($code);
+    $details = $this->consignment_order_model->get_details($code);
 
     if( ! empty($details))
     {
@@ -142,7 +142,7 @@ class Consign_order extends PS_Controller
       'details' => $details
     );
 
-    $this->load->view('mobile/consign_order/consign_order_edit', $ds);
+    $this->load->view('mobile/consignment_order/consignment_order_edit', $ds);
   }
 
 
@@ -156,13 +156,13 @@ class Consign_order extends PS_Controller
 
       if( ! empty($ds) && ! empty($ds->code) && ! empty($ds->warehouse_code) && ! empty($ds->customer_code))
       {
-        $doc = $this->consign_order_model->get($ds->code);
+        $doc = $this->consignment_order_model->get($ds->code);
 
         if( ! empty($doc))
         {
           if($doc->status == 'P' OR $doc->status == 'A')
           {
-            if($this->warehouse_model->is_exists_consign_warehouse_customer($ds->warehouse_code, $ds->customer_code))
+            if($this->warehouse_model->is_exists_consignment_warehouse_customer($ds->warehouse_code, $ds->customer_code))
             {
               $date_add = db_date($ds->date_add, TRUE);
               $code = $ds->code;
@@ -180,7 +180,7 @@ class Consign_order extends PS_Controller
                 'update_user' => $this->_user->uname
               );
 
-              if( ! $this->consign_order_model->update($code, $arr))
+              if( ! $this->consignment_order_model->update($code, $arr))
               {
                 $sc = FALSE;
                 set_error('update');
@@ -224,8 +224,8 @@ class Consign_order extends PS_Controller
   {
     $this->load->model('approve_logs_model');
 
-    $doc = $this->consign_order_model->get($code);
-    $details = $this->consign_order_model->get_details($code);
+    $doc = $this->consignment_order_model->get($code);
+    $details = $this->consignment_order_model->get_details($code);
 
     $ds = array(
       'doc' => $doc,
@@ -233,7 +233,7 @@ class Consign_order extends PS_Controller
       'logs' => $this->approve_logs_model->get($code)
     );
 
-    $this->load->view('mobile/consign_order/consign_order_detail', $ds);
+    $this->load->view('mobile/consignment_order/consignment_order_detail', $ds);
   }
 
 
@@ -243,7 +243,7 @@ class Consign_order extends PS_Controller
 
     $warehouse_code = $this->input->post('warehouse_code');
 
-		$detail = $this->consign_order_model->get_detail($id);
+		$detail = $this->consignment_order_model->get_detail($id);
 
 		if(empty($detail))
 		{
@@ -251,9 +251,9 @@ class Consign_order extends PS_Controller
 			$this->error = "Item row not found !";
 		}
 
-    $this->load->library('wrx_consign_api');
+    $this->load->library('wrx_consignment_api');
 		$detail->barcode = $this->products_model->get_barcode($detail->product_code);
-    $detail->stock = $detail->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($detail->product_code, $warehouse_code) : 100000;
+    $detail->stock = $detail->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($detail->product_code, $warehouse_code) : 100000;
 
 		$arr = array(
 			'status' => $sc === TRUE ? 'success' : 'failed',
@@ -296,10 +296,10 @@ class Consign_order extends PS_Controller
 
       if($sc === TRUE)
       {
-        $this->load->library('wrx_consign_api');
+        $this->load->library('wrx_consignment_api');
 
-        $stock = $item->count_stock ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
-        $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $warehouse->code) : 0;
+        $stock = $item->count_stock ? $this->wrx_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
         $ds = array(
@@ -361,10 +361,10 @@ class Consign_order extends PS_Controller
 
       if($sc === TRUE)
       {
-        $this->load->library('wrx_consign_api');
+        $this->load->library('wrx_consignment_api');
 
-        $stock = $item->count_stock ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
-        $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $warehouse->code) : 0;
+        $stock = $item->count_stock ? $this->wrx_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
         $ds = array(
@@ -402,7 +402,7 @@ class Consign_order extends PS_Controller
 
     if( ! empty($ds) && ! empty($ds->code && ! empty($ds->product_code) && ! empty($ds->qty)))
     {
-      $doc = $this->consign_order_model->get($ds->code);
+      $doc = $this->consignment_order_model->get($ds->code);
 
       if( ! empty($doc))
       {
@@ -423,10 +423,10 @@ class Consign_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            $this->load->library('wrx_consign_api');
+            $this->load->library('wrx_consignment_api');
             $input_type = 1;
-            $stock = $item->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
-            $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $doc->warehouse_code) : 0;
+            $stock = $item->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
+            $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $doc->warehouse_code) : 0;
             $available = $stock - $commit;
 
             $id = NULL;
@@ -440,7 +440,7 @@ class Consign_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            $detail = $this->consign_order_model->get_exists_detail($doc->code, $item->code, $ds->price, $ds->disc, $input_type);
+            $detail = $this->consignment_order_model->get_exists_detail($doc->code, $item->code, $ds->price, $ds->disc, $input_type);
 
             if(empty($detail))
             {
@@ -461,7 +461,7 @@ class Consign_order extends PS_Controller
                 'input_type' => $input_type
               );
 
-              $id = $this->consign_order_model->add_detail($arr);
+              $id = $this->consignment_order_model->add_detail($arr);
 
               if( ! $id)
               {
@@ -480,7 +480,7 @@ class Consign_order extends PS_Controller
                 'amount' => $sell_price * $new_qty
               );
 
-              if( ! $this->consign_order_model->update_detail($id, $arr))
+              if( ! $this->consignment_order_model->update_detail($id, $arr))
               {
                 $sc = FALSE;
                 $this->error = "Failed to update item row";
@@ -490,7 +490,7 @@ class Consign_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            $this->consign_order_model->recal_summary($doc->code);
+            $this->consignment_order_model->recal_summary($doc->code);
 
             if($doc->status == 'A')
             {
@@ -499,7 +499,7 @@ class Consign_order extends PS_Controller
                 'update_user' => $this->_user->uname
               );
 
-              $this->consign_order_model->update($doc->code, $arr);
+              $this->consignment_order_model->update($doc->code, $arr);
             }
           }
         }
@@ -523,7 +523,7 @@ class Consign_order extends PS_Controller
 
     if($sc === TRUE)
     {
-      $rs = $this->consign_order_model->get_detail($id);
+      $rs = $this->consignment_order_model->get_detail($id);
 
       if( ! empty($rs))
       {
@@ -561,21 +561,21 @@ class Consign_order extends PS_Controller
 
     if( ! empty($ds) && ! empty($ds->code) && ! empty($ds->id) && ! empty($ds->qty))
     {
-      $doc = $this->consign_order_model->get($ds->code);
+      $doc = $this->consignment_order_model->get($ds->code);
 
       if( ! empty($doc))
       {
         if($doc->status == 'P' OR $doc->status == 'A')
         {
-          $rs = $this->consign_order_model->get_detail($ds->id);
+          $rs = $this->consignment_order_model->get_detail($ds->id);
 
           if( ! empty($rs))
           {
-            $this->load->library('wrx_consign_api');
+            $this->load->library('wrx_consignment_api');
             $input_type = 1;
 
-            $stock = $rs->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 100000;
-            $c_qty = $rs->count_stock == 1 ? $this->consign_order_model->get_unsave_qty($doc->code, $rs->product_code, $ds->price, $ds->disc) : 0;
+            $stock = $rs->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 100000;
+            $c_qty = $rs->count_stock == 1 ? $this->consignment_order_model->get_unsave_qty($doc->code, $rs->product_code, $ds->price, $ds->disc) : 0;
             $c_qty = $c_qty - $rs->qty;
             $sum_qty = $ds->qty + $c_qty;
 
@@ -602,14 +602,14 @@ class Consign_order extends PS_Controller
                 'input_type' => $input_type
               );
 
-              if( ! $this->consign_order_model->update_detail($ds->id, $arr))
+              if( ! $this->consignment_order_model->update_detail($ds->id, $arr))
               {
                 $sc = FALSE;
                 $this->error = "Failed to update row item";
               }
               else
               {
-                $this->consign_order_model->recal_summary($ds->code);
+                $this->consignment_order_model->recal_summary($ds->code);
 
                 if($doc->status == 'A')
                 {
@@ -618,7 +618,7 @@ class Consign_order extends PS_Controller
                     'update_user' => $this->_user->uname
                   );
 
-                  $this->consign_order_model->update($doc->code, $arr);
+                  $this->consignment_order_model->update($doc->code, $arr);
                 }
               }
             }
@@ -659,20 +659,20 @@ class Consign_order extends PS_Controller
 
     if( ! empty($code) && ! empty($id))
     {
-      $doc = $this->consign_order_model->get($code);
+      $doc = $this->consignment_order_model->get($code);
 
       if( ! empty($doc))
       {
         if($doc->status == 'P' OR $doc->status == 'A')
         {
-          if( ! $this->consign_order_model->delete_detail($id))
+          if( ! $this->consignment_order_model->delete_detail($id))
           {
             $sc = FALSE;
             $this->error = "Failed to delete row item";
           }
           else
           {
-            $this->consign_order_model->recal_summary($code);
+            $this->consignment_order_model->recal_summary($code);
 
             if($doc->status == 'A')
             {
@@ -681,7 +681,7 @@ class Consign_order extends PS_Controller
                 'update_user' => $this->_user->uname
               );
 
-              $this->consign_order_model->update($doc->code, $arr);
+              $this->consignment_order_model->update($doc->code, $arr);
             }
           }
         }
@@ -707,15 +707,14 @@ class Consign_order extends PS_Controller
   }
 
 
-  public function get_consign_warehouse_by_customer()
+  public function get_consignment_warehouse_by_customer()
   {
     $sc = TRUE;
     $ds = [];
     $customer_code = $this->input->post('customer_code');
     $warehouse_code = $this->input->post('warehouse_code');
-    $is_consignment = 0;
 
-    $options = $this->warehouse_model->get_consign_warehouse_by_customer($customer_code, $is_consignment);
+    $options = $this->warehouse_model->get_consignment_warehouse_by_customer($customer_code);
 
     if( ! empty($options))
     {
@@ -738,14 +737,13 @@ class Consign_order extends PS_Controller
   }
 
 
-  public function get_consign_customer_by_warehouse()
+  public function get_consignment_customer_by_warehouse()
   {
     $sc = TRUE;
     $ds = [];
     $warehouse_code = $this->input->post('warehouse_code');
     $customer_code = $this->input->post('customer_code');
-    $is_consignment = 0;
-
+    $is_consignment = 1;
     $exists = FALSE;
 
     if($sc === TRUE)
@@ -833,13 +831,13 @@ class Consign_order extends PS_Controller
   public function save()
   {
     $sc = TRUE;
-    $this->load->library('wrx_consign_api');
+    $this->load->library('wrx_consignment_api');
     $code = $this->input->post('code');
-    $doc = $this->consign_order_model->get($code);
+    $doc = $this->consignment_order_model->get($code);
 
     if($doc->status == 'P' OR $doc->status == 'A')
     {
-      $details = $this->consign_order_model->get_details($code);
+      $details = $this->consignment_order_model->get_details($code);
 
       if( ! empty($details))
       {
@@ -850,7 +848,7 @@ class Consign_order extends PS_Controller
             $items[$row->product_code] = (object) array(
               'code' => $row->product_code,
               'qty' => $row->qty,
-              'stock' => $row->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($row->product_code, $doc->warehouse_code) : 1000000
+              'stock' => $row->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($row->product_code, $doc->warehouse_code) : 1000000
             );
           }
           else
@@ -877,7 +875,7 @@ class Consign_order extends PS_Controller
             'update_user' => $this->_user->uname
           );
 
-          if( ! $this->consign_order_model->update($code, $arr))
+          if( ! $this->consignment_order_model->update($code, $arr))
           {
             $sc = FALSE;
             $this->error = "Failed to update document status";
@@ -924,14 +922,14 @@ class Consign_order extends PS_Controller
     {
       if( ! empty($code))
       {
-        $doc = $this->consign_order_model->get($code);
+        $doc = $this->consignment_order_model->get($code);
 
         if( ! empty($doc))
         {
           if($doc->status == 'A')
           {
-            $this->load->library('wrx_consign_api');
-            $details = $this->consign_order_model->get_details($code);
+            $this->load->library('wrx_consignment_api');
+            $details = $this->consignment_order_model->get_details($code);
 
             if( ! empty($details))
             {
@@ -939,8 +937,8 @@ class Consign_order extends PS_Controller
               {
                 if($sc === FALSE) { break; }
 
-                $stock = $rs->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
-                $all_qty = $this->consign_order_model->get_sum_order_qty($doc->code, $rs->product_code);
+                $stock = $rs->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
+                $all_qty = $this->consignment_order_model->get_sum_order_qty($doc->code, $rs->product_code);
 
                 if($all_qty > $stock)
                 {
@@ -959,7 +957,7 @@ class Consign_order extends PS_Controller
                 'update_user' => $this->_user->uname
               );
 
-              if( ! $this->consign_order_model->update($code, $arr))
+              if( ! $this->consignment_order_model->update($code, $arr))
               {
                 $sc = FALSE;
                 $this->error = "Failed to update document status";
@@ -969,7 +967,7 @@ class Consign_order extends PS_Controller
               {
                 $arr = array('status' => 'C');
 
-                if( ! $this->consign_order_model->update_details($code, $arr))
+                if( ! $this->consignment_order_model->update_details($code, $arr))
                 {
                   $sc = FALSE;
                   $this->error = "Failed to update item rows status";
@@ -993,10 +991,10 @@ class Consign_order extends PS_Controller
 
               if($sc === TRUE)
               {
-                if(is_true(getConfig('WRX_CONSIGN_INTERFACE')))
+                if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGNMENT_INTERFACE')))
                 {
                   // INT12
-                  if( ! $this->wrx_consign_api->export_consign($code))
+                  if( ! $this->wrx_consignment_api->export_consignment($code))
                   {
                     $ex = 1;
                     $this->error = "อนุมัติเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ <br/> กรุณากดส่งข้อมูลไป ERP ใหม่อีกครั้งภายหลัง";
@@ -1046,20 +1044,20 @@ class Consign_order extends PS_Controller
 
     if( ! empty($code))
     {
-      $doc = $this->consign_order_model->get($code);
+      $doc = $this->consignment_order_model->get($code);
 
       if( ! empty($doc))
       {
         if($doc->status == 'C')
         {
-          if(is_true(getConfig('WRX_CONSIGN_INTERFACE')))
+          if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGNMENT_INTERFACE')))
           {
-            $this->load->library('wrx_consign_api');
+            $this->load->library('wrx_consignment_api');
 
-            if( ! $this->wrx_consign_api->export_consign($code))
+            if( ! $this->wrx_consignment_api->export_consignment($code))
             {
               $sc = FALSE;
-              $this->error = "Send data to ERP failed : {$this->wrx_consign_api->error}";
+              $this->error = "Send data to ERP failed : {$this->wrx_consignment_api->error}";
             }
           }
           else
@@ -1100,7 +1098,7 @@ class Consign_order extends PS_Controller
     {
       if( ! empty($code))
       {
-        $doc = $this->consign_order_model->get($code);
+        $doc = $this->consignment_order_model->get($code);
 
         if( ! empty($doc))
         {
@@ -1115,7 +1113,7 @@ class Consign_order extends PS_Controller
               'cancel_reason' => $reason
             );
 
-            if( ! $this->consign_order_model->update($code, $arr))
+            if( ! $this->consignment_order_model->update($code, $arr))
             {
               $sc = FALSE;
               set_error('cancel');
@@ -1123,7 +1121,7 @@ class Consign_order extends PS_Controller
 
             if($sc === TRUE)
             {
-              if( ! $this->consign_order_model->update_details($code, ['status' => 'D']))
+              if( ! $this->consignment_order_model->update_details($code, ['status' => 'D']))
               {
                 $sc = FALSE;
                 $this->error = "Failed to cancel item rows status";
@@ -1176,7 +1174,7 @@ class Consign_order extends PS_Controller
     {
       if( ! empty($code))
       {
-        $doc = $this->consign_order_model->get($code);
+        $doc = $this->consignment_order_model->get($code);
 
         if( ! empty($doc))
         {
@@ -1189,7 +1187,7 @@ class Consign_order extends PS_Controller
               'update_user' => $this->_user->uname
             );
 
-            if( ! $this->consign_order_model->update($code, $arr))
+            if( ! $this->consignment_order_model->update($code, $arr))
             {
               $sc = FALSE;
               $this->error = "Failed to rollback document status";
@@ -1197,7 +1195,7 @@ class Consign_order extends PS_Controller
 
             if($sc === TRUE)
             {
-              if( ! $this->consign_order_model->update_details($code, ['status' => 'O']))
+              if( ! $this->consignment_order_model->update_details($code, ['status' => 'O']))
               {
                 $sc = FALSE;
                 $this->error = "Failed to rollback item rows status";
@@ -1249,7 +1247,7 @@ class Consign_order extends PS_Controller
     $prefix = getConfig('PREFIX_CONSIGN_SOLD');
     $run_digit = getConfig('RUN_DIGIT_CONSIGN_SOLD');
     $pre = $prefix .'-'.$Y.$M;
-    $code = $this->consign_order_model->get_max_code($pre);
+    $code = $this->consignment_order_model->get_max_code($pre);
     if( ! empty($code))
     {
       $run_no = mb_substr($code, ($run_digit*-1), NULL, 'UTF-8') + 1;

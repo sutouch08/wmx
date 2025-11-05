@@ -180,7 +180,7 @@ class Wrx_consign_api
       }
     }
 
-    return $qty;
+    return $sc === TRUE ? $qty : 0;
   }
 
 

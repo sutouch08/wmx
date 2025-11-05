@@ -1,6 +1,4 @@
 <?php $this->load->view('include/header_mobile'); ?>
-<script src="<?php echo base_url(); ?>assets/js/localforage.js"></script>
-<script src="<?php echo base_url(); ?>assets/js/html5-qrcode.min.js"></script>
 <style>
 	.page-wrap.listing {
 		height: calc(100vh - 170px);
@@ -9,7 +7,7 @@
 
 <div class="nav-title nav-title-center">
 	<a onclick="goBack()"><i class="fa fa-angle-left fa-2x"></i></a>
-	<div class="font-size-18 text-center"><?php echo $doc->code; ?></div>
+	<div class="font-size-18 text-center"><?php echo $doc->code; ?> [<?php echo status_text($doc->status); ?>]</div>
 	<div class="header-info-icon"><a href="javascript:toggleHeader()"><i class="fa fa-info white"></i></a></div>
 </div>
 
@@ -86,37 +84,7 @@
 	</div>
 </div>
 
-<script id="item-template" type="text/x-handlebarsTemplate">
-	<div class="list-block" id="list-block-{{id}}" onclick="toggleActive({{id}})">
-		<div class="list-link" >
-			<div class="list-link-inner width-100">
-				<div class="margin-right-10 no" id="no-{{id}}"></div>
-				<input type="checkbox" class="chk hide" id="list-{{id}}" data-code="{{product_code}}" data-name="{{product_name}}" value="{{id}}"/>
-				<div class="display-inline-block width-100">
-					<span class="display-block font-size-12">{{product_code}}</span>
-					<span class="display-block font-size-11">{{product_name}}</span>
-					<span class="float-left font-size-11 width-20">Price:</span>
-					<input type="text" class="float-left font-size-11 text-label padding-0 width-30 price"
-					id="price-{{id}}" data-id="{{id}}" value="{{price}}" readonly/>
-					<span class="float-left font-size-11 width-20">Discount:</span>
-					<input type="text" class="float-left font-size-11 text-label padding-0 width-30 disc"
-					id="disc-{{id}}" data-id="{{id}}" value="{{discount}}" readonly/>
-					<span class="float-left font-size-11 width-20">QTY:</span>
-					<input type="text" class="float-left font-size-11 text-label padding-0 width-30 qty"
-					id="qty-{{id}}" data-id="{{id}}" value="{{qty}}" readonly/>
-					<span class="float-left font-size-11 width-20">Amnt:</span>
-					<input type="text" class="float-left font-size-11 text-label padding-0 width-30 amount"
-					id="amount-{{id}}" data-id="{{id}}" value="{{amount}}" readonly/>
-				</div>
-			</div>
-		</div>
-	</div>
-</script>
-
-<?php $this->load->view('mobile/consign_order/header_panel'); ?>
-<?php $this->load->view('mobile/consign_order/item_panel'); ?>
-<?php $this->load->view('include/barcode_reader'); ?>
-<?php $this->load->view('mobile/consign_order/item_search'); ?>
+<?php $this->load->view('mobile/consignment_order/header_panel'); ?>
 <?php $this->load->view('cancel_modal'); ?>
 
 <div class="pg-footer">
@@ -132,26 +100,41 @@
 					<i class="fa fa-refresh fa-2x"></i><span>รีเฟรซ</span>
 				</span>
 			</div>
-			<div class="footer-menu">
-				<span class="pg-icon" onclick="startScan(getItemByBarcode)">
-					<i class="fa fa-qrcode fa-2x"></i><span>เพิ่ม</span>
-				</span>
-			</div>
-			<div class="footer-menu">
-				<span class="pg-icon" onclick="showItemSearch()">
-					<i class="fa fa-plus fa-2x"></i><span>เพิ่ม</span>
-				</span>
-			</div>
-			<div class="footer-menu">
-				<span class="pg-icon" onclick="editRow()">
-					<i class="fa fa-pencil fa-2x"></i><span>แก้ไข</span>
-				</span>
-			</div>
-			<div class="footer-menu">
-				<span class="pg-icon" onclick="toggleMore()">
-					<i class="fa fa-bars fa-2x"></i><span>เพิ่มเติม</span>
-				</span>
-			</div>
+      <?php if($this->pm->can_approve && $doc->status == 'A') : ?>
+  			<div class="footer-menu">
+  				<span class="pg-icon" onclick="doApprove('<?php echo $doc->code; ?>')">
+  					<i class="fa fa-check fa-2x"></i><span>อนุมัติ</span>
+  				</span>
+  			</div>
+      <?php endif; ?>
+      <?php if($this->pm->can_edit && ($doc->status == 'P' OR $doc->status == 'A')) : ?>
+  			<div class="footer-menu">
+  				<span class="pg-icon" onclick="goEdit('<?php echo $doc->code; ?>')">
+  					<i class="fa fa-pencil fa-2x"></i><span>แก้ไข</span>
+  				</span>
+  			</div>
+      <?php endif; ?>
+      <?php if($this->pm->can_delete && $doc->is_exported != 'Y' && $doc->status != 'P') : ?>
+  			<div class="footer-menu">
+  				<span class="pg-icon" onclick="rollback('<?php echo $doc->code; ?>')">
+  					<i class="fa fa-history fa-2x"></i><span>Rollback</span>
+  				</span>
+  			</div>
+      <?php endif; ?>
+      <?php if($this->pm->can_delete && $doc->is_exported != 'Y' && $doc->status != 'D') : ?>
+  			<div class="footer-menu">
+  				<span class="pg-icon" onclick="confirmCancel('<?php echo $doc->code; ?>')">
+  					<i class="fa fa-exclamation-triangle fa-2x"></i><span>ยกเลิก</span>
+  				</span>
+  			</div>
+      <?php endif; ?>
+      <?php if($doc->status == 'C' && is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGN_INTERFACE'))) : ?>
+  			<div class="footer-menu">
+  				<span class="pg-icon" onclick="sendToErp('<?php echo $doc->code; ?>')">
+  					<i class="fa fa-send fa-2x"></i><span>Export</span>
+  				</span>
+  			</div>
+      <?php endif; ?>
 		</div>
  </div>
 </div>
@@ -163,7 +146,7 @@
 		</span>
   </div>
 	<div class="footer-menu display-block">
-		<span class="pg-icon" onclick="confirmCancel('<?php echo $doc->code; ?>')">
+		<span class="pg-icon" onclick="cancel('<?php echo $doc->code; ?>', '<?php echo $doc->status; ?>')">
 			<i class="fa fa-exclamation-triangle fa-2x"></i><span>ยกเลิก</span>
 		</span>
 	</div>
@@ -179,8 +162,7 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order_add.js?v=<?php echo date('Ymd'); ?>"></script>
-<script src="<?php echo base_url(); ?>scripts/scanner.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order_add.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer_mobile'); ?>

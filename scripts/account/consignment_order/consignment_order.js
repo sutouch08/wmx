@@ -1,27 +1,97 @@
-var HOME = BASE_URL + 'account/consignment_order/';
-
-function goBack(){
-  window.location.href = HOME;
-}
-
-
 function addNew(){
   window.location.href = HOME + 'add_new';
 }
 
 
-function viewDetail(code){
+function viewDetail(code) {
   window.location.href = HOME + 'view_detail/'+code;
 }
 
 
-function goEdit(code)
-{
+function goEdit(code) {
   window.location.href = HOME + 'edit/'+code;
 }
 
 
-function cancel(code) {
+function sendToErp(code) {
+  load_in();
+
+  $.ajax({
+    url:HOME + 'do_export',
+    type:'POST',
+    cache:false,
+    data:{
+      'code' : code
+    },
+    success:function(rs) {
+      load_out();
+
+      if(rs.trim() === 'success') {
+        swal({
+          title:'Success',
+          type:'success',
+          timer:1000
+        });
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
+
+
+function rollback(code) {
+  swal({
+    title: "ย้อนสถานะ",
+    text: "ต้องการย้อนสถานะ '"+code+"' กลับมาแก้ไขหรือไม่ ?",
+    type: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#DD6B55",
+    confirmButtonText: 'Yes',
+    cancelButtonText: 'No',
+    closeOnConfirm: true
+  }, function() {
+    load_in();
+    setTimeout(() => {
+      $.ajax({
+        url:HOME + 'rollback',
+        type:'POST',
+        cache:false,
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
+          load_out();
+
+          if(rs.trim() === 'success') {
+            swal({
+              title:'Success',
+              type:'success',
+              timer:1000
+            });
+
+            setTimeout(() => {
+              refresh();
+            }, 1200);
+          }
+          else {
+            showError(rs);
+          }
+        },
+        error:function(rs) {
+          showError(rs);
+        }
+      })
+    }, 100);
+  });
+}
+
+
+function confirmCancel(code) {
   swal({
     title: "คุณแน่ใจ ?",
     text: "ต้องการยกเลิก '"+code+"' หรือไม่ ?",
@@ -31,11 +101,13 @@ function cancel(code) {
     confirmButtonText: 'Yes',
     cancelButtonText: 'No',
     closeOnConfirm: true
-  },
-  function() {
+  }, function() {
     $('#cancel-code').val(code);
     $('#cancel-reason').val('').removeClass('has-error');
-    $('#cancel-modal').modal('show');
+
+    setTimeout(() => {
+      showModal('cancel-modal');
+    }, 100);
   });
 }
 
@@ -43,19 +115,19 @@ function cancel(code) {
 function doCancel() {
   $('#cancel-reason').clearError();
 
-  let code = $('#cancel-code').val();
-  let reason = $('#cancel-reason').val().trim();
+	let code = $('#cancel-code').val();
+	let reason = $('#cancel-reason').val().trim();
 
-  if(reason.length < 10) {
-    $('#cancel-reason').hasError();
-    return false;
-  }
+	if( reason.length < 10) {
+    $('#cancel-reason').hasError().focus();
+		return false;
+	}
 
-  $('#cancel-modal').modal('hide');
-
-  load_in();
+	closeModal('cancel-modal');
 
   setTimeout(() => {
+    load_in();
+
     $.ajax({
       url:HOME + 'cancel',
       type:'POST',
@@ -69,62 +141,47 @@ function doCancel() {
 
         if(rs.trim() === 'success') {
           swal({
-						title: 'Cancled',
-						type: 'success',
-						timer: 1000
-					});
+            title:'Canceled',
+            type:'success',
+            timer:1000
+          });
 
-					setTimeout(function(){
-						window.location.reload();
-					}, 1200);
+          setTimeout(() => {
+            refresh();
+          }, 1200);
         }
         else {
-          beep();
-          showError(rs);
+          swal({
+            title:'Error !',
+            text:rs,
+            type:'error',
+            html:true
+          }, function() {
+            showModal('cancel-modal');
+          })
         }
       },
       error:function(rs) {
-        beep();
-        showError(rs);
+        load_out();
+
+        swal({
+          title:'Error !',
+          text:rs.responseText,
+          type:'error',
+          html:true
+        }, function() {
+          showModal('cancel-modal');
+        })
       }
-    })
-  }, 100);
+    });
+
+  }, 200);
 }
 
 
 $('#cancel-modal').on('shown.bs.modal', function() {
 	$('#cancel-reason').focus();
 });
-
-
-function sendToErp(code) {
-  load_in();
-
-  $.ajax({
-    url:HOME + 'send_to_erp/' + code,
-    type:'GET',
-    cache:false,
-    success:function(rs) {
-      load_out();
-
-      if(rs.trim() === 'success') {
-        swal({
-          title:'success',
-          type:'success',
-          timer:1000
-        });
-      }
-      else {
-        beep();
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      beep();
-      showError(rs);
-    }
-  })
-}
 
 
 $("#fromDate").datepicker({
@@ -135,14 +192,12 @@ $("#fromDate").datepicker({
 });
 
 
-
 $("#toDate").datepicker({
 	dateFormat: 'dd-mm-yy',
 	onClose: function(ds){
 		$("#fromDate").datepicker("option", "maxDate", ds);
 	}
 });
-
 
 
 // JavaScript Document

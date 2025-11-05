@@ -1,147 +1,223 @@
 var zero_qty = 0;
 var click = 0;
 
-function save() {
-  if(click == 0) {
-    click = 1;
-    clearErrorByClass('c');
-    error = 0;
+window.addEventListener('load', () => {
+  customerInit();
+})
 
-    let code = $('#consign_code').val();
-    let len = $('.input-qty').length;
+function customerInit() {
+  let whsCode = $('#warehouse').val();
 
-    if(len == 0) {
-      swal("ไม่พบรายการสินค้า");
-      click = 0;
-      return false;
+  $('#customer-code').autocomplete({
+    source:HOME + 'get_customer_by_warehouse/'+whsCode,
+    autoFocus:true,
+    close:function() {
+      let arr = $(this).val().split(' | ');
+
+      if(arr.length == 3) {
+        $(this).val(arr[0]);
+        $('#customer-name').val(arr[1]);
+        $('#gp').val(arr[2]);
+
+        warehouseInit();
+      }
+      else {
+        $(this).val('');
+        $('#customer-name').val('');
+        $('#gp').val('');
+        warehouseInit();
+      }
     }
+  })
+}
 
-    $('.input-qty').each(function() {
-      let id = $(this).data('id');
-      let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
-      let discount = $('#disc-'+id).val();
-      let disc = parseDiscount(discount, price);
-      let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
-      let amount = qty * (price - disc.discountAmount);
 
-      if(price < 0) {
-        $('#price-'+id).hasError();
-        error++;
-      }
+$('#customer-code').change(function() {
+  if($(this).val().trim() == "") {
+    $('#customer-name').val('');
+    warehouseInit();
+  }
+})
 
-      if(disc.discountAmount < 0 || disc.discountAmount > price) {
-        $('#disc-'+id).hasError();
-        error++;
-      }
 
-      if(qty <= 0) {
-        $('#qty-'+id).hasError();
-        error++;
-      }
-    })
+function warehouseInit() {
+  let custCode = $('#customer-code').val().trim();
+  let whsCode = $('#warehouse').val();
 
-    if(error > 0) {
-      click = 0;
-      swal("พบข้อผิดพลาด กรุณาแก้ไข");
-      return false;
-    }
-
-    swal({
-  		title: "บันทึกขายและตัดสต็อก",
-  		text: "เมื่อบันทึกแล้วจะไม่สามารถแก้ไขได้ ต้องการบันทึกหรือไม่ ?",
-  		type: "warning",
-  		showCancelButton: true,
-  		confirmButtonColor: "#8CC152",
-  		confirmButtonText: 'บันทึก',
-  		cancelButtonText: 'ยกเลิก',
-  		closeOnConfirm: true
+  $.ajax({
+    url:HOME + 'get_consignment_warehouse_by_customer',
+    type:'POST',
+    cache:false,
+    data:{
+      'customer_code' : custCode,
+      'warehouse_code' : whsCode
     },
-    function() {
-      load_in();
+    success:function(rs) {
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
 
-      setTimeout(() => {
-        $.ajax({
-          url:HOME + 'save_consign/' + code,
-          type:'POST',
-          cache:false,
-          success:function(rs) {
-            click = 0;
-            load_out();
+        if(ds.status === 'success') {
+          let source = $('#warehouse-template').html();
+          let output = $('#warehouse');
 
-            if(isJson(rs)) {
-              let ds = JSON.parse(rs);
+          render(source, ds.data, output);
 
-              if(ds.status === 'success') {
+          $('#warehouse').select2();
+        }
+        else {
+          showError(ds.message);
+        }
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
 
-                if(ds.ex == 1) {
-                  //-- ex = 1 mean save document success but export data to Oracle failed
-                  swal({
-                    title:'Oops !',
-                    text:ds.message,
-                    type:'info'
-                  }, function() {
-                    viewDetail(code);
-                  })
-                }
-                else {
-                  swal({
-                    title:'Success',
-                    type:'success',
-                    timer:1000
-                  });
 
-                  setTimeout(() => {
-                    viewDetail(code);
-                  }, 1200);
-                }
-              }
-              else {
-                beep();
-                showError(ds.message);
-              }
+function updateCustomer() {
+  let whsCode = $('#warehouse').val();
+  let customer_code = $('#customer-code').val().trim();
+
+  if(whsCode != "") {
+    $.ajax({
+      url:HOME + 'get_consignment_customer_by_warehouse',
+      type:'POST',
+      cache:false,
+      data:{
+        'warehouse_code' : whsCode,
+        'customer_code' : customer_code
+      },
+      success:function(rs) {
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status === 'success') {
+            if(ds.data != null && ds.data != "" && ds.data != undefined) {
+              $('#customer-code').val(ds.data.customer_code);
+              $('#customer-name').val(ds.data.customer_name);
+              $('#gp').val(ds.data.gp);
             }
             else {
-              beep();
-              showError(rs);
+              $('#customer-code').val('');
+              $('#customer-name').val('');
+              $('#gp').val('');
             }
-          },
-          error:function(rs) {
-            beep();
-            showError(rs);
-            click = 0;
+
+            customerInit();
           }
-        })
-      },100);
-    });
+          else {
+            showError(ds.message);
+          }
+        }
+        else {
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        showError(rs);
+      }
+    })
+  }
+  else {
+    customerInit();
   }
 }
 
 
-function rollback() {
-  let code = $('#consign_code').val();
+function confirmSave(save_type) {
+  if(save_type == 'A') {
+    swal({
+  		title: "บันทึกและอนุมัติ",
+  		text: "เมื่ออนุมัติแล้วจะไม่สามารถแก้ไขได้อีก ต้องการดำเนินการต่อหรือไม่ ?",
+  		type: "warning",
+  		showCancelButton: true,
+  		confirmButtonColor: "#8CC152",
+  		confirmButtonText: 'Save and Approve',
+  		cancelButtonText: 'No',
+  		closeOnConfirm: true
+    }, function(){
+      setTimeout(() => {
+        save(save_type);
+      }, 100);
+    });
+  }
+  else {
+    save(save_type);
+  }
+}
 
-  swal({
-    title: "Rollback Status",
-    text: "ต้องการย้อนสถานะเอกสารกลับมาแก้ไขใหม่หรือไม่ ?",
-    type: "warning",
-    showCancelButton: true,
-    confirmButtonColor: "#8CC152",
-    confirmButtonText: 'Yes',
-    cancelButtonText: 'No',
-    closeOnConfirm: true
-  },
-  function() {
-    setTimeout(() => {
-      load_in();
 
-      $.ajax({
-        url:HOME + 'rollback/' + code,
-        type:'GET',
-        cache:false,
-        success:function(rs) {
-          load_out();
+function save(save_type) {
+  clearErrorByClass('e');
 
-          if(rs.trim() === 'success') {
+  let code = $('#code').val();
+  let error = 0;
+
+  if($('.qty').length == 0) {
+    showError("ไม่พบรายการสินค้า");
+    return false;
+  }
+
+  $('.qty').each(function() {
+    let el = $(this);
+    let id = el.data('id');
+    let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+    let disc = parseDiscount($('#disc-'+id).val(), price);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
+
+    if(price < 0) {
+      error++;
+      $('#price-'+id).hasError();
+    }
+
+    if(disc.discountAmount > price) {
+      error++;
+      $('#disc-'+id).hasError();
+    }
+
+    if(qty <= 0) {
+      error++;
+      el.hasError();
+    }
+  });
+
+  if(error > 0) {
+    showError("กรุณาแก้ไขรายการที่ไม่ถูกต้อง");
+    return false;
+  }
+
+  load_in();
+
+  $.ajax({
+    url:HOME + 'save',
+    type:'POST',
+    cache:false,
+    data:{
+      'code' : code,
+      'save_type' : save_type  // S = save, A = Save and approve
+    },
+    success:function(rs) {
+      load_out();
+
+      if(isJson(rs)) {
+        let ds = JSON.parse(rs);
+
+        if(ds.status === 'success') {
+          if(ds.ex == 1) {
+            swal({
+              title:'Oops',
+              text:ds.message,
+              type:'info'
+            }, function() {
+              viewDetail(code);
+            });
+          }
+          else {
             swal({
               title:'Success',
               type:'success',
@@ -149,21 +225,22 @@ function rollback() {
             });
 
             setTimeout(() => {
-              goEdit(code);
+              viewDetail(code);
             }, 1200);
           }
-          else {
-            beep();
-            showError(rs);
-          }
-        },
-        error:function(rs) {
-          beep();
-          showError(rs);
         }
-      })
-    }, 100)
-  });
+        else {
+          showError(ds.message);
+        }
+      }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
 }
 
 
@@ -172,143 +249,91 @@ $('#date').datepicker({
 });
 
 
-
-$("#customerCode").autocomplete({
-	source: BASE_URL + 'auto_complete/get_customer_code_and_name',
-	autoFocus: true,
-	close: function(){
-		var rs = $.trim($(this).val());
-		var arr = rs.split(' | ');
-		if( arr.length == 2 ){
-			var code = arr[0];
-			var name = arr[1];
-			$("#customerCode").val(code);
-			$("#customer").val(name);
-      zoneInit(code, true);
-		}else{
-			$("#customerCode").val('');
-			$("#customer").val('');
-      zoneInit('');
-		}
-	}
+$('#posting-date').datepicker({
+  dateFormat:'dd-mm-yy'
 });
 
 
-$("#customer").autocomplete({
-	source: BASE_URL + 'auto_complete/get_customer_code_and_name',
-	autoFocus: true,
-	close: function(){
-		var rs = $.trim($(this).val());
-		var arr = rs.split(' | ');
-		if( arr.length == 2 ){
-			var code = arr[0];
-			var name = arr[1];
-			$("#customerCode").val(code);
-			$("#customer").val(name);
-      zoneInit(code, true);
-		}else{
-			$("#customerCode").val('');
-			$(this).val('');
-      zoneInit('');
-		}
-	}
-});
+function add() {
+  if(click === 0) {
+    click = 1;
+    clearErrorByClass('r');
 
-$('#pd-box').autocomplete({
-  source: BASE_URL + 'auto_complete/get_style_code',
-  autoFocus:true
-})
+    let h = {
+      'customer_code' : $('#customer-code').val().trim(),
+      'customer_name' : $('#customer-name').val().trim(),
+      'gp' : parseDefaultFloat($('#gp').val(), 0),
+      'date_add' : $('#date').val(),
+      'posting_date' : $('#posting-date').val(),
+      'warehouse_code' : $('#warehouse').val(),
+      'remark' : $('#remark').val().trim()
+    };
 
-
-//---	กำหนดให้สามารถค้นหาโซนได้ก่อนจะค้นหาลูกค้า(กรณี edit header)
-$(document).ready(function(){
-	var customer_code = $('#customerCode').val();
-	zoneInit(customer_code, false);
-});
-
-
-
-function zoneInit(customer_code, edit)
-{
-  if(edit) {
-    $('#zone_code').val('');
-    $('#zone').val('');
-  }
-
-  $('#zone').autocomplete({
-    source:BASE_URL + 'auto_complete/get_consign_zone/' + customer_code,
-    autoFocus: true,
-    close:function(){
-      var rs = $.trim($(this).val());
-      var arr = rs.split(' | ');
-      if(arr.length == 2)
-      {
-        var code = arr[0];
-        var name = arr[1];
-        $('#zone_code').val(code);
-        $('#zone').val(name);
-      }else{
-        $('#zone_code').val('');
-        $('#zone').val('');
-      }
+    if( ! isDate(h.date_add)) {
+      $('#date').hasError();
+      click = 0;
+      return false;
     }
-  });
 
-  $('#zone_code').autocomplete({
-    source:BASE_URL + 'auto_complete/get_consign_zone/' + customer_code,
-    autoFocus: true,
-    close:function(){
-      var rs = $.trim($(this).val());
-      var arr = rs.split(' | ');
-      if(arr.length == 2)
-      {
-        var code = arr[0];
-        var name = arr[1];
-        $('#zone_code').val(code);
-        $('#zone').val(name);
-      }else{
-        $('#zone_code').val('');
-        $('#zone').val('');
-      }
+    if( ! isDate(h.posting_date)) {
+      $('#posting-date').hasError();
+      click = 0;
+      return false;
     }
-  });
+
+    if(h.customer_code.length == 0 || h.customer_name.length == 0) {
+      $('#customer-code').hasError();
+      $('#customer-name').hasError();
+      click = 0;
+      return false;
+    }
+
+    if(h.gp > 100 || h.gp < 0) {
+      $('#gp').hasError();
+      click = 0;
+      return false;
+    }
+
+    if(h.warehouse_code == "") {
+      $('#warehouse').hasError();
+      click = 0;
+      return false;
+    }
+
+    load_in();
+
+    $.ajax({
+      url:HOME + 'add',
+      type:'POST',
+      cache:false,
+      data:{
+        'data' : JSON.stringify(h)
+      },
+      success:function(rs) {
+        click = 0;
+        load_out();
+
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status === 'success') {
+            goEdit(ds.code);
+          }
+          else {
+            showError(ds.message);
+          }
+        }
+        else {
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        click = 0;
+        showError(rs);
+      }
+    })
+  }
 }
-
-
-
-
-function add(){
-  var customer_code = $('#customerCode').val();
-  var customer_name = $('#customer').val();
-  var date_add = $('#date').val();
-  var zone_code = $('#zone_code').val();
-  var zone_name = $('#zone').val();
-
-
-  if(customer_code.length == 0 || customer_name.length == 0){
-    swal('ชื่อลูกค้าไม่ถูกต้อง');
-    return false;
-  }
-
-  if(!isDate(date_add))
-  {
-    swal('วันที่ไม่ถูกต้อง');
-    return false;
-  }
-
-  if(zone_code.length == 0 || zone_name.length == 0)
-  {
-    swal('โซนไม่ถูกต้อง');
-    return false;
-  }
-
-  $('#addForm').submit();
-}
-
-
-var customer;
-var payment;
-var date;
 
 
 function getEdit(){
@@ -319,28 +344,43 @@ function getEdit(){
 
 
 function update() {
+  clearErrorByClass('r');
 
-  let code = $('#consign_code').val();
-  let date = $('#date').val();
-  let remark = $('#remark').val();
-  var customer_code = $('#customerCode').val();
-  var customer_name = $('#customer').val();
-  var zone_code = $('#zone_code').val();
-  var zone_name = $('#zone').val();
+  let h = {
+    'code' : $('#code').val(),
+    'customer_code' : $('#customer-code').val().trim(),
+    'customer_name' : $('#customer-name').val().trim(),
+    'gp' : parseDefaultFloat($('#gp').val(), 0),
+    'date_add' : $('#date').val(),
+    'posting_date' : $('#posting-date').val(),
+    'warehouse_code' : $('#warehouse').val(),
+    'remark' : $('#remark').val().trim()
+  };
 
-  if(!isDate(date)){
-    swal('วันที่ไม่ถูกต้อง');
+
+  if( ! isDate(h.date_add)) {
+    $('#date').hasError();
     return false;
   }
 
-  if(customer_code.length == 0 || customer_name.length == 0){
-    swal('ชื่อลูกค้าไม่ถูกต้อง');
+  if( ! isDate(h.posting_date)) {
+    $('#posting-date').hasError();
     return false;
   }
 
-  if(zone_code.length == 0 || zone_name.length == 0)
-  {
-    swal('โซนไม่ถูกต้อง');
+  if(h.customer_code.length == 0 || h.customer_name.length == 0) {
+    $('#customer-code').hasError();
+    $('#customer-name').hasError();
+    return false;
+  }
+
+  if(h.gp > 100 || h.gp < 0) {
+    $('#gp').hasError();
+    return false;
+  }
+
+  if(h.warehouse_code == "") {
+    $('#warehouse').hasError();
     return false;
   }
 
@@ -350,24 +390,28 @@ function update() {
     url: HOME + 'update',
     type:'POST',
     cache:false,
-    data:{
-      'code' : code,
-      'date' : date,
-      'remark' : remark
+    data: {
+      'data' : JSON.stringify(h)
     },
-    success:function(rs){
+    success:function(rs) {
       load_out();
-      if(rs === 'success'){
+      if(rs.trim() === 'success') {
         swal({
-          title:'Updted',
+          title:'Updated',
           type:'success',
           timer:1000
         });
 
-        $('.edit').attr('disabled', 'disabled');
-        $('#btn-edit').removeClass('hide');
-        $('#btn-update').addClass('hide');
+        setTimeout(() => {
+          refresh();
+        }, 1200);
       }
+      else {
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      showError(rs);
     }
   })
 }
@@ -389,29 +433,6 @@ function deleteRow(id, code){
 }
 
 
-function deleteDetail(id){
-  $.ajax({
-    url: HOME + 'delete_detail/'+id,
-    type:'POST',
-    cache:'false',
-    success:function(rs) {
-      if(rs.trim() == 'success') {
-        swal({
-          title:'Deleted',
-          type:'success',
-          timer:1000
-        });
-
-        $('#row-'+id).remove();
-        reIndex();
-        updateTotalQty();
-        updateTotalAmount();
-      }
-    }
-  });
-}
-
-
 function getSample(){
   var token	= new Date().getTime();
 	get_download(token);
@@ -419,7 +440,9 @@ function getSample(){
 }
 
 
-function getUploadFile(){
+function getUploadFile() {
+  $('#show-file-name').val('');
+  $('#uploadFile').val('');
   $('#upload-modal').modal('show');
 }
 
@@ -428,13 +451,14 @@ function getFile(){
   $('#uploadFile').click();
 }
 
-$("#uploadFile").change(function(){
+
+$("#uploadFile").change(function() {
 	if($(this).val() != '')
 	{
-		var file 		= this.files[0];
-		var name		= file.name;
-		var type 		= file.type;
-		var size		= file.size;
+		let file = this.files[0];
+		let name = file.name;
+		let type = file.type;
+		let size = file.size;
 
 		if( size > 5000000 )
 		{
@@ -442,34 +466,31 @@ $("#uploadFile").change(function(){
 			$(this).val('');
 			return false;
 		}
-		//readURL(this);
-    $('#show-file-name').text(name);
+
+    $('#show-file-name').val(name);
 	}
 });
 
 
-function uploadfile(){
-  var code = $('#consign_code').val();
-  var excel = $('#uploadFile')[0].files[0];
-
+function uploadfile() {
+  let code = $('#code').val();
+  let excel = $('#uploadFile')[0].files[0];
 	$("#upload-modal").modal('hide');
-
-	var fd = new FormData();
-
+	let fd = new FormData();
 	fd.append('excel', $('input[type=file]')[0].files[0]);
+
 	load_in();
 
 	$.ajax({
 		url:HOME + 'import_excel_file/'+code,
-		type:"POST",
-    cache: "false",
+		type:'POST',
+    cache: false,
     data: fd,
     processData:false,
     contentType: false,
-		success: function(rs){
+		success: function(rs) {
 			load_out();
-			var rs = $.trim(rs);
-			if( rs == 'success')
+			if(rs.trim() == 'success')
 			{
         swal({
           title:'Success',
@@ -478,72 +499,83 @@ function uploadfile(){
         });
 
 				setTimeout(function(){
-          window.location.reload();
+          refresh();
         }, 1200);
 			}
 			else
 			{
-				swal({
-          title:"Error!",
-          text:rs,
-          type:"error",
-          html:true
-        });
+        showError(rs);
 			}
 		},
-		error:function(xhr, status, error){
-			load_out();
-			var errorMessage = xhr.status + ': '+xhr.statusText;
-			swal({
-				title:'Error!',
-				text:'Error-'+errorMessage,
-				type:'error'
-			});
+		error:function(rs){
+			showError(rs);
 		}
 	});
 }
 
 
-function validateOrder(){
-  var prefix = $('#prefix').val();
-  var runNo = parseInt($('#runNo').val());
-  let code = $('#code').val();
-  if(code.length == 0){
-    add();
-    return false;
-  }
+function doApprove(code) {
+  swal({
+    title:'Approval',
+    text:'เมื่ออนุมัติแล้วจะไม่สามารถแก้ไขได้อีก<br/>ต้องการอนุมัติ '+ code + ' หรือไม่ ?',
+    type:'info',
+    html:true,
+    showCancelButton:true,
+    confirmButtonText:'Yes',
+    cancelButtonText:'No',
+    confirmButtonColor:'#81a87b',
+    closeOnConfirm:true
+  }, function() {
+    setTimeout(() => {
+      load_in();
 
-  let arr = code.split('-');
-
-  if(arr.length == 2){
-    if(arr[0] !== prefix){
-      swal('Prefix ต้องเป็น '+prefix);
-      return false;
-    }else if(arr[1].length != (4 + runNo)){
-      swal('Run Number ไม่ถูกต้อง');
-      return false;
-    }else{
       $.ajax({
-        url: HOME + 'is_exists/'+code,
-        type:'GET',
+        url:HOME + 'approve',
+        type:'POST',
         cache:false,
-        success:function(rs){
-          if(rs == 'not_exists'){
-            add();
-          }else{
-            swal({
-              title:'Error!!',
-              text: rs,
-              type: 'error'
-            });
+        data:{
+          'code' : code
+        },
+        success:function(rs) {
+          load_out();
+
+          if(isJson(rs)) {
+            let ds = JSON.parse(rs);
+
+            if(ds.status === 'success') {
+              if(ds.ex == 1) {
+                swal({
+                  title:'Approved',
+                  type:'info',
+                  text: ds.message
+                }, function() {
+                  refresh();
+                });
+              }
+              else {
+                swal({
+                  title:'Approved',
+                  type:'success',
+                  timer:1000
+                });
+
+                setTimeout(() => {
+                  refresh();
+                }, 1200);
+              }
+            }
+            else {
+              showError(ds.message);
+            }
           }
+          else {
+            showError(rs);
+          }
+        },
+        error:function(rs) {
+          showError(rs);
         }
       })
-    }
-
-  }else{
-    swal('เลขที่เอกสารไม่ถูกต้อง');
-    return false;
-  }
-
+    }, 100);
+  })
 }

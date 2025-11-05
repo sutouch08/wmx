@@ -263,8 +263,7 @@ function addToDetail() {
 
           if($('#row-'+id).length == 1)
           {
-            $('#input-qty-'+id).val(data.qty);
-            $('#qty-'+id).text(addCommas(data.qty));
+            $('#qty-'+id).val(addCommas(data.qty));
           }
           else
           {

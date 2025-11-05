@@ -1,7 +1,3 @@
-window.addEventListener('load', () => {
-  inputInit();
-})
-
 $('#barcode-item').keyup(function(e){
   if(e.keyCode == 13){
     if($(this).val() != ''){
@@ -23,13 +19,8 @@ $('#item-code').autocomplete({
   autoFocus:true,
   close:function(){
     var rs = $(this).val();
-    if( rs == 'no item found') {
+    if( rs == 'no item found'){
       $(this).val('');
-    }
-    else {
-      setTimeout(() => {
-        getItemByCode();
-      }, 100)
     }
   }
 });
@@ -37,185 +28,217 @@ $('#item-code').autocomplete({
 
 function getItemByCode() {
   let code = $('#item-code').val().trim();
-  var zone_code = $('#zone_code').val();
+  let warehouse_code = $('#warehouse').val();
 
-  if(code.length > 0) {
+  if(code.length > 0)
+  {
+    load_in();
+
     $.ajax({
       url: HOME + 'get_item_by_code',
-      type:'GET',
+      type:'POST',
       cache:'false',
       data:{
-        'code' : code,
-        'zone_code' : zone_code
+        'product_code' : code,
+        'warehouse_code' : warehouse_code
       },
       success:function(rs) {
-        if( isJson(rs) ) {
-          let ds = JSON.parse(rs);
+        load_out();
 
-          $('#product_code').val(ds.pdCode);
-          $('#barcode-item').val(ds.barcode);
-          $('#item-price').val(ds.price);
-          $('#item-disc').val(ds.disc);
-          $('#stock-qty').text(ds.stock);
-          $('#count_stock').val(ds.count_stock);
-          $('#item-price').focus().select();
-        }
-        else {
-          showError(rs);
-          clearFields();
-        }
-      }
-    });
-  }
-}
-
-
-function getItemByBarcode() {
-  let barcode = $('#barcode-item').val().trim();
-  let zone_code = $('#zone_code').val();
-
-  if(barcode.length > 0)
-  {
-    $.ajax({
-      url: HOME + 'get_item_by_barcode',
-      type:'GET',
-      cache:'false',
-      data:{
-        'barcode' : barcode,
-        'zone_code' : zone_code
-      },
-      success:function(rs) {
         if(isJson(rs)) {
           let ds = JSON.parse(rs);
-          $('#product_code').val(ds.pdCode);
-          $('#item-code').val(ds.product);
-          $('#item-price').val(ds.price);
-          $('#item-disc').val(ds.disc);
-          $('#stock-qty').text(ds.stock);
-          $('#count_stock').val(ds.count_stock);
-          $('#item-price').focus().select();
+
+          if(ds.status === 'success') {
+            let discLabel = parseDefaultFloat($('#gp').val(), 0) + '%';
+            $('#item-price').val(ds.data.price);
+            $('#item-disc').val(discLabel);
+            $('#item-stock').val(ds.data.stock);
+            $('#count-stock').val(ds.data.count_stock);
+
+            $('#item-price').focus().select();
+          }
+          else {
+            beep();
+            showError(ds.message);
+            clearFileds();
+          }
         }
         else {
           showError(rs);
-          clearFields();
         }
+      },
+      error:function(rs) {
+        showError(rs);
       }
     });
   }
+
 }
 
 
 $('#item-price').keydown(function(e) {
-  if(e.keyCode == 32) {
+  if(e.keyCode == 32){
     e.preventDefault();
-    $('#item-qty').focus();
+    $('#input-qty').focus();
   }
 });
 
 
-$('#item-price').keyup(function(e) {
-  if(e.keyCode == 13) {
-    setTimeout(() => {
-      $('#item-disc').focus().select();
-    },50);
+$('#item-price').keyup(function(e){
+  if(e.keyCode == 13 && $(this).val() != ''){
+    $('#item-disc').focus();
+    $('#item-disc').select();
   }
+
+  calAmount();
 });
 
 
-$('#item-price').focusout(function() {
-  let amount = parseDefaultFloat($(this).val(), 0);
-  if(amount <= 0) {
-    $(this).val(0);
+$('#item-price').focusout(function(event) {
+  var amount = parseFloat($(this).val());
+  if(amount <= 0){
     $('#item-disc').val(0);
   }
-});
 
-
-$('#item-disc').keyup(function(e) {
-  if(e.keyCode == 13) {
-    setTimeout(() => {
-      $('#item-qty').focus().select();
-    },50);
+  if(amount < 0 ){
+    $(this).val(0);
   }
 });
 
 
-$('#item-disc').keydown(function(e) {
-  if(e.keyCode == 32) {
-    e.preventDefault();
-    let val = $(this).val().trim();
+$('#item-disc').keyup(function(e){
+  if(e.keyCode == 13){
+    $('#input-qty').focus();
+    $('#input-qty').select();
+  }
 
-    if(val.length > 0) {
-      let lastChar = val.slice(-1);
+  calAmount();
+});
 
-      if( ! isNaN(lastChar)) {
-        val = val + '%'
-        $(this).val(val);
-      }
+
+$('#input-qty').keyup(function(e){
+  if(e.keyCode == 13) {
+    let qty = parseDefaultInt($(this).val(), 0);
+
+    if(qty > 0) {
+      addToDetail();
+      return;
     }
+  }
+
+  calAmount();
+});
+
+
+$('#chk-all').change(function() {
+  if($(this).is(':checked')) {
+    $('.chk').prop('checked', true);
+  }
+  else {
+    $('.chk').prop('checked', false);
   }
 })
 
 
-$('#item-disc').focusout(function() {
-  calAmount();
-});
+function removeChecked() {
+  if($('.chk:checked').length) {
+    swal({
+      title:'Are you sure ?',
+      text:'ต้องการลบรายการที่เลือกหรือไม่ ?',
+      type:'warning',
+      html:true,
+      showCancelButton:true,
+      confirmButtonColor:'#d15b47',
+      confirmButtonText:'Yes',
+      cancelButtonText:'No',
+      closeOnConfirm:true
+    }, function() {
+      let h = {
+        'code' : $('#code').val(),
+        'ids' : []
+      };
 
+      $('.chk:checked').each(function() {
+        h.ids.push($(this).val());
+      });
 
-$('#item-qty').keyup(function(e) {
-  if(e.keyCode == 13) {
-    let qty = parseDefaultFloat($(this).val(), 1);
+      setTimeout(() => {
+        load_in();
 
-    if(qty > 0) {
-      addToDetail();
-    }
+        $.ajax({
+          url:HOME + 'remove_rows',
+          type:'POST',
+          cache:false,
+          data: {
+            "data" : JSON.stringify(h)
+          },
+          success:function(rs) {
+            load_out();
+
+            if(rs.trim() === 'success') {
+              swal({
+                title:'Success',
+                type:'success',
+                timer:1000
+              });
+
+              h.ids.forEach((id) => {
+                $('#row-'+id).remove();
+              });
+
+              reIndex();
+              reCalAll();
+            }
+          },
+          error:function(rs) {
+            showError(rs);
+          }
+        })
+      }, 100);
+    })
+
   }
-
-  calAmount();
-});
+}
 
 
 function calAmount() {
-  let qty = parseDefaultFloat($('#item-qty').val(), 0);
-  let price = parseDefaultFloat($('#item-price').val(), 0);
+  let qty = parseDefaultInt($('#input-qty').val(), 0);
+  let price = parseDefaultFloat(removeCommas($('#item-price').val()), 0);
   let disc = parseDiscount($('#item-disc').val(), price);
-  let amount = qty * (price - disc.discountAmount);
-
+  let discount = disc.discountAmount * qty;
+  let amount = (price * qty) - discount;
   $('#item-amount').val(addCommas(amount.toFixed(2)));
 }
 
 
 function addToDetail() {
-  clearErrorByClass('c');
+  clearErrorByClass('e');
 
   let h = {
-    'code' : $('#consign_code').val(),
-    'product_code' : $('#product_code').val().trim(),
-    'qty' : parseDefaultFloat($('#item-qty').val(), 1),
-    'price' : parseDefaultFloat($('#item-price').val(), 0),
-    'disc' : $('#item-disc').val().trim(),
-    'auz' : $('#auz').val(),
-    'count_stock' : $('#count_stock').val()
+    'code' : $('#code').val(),
+    'product_code' : $('#item-code').val().trim(),
+    'qty' : parseDefaultInt($('#input-qty').val(), 0),
+    'price' : parseDefaultFloat(removeCommas($('#item-price').val()), 0),
+    'disc' : $('#item-disc').val()
   }
 
-  let stock = parseDefaultFloat($('#stock-qty').val(), 0);
+  let stock = parseDefaultInt(removeCommas($('#item-stock').val()), 0);
+  let count_stock = $('#count-stock').val();
 
-  if(h.product_code.length == 0) {
-    beep();
+  if(h.qty <= 0) {
+    $('#input-qty').hasError();
+    return false;
+  }
+
+  if(h.qty > stock && count_stock == 1) {
+    $('#input-qty').hasError();
+    swal('ยอดในโซนไม่พอตัด');
+    return false;
+  }
+
+  if(h.product_code == '') {
     $('#item-code').hasError();
-    return false;
-  }
-
-  if(h.qty < 0) {
-    beep();
-    $('#item-qty').hasError();
-    return false;
-  }
-
-  if(h.qty > stock && h.auz == 0 && h.count_stock == 1) {
-    beep();
-    $('#stock-qty').hasError();
-    $('#item-qty').hasError();
+    swal('สินค้าไม่ถูกต้อง');
     return false;
   }
 
@@ -225,7 +248,7 @@ function addToDetail() {
     url: HOME + 'add_detail',
     type:'POST',
     cache:false,
-    data:{
+    data: {
       'data' : JSON.stringify(h)
     },
     success:function(rs) {
@@ -235,378 +258,209 @@ function addToDetail() {
         let ds = JSON.parse(rs);
 
         if(ds.status === 'success') {
-          let id = ds.data.id;
+          let data = ds.data;
+          let id = data.id;
 
-          if($('#row-'+id).length) {
-            $('#qty-'+id).val(ds.data.qty);
-
-            reCal(id);
-            clearFields();
+          if($('#row-'+id).length == 1)
+          {            
+            $('#qty-'+id).val(addCommas(data.qty));
           }
-          else {
-            let source = $('#new-row-template').html();
-            let output = $('#detail-table');
-
-            render_prepend(source, ds.data, output);
-            inputInit();
-            reIndex();
-            reCalAll();
-            clearFields();
+          else
+          {
+            var source = $('#new-row-template').html();
+            var output = $('#detail-table');
+            render_prepend(source, data, output);
           }
+
+          reIndex();
+          reCalAll();
+          clearFields();
         }
         else {
-          beep();
           showError(ds.message);
         }
       }
       else {
-        beep();
         showError(rs);
       }
     },
     error:function(rs) {
-      beep();
       showError(rs);
     }
   })
 }
 
 
-function clearFields(){
-  $('#barcode-item').val('');
+function updateRowPrice(id) {
+  let el = $('#price-'+id);
+  el.clearError();
+  let prev = el.data('prev');
+  let price = parseDefaultFloat(removeCommas(el.val()), 0);
+
+  if(price < 0) {
+    el.hasError();
+    return false;
+  }
+
+  $.ajax({
+    url:HOME + 'update_row_price',
+    type:'POST',
+    cache:false,
+    data:{
+      'price' : price,
+      'id' : id
+    },
+    success:function(rs) {
+      if(rs.trim() == 'success') {
+        el.data('prev', addCommas(price));
+        reCal(id);
+      }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error'
+        });
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
+
+
+function updateRowDisc(id) {
+  let el = $('#disc-'+id);
+  el.clearError();
+  let prev = el.data('prev');
+  let discLabel = el.val();
+  let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
+  let disc = parseDiscount(discLabel, price);
+
+  if(disc.discountAmount > price) {
+    el.hasError();
+    return false;
+  }
+
+  $.ajax({
+    url:HOME + 'update_row_disc',
+    type:'POST',
+    cache:false,
+    data:{
+      'discount' : discLabel,
+      'id' : id
+    },
+    success:function(rs) {
+      if(rs.trim() == 'success') {
+        el.data('prev', discLabel);
+        reCal(id);
+      }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error'
+        });
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
+
+
+function updateRowQty(id) {
+  let el = $('#qty-'+id);
+  el.clearError();
+  let prev = el.data('prev');
+  let qty = parseDefaultFloat(removeCommas(el.val()), 0);
+
+  if(qty <= 0) {
+    el.hasError();
+    return false;
+  }
+
+  $.ajax({
+    url:HOME + 'update_row_qty',
+    type:'POST',
+    cache:false,
+    data:{
+      'qty' : qty,
+      'id' : id
+    },
+    success:function(rs) {
+      if(rs.trim() == 'success') {
+        el.data('prev', addCommas(qty));
+        reCal(id);
+      }
+      else {
+        swal({
+          title:'Error!',
+          text:rs,
+          type:'error'
+        });
+      }
+    },
+    error:function(rs) {
+      showError(rs);
+    }
+  })
+}
+
+
+function clearFields() {
   $('#item-code').val('');
   $('#item-price').val('');
   $('#item-disc').val('');
-  $('#stock-qty').text(0);
-  $('#item-qty').val('');
-  $('#item-amount').text('');
-  $('#product_code').val('');
-  $('#barcode-item').focus();
+  $('#item-stock').val('');
+  $('#input-qty').val('');
+  $('#item-amount').val('');
+  $('#item-code').focus();
 }
 
 
 function reCal(id) {
   let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
   let disc = parseDiscount($('#disc-'+id).val(), price);
-  let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
+  let qty = parseDefaultInt(removeCommas($('#qty-'+id).val()),1);
   let amount = qty * (price - disc.discountAmount);
-
   $('#amount-'+id).val(addCommas(amount.toFixed(2)));
-
   updateTotalQty();
   updateTotalAmount();
 }
 
 
 function reCalAll() {
-  let totalAmount = 0;
-  let totalQty = 0;
-
-  $('.input-price').each(function() {
+  $('.rox').each(function() {
     let id = $(this).data('id');
-    let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
-    let disc = parseDiscount($('#disc-'+id).val(), price);
-    let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
-    let amount = qty * (price - disc.discountAmount);
-    $('#amount-'+id).val(addCommas(amount.toFixed(2)));
-
-    totalAmount += amount;
-    totalQty += qty;
+    reCal(id);
   });
-
-  $('#total-amount').text(addCommas(totalAmount.toFixed(2)));
-  $('#total-qty').text(addCommas(totalQty.toFixed(2)));
-}
-
-
-function updateTotalAmount() {
-  let total = 0;
-
-  $('.amount').each(function() {
-    let amount = parseDefaultFloat(removeCommas($(this).val()), 0);
-    total += amount;
-    console.log(amount);
-  });
-
-  $('#total-amount').text(addCommas(total.toFixed(2)));
-}
-
-
-function updateTotalQty() {
-  let total = 0;
-
-  $('.input-qty').each(function() {
-    let qty = parseDefaultFloat(removeCommas($(this).val()), 0);
-    total += qty;
-  });
-
-  $('#total-qty').text(addCommas(total.toFixed(2)));
-}
-
-
-function moveCursorToEnd(el) {
-  len = el.val().length;
-  el[0].setSelectionRange(len, len);
-}
-
-
-function inputInit() {
-  $('.input-price').click(function() {
-    moveCursorToEnd($(this));
-  })
-
-  $('.input-price').focusin(function() {
-    let val = $(this).val();
-    $(this).val(removeCommas(val));
-    moveCursorToEnd($(this));
-  });
-
-  $('.input-price').focusout(function() {
-    let val = parseDefaultFloat($(this).val(), 0);
-    $(this).val(addCommas(val.toFixed(2)));
-  })
-
-  $('.input-price').change(function() {
-    $(this).clearError();
-
-    let id = $(this).data('id');
-    updateRow(id);
-  })
-
-  $('.input-price').keyup(function(e) {
-    if(e.keyCode == 13) {
-      let id = $(this).data('id');
-      $('#disc-'+id).focus();
-    }
-  })
-
-  $('.input-disc').click(function() {
-    moveCursorToEnd($(this));
-  })
-
-  $('.input-disc').focusin(function() {
-    moveCursorToEnd($(this));
-  })
-
-  $('.input-disc').change(function() {
-    $(this).clearError();
-    let id = $(this).data('id');
-    updateRow(id);
-
-    // let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
-    // let disc = parseDiscount($(this).val(), price);
-    //
-    // if(disc.discountAmount < 0 || disc.discountAmount > price ) {
-    //   $(this).hasError();
-    // }
-    //
-    // reCal(id);
-  })
-
-  $('.input-disc').keyup(function(e) {
-    if(e.keyCode == 13) {
-      let id = parseDefaultInt($(this).data('id'), 1);
-      $('#qty-'+id).focus();
-    }
-  })
-
-  $('.input-disc').keydown(function(e) {
-    if(e.keyCode == 32) {
-      e.preventDefault();
-      let val = $(this).val().trim();
-
-      if(val.length > 0) {
-        let lastChar = val.slice(-1);
-
-        if( ! isNaN(lastChar)) {
-          val = val + '%'
-          $(this).val(val);
-        }
-      }
-    }
-  })
-
-  $('.input-qty').click(function() {
-    moveCursorToEnd($(this));
-  })
-
-  $('.input-qty').focusin(function() {
-    let val = $(this).val();
-    $(this).val(removeCommas(val));
-    moveCursorToEnd($(this));
-  })
-
-  $('.input-qty').focusout(function() {
-    let val = $(this).val();
-    $(this).val(addCommas(val));
-  })
-
-  $('.input-qty').change(function() {
-    $(this).clearError();
-
-    let id = $(this).data('id');
-    updateRow(id);
-    // let qty = parseDefaultFloat(removeCommas($(this).val(), 0));
-    //
-    // if(qty <= 0) {
-    //   $(this).hasError();
-    // }
-    //
-    // reCal(id);
-  })
-
-  $('.input-qty').keyup(function(e) {
-    if(e.keyCode == 13) {
-      let id = parseDefaultInt($(this).data('id'), 1);
-      id++;
-      $('#price-'+id).focus();
-    }
-  })
-
-}
-
-
-function checkAll() {
-  if($('#chk-all').is(':checked')) {
-    $('.chk').prop('checked', true);
-  }
-  else {
-    $('.chk').prop('checked', false);
-  }
-}
-
-
-function removeChecked() {
-  let count = $('.chk:checked').length;
-
-  if(count) {
-    swal({
-      title:'Are you sure ?',
-      text:'ต้องการลบ ' + count + ' รายการที่เลือกหรือไม่ ?',
-      type:'warning',
-      showCancelButton:true,
-      confirmButtonText:'Yes',
-      cancelButtonText:'No',
-      confirmButtonColor:'#FA5858',
-      closeOnConfirm:true
-    }, function() {
-      load_in();
-
-      setTimeout(() => {
-        let code = $('#consign_code').val();
-        let ids = [];
-
-        $('.chk:checked').each(function() {
-          ids.push( $(this).val());
-        })
-
-        if(ids.length > 0) {
-          $.ajax({
-            url:HOME + 'delete_details',
-            type:'POST',
-            cache:false,
-            data:{
-              'code' : code,
-              'ids' : ids
-            },
-            success:function(rs) {
-              load_out();
-
-              if(rs.trim() === 'success') {
-                swal({
-                  title:'Deleted',
-                  type:'success',
-                  timer:1000
-                });
-
-                $('.chk:checked').each(function() {
-                  let id = $(this).val();
-
-                  $('#row-'+id).remove();
-                });
-
-                reIndex();
-                reCalAll();
-              }
-              else {
-                beep();
-                showError(rs);
-              }
-            },
-            error:function(rs) {
-              beep();
-              showError(rs);
-            }
-          })
-        }
-      }, 200);
-    })
-  }
-}
-
-
-function updateRow(id) {
-  let error = 0;
-
-  let code = $('#consign_code').val();
-  let price = parseDefaultFloat(removeCommas($('#price-'+id).val()), 0);
-  let discount = $('#disc-'+id).val();
-  let disc = parseDiscount(discount, price);
-  let qty = parseDefaultFloat(removeCommas($('#qty-'+id).val()), 0);
-  let amount = qty * (price - disc.discountAmount);
-
-  if(price < 0) {
-    $('#price-'+id).hasError();
-    error++;
-  }
-
-  if(disc.discountAmount < 0 || disc.discountAmount > price) {
-    $('#disc-'+id).hasError();
-    error++;
-  }
-
-  if(qty <= 0) {
-    $('#qty-'+id).hasError();
-    error++;
-  }
-
-  if(error > 0) {
-    return false;
-  }
-
-  let h = {
-    'id' : id,
-    'code' : code,
-    'price' : price,
-    'qty' : qty,
-    'discount' : discount,
-    'discount_amount' : disc.discountAmount,
-    'amount' : amount
-  };
-
-  $.ajax({
-    url:HOME + 'update_detail',
-    type:'POST',
-    cache:false,
-    data:{
-      'data' : JSON.stringify(h)
-    },
-    success:function(rs) {
-      if(rs.trim() === 'success') {
-        reCal(id);
-      }
-      else {
-        beep();
-        showError(rs);
-      }
-    },
-    error:function(rs) {
-      beep();
-      showError(rs);
-    }
-  })
-
 
   updateTotalQty();
   updateTotalAmount();
+}
+
+
+function updateTotalAmount(){
+  let total = 0;
+  $('.amount').each(function() {
+    let amount = parseDefault(parseFloat(removeCommas($(this).val())), 0);
+    total += amount;
+  });
+
+  total = parseFloat(total).toFixed(2);
+  $('#total-amount').text(addCommas(total));
+}
+
+
+function updateTotalQty(){
+  var total = 0;
+  $('.qty').each(function(index, el) {
+    let qty = parseInt(removeCommas($(this).val()));
+    total += qty;
+  });
+
+  $('#total-qty').text(addCommas(total));
 }

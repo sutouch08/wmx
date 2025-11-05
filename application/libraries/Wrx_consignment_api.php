@@ -21,14 +21,14 @@ class Wrx_consignment_api
   }
 
 
-  public function get_onhand_stock($code, $warehouse_code, $zone_code = "Store")
+  public function get_onhand_stock($code, $warehouse_code)
   {
     $sc = TRUE;
-    $qty = 0;
+    $qty = 1000;
     $action = "check stock";
     $type = "ADD16";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "ns/check-stock";
+    $url .= "ns/stock-sync";
     $api_path = $url;
     $req_time = NULL;
 
@@ -60,7 +60,7 @@ class Wrx_consignment_api
       "subColor" => "",
       "size" => "",
       "location" => $warehouse_code,
-      "bin" => $zone_code,
+      "bin" => "",
       "limit" => 1,
       "offset" => 0
     );
@@ -107,7 +107,7 @@ class Wrx_consignment_api
 
         if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
         {
-          if($res->status == 'success' && ! empty($res->data))
+          if($res->code == 200 && $res->status == 'success' && ! empty($res->data))
           {
             $ds = $res->data;
 
@@ -117,11 +117,8 @@ class Wrx_consignment_api
             }
             else
             {
-              if( empty($ds->data))
-              {
-                $sc = FALSE;
-                $this->error = "Response data is empty";
-              }
+              $qty = 0;
+              $this->error = empty($ds->message) ? $res->serviceMessage : $ds->message;              
             }
           }
           else
@@ -139,7 +136,7 @@ class Wrx_consignment_api
               'code' => $code,
               'action' => $action,
               'status' => $sc === TRUE ? 'success' : 'failed',
-              'message' => $res->serviceMessage,
+              'message' => $this->error,
               'request_json' => $json,
               'response_json' => $response,
               'req_start' => $req_start,
@@ -180,7 +177,7 @@ class Wrx_consignment_api
       }
     }
 
-    return $sc === TRUE ? $qty : $sc;
+    return $sc === TRUE ? $qty : 0;
   }
 
 
@@ -189,7 +186,6 @@ class Wrx_consignment_api
     $sc = TRUE;
     $this->ci->load->model('account/consignment_order_model');
     $this->ci->load->model('masters/warehouse_model');
-    $this->ci->load->model('masters/zone_model');
 
     $action = "create";
     $type = "INT17.1";
@@ -209,13 +205,14 @@ class Wrx_consignment_api
 
     if( ! empty($doc))
     {
-      if($doc->status == 1)
+      if($doc->status == 'C')
       {
         $playload = array(
           'company' => $this->company,
+          'subsidiary' => "Consignment",
           'customer' => $doc->customer_code,
           'saleChannel' => getConfig('WRX_CONSIGNMENT_CHANNEL'),
-          'Date' => $doc->date_add,
+          'date' => $doc->date_add,
           'documentId' => $doc->code,
           'memoMain' => $doc->remark,
           'line' => []
@@ -226,15 +223,17 @@ class Wrx_consignment_api
         if( ! empty($details))
         {
           $line = 1;
+
           foreach($details as $rs)
           {
             $playload['line'][] = array(
               "line" => $line,
               'itemNumber' => $rs->product_code,
               'location' => $doc->warehouse_code,
-              'quantity' => floatval($rs->qty),
+              'quantity' => round(floatval($rs->qty), 2),
               'memo' => "",
-              'binNumber' => $doc->zone_code
+              'bin' => "",
+              'refInvoice' => ""
             );
 
             $line++;
@@ -297,7 +296,8 @@ class Wrx_consignment_api
                   }
 
                   $arr = array(
-                    'DocNum' => $docNum
+                    'DocNum' => $docNum,
+                    'is_exported' => 'Y'
                   );
 
                   if( ! $this->ci->consignment_order_model->update($code, $arr))

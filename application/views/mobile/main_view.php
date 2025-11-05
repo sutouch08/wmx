@@ -1,52 +1,77 @@
 <?php $this->load->view('include/header_mobile'); ?>
-<div class="row">
-	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-center">
-		<h1>Hello! <?php echo get_cookie('displayName'); ?></h1>
-		<h5>Good to see you here</h5>
+<style>
+	.content-inner {
+		position: absolute;
+		top: 45px;
+		left: 0;
+		padding-left: 20px;
+		padding-right: 20px;
+		height: calc(100vh - 150px);
+		overflow: auto;
+	}
+</style>
+
+
+<div class="content-inner">
+	<div class="row">
+		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 text-center">
+			<h1>Hello! <?php echo get_cookie('displayName'); ?></h1>
+			<h5>Good to see you here</h5>
+		</div>
+		<div class="divider-hidden"></div>
+		<div class="divider"></div>
 	</div>
-	<div class="divider-hidden"></div>
-	<div class="divider"></div>
-</div>
-<div class="row">
-	<div class="menu-box">
-		<div class="menu-card" style="border-color: #2196F3; color:#2196F3;" onclick="goTo('mobile/pick_list')">
-			<span class="icon-badge text-center"><i class="fa fa-tasks fa-lg"></i><br/></span>
-			<span class="menu-text text-left">Pick List</span>
-		</div>
+	<div class="row">
+		<div class="menu-box">
+			<div class="menu-card" style="border-color: #2196F3; color:#2196F3;" onclick="goTo('mobile/pick_list')">
+				<span class="icon-badge text-center"><i class="fa fa-tasks fa-lg"></i><br/></span>
+				<span class="menu-text text-left">Pick List</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #2196F3; color:#2196F3;" onclick="goTo('mobile/prepare')">
-			<span class="icon-badge text-center"><i class="fa fa-tasks fa-lg"></i><br/></span>
-			<span class="menu-text text-left">จัดสินค้า</span>
-		</div>
+			<div class="menu-card" style="border-color: #2196F3; color:#2196F3;" onclick="goTo('mobile/prepare')">
+				<span class="icon-badge text-center"><i class="fa fa-tasks fa-lg"></i><br/></span>
+				<span class="menu-text text-left">จัดสินค้า</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/dispatch')">
-			<span class="icon-badge text-center"><i class="fa fa-truck fa-lg"></i><br/></span>
-			<span class="menu-text text-left">Dispatch</span>
-		</div>
+			<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/dispatch')">
+				<span class="icon-badge text-center"><i class="fa fa-truck fa-lg"></i><br/></span>
+				<span class="menu-text text-left">Dispatch</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/move')">
-			<span class="icon-badge text-center"><i class="fa fa-exchange fa-lg"></i><br/></span>
-			<span class="menu-text text-left">Move Stock</span>
-		</div>
+			<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/move')">
+				<span class="icon-badge text-center"><i class="fa fa-exchange fa-lg"></i><br/></span>
+				<span class="menu-text text-left">Move Stock</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/receive_po')">
-			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
-			<span class="menu-text text-left">รับจากใบสั่งซื้อ</span>
-		</div>
+			<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/receive_po')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">รับจากใบสั่งซื้อ</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/receive_product')">
-			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
-			<span class="menu-text text-left">รับสินค้าเข้า</span>
-		</div>
+			<div class="menu-card hide" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/receive_product')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">รับสินค้าเข้า</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/return_order')">
-			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
-			<span class="menu-text text-left">ลดหนี้ขาย</span>
-		</div>
+			<div class="menu-card hide" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/return_order')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">ลดหนี้ขาย</span>
+			</div>
 
-		<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/consign_order')">
-			<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
-			<span class="menu-text text-left">ตัดยอดฝากขาย (WM)</span>
+			<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/consign_order')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">ตัดยอดฝากขาย (WM)</span>
+			</div>
+
+			<div class="menu-card" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/consignment_order')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">ตัดยอดฝากขาย (WD)</span>
+			</div>
+
+			<div class="menu-card not-show" style="border-color: #4CAF50; color:#4CAF50;" onclick="goTo('mobile/consignment_order')">
+				<span class="icon-badge text-center"><i class="fa fa-inbox fa-lg"></i><br/></span>
+				<span class="menu-text text-left">ตัดยอดฝากขาย (WD)</span>
+			</div>
 		</div>
 	</div>
 </div>

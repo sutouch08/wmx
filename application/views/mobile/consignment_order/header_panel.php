@@ -33,7 +33,7 @@
         <label>คลัง</label>
         <select class="form-control edit r" id="warehouse" onchange="updateCustomer()" disabled>
           <option value="">เลือก</option>
-          <?php echo select_consign_warehouse($doc->warehouse_code); ?>
+          <?php echo select_consignment_warehouse($doc->warehouse_code); ?>
         </select>
       </div>
 

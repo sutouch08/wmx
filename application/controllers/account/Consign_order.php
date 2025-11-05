@@ -263,7 +263,9 @@ class Consign_order extends PS_Controller
       {
         $this->load->library('wrx_consign_api');
 
-        $stock = 1000; //$stock = $item->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $stock = $item->count_stock ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $commit = $item->count_stock ? $this->consign_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
+        $available = $stock - $commit;
 
         $ds = array(
           'pdCode' => $item->code,
@@ -271,7 +273,7 @@ class Consign_order extends PS_Controller
           'product' => $item->code,
           'price' => number($item->price, 2),
           'disc' => 0,
-          'stock' => number($stock),
+          'stock' => $available > 0 ? number($available) : 0,
           'count_stock' => $item->count_stock
         );
       }
@@ -323,50 +325,48 @@ class Consign_order extends PS_Controller
             $this->load->library('wrx_consign_api');
             $input_type = 1;
 
-            $stock = 1000; //$item->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
-            $c_qty = $item->count_stock == 1 ? $this->consign_order_model->get_unsave_qty($doc->code, $item->code, $ds->price, $ds->disc) : 0;
-            $detail = $this->consign_order_model->get_exists_detail($doc->code, $item->code, $ds->price, $ds->disc, $input_type);
-            $sum_qty = $ds->qty + $c_qty;
+            $stock = $item->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
+            $commit = $item->count_stock ? $this->consign_order_model->get_commit_qty($item->code, $doc->warehouse_code) : 0;
+            $available = $stock - $commit;
+
             $id = NULL;
 
-            if( empty($detail))
+            if($available <= 0)
             {
-              if($sum_qty > $stock)
+              $sc = FALSE;
+              $this->error = "Insufficient stock";
+            }
+          }
+
+          if($sc === TRUE)
+          {
+            $detail = $this->consign_order_model->get_exists_detail($doc->code, $item->code, $ds->price, $ds->disc, $input_type);
+
+            if(empty($detail))
+            {
+              $arr = array(
+                'consign_code' => $doc->code,
+                'product_code' => $item->code,
+                'product_name' => $item->name,
+                'unit_code' => $item->unit_code,
+                'count_stock' => $item->count_stock,
+                'cost' => $item->cost,
+                'price' => $ds->price,
+                'sell_price' => $sell_price,
+                'qty' => $ds->qty,
+                'discount' => $ds->disc,
+                'discount_amount' => $discount * $ds->qty,
+                'amount' => $amount,
+                'ref_code' => $doc->ref_code,
+                'input_type' => $input_type
+              );
+
+              $id = $this->consign_order_model->add_detail($arr);
+
+              if( ! $id)
               {
                 $sc = FALSE;
-                $this->error = "Insufficient stock";
-              }
-
-              if($sc === TRUE)
-              {
-                $arr = array(
-                  'consign_code' => $doc->code,
-                  'product_code' => $item->code,
-                  'product_name' => $item->name,
-                  'unit_code' => $item->unit_code,
-                  'count_stock' => $item->count_stock,
-                  'cost' => $item->cost,
-                  'price' => $ds->price,
-                  'sell_price' => $sell_price,
-                  'qty' => $ds->qty,
-                  'discount' => $ds->disc,
-                  'discount_amount' => $discount * $ds->qty,
-                  'amount' => $amount,
-                  'ref_code' => $doc->ref_code,
-                  'input_type' => $input_type
-                );
-
-                $id = $this->consign_order_model->add_detail($arr);
-
-                if( ! $id)
-                {
-                  $sc = FALSE;
-                  $this->error = "Failed to insert item";
-                }
-                else
-                {
-                  $this->consign_order_model->recal_summary($doc->code);
-                }
+                $this->error = "Failed to insert item";
               }
             }
             else
@@ -374,30 +374,32 @@ class Consign_order extends PS_Controller
               $id = $detail->id;
               $new_qty = $ds->qty + $detail->qty;
 
-              if($sum_qty > $stock)
+              $arr = array(
+                'qty' => $new_qty,
+                'discount_amount' => $discount * $new_qty,
+                'amount' => $sell_price * $new_qty
+              );
+
+              if( ! $this->consign_order_model->update_detail($id, $arr))
               {
                 $sc = FALSE;
-                $this->error = "Insufficient stock";
+                $this->error = "Failed to update item row";
               }
+            }
+          }
 
-              if($sc === TRUE)
-              {
-                $arr = array(
-                  'qty' => $new_qty,
-                  'discount_amount' => $discount * $new_qty,
-                  'amount' => ($ds->price - $discount) * $new_qty
-                );
+          if($sc === TRUE)
+          {
+            $this->consign_order_model->recal_summary($doc->code);
 
-                if( ! $this->consign_order_model->update_detail($id, $arr))
-                {
-                  $sc = FALSE;
-                  $this->error = "Failed to update item row";
-                }
-                else
-                {
-                  $this->consign_order_model->recal_summary($doc->code);
-                }
-              }
+            if($doc->status == 'A')
+            {
+              $arr = array(
+                'status' => 'P',
+                'update_user' => $this->_user->uname
+              );
+
+              $this->consign_order_model->update($doc->code, $arr);
             }
           }
         }
@@ -418,15 +420,6 @@ class Consign_order extends PS_Controller
       $sc = FALSE;
       set_error('required');
     }
-
-    if($sc === TRUE)
-    {
-      if($doc->status == 'A')
-      {
-        $this->consign_order_model->update($doc->code, ['status' => 'P']);
-      }
-    }
-
 
     if($sc === TRUE)
     {
@@ -796,18 +789,30 @@ class Consign_order extends PS_Controller
 
       if( ! empty($details))
       {
-        $line = 1;
-        //--- check stock and update status each row
-        foreach($details as $rs)
-        {
-          $stock = $rs->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
-          $all_qty = $this->consign_order_model->get_sum_order_qty($doc->code, $rs->product_code);
+        $items = [];
 
-          if($all_qty > $stock)
+        foreach($details as $row)
+        {
+          if(empty($items[$row->product_code]))
+          {
+            $items[$row->product_code] = (object) array(
+              'code' => $row->product_code,
+              'qty' => $row->qty,
+              'stock' => $row->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($row->product_code, $doc->warehouse_code) : 1000000
+            );
+          }
+          else
+          {
+            $items[$row->product_code]->qty += $row->qty;
+          }
+        }
+
+        foreach($items as $item)
+        {
+          if($item->qty > $item->stock)
           {
             $sc = FALSE;
-            $this->error .= "<span class='display-block'>Insufficient stock for {$rs->product_code} {$all_qty} / {$stock} at Line {$line}</span>";
-            $line++;
+            $this->error .= "<span class='display-block'>Insufficient stock for {$item->code} ({$item->qty} / {$item->stock})</span>";
           }
         }
 
@@ -861,9 +866,8 @@ class Consign_order extends PS_Controller
 
         if($sc === TRUE && $save_type == 'A')
         {
-          if(is_true(getConfig('WRX_CONSIGN_INTERFACE')))
+          if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGN_INTERFACE')))
           {
-            // INT12
             if( ! $this->wrx_consign_api->export_consign($code))
             {
               $ex = 1;
@@ -915,17 +919,40 @@ class Consign_order extends PS_Controller
 
             if( ! empty($details))
             {
+              $items = [];
+
               foreach($details as $rs)
               {
-                if($sc === FALSE) { break; }
-
-                $stock = $rs->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
-                $all_qty = $this->consign_order_model->get_sum_order_qty($doc->code, $rs->product_code);
-
-                if($all_qty > $stock)
+                if( empty($items[$rs->product_code]))
                 {
-                  $sc = FALSE;
-                  $this->error .= "<span>{$rs->product_code} ยอดในโซนไม่พอตัด  ในโซน: {$stock} ยอดตัด : {$all_qty} </span><br/>";
+                  $items[$rs->product_code] = (object) array(
+                    'code' => $rs->product_code,
+                    'qty' => $rs->qty,
+                    'count_stock' => $rs->count_stock
+                  );
+                }
+                else
+                {
+                  $items[$rs->product_code]->qty += $rs->qty;
+                }
+              }
+
+              if( ! empty($items))
+              {
+                foreach($items as $item)
+                {
+                  if($sc === FALSE) { break; }
+
+                  if($item->count_stock)
+                  {
+                    $stock = $this->wrx_consign_api->get_onhand_stock($item->code, $doc->warehouse_code);
+
+                    if($item->qty > $stock)
+                    {
+                      $sc = FALSE;
+                      $this->error = "<span class='display-block'>Insufficient stock for {$item->code} ({$item->qty} / {$stock})</span>";
+                    }
+                  }
                 }
               }
             }
@@ -973,9 +1000,9 @@ class Consign_order extends PS_Controller
 
               if($sc === TRUE)
               {
-                if(is_true(getConfig('WRX_CONSIGN_INTERFACE')))
+                if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGN_INTERFACE')))
                 {
-                  // INT12
+                  // INT23
                   if( ! $this->wrx_consign_api->export_consign($code))
                   {
                     $ex = 1;
@@ -1032,7 +1059,7 @@ class Consign_order extends PS_Controller
       {
         if($doc->status == 'C')
         {
-          if(is_true(getConfig('WRX_CONSIGN_INTERFACE')))
+          if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGN_INTERFACE')))
           {
             $this->load->library('wrx_consign_api');
 
@@ -1045,7 +1072,7 @@ class Consign_order extends PS_Controller
           else
           {
             $sc = FALSE;
-            $this->error = "Service unavaliable <br/> Consign Interface (INT12) is inactive";
+            $this->error = "Service unavaliable <br/> Consign Interface is inactive";
           }
         }
         else

@@ -205,7 +205,7 @@
 		<div class="divider"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consign Interface (INT12)</span>
+			<span class="form-control left-label">Consign Interface (INT23)</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">

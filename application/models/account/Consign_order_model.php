@@ -218,6 +218,28 @@ class Consign_order_model extends CI_Model
   }
 
 
+  public function get_commit_qty($product_code, $warehouse_code)
+  {
+    $rs = $this->db
+    ->select_sum('d.qty')
+    ->from("{$this->td} as d")
+    ->join("{$this->tb} as o", 'd.consign_code = o.code', 'left')
+    ->where('d.status', 'O')
+    ->where('d.product_code', $product_code)
+    ->where_in('o.status', ['P', 'A'])
+    ->where('o.warehouse_code', $warehouse_code)
+    ->group_by('d.product_code')
+    ->get();
+
+    if($rs->num_rows() === 1)
+    {
+      return floatval($rs->row()->qty);
+    }
+
+    return 0;
+  }
+
+
   public function get_list(array $ds = array(), $perpage = 20, $offset = 0)
   {
     if($ds['status'] != 'all')
