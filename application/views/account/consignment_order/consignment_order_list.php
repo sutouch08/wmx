@@ -29,7 +29,7 @@
       <label>คลัง</label>
       <select class="width-100 filter" name="warehouse" id="warehouse">
         <option value="all">ทั้งหมด</option>
-        <?php echo select_consign_warehouse($warehouse); ?>
+        <?php echo select_consignment_warehouse($warehouse); ?>
       </select>
     </div>
 
