@@ -484,13 +484,20 @@ function refresh() {
 }
 
 
-function logout() {
+function logout(page) {
+  let target = page == 'm' ? BASE_URL + 'mobile/authentication/logout' : BASE_URL + 'users/authentication/logout';
+
   $.ajax({
-    url:BASE_URL + 'users/authentication/logout',
+    url:target,
     type:'POST',
     cache:false,
     success:function() {
-      goTo('main');
+      if(page == 'm') {
+        goTo('mobile/authentication');
+      }
+      else {
+        goTo('users/authentication');
+      }
     }
   })
 }

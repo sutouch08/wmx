@@ -2,7 +2,7 @@
 	<div class="col-xs-12">
 		<div class="row">
 			<div class="list">
-				<div class="list-block" onclick="logout()" style="background-color:white; border:solid 2px #2196F3;">
+				<div class="list-block" onclick="logout('m')" style="background-color:white; border:solid 2px #2196F3;">
 					<a href="#" class="list-link" style="color:#2196F3;">
 						<i class="fa fa-sign-out fa-lg"></i>  Logout
 					</a>
