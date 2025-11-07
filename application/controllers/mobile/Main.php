@@ -12,6 +12,8 @@ class Main extends PS_Controller
 	{
 		parent::__construct();
 		_check_login();
+		$this->pm = new stdClass();
+		$this->pm->can_view = 1;
 	}
 
 
