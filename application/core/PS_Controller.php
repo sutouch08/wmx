@@ -19,7 +19,14 @@ class PS_Controller extends CI_Controller
     //--- check is user has logged in ?
     if(empty($uid) OR ! $this->user_model->verify_uid($uid))
     {
-      redirect(base_url().'users/authentication');
+      if($this->uri->segment(1) == 'mobile')
+      {
+        redirect(base_url().'mobile/authentication');
+      }
+      else
+      {
+        redirect(base_url().'users/authentication');
+      }
       exit();
     }
     else

@@ -1,11 +1,19 @@
 <?php
-function _check_login()
+function _check_login($option = NULL)
 {
   $CI =& get_instance();
   $uid = get_cookie('uid');
+
   if($uid === NULL OR $CI->user_model->verify_uid($uid) === FALSE)
   {
-    redirect(base_url().'users/authentication');
+    if($option === 'm')
+    {
+      redirect(base_url().'mobile/authentication');
+    }
+    else
+    {
+      redirect(base_url().'users/authentication');      
+    }
   }
 }
 
