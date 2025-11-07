@@ -299,7 +299,7 @@ class Consign_order extends PS_Controller
         $this->load->library('wrx_consign_api');
 
         $stock = $item->count_stock ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
-        $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $warehouse->code) : 0;
+        $commit = $item->count_stock ? $this->consign_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
         $ds = array(
@@ -364,7 +364,7 @@ class Consign_order extends PS_Controller
         $this->load->library('wrx_consign_api');
 
         $stock = $item->count_stock ? $this->wrx_consign_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
-        $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $warehouse->code) : 0;
+        $commit = $item->count_stock ? $this->consign_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
         $ds = array(
@@ -426,7 +426,7 @@ class Consign_order extends PS_Controller
             $this->load->library('wrx_consign_api');
             $input_type = 1;
             $stock = $item->count_stock == 1 ? $this->wrx_consign_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
-            $commit = $item->count_stock ? $this->consign_order_model->get_comit_qty($item->code, $doc->warehouse_code) : 0;
+            $commit = $item->count_stock ? $this->consign_order_model->get_commit_qty($item->code, $doc->warehouse_code) : 0;
             $available = $stock - $commit;
 
             $id = NULL;
