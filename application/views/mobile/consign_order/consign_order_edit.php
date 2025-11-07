@@ -179,6 +179,7 @@
 	</div>
 </div>
 
+<?php $this->load->view('include/setting_menu'); ?>
 <script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/mobile/consign_order/consign_order_add.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/scanner.js?v=<?php echo date('Ymd'); ?>"></script>

@@ -60,8 +60,6 @@ function saveCameraId() {
 }
 
 function changeCameraId() {
-  closeExtraMenu();
-
   Html5Qrcode.getCameras().then(devices => {
     if(devices && devices.length) {
       let source = $('#cameras-list-template').html();
