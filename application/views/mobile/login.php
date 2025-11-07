@@ -87,9 +87,9 @@
 
 													<div class="space"></div>
 
-													<div class="clearfix">
+													<div class="clearfix hide">
 														<label class="inline" id="rem-label">
-															<input type="checkbox" name="remember" id="rem-box" class="ace" value="1" />
+															<input type="checkbox" name="remember" id="rem-box" class="ace" value="1" checked />
 															<span class="lbl"> Remember Me</span>
 														</label>
 													</div>
