@@ -30,7 +30,7 @@
 				<?php endif; ?>
 				<?php if($this->pm->can_delete && ($doc->status == 'P' OR $doc->status == 'A')) : ?>
 					<li class="danger">
-						<a href="javascript:cancel()"><i class="fa fa-times"></i>&nbsp; Cancel</a>
+						<a href="javascript:confirmCancel('<?php echo $doc->code; ?>')"><i class="fa fa-times"></i>&nbsp; Cancel</a>
 					</li>
 				<?php endif; ?>
 			</ul>
@@ -117,6 +117,8 @@
 	 </div>
  </div>
 </div>
+
+<?php $this->load->view('cancel_modal'); ?>
 
 <script id="warehouse-template" type="text/x-handlebarsTemplate">
 	<option value="">เลือก</option>

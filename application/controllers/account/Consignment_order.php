@@ -122,22 +122,29 @@ class Consignment_order extends PS_Controller
   {
     $doc = $this->consignment_order_model->get($code);
 
-    $details = $this->consignment_order_model->get_details($code);
-
-    if( ! empty($details))
+    if($doc->status == 'P' OR $doc->status == 'A')
     {
-      foreach($details as $rs)
+      $details = $this->consignment_order_model->get_details($code);
+
+      if( ! empty($details))
       {
-        $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+        foreach($details as $rs)
+        {
+          $rs->barcode = $this->products_model->get_barcode($rs->product_code);
+        }
       }
+
+      $ds = array(
+        'doc' => $doc,
+        'details' => $details
+      );
+
+      $this->load->view('account/consignment_order/consignment_order_edit', $ds);
     }
-
-    $ds = array(
-      'doc' => $doc,
-      'details' => $details
-    );
-
-    $this->load->view('account/consignment_order/consignment_order_edit', $ds);
+    else
+    {
+      redirect($this->home."/view_detail/{$code}");
+    }    
   }
 
 

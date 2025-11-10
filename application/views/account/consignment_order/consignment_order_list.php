@@ -144,7 +144,8 @@
      </table>
    </div>
  </div>
- <?php $this->load->view('cancle_modal'); ?>
+
+ <?php $this->load->view('cancel_modal'); ?>
 
 <script>
   $('#warehouse').select2();
