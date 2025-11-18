@@ -118,7 +118,7 @@ class Wrx_consignment_api
             else
             {
               $qty = 0;
-              $this->error = empty($ds->message) ? $res->serviceMessage : $ds->message;              
+              $this->error = empty($ds->message) ? $res->serviceMessage : $ds->message;
             }
           }
           else
@@ -210,7 +210,7 @@ class Wrx_consignment_api
         $playload = array(
           'company' => $this->company,
           'subsidiary' => "Consignment",
-          'customer' => $doc->customer_code,
+          // 'customer' => $doc->customer_code,
           'saleChannel' => getConfig('WRX_CONSIGNMENT_CHANNEL'),
           'date' => $doc->date_add,
           'documentId' => $doc->code,
