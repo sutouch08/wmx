@@ -230,7 +230,7 @@ class Wrx_consign_api
           "mfgStatus" => "",
           "billToCode" => "",
           "shipToCode" => "",
-          "orderStatus" => "Pending Approval",
+          "orderStatus" => "Pending Fulfillment",
           "salesPerson" => "",
           "salesChannel" => getConfig('WRX_CONSIGN_CHANNEL'),
           "salesType" => "Collection",
