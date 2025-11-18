@@ -230,7 +230,7 @@ class Wrx_consignment_api
               "line" => $line,
               'itemNumber' => $rs->product_code,
               'location' => $doc->warehouse_code,
-              'quantity' => round(floatval($rs->qty), 2),
+              'quantity' => round(floatval($rs->qty), 2) * -1,
               'memo' => "",
               'bin' => "",
               'refInvoice' => ""
