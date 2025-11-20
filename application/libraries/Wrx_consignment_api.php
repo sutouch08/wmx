@@ -111,9 +111,9 @@ class Wrx_consignment_api
           {
             $ds = $res->data;
 
-            if($ds->success && ! empty($ds->listItems))
+            if($ds->success && ! empty($ds->listData))
             {
-              $qty = $ds->listItems[0]->listLocations[0]->onhandQty;
+              $qty = $ds->listData[0]->listItems[0]->onhandQty;
             }
             else
             {
