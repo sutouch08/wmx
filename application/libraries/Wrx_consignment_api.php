@@ -286,7 +286,7 @@ class Wrx_consignment_api
               {
                 $ds = $res->data;
 
-                if($ds->Status == 'Success' OR $ds->Status == 'success')
+                if($ds->status == 'Success' OR $ds->status == 'success')
                 {
                   $docNum = NULL;
 

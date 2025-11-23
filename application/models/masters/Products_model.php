@@ -20,6 +20,7 @@ class Products_model extends CI_Model
     return NULL;
   }
 
+
   public function count_rows(array $ds = array())
   {
     if( ! empty($ds))
