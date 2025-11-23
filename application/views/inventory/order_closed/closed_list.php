@@ -92,18 +92,18 @@
 
 <div class="row">
   <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-    <table class="table table-bordered border-1" style="min-width:1000px;">
+    <table class="table table-bordered border-1" style="min-width:1100px;">
       <thead>
         <tr class="font-size-11">
           <th class="fix-width-40 text-center">#</th>
           <th class="fix-width-80 text-center">วันที่</th>
 					<th class="fix-width-80 text-center">วันที่จัดส่ง</th>
-          <th class="fix-width-100">เลขที่เอกสาร</th>
-					<th class="fix-width-120">เลขที่อ้างอิง</th>
-					<th class="fix-width-100">ช่องทางขาย</th>
-          <th class="min-width-200">ลูกค้า/ผู้รับ/ผู้เบิก</th>
+          <th class="fix-width-150">เลขที่เอกสาร</th>
+					<th class="fix-width-150">เลขที่อ้างอิง</th>
+					<th class="fix-width-150">ช่องทางขาย</th>
+          <th class="min-width-250">ลูกค้า/ผู้รับ/ผู้เบิก</th>
           <th class="fix-width-100 text-right">ยอดเงิน</th>
-          <th class="fix-width-150">User</th>
+          <th class="fix-width-100">User</th>
         </tr>
       </thead>
       <tbody>
@@ -128,7 +128,7 @@
 					<td class="pointer" onclick="viewDetail('<?php echo $rs->code; ?>')">
             <?php echo $rs->reference; ?>
           </td>
-					<td class="pointer text-center" onclick="viewDetail('<?php echo $rs->code; ?>')">
+					<td class="pointer" onclick="viewDetail('<?php echo $rs->code; ?>')">
             <?php echo empty($ch[$rs->channels_code]) ? "" : $ch[$rs->channels_code]; ?>
           </td>
           <td class="pointer" onclick="viewDetail('<?php echo $rs->code; ?>')">
@@ -136,7 +136,7 @@
 							<?php echo $rs->empName; ?>
 						<?php else : ?>
 							<?php echo $rs->customer_code ." : ".$rs->customer_name; ?>
-						<?php endif; ?>            
+						<?php endif; ?>
           </td>
           <td class="pointer text-right" onclick="viewDetail('<?php echo $rs->code; ?>')">
 						<?php echo ($rs->doc_total <= 0 ? number($this->invoice_model->get_billed_amount($rs->code), 2) : number($rs->doc_total,2)); ?>
