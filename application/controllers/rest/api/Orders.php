@@ -669,7 +669,8 @@ class Orders extends REST_Controller
             'warehouse_code' => $warehouse_code,
             'to_warehouse' => $to_warehouse,
             'id_sender' => $id_sender,
-            'shop_id' => $shop_id
+            'shop_id' => $shop_id,
+            'remark' => empty($data->remark) ? NULL : get_null($data->remark)
           );
         }
         else
@@ -695,7 +696,8 @@ class Orders extends REST_Controller
             'warehouse_code' => $warehouse_code,
             'to_warehouse' => $to_warehouse,
             'id_sender' => $id_sender,
-            'shop_id' => $shop_id
+            'shop_id' => $shop_id,
+            'remark' => empty($data->remark) ? NULL : get_null($data->remark)
           );
         }
 
