@@ -70,7 +70,7 @@ class Wrx_adjust_api
               'location' => $rs->warehouse_code,
               'quantity' => floatval($rs->qty),
               'memo' => "",
-              'binNumber' => ""
+              'binNumber' => "Store"
             );
 
             $line++;

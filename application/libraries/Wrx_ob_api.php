@@ -49,7 +49,7 @@ class Wrx_ob_api
         'Company' => $this->company,
         'HeaderInternalId' => intval($order->oracle_id),
         'Fulfillment' => $order->fulfillment_code,
-        'Status' => ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked')),
+        'Status' => ($order->state == 9 ? 'Cancel' : ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked'))),
         'ShippingMethod' => empty($sender) ? "" :  $sender, //$this->ci->sender_model->get_code($order->id_sender),
         'TrackingNo'=> empty($order->shipping_code) ? "" : $order->shipping_code,
         'UpdateBy' => 'WMS API',
@@ -171,7 +171,7 @@ class Wrx_ob_api
     else
     {
       $sc = FALSE;
-      $this->error = "Order not found !";      
+      $this->error = "Order not found !";
     }
 
     return $sc;

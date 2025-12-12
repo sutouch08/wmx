@@ -268,7 +268,7 @@ class Wrx_ib_api
               'itemNumber' => $rs->product_code,
               'receiveQty' => floatval($rs->receive_qty),
               'lineLocation' => $doc->warehouse_code,
-              'bin' => "store" //$doc->zone_code
+              'bin' => "Store" //$doc->zone_code
             );
           }
         }
