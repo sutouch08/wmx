@@ -14,7 +14,7 @@
         <?php endif; ?>
         <?php if( empty($dName[$rs->update_user]) && ! empty($rs->update_user)) : ?>
           <?php $dName[$rs->update_user] = display_name($rs->update_user); ?>
-        <?php endif; ?>  			
+        <?php endif; ?>
   			<?php $cn_text = $rs->is_cancled == 1 ? '<span class="badge badge-danger font-size-10 margin-left-5">ยกเลิก</span>' : ''; ?>
         <?php $backorder = $rs->is_backorder ? 'backorder' : ''; ?>
         <div class="list-block" onclick="goPrepare('<?php echo $rs->code; ?>')">
@@ -106,6 +106,6 @@
 	</div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/mobile/prepare/prepare.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/prepare/prepare.js?v=<?php echo date('YmdH'); ?>"></script>
 
 <?php $this->load->view('include/footer_mobile'); ?>

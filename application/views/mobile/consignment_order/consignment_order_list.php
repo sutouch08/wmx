@@ -72,6 +72,6 @@
  </div>
 </div>
 
-<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/mobile/consignment_order/consignment_order.js?v=<?php echo date('YmdH'); ?>"></script>
 
 <?php $this->load->view('include/footer_mobile'); ?>

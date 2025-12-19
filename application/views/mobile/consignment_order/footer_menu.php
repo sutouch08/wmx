@@ -2,7 +2,7 @@
 	<div class="pg-footer-inner">
 		<div class="pg-footer-content text-right">
 			<div class="footer-menu">
-				<span class="pg-icon" onclick="goTo('main')">
+				<span class="pg-icon" onclick="goTo('mobile/main')">
 					<i class="fa fa-home fa-2x"></i><span>หน้าหลัก</span>
 				</span>
 			</div>

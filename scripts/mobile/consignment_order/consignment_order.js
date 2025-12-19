@@ -13,6 +13,18 @@ function goEdit(code) {
 }
 
 
+function resetFilter() {
+  $.ajax({
+    url:HOME + 'clear_filter',
+    type:'GET',
+    cache:false,
+    success:function() {
+      goBack();
+    }
+  })
+}
+
+
 function rollback(code) {
   swal({
     title: "ย้อนสถานะ",

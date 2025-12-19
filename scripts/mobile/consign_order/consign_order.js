@@ -1,3 +1,5 @@
+
+
 function addNew(){
   window.location.href = HOME + 'add_new';
 }
@@ -10,6 +12,18 @@ function viewDetail(code) {
 
 function goEdit(code) {
   window.location.href = HOME + 'edit/'+code;
+}
+
+
+function resetFilter() {
+  $.ajax({
+    url:HOME + 'clear_filter',
+    type:'GET',
+    cache:false,
+    success:function() {
+      goBack();
+    }
+  })
 }
 
 
