@@ -1244,8 +1244,8 @@ class Consignment_order extends PS_Controller
     $date = $date == '' ? date('Y-m-d') : $date;
     $Y = date('y', strtotime($date));
     $M = date('m', strtotime($date));
-    $prefix = getConfig('PREFIX_CONSIGN_SOLD');
-    $run_digit = getConfig('RUN_DIGIT_CONSIGN_SOLD');
+    $prefix = getConfig('PREFIX_CONSIGNMENT_SOLD');
+    $run_digit = getConfig('RUN_DIGIT_CONSIGNMENT_SOLD');
     $pre = $prefix .'-'.$Y.$M;
     $code = $this->consignment_order_model->get_max_code($pre);
     if( ! empty($code))
