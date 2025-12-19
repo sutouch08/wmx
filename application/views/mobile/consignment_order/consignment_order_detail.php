@@ -53,7 +53,7 @@
 				<?php $totalQty += $rs->qty; ?>
 				<?php $totalAmount += $rs->amount; ?>
         <?php $no++; ?>
-      <?php endforeach; ?><?php echo date('YmdH'); ?>
+      <?php endforeach; ?>
     <?php endif; ?>
   </div>
 
