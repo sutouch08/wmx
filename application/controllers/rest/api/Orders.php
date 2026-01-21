@@ -1228,14 +1228,14 @@ class Orders extends REST_Controller
       }
     }
 
-    if($prefix == 'WS' OR $prefix == 'WU')
-    {
-      if( ! property_exists($data, 'budget_code') OR $data->budget_code == '')
-      {
-        $this->error = 'budget_code is required';
-        return FALSE;
-      }
-    }
+    // if($prefix == 'WS' OR $prefix == 'WU')
+    // {
+    //   if( ! property_exists($data, 'budget_code') OR $data->budget_code == '')
+    //   {
+    //     $this->error = 'budget_code is required';
+    //     return FALSE;
+    //   }
+    // }
 
     if($prefix == 'WT' OR $prefix == 'WQ' OR $prefix == 'WW')
     {

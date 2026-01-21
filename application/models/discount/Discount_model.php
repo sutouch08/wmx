@@ -117,7 +117,7 @@ class Discount_model extends CI_Model
 			->group_start()->where('r.minAmount', 0)->or_where('r.minAmount <=', ($price * $qty))->group_end()
 			->order_by('r.priority', 'DESC')
 			->get();
-
+			
 			if($rs->num_rows() > 0)
 			{
 				return $rs->result();
@@ -227,5 +227,20 @@ class Discount_model extends CI_Model
 		return NULL;
 	}
 
+
+	public function policy_id_in(array $ds = array())
+	{
+		$ids = "0";
+
+		if( ! empty($ds))
+		{
+			foreach($ds as $id)
+			{
+				$ids .= ", {$id}";
+			}
+		}
+
+		return $ids;
+	}
 } //--- end class
 ?>
