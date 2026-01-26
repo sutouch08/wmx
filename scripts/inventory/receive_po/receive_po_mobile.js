@@ -40,7 +40,7 @@ function leave(tab) {
   let target = tab == 'process' ? 'process_list' : 'pending_list';
   $('.buffer').each(function() {
     let el = $(this);
-    let qty = parseDefault(parseFloat(el.val()), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
     if(qty != 0) {
       unsave += qty;
@@ -63,7 +63,7 @@ function leave(tab) {
       window.location.href = HOME + target;
     });
   }
-  else {    
+  else {
     window.location.href = HOME + target;
   }
 }
@@ -74,7 +74,7 @@ function doRefresh() {
 
   $('.buffer').each(function() {
     let el = $(this);
-    let qty = parseDefault(parseFloat(el.val()), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
     if(qty != 0) {
       unsave += qty;
@@ -126,9 +126,9 @@ function doReceive() {
   let barcode = $('#barcode-item').val().trim();
 
   if(barcode.length) {
-    let qty = parseDefault(parseFloat($('#qty').val()), 1);
+    let qty = parseDefaultFloat(removeCommas($('#qty').val()), 1);
     let valid = 0;
-    let totalQty = parseDefault(parseFloat(removeCommas($('#all-qty').val())), 0);
+    let totalQty = parseDefaultFloat(removeCommas($('#all-qty').val()), 0);
 
     if($('.'+barcode).length) {
 
@@ -138,13 +138,13 @@ function doReceive() {
         if(valid == 0 && qty > 0) {
           let id = $(this).data('id');
           let el = $('#receive-qty-'+id);
-          let received = parseDefault(parseFloat(removeCommas(el.val())), 1);
-          let limit = parseDefault(parseFloat(el.data('limit')), 0);
+          let received = parseDefaultFloat(removeCommas(el.val()), 1);
+          let limit = parseDefaultFloat(removeCommas(el.data('limit')), 0);
           let diff = limit - received;
-          let balance = parseDefault(parseFloat(removeCommas($('#balance-'+id).val())), 0);
+          let balance = parseDefaultFloat(removeCommas($('#balance-'+id).val()), 0);
 
           if(diff > 0) {
-            let buffer = parseDefault(parseFloat($('#buffer-'+id).val()), 0);
+            let buffer = parseDefaultFloat(removeCommas($('#buffer-'+id).val()), 0);
             let receiveQty = qty >= diff ? diff : qty;
             let newQty = received + receiveQty;
             balance = limit - newQty;
@@ -216,10 +216,10 @@ function doReceive() {
 
 
 function decreaseReceived(id) {
-  let buffer = parseDefault(parseFloat($('#buffer-'+id).val()), 0); //---- จำนวนรับแล้วที่ยังไม่บันทึก (buffer)
-  let received = parseDefault(parseFloat(removeCommas($('#receive-qty-'+id).val())), 0);
-  let balance = parseDefault(parseFloat(removeCommas($('#balance-'+id).val())), 0);
-  let allQty = parseDefault(parseFloat(removeCommas($('#all-qty').val())), 0);
+  let buffer = parseDefaultFloat(removeCommas($('#buffer-'+id).val()), 0); //---- จำนวนรับแล้วที่ยังไม่บันทึก (buffer)
+  let received = parseDefaultFloat(removeCommas($('#receive-qty-'+id).val()), 0);
+  let balance = parseDefaultFloat(removeCommas($('#balance-'+id).val()), 0);
+  let allQty = parseDefaultFloat(removeCommas($('#all-qty').val()), 0);
 
   if(received > 0) {
     received--;
@@ -240,10 +240,10 @@ function decreaseReceived(id) {
 
 
 function resetReceived(id) {
-  let buffer = parseDefault(parseFloat($('#buffer-'+id).val()), 0); //---- จำนวนรับแล้วที่ยังไม่บันทึก (buffer)
-  let received = parseDefault(parseFloat(removeCommas($('#receive-qty-'+id).val())), 0);
-  let balance = parseDefault(parseFloat(removeCommas($('#balance-'+id).val())), 0);
-  let allQty = parseDefault(parseFloat(removeCommas($('#all-qty').val())), 0);
+  let buffer = parseDefaultFloat(removeCommas($('#buffer-'+id).val()), 0); //---- จำนวนรับแล้วที่ยังไม่บันทึก (buffer)
+  let received = parseDefaultFloat(removeCommas($('#receive-qty-'+id).val()), 0);
+  let balance = parseDefaultFloat(removeCommas($('#balance-'+id).val()), 0);
+  let allQty = parseDefaultFloat(removeCommas($('#all-qty').val()), 0);
 
   if(received > 0) {
     qty = received;
@@ -272,7 +272,7 @@ function saveReceived() {
 
   $('.buffer').each(function() {
     let el = $(this);
-    let qty = parseDefault(parseFloat(el.val()), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
     if(qty != 0) {
       h.rows.push({
@@ -324,7 +324,7 @@ function closeReceive() {
 
   $('.buffer').each(function() {
     let el = $(this);
-    let qty = parseDefault(parseFloat(el.val()), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
     if(qty != 0) {
       unsave += qty;
@@ -361,7 +361,7 @@ function finishReceive() {
 
   $('.buffer').each(function() {
     let el = $(this);
-    let qty = parseDefault(parseFloat(el.val()), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
     if(qty != 0) {
       h.rows.push({

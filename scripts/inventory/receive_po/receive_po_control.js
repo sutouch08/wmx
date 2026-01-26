@@ -10,13 +10,13 @@ function addPoItems() {
 		let el = $(this);
 
 		if(el.val() != "") {
-			let qty = parseDefault(parseFloat(removeCommas(el.val())), 0);
+			let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
 			if(qty > 0) {
 				let no = el.data('uid');
 
 				if($('#receive-qty-'+no).length) {
-					let cqty = parseDefault(parseFloat($('#receive-qty-'+no).val()), 0);
+					let cqty = parseDefaultFloat(removeCommas($('#receive-qty-'+no).val()), 0);
 					let nqty = cqty + qty;
 					$('#receive-qty-'+no).val(nqty);
 
@@ -31,8 +31,8 @@ function addPoItems() {
 					let poRef = el.data('poref');
 					let baseLine = el.data('baseline');
 					let poLineNum = el.data('polinenum');
-					let limit = parseDefault(parseFloat(el.data('limit')), 0.00);
-					let backlogs = parseDefault(parseFloat(el.data('backlogs')), 0);
+					let limit = parseDefaultFloat(removeCommas(el.data('limit')), 0.00);
+					let backlogs = parseDefaultFloat(removeCommas(el.data('backlogs')), 0);
 
 					let item = {
 						'uid' : no,
@@ -96,7 +96,7 @@ function recalTotal() {
 
 	$('.receive-qty').each(function() {
 		let id = $(this).data('uid');
-		let qty = parseDefault(parseFloat(removeCommas($('#receive-qty-'+id).val())), 0);
+		let qty = parseDefaultFloat(removeCommas($('#receive-qty-'+id).val()), 0);
 		totalQty += qty;
 	});
 

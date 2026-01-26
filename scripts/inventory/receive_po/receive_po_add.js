@@ -84,7 +84,7 @@ function save() {
 
 	$('.receive-qty').each(function() {
 		let el = $(this);
-		let qty = parseDefault(parseFloat(el.val()), 0);
+		let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
 		if(qty > 0) {
 			uid = el.data('uid');
@@ -220,7 +220,7 @@ function validateReceive() {
 		clearErrorByClass('receive-qty');
 
 		let code = $('#receive_code').val();
-		let totalQty = parseDefault(parseFloat(removeCommas($('#total-qty').val())), 0);
+		let totalQty = parseDefaultFloat(removeCommas($('#total-qty').val()), 0);
 		let totalReceive = 0;
 		let err = 0;
 		let h = {
@@ -230,8 +230,8 @@ function validateReceive() {
 
 		$('.receive-qty').each(function() {
 			let el = $(this);
-			let qty = parseDefault(parseFloat(el.val()), 0);
-			let limit = parseDefault(parseFloat(el.data('limit')), 0);
+			let qty = parseDefaultFloat(removeCommas(el.val()), 0);
+			let limit = parseDefaultFloat(removeCommas(el.data('limit')), 0);
 
 			if(qty > 0) {
 				if(qty > limit) {
@@ -292,8 +292,8 @@ function checkLimit(option) {
 	$(".receive-qty").each(function() {
 		let el = $(this);
 		let uid = el.data('uid');
-		let limit = parseDefault(parseFloat(el.data('limit')), 0);
-		let qty = parseDefault(parseFloat(el.val()), 0);
+		let limit = parseDefaultFloat(removeCommas(el.data('limit')), 0);
+		let qty = parseDefaultFloat(removeCommas(el.val()), 0);
 
 		if(limit > 0 && qty > 0) {
 			if(qty > limit) {
@@ -635,7 +635,7 @@ function zone_init() {
 function checkBarcode() {
 	let barcode = $('#barcode').val().trim();
 	if(barcode.length) {
-		let qty = parseDefault(parseFloat($('#qty').val()), 1);
+		let qty = parseDefaultFloat(removeCommas($('#qty').val()), 1);
 		let valid = 0;
 
 		if($('.'+barcode).length) {
@@ -645,8 +645,8 @@ function checkBarcode() {
 			$('.'+barcode).each(function() {
 				if(valid == 0 && qty > 0) {
 					let uid = $(this).val();
-					let limit = parseDefault(parseFloat($(this).data('limit')), 0);
-					let inputQty = parseDefault(parseFloat($('#receive-qty-'+uid).val()), 0);
+					let limit = parseDefaultFloat(removeCommas($(this).data('limit')), 0);
+					let inputQty = parseDefaultFloat(removeCommas($('#receive-qty-'+uid).val()), 0);
 					let diff = limit - inputQty;
 
 					if(diff > 0) {
@@ -714,9 +714,9 @@ function sumReceive() {
 		let el = $(this);
 		el.clearError();
 		let no = el.data('uid');
-    let qty = parseDefault(parseFloat(el.val()), 0);
-		let price = parseDefault(parseFloat(el.data('price')), 0);
-		let limit = parseDefault(parseFloat(el.data('limit')), 0);
+    let qty = parseDefaultFloat(removeCommas(el.val()), 0);
+		let price = parseDefaultFloat(removeCommas(el.data('price')), 0);
+		let limit = parseDefaultFloat(removeCommas(el.data('limit')), 0);
 		let amount = qty * price;
 		totalQty += qty;
 		totalAmount += amount;
