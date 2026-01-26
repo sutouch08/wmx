@@ -234,7 +234,7 @@
 					id="backlogs-{{uid}}" data-backlogs="{{backlogs}}" value="{{backLogsLabel}}" readonly />
 			</td>
 			<td class="middle">
-				<input type="number"
+				<input type="text"
 					class="form-control input-sm text-center receive-qty"
 					id="receive-qty-{{uid}}"
 					data-uid="{{uid}}"
@@ -263,7 +263,7 @@
 		<td class="middle text-center">{{on_order_label}}</td>
 		<td class="middle text-center">{{qty_label}}</td>
 		<td class="middle">
-			<input type="number"
+			<input type="text"
 				class="form-control input-sm text-center po-qty"
 				id="po-qty-{{uid}}"
 				data-uid="{{uid}}"
