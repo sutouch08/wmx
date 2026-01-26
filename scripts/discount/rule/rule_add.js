@@ -1,9 +1,9 @@
-function changeURL(id, tab)
-{
+function changeURL(id, tab) {
 	var url = HOME + 'edit/' + id + '/' + tab;
 	var stObj = { stage: 'stage' };
 	window.history.pushState(stObj, 'discount_rule', url);
 }
+
 
 function saveAdd() {
   let name = $('#name').val();
@@ -57,6 +57,7 @@ function disActiveRule(){
   $('#btn-dis-rule').addClass('btn-danger');
 }
 
+
 function updateRule() {
   var id = $('#id_rule').val();
   var isActive = $('#isActive').val();
@@ -102,4 +103,13 @@ function updateRule() {
 			showError(rs);
 		}
   });
+}
+
+
+function getTemplateFile(type) {
+	let token = generateUID();
+	console.log(token);
+	console.log(type);
+  get_download(token);
+	window.location.href = HOME + 'get_template_file/'+type+'/'+token;
 }

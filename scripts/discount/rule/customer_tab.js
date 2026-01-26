@@ -126,7 +126,7 @@ function saveCustomer() {
           title:'Saved',
           type:'success',
           timer:1000
-        });	
+        });
       }
       else {
         beep();
@@ -277,6 +277,7 @@ function addCustId() {
     let output = $('#customerList');
 
     render_append(source, ds, output);
+    reIndex('C');
 
     $('#customer-id').val('');
     $('#customer-id').data('code', '');
@@ -288,11 +289,11 @@ function addCustId() {
 
 function removeCustomer(){
   $('.customer-chk:checked').each(function() {
-		if($(this).is(':checked')) {
-			let id = $(this).val();
-			$('#customer-row-'+id).remove();
-		}
+    let id = $(this).val();
+    $('#customer-row-'+id).remove();
 	});
+
+  reIndex('C');
 }
 
 
@@ -350,11 +351,13 @@ function toggleCustomerId(option){
   }
 
   $('#customer_id').val(option);
+
   if(option == 'Y'){
     $('#btn-cust-id-yes').addClass('btn-primary');
     $('#btn-cust-id-no').removeClass('btn-primary');
     $('#txt-cust-id-box').removeAttr('disabled');
     $('#btn-cust-id-add').removeAttr('disabled');
+    $('#btn-cust-id-upload').removeAttr('disabled');
   }
 
   if(option == 'N'){
@@ -362,6 +365,7 @@ function toggleCustomerId(option){
     $('#btn-cust-id-yes').removeClass('btn-primary');
     $('#txt-cust-id-box').attr('disabled', 'disabled');
     $('#btn-cust-id-add').attr('disabled', 'disabled');
+    $('#btn-cust-id-upload').attr('disabled', 'disabled');
   }
 
   activeCustomerControl();

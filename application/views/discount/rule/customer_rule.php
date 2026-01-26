@@ -53,35 +53,40 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
        <button type="button" class="not-all btn btn-sm width-50 btn-primary" id="btn-cust-id-no" onclick="toggleCustomerId('N')" disabled>NO</button>
      </div>
    </div>
-   <div class="col-lg-5 col-md-5-harf col-sm-4-harf padding-5">
+   <div class="col-lg-3 col-md-3-harf col-sm-4-harf padding-5">
      <input type="text" class="option form-control input-sm" id="txt-cust-id-box" placeholder="ค้นหาชื่อลูกค้า" disabled />
      <input type="hidden" id="customer-id" data-code="" data-name="" />
    </div>
    <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
      <button type="button" class="option btn btn-xs btn-info btn-block" id="btn-cust-id-add" onclick="addCustId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
    </div>
+   <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
+     <button type="button" class="option btn btn-xs btn-white btn-info btn-block" id="btn-cust-id-upload" onclick="getUploadFile('C')" disabled><i class="fa fa-cloud-upload"></i>&nbsp; Import</button>
+   </div>
 
    <div class="divider-hidden"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 padding-5 not-show">
-     <span class="form-control left-label">SKU</span>
+     <span class="form-control left-label">Customer</span>
    </div>
-   <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="max-height:300px; overflow:auto; margin-bottom:5px;">
-     <table class="table table-striped border-1">
+   <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="min-height: 100px; max-height:300px; overflow:scroll; margin-bottom:15px; border:solid 1px #ccc; padding:0;">
+     <table class="table tableFixHead border-1">
        <thead>
          <tr class="font-size-11">
-           <th class="fix-width-40">
+           <th class="middle text-center fix-width-40 fix-header">
              <label>
                <input type="checkbox" class="ace" onchange="checkCustomerAll($(this))">
                <span class="lbl"></span>
              </label>
            </th>
-           <th class="fix-width-150">Customer Code</th>
-           <th class="min-width-250">Customer Name</th>
-           <th class="fix-width-60 text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeCustomer()">Delete</button></th>
+           <th class="middle text-center fix-width-50 fix-header">#</th>
+           <th class="middle fix-width-150 fix-header">Customer Code</th>
+           <th class="middle min-width-250 fix-header">Customer Name</th>
+           <th class="middle fix-width-80 fix-header text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeCustomer()">Delete</button></th>
          </tr>
        </thead>
        <tbody id="customerList">
-         <?php if(!empty($cusList)) : ?>
+         <?php if(! empty($cusList)) : ?>
+           <?php $ne = 1; ?>
            <?php foreach($cusList as $rs) : ?>
              <tr class="font-size-11" id="customer-row-<?php echo $rs->customer_id; ?>">
                <td class="middle text-center">
@@ -93,9 +98,11 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
                    <span class="lbl"></span>
                  </label>
                </td>
+               <td class="middle text-center C"><?php echo $ne; ?></td>
                <td class="middle"><?php echo $rs->customer_code; ?></td>
                <td class="middle" colspan="2"><?php echo $rs->customer_name; ?></td>
              </tr>
+             <?php $ne++; ?>
            <?php endforeach; ?>
          <?php endif; ?>
        </tbody>
@@ -213,9 +220,33 @@ $customer_grade = ($custGradeNo > 0 && $allCustomer == 'N' && $customer_id == 'N
           <span class="lbl"></span>
         </label>
      </td>
+     <td class="middle text-center C"></td>
      <td class="middle">{{code}}</td>
      <td class="middle" colspan="2">{{name}}</td>
    </tr>
+ </script>
+
+ <script type="text/x-handlebarsTemplate" id="customerRowsTemplate">
+    {{#each this}}
+      {{#if nodata}}
+        <tr class="font-size-11">
+          <td colspan="4" class="middle text-center">--- No Data --</td>
+        </tr>
+      {{else}}
+         <tr class="font-size-11" id="customer-row-{{id}}">
+           <td class="middle text-center">
+              <label>
+                <input type="checkbox" class="ace customer-chk"
+                data-code="{{code}}" data-name="{{name}}" value="{{id}}">
+                <span class="lbl"></span>
+              </label>
+           </td>
+           <td class="middle text-center C"></td>
+           <td class="middle">{{code}}</td>
+           <td class="middle" colspan="2">{{name}}</td>
+         </tr>
+      {{/if}}
+    {{/each}}
  </script>
 
  <?php $this->load->view('discount/rule/customer_rule_modal'); ?>

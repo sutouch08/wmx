@@ -12,14 +12,32 @@
 ?>
 <script src="<?php echo base_url(); ?>assets/js/xlsx.full.min.js"></script>
 
-<div class="row top-row">
+<div class="row">
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 padding-top-5">
     <h4 class="title"></i><?php echo $this->title; ?></h4>
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
-    <button type="button" class="btn btn-xs btn-warning top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+    <button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> กลับ</button>
+    <div class="btn-group">
+      <button data-toggle="dropdown" class="btn btn-primary btn-white dropdown-toggle margin-top-5" aria-expanded="false">
+        Template
+        <i class="ace-icon fa fa-angle-down icon-on-right"></i>
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right">
+        <li class="primary">
+          <a href="javascript:getTemplateFile('C')"><i class="fa fa-download"></i>&nbsp; Customer Template</a>
+        </li>
+        <li class="primary">
+          <a href="javascript:getTemplateFile('P')"><i class="fa fa-download"></i>&nbsp; SKU Template</a>
+        </li>
+        <li class="primary">
+          <a href="javascript:getTemplateFile('M')"><i class="fa fa-download"></i>&nbsp; Model Template</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
+
 <hr/>
 
 <div class="row hidden-xs">
@@ -75,7 +93,7 @@
     </ul>
   </div>
 
-  <div class="col-lg-10-harf col-md-10 col-sm-10 col-xs-12 padding-5" id="content-block" style="border-left:solid 1px #ccc; min-height:600px; max-height:1000px;">
+  <div class="col-lg-10-harf col-md-10 col-sm-10 col-xs-12 padding-5" id="content-block" style="border-left:solid 1px #ccc; min-height:600px;">
     <div class="tab-content" style="border:0;">
       <div class="tab-pane fade <?php echo $tab1; ?>" id="discount">
         <?php $this->load->view('discount/rule/discount_rule'); ?>
@@ -96,10 +114,12 @@
     </div>
   </div><!--/ col-sm-9  -->
 </div><!--/ row  -->
+
 <div class="row visible-xs">
 	<div class="col-xs-12"><h1 class="text-center">Not support mobile</h1></div>
 </div>
 
+<?php $this->load->view('discount/rule/import_modal'); ?>
 <script src="<?php echo base_url(); ?>scripts/discount/rule/rule.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/discount/rule/rule_add.js?v=<?php echo date('Ymd'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/discount/rule/channels_tab.js?v=<?php echo date('Ymd'); ?>"></script>

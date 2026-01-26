@@ -1181,6 +1181,426 @@ class Discount_rule extends PS_Controller
   }
 
 
+  public function get_customer_list()
+  {
+    $sc = TRUE;
+    $this->load->library('excel');
+    $file = isset( $_FILES['uploadFile'] ) ? $_FILES['uploadFile'] : FALSE;
+    $ds = array(); //---- ได้เก็บข้อมูล
+
+    if($file !== FALSE)
+    {
+      $path = $this->config->item('upload_path'). 'import_files/';
+      $file	= 'uploadFile';
+
+      $config = array(   // initial config for upload class
+        "allowed_types" => "xlsx",
+        "upload_path" => $path,
+        "file_name"	=> 'customers-'.date('YmdHis'),
+        "max_size" => 5120,
+        "overwrite" => TRUE
+      );
+
+      $this->load->library("upload", $config);
+
+      if( ! $this->upload->do_upload($file))
+      {
+        $sc = FALSE;
+        $this->error = $this->upload->display_errors();
+      }
+
+      if($sc === TRUE)
+      {
+        $info = $this->upload->data();
+        $excel = PHPExcel_IOFactory::load($info['full_path']);
+        $excel->setActiveSheetIndex(0);
+
+        $sheet	= $excel->getSheet(0);
+
+        if(empty($sheet))
+        {
+          $sc = FALSE;
+          $this->error = "Cannot read file or file not contain any data";
+        }
+
+        if($sc === TRUE)
+        {
+          $rows = $sheet->getHighestRow();
+
+          $i = 1;
+          $j = 1;
+          $k = 1;
+
+          $customers = [];
+
+          while($i <= $rows)
+          {
+            if($i > 1)
+            {
+              $code = $sheet->getCell("A{$i}")->getValue();
+
+              if( ! empty($code))
+              {
+                if(empty($customers[$j][$code]))
+                {
+                  $customers[$j][$code] = $code;
+
+                  $k++;
+
+                  if($k == 20)
+                  {
+                    $j++;
+                    $k = 1;
+                  }
+                }
+              }
+
+              $i++;
+            }
+            else
+            {
+              $i++;
+            }
+          }
+
+          if( ! empty($customers))
+          {
+            foreach($customers as $cs)
+            {
+              $list = $this->get_customers($cs);
+
+              if( ! empty($list))
+              {
+                foreach($list as $rs)
+                {
+                  $ds[] = $rs;
+                }
+              }
+            }
+          }
+        } //--- $sc
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Upload file not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function get_sku_list()
+  {
+    $sc = TRUE;
+    $this->load->library('excel');
+    $file = isset( $_FILES['uploadFile'] ) ? $_FILES['uploadFile'] : FALSE;
+    $ds = array(); //---- ได้เก็บข้อมูล
+
+    if($file !== FALSE)
+    {
+      $path = $this->config->item('upload_path'). 'import_files/';
+      $file	= 'uploadFile';
+
+      $config = array(   // initial config for upload class
+        "allowed_types" => "xlsx",
+        "upload_path" => $path,
+        "file_name"	=> 'sku-'.date('YmdHis'),
+        "max_size" => 5120,
+        "overwrite" => TRUE
+      );
+
+      $this->load->library("upload", $config);
+
+      if( ! $this->upload->do_upload($file))
+      {
+        $sc = FALSE;
+        $this->error = $this->upload->display_errors();
+      }
+
+      if($sc === TRUE)
+      {
+        $info = $this->upload->data();
+        $excel = PHPExcel_IOFactory::load($info['full_path']);
+        $excel->setActiveSheetIndex(0);
+
+        $sheet	= $excel->getSheet(0);
+
+        if(empty($sheet))
+        {
+          $sc = FALSE;
+          $this->error = "Cannot read file or file not contain any data";
+        }
+
+        if($sc === TRUE)
+        {
+          $rows = $sheet->getHighestRow();
+
+          $i = 1;
+          $j = 1;
+          $k = 1;
+
+          $items = [];
+
+          while($i <= $rows)
+          {
+            if($i > 1)
+            {
+              $code = $sheet->getCell("A{$i}")->getValue();
+
+              if( ! empty($code))
+              {
+                if(empty($items[$j][$code]))
+                {
+                  $items[$j][$code] = $code;
+
+                  $k++;
+
+                  if($k == 20)
+                  {
+                    $j++;
+                    $k = 1;
+                  }
+                }
+              }
+
+              $i++;
+            }
+            else
+            {
+              $i++;
+            }
+          }
+
+          if( ! empty($items))
+          {
+            foreach($items as $cs)
+            {
+              $list = $this->get_items($cs);
+
+              if( ! empty($list))
+              {
+                foreach($list as $rs)
+                {
+                  $ds[] = $rs;
+                }
+              }
+            }
+          }
+        } //--- $sc
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Upload file not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function get_model_list()
+  {
+    $sc = TRUE;
+    $this->load->library('excel');
+    $file = isset( $_FILES['uploadFile'] ) ? $_FILES['uploadFile'] : FALSE;
+    $ds = array(); //---- ได้เก็บข้อมูล
+
+    if($file !== FALSE)
+    {
+      $path = $this->config->item('upload_path'). 'import_files/';
+      $file	= 'uploadFile';
+
+      $config = array(   // initial config for upload class
+        "allowed_types" => "xlsx",
+        "upload_path" => $path,
+        "file_name"	=> 'model-'.date('YmdHis'),
+        "max_size" => 5120,
+        "overwrite" => TRUE
+      );
+
+      $this->load->library("upload", $config);
+
+      if( ! $this->upload->do_upload($file))
+      {
+        $sc = FALSE;
+        $this->error = $this->upload->display_errors();
+      }
+
+      if($sc === TRUE)
+      {
+        $info = $this->upload->data();
+        $excel = PHPExcel_IOFactory::load($info['full_path']);
+        $excel->setActiveSheetIndex(0);
+
+        $sheet	= $excel->getSheet(0);
+
+        if(empty($sheet))
+        {
+          $sc = FALSE;
+          $this->error = "Cannot read file or file not contain any data";
+        }
+
+        if($sc === TRUE)
+        {
+          $rows = $sheet->getHighestRow();
+
+          $i = 1;
+          $j = 1;
+          $k = 1;
+
+          $items = [];
+
+          while($i <= $rows)
+          {
+            if($i > 1)
+            {
+              $code = $sheet->getCell("A{$i}")->getValue();
+
+              if( ! empty($code))
+              {
+                if(empty($items[$j][$code]))
+                {
+                  $items[$j][$code] = $code;
+
+                  $k++;
+
+                  if($k == 20)
+                  {
+                    $j++;
+                    $k = 1;
+                  }
+                }
+              }
+
+              $i++;
+            }
+            else
+            {
+              $i++;
+            }
+          }
+
+          if( ! empty($items))
+          {
+            foreach($items as $cs)
+            {
+              $list = $this->get_models($cs);
+
+              if( ! empty($list))
+              {
+                foreach($list as $rs)
+                {
+                  $ds[] = $rs;
+                }
+              }
+            }
+          }
+        } //--- $sc
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Upload file not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $ds
+    );
+
+    echo json_encode($arr);
+  }
+
+
+  public function get_customers(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      $rs = $this->db->select('id, code, name')->where_in('code', $ds)->get('customers');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
+
+
+  public function get_items(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      $rs = $this->db->select('id, code, name')->where_in('code', $ds)->get('products');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
+
+
+  public function get_models(array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      $rs = $this->db->select('id, code, name')->where_in('code', $ds)->get('product_model');
+
+      if($rs->num_rows() > 0)
+      {
+        return $rs->result();
+      }
+    }
+
+    return NULL;
+  }
+
+
+  public function get_template_file($type, $token)
+  {
+    //--- type : C = Customer, P = SKU, M = Model
+    $name = $type == 'C' ? 'Customer template' : ($type == 'P' ? 'SKU template' : 'Model template');
+    $col = $type == 'C' ? 'Customer code' : ($type == 'P' ? 'SKU' : 'Model code');
+    $val = $type == 'C' ? 'CLSH9-0001' : ($type == 'P' ? 'WA-PLAN15-AA-L' : 'WA-PLAN15');
+    $this->load->library('excel');
+
+    $this->excel->setActiveSheetIndex(0);
+    $this->excel->getActiveSheet()->setTitle("Sheet1");
+    $sheet = $this->excel->getActiveSheet();
+    $sheet->getColumnDimension("A")->setAutoSize(true);
+    $sheet->setCellValue('A1', $col);
+    $sheet->setCellValue('A2', $val);
+
+    setToken($token);
+    $file_name = "{$name}.xlsx";
+    header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'); /// form excel 2007 XLSX
+    header('Content-Disposition: attachment;filename="'.$file_name.'"', true);
+    $writer = PHPExcel_IOFactory::createWriter($this->excel, 'Excel2007');
+    $writer->save('php://output');
+  }
+
+
   public function get_new_code()
   {
     $date = date('Y-m-d');

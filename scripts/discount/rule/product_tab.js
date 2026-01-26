@@ -527,17 +527,19 @@ function addProduct(id, code, name) {
     let output = $('#itemList');
 
     render_append(source, ds, output);
+
+    reIndex('P');
 	}
 }
 
 
 function removeItem(){
-  $('.item-chk').each(function() {
-		if($(this).is(':checked')) {
-			let id = $(this).val();
-			$('#item-row-'+id).remove();
-		}
-	})
+  $('.item-chk:checked').each(function() {
+    let id = $(this).val();
+    $('#item-row-'+id).remove();
+	});
+
+  reIndex('P');
 }
 
 
@@ -577,6 +579,8 @@ function addModelId() {
     $('#model-id').data('code', '');
     $('#model-id').data('name', '');
     $('#txt-model-id-box').val('').focus();
+
+    reIndex('M');
   }
 }
 
@@ -587,18 +591,19 @@ function addModel(id, code, name) {
     let source = $('#modelRowTemplate').html();
     let output = $('#modelList');
     render_append(source, ds, output);
+
+    reIndex('M');
   }
 }
 
 
 function removeModel(){
-  $('.model-chk').each(function() {
+  $('.model-chk:checked').each(function() {
 		let id = $(this).val();
-
-		if($(this).is(':checked')) {
-			$('#model-row-'+id).remove();
-		}
+    $('#model-row-'+id).remove();
 	});
+
+  reIndex('M');
 }
 
 
@@ -1182,116 +1187,3 @@ $(document).ready(function() {
   toggleModelId(modelId);
 	toggleProductId(productId);
 });
-
-
-function getUploadFile(){
-	$('#upload-modal').modal('show');
-}
-
-
-function getFile(){
-	$('#uploadFile').click();
-}
-
-
-$("#uploadFile").change(function(){
-	if($(this).val() != '')
-	{
-		var file 		= this.files[0];
-		var name		= file.name;
-		var type 		= file.type;
-		var size		= file.size;
-
-		if( size > 5000000 )
-		{
-			swal("ขนาดไฟล์ใหญ่เกินไป", "ไฟล์แนบต้องมีขนาดไม่เกิน 5 MB", "error");
-			$(this).val('');
-			return false;
-		}
-
-		$('#show-file-name').text(name);
-	}
-});
-
-
-function readExcelFile() {
-		$('#upload-modal').modal('hide');
-		var regex = /^([a-zA-Z0-9\s_\\.\-:])+(.xlsx|.xls)$/;
-	 /*Checks whether the file is a valid excel file*/
-	 if (regex.test($("#uploadFile").val().toLowerCase())) {
-			 var xlsxflag = false; /*Flag for checking whether excel is .xls format or .xlsx format*/
-			 if ($("#uploadFile").val().toLowerCase().indexOf(".xlsx") > 0) {
-					 xlsxflag = true;
-			 }
-			 /*Checks whether the browser supports HTML5*/
-			 if (typeof (FileReader) != "undefined") {
-					 var reader = new FileReader();
-					 reader.onload = function (e) {
-							 var data = e.target.result;
-							 /*Converts the excel data in to object*/
-							 if (xlsxflag) {
-									 var workbook = XLSX.read(data, { type: 'binary' });
-							 }
-							 else {
-									 var workbook = XLS.read(data, { type: 'binary' });
-							 }
-							 /*Gets all the sheetnames of excel in to a variable*/
-							 var sheet_name_list = workbook.SheetNames;
-
-							 var cnt = 0; /*This is used for restricting the script to consider only first sheet of excel*/
-							 sheet_name_list.forEach(function (y) { /*Iterate through all sheets*/
-									 /*Convert the cell value to Json*/
-									 if (xlsxflag) {
-											 var exceljson = XLSX.utils.sheet_to_json(workbook.Sheets[y]);
-									 }
-									 else {
-											 var exceljson = XLS.utils.sheet_to_row_object_array(workbook.Sheets[y]);
-									 }
-
-									 if (exceljson.length > 0 && cnt == 0) {
-											 addToList(exceljson);
-											 cnt++;
-									 }
-							 });
-					 }
-
-					 if (xlsxflag) {/*If excel file is .xlsx extension than creates a Array Buffer from excel*/
-							 reader.readAsArrayBuffer($("#uploadFile")[0].files[0]);
-					 }
-					 else {
-							 reader.readAsBinaryString($("#uploadFile")[0].files[0]);
-					 }
-			 }
-			 else {
-					 swal({
-						 title:'Error!',
-						 text:"Sorry! Your browser does not support HTML5!",
-						 type:'error'
-					 });
-			 }
-	 }
-	 else {
-			 swal({
-				 title:'Error!',
-				 text:"Please upload a valid Excel file!",
-				 type:'error'
-			 });
-	 }
-}
-
-
-function addToList(jsondata) {
-	if(jsondata.length) {
-		//--- clear current li in model-list
-		$('#model-list li').remove();
-		//--- clear current hidden input list
-		$('.modelId').remove();
-		$('#psCount').text('0');
-
-		for (var i = 0; i < jsondata.length; i++) {
-			//console.log(jsondata[i]);
-			var code = $.trim(jsondata[i].Model);
-			addModel(code);
-		}
-	}
-}

@@ -242,7 +242,7 @@ $('#poGrid').on('shown.bs.modal', function() {
 
 function receiveAll() {
 	$('.po-qty').each(function() {
-		let qty = parseDefault(parseFloat($(this).data('qty')), 0);
+		let qty = parseDefaultFloat(removeCommas($(this).data('qty')), 0);
 		if(qty > 0) {
 			$(this).val(addCommas(qty));
 		}

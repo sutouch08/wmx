@@ -116,8 +116,10 @@ function isDate(txtDate) {
 
 
 function removeCommas(str){
-  while(str.search(",") >= 0) {
-    str = (str + "").replace(',', '');
+  if(typeof(str) !== 'number') {
+    while(str.search(",") >= 0) {
+      str = (str + "").replace(',', '');
+    }
   }
 
   return str;

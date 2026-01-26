@@ -86,40 +86,44 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
      </div>
    </div>
 
-   <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
+   <div class="col-lg-4 col-md-4 col-sm-5 padding-5">
      <input type="text" class="not-pd-all option form-control input-sm" id="txt-product-id-box" placeholder="รหัส/ชื่อสินค้า" disabled />
      <input type="hidden" id="product-id" data-code="" data-name=""/>
    </div>
 
-   <div class="col-sm-1 padding-5">
+   <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
      <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-id-add" onclick="addProductId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
    </div>
 
-   <div class="col-sm-1 col-1-harf padding-5 hide">
-     <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-product-import" onclick="getUploadFile()" disabled><i class="fa fa-upload"></i> import</button>
+   <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
+     <button type="button" class="not-pd-all option btn btn-white btn-xs btn-info btn-block" id="btn-product-import" onclick="getUploadFile('P')" disabled><i class="fa fa-cloud-upload"></i> import</button>
    </div>
 
    <div class="divider-hidden"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3 not-show">
      <span class="form-control text-label">SKU</span>
    </div>
-   <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="max-height:300px; overflow:auto; margin-bottom:5px;">
-     <table class="table table-striped border-1">
+   <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5 " style="max-height:300px; overflow:auto; margin-bottom:5px;">
+     <table class="table tableFixHead border-1">
        <thead>
          <tr class="font-size-11">
-           <th class="fix-width-40">
+           <th class="middle fix-width-40 fix-header text-center">
              <label>
                <input type="checkbox" class="ace" onchange="checkItemAll($(this))">
                <span class="lbl"></span>
              </label>
            </th>
-           <th class="fix-width-150">SKU Code</th>
-           <th class="min-width-250">Description</th>
-           <th class="fix-width-60 text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeItem()">Delete</button></th>
+           <th class="middle fix-width-50 fix-header text-center">#</th>
+           <th class="middle fix-width-150 fix-header">SKU Code</th>
+           <th class="middle min-width-250 fix-header">Description</th>
+           <th class="middle fix-width-100 fix-header text-center">
+             <button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeItem()">Delete</button>
+           </th>
          </tr>
        </thead>
        <tbody id="itemList">
          <?php if(!empty($pdList)) : ?>
+           <?php $np = 1; ?>
            <?php foreach($pdList as $item) : ?>
              <tr class="font-size-11" id="item-row-<?php echo $item->product_id; ?>">
                <td class="middle text-center">
@@ -131,16 +135,20 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
                    <span class="lbl"></span>
                  </label>
                </td>
+               <td class="middle text-center P"><?php echo $np; ?></td>
                <td class="middle"><?php echo $item->product_code; ?></td>
                <td class="middle" colspan="2"><?php echo $item->product_name; ?></td>
              </tr>
+             <?php $np++; ?>
            <?php endforeach; ?>
+         <?php else : ?>
+           <tr class="font-size-11"><td colspan="4" class="middle text-center">-- No Data --</td></tr>
          <?php endif; ?>
        </tbody>
      </table>
    </div>
 
-
+   <div class="divider-hidden"></div>
    <div class="col-lg-2 col-md-2-harf col-sm-3">
      <span class="form-control text-label text-right">Model</span>
    </div>
@@ -152,17 +160,17 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
    </div>
 
 
-   <div class="col-lg-5 col-md-5 col-sm-5 padding-5">
+   <div class="col-lg-4 col-md-4 col-sm-5 padding-5">
      <input type="text" class="not-pd-all option form-control input-sm" id="txt-model-id-box" placeholder="รหัส/ชื่อรุ่น" disabled />
      <input type="hidden" id="model-id" data-code="" data-name="" />
    </div>
 
-   <div class="col-lg-1 col-md-1 col-sm-1 padding-5">
+   <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
      <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-id-add" onclick="addModelId()" disabled><i class="fa fa-plus"></i> เพิ่ม</button>
    </div>
 
-   <div class="col-sm-1 col-1-harf padding-5 hide">
-     <button type="button" class="not-pd-all option btn btn-xs btn-info btn-block" id="btn-model-import" onclick="getUploadFile()" disabled><i class="fa fa-file-excel-o"></i>&nbsp; import</button>
+   <div class="col-lg-1 col-md-1-harf col-sm-1-harf padding-5">
+     <button type="button" class="not-pd-all option btn btn-white btn-xs btn-info btn-block" id="btn-model-import" onclick="getUploadFile('M')" disabled><i class="fa fa-cloud-upload"></i>&nbsp; import</button>
    </div>
 
    <div class="divider-hidden"></div>
@@ -170,22 +178,24 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
      <span class="form-control text-label">Model</span>
    </div>
    <div class="col-lg-10 col-md-9-harf col-sm-9 padding-5" style="max-height:300px; overflow:auto; margin-bottom:5px;">
-     <table class="table table-striped border-1">
+     <table class="table tableFixHead border-1">
        <thead>
          <tr class="font-size-11">
-           <th class="fix-width-40">
+           <th class="middle fix-width-40 fix-header text-center">
              <label>
                <input type="checkbox" class="ace" onchange="checkModelAll($(this))">
                <span class="lbl"></span>
              </label>
            </th>
-           <th class="min-width-100">Model Code</th>
-           <th class="min-width-250">Desctiption</th>
-           <th class="fix-width-60 text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeModel()">Delete</button></th>
+           <th class="middle fix-width-50 fix-header text-center">#</th>
+           <th class="middle min-width-100 fix-header">Model Code</th>
+           <th class="middle min-width-250 fix-header">Desctiption</th>
+           <th class="middle fix-width-60 fix-header text-center"><button type="button" class="btn btn-minier btn-danger btn-block" onclick="removeModel()">Delete</button></th>
          </tr>
        </thead>
        <tbody id="modelList">
          <?php if(!empty($pdModel)) : ?>
+           <?php $nm = 1; ?>
            <?php foreach($pdModel as $item) : ?>
              <tr class="font-size-11" id="model-row-<?php echo $item->model_id; ?>">
                <td class="middle text-center">
@@ -197,15 +207,19 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
                    <span class="lbl"></span>
                  </label>
                </td>
+               <td class="middle text-center M"><?php echo $nm; ?></td>
                <td class="middle"><?php echo $item->model_code; ?></td>
                <td class="middle" colspan="2"><?php echo $item->model_name; ?></td>
              </tr>
+             <?php $nm++; ?>
            <?php endforeach; ?>
+         <?php else : ?>
+           <tr class="font-size-11"><td colspan="4" class="middle text-center">-- No Data --</td></tr>
          <?php endif; ?>
        </tbody>
      </table>
    </div>
-
+   <div class="divider-hidden"></div>
 
    <div class="col-lg-2 col-md-2-harf col-sm-3">
      <span class="form-control text-label text-right">Main Group</span>
@@ -434,34 +448,6 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
  <input type="hidden" id="product_year" value="<?php echo $product_year; ?>" />
 
 
- <div class="modal fade" id="upload-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-   <div class="modal-dialog" model="width:500px;">
-     <div class="modal-content">
-       <div class="modal-header">
-         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-         <h4 class="modal-title">Import Product Model</h4>
-       </div>
-       <div class="modal-body">
-         <form id="upload-form" name="upload-form" method="post" enctype="multipart/form-data">
-           <div class="row">
-             <div class="col-sm-9">
-               <button type="button" class="btn btn-sm btn-primary btn-block" id="show-file-name" onclick="getFile()">กรุณาเลือกไฟล์ Excel</button>
-             </div>
-
-             <div class="col-sm-3">
-               <button type="button" class="btn btn-sm btn-info" onclick="readExcelFile()"><i class="fa fa-cloud-upload"></i> นำเข้า</button>
-             </div>
-           </div>
-           <input type="file" class="hide" name="uploadFile" id="uploadFile" accept=".xlsx" />
-         </form>
-       </div>
-       <div class="modal-footer">
-
-       </div>
-     </div>
-   </div>
- </div>
-
  <script type="text/x-handlebarsTemplate" id="itemRowTemplate">
    <tr class="font-size-11" id="item-row-{{id}}">
      <td class="middle text-center">
@@ -473,9 +459,35 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
         <span class="lbl"></span>
       </label>
     </td>
-     <td class="middle">{{code}}</td>
-     <td class="middle" colspan="2">{{name}}</td>
+    <td class="middle text-center P"></td>
+    <td class="middle">{{code}}</td>
+    <td class="middle" colspan="2">{{name}}</td>
    </tr>
+ </script>
+
+ <script type="text/x-handlebarsTemplate" id="itemRowsTemplate">
+    {{#each this}}
+      {{#if nodata}}
+        <tr class="font-size-11">
+          <td colspan="4" class="middle text-center">-- No Data --</td>
+        </tr>
+      {{else}}
+        <tr class="font-size-11" id="item-row-{{id}}">
+          <td class="middle text-center">
+           <label>
+             <input type="checkbox" class="ace item-chk"
+             id="item-{{id}}"
+             value="{{id}}"
+             data-code="{{code}}" />
+             <span class="lbl"></span>
+           </label>
+         </td>
+         <td class="middle text-center P"></td>
+         <td class="middle">{{code}}</td>
+         <td class="middle" colspan="2">{{name}}</td>
+        </tr>
+      {{/if}}
+    {{/each}}
  </script>
 
  <script type="text/x-handlebarsTemplate" id="modelRowTemplate">
@@ -489,9 +501,35 @@ $product_year = ($pdYearNo > 0 && $allProduct == 'N' && $product_model == 'N' &&
         <span class="lbl"></span>
       </label>
     </td>
-     <td class="middle" >{{code}}</td>
-     <td class="middle" colspan="2">{{name}}</td>
+    <td class="middle text-center nm"></td>
+    <td class="middle" >{{code}}</td>
+    <td class="middle" colspan="2">{{name}}</td>
    </tr>
+ </script>
+
+ <script type="text/x-handlebarsTemplate" id="modelRowsTemplate">
+    {{#each this}}
+      {{#if nodata}}
+        <tr class="font-size-11">
+          <td colspan="4" class="middle text-center">-- No Data --</td>
+        </tr>
+      {{else}}
+        <tr class="font-size-11" id="model-row-{{id}}">
+          <td class="middle text-center">
+           <label>
+             <input type="checkbox" class="ace model-chk"
+             id="model-{{id}}"
+             value="{{id}}"
+             data-code="{{code}}" />
+             <span class="lbl"></span>
+           </label>
+         </td>
+         <td class="middle text-center M"></td>
+         <td class="middle" >{{code}}</td>
+         <td class="middle" colspan="2">{{name}}</td>
+        </tr>
+      {{/if}}
+    {{/each}}
  </script>
 
  <?php $this->load->view('discount/rule/product_rule_modal'); ?>
