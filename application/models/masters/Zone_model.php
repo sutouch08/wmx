@@ -32,6 +32,17 @@ class Zone_model extends CI_Model
   }
 
 
+  public function update_by_id($id, $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->where('id', $id)->update($this->tb, $ds);
+    }
+
+    return FALSE;
+  }
+
+
   //--- add new customer to zone
   public function add_customer(array $ds = array())
   {
@@ -390,6 +401,18 @@ class Zone_model extends CI_Model
     return NULL;
   }
 
+
+  public function get_id($code)
+  {
+    $rs = $this->db->select('id')->where('code', $code)->get($this->tb);
+
+    if($rs->num_rows() === 1)
+    {
+      return $rs->row()->id;
+    }
+
+    return NULL;
+  }
 
   public function get($code)
   {

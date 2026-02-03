@@ -13,7 +13,7 @@ class View_stock extends PS_Controller
 		$this->pm->can_view = 1;
 
     $this->load->model('masters/products_model');
-    $this->load->model('masters/product_style_model');
+    $this->load->model('masters/product_model_model');
     $this->load->model('masters/product_tab_model');
     $this->load->model('stock/stock_model');
 

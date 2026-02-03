@@ -596,7 +596,7 @@ class Receive_product extends PS_Controller
 
 			if( ! empty($doc))
 			{
-				if($doc->status != 2)
+				if($doc->status != 'D')
 				{
           $this->load->model('stock/stock_model');
           $this->load->model('inventory/movement_model');
@@ -605,16 +605,19 @@ class Receive_product extends PS_Controller
 
           if( ! empty($details))
           {
-            foreach($details as $rs)
+            if($doc->status == 'C')
             {
-              if($sc === FALSE) { break; }
-
-              $stock = $this->stock_model->get_stock_zone($doc->zone_code, $rs->product_code);
-
-              if($stock < $rs->receive_qty)
+              foreach($details as $rs)
               {
-                $sc = FALSE;
-                $this->error = "สต็อกคงเหลือในโซนไม่เพียงพอ";
+                if($sc === FALSE) { break; }
+
+                $stock = $this->stock_model->get_stock_zone($doc->zone_code, $rs->product_code);
+
+                if($stock < $rs->receive_qty)
+                {
+                  $sc = FALSE;
+                  $this->error = "สต็อกคงเหลือในโซนไม่เพียงพอ {$rs->product_code} : {$doc->zone_code} ({$rs->receive_qty} / {$stock})";
+                }
               }
             }
           }
@@ -625,14 +628,17 @@ class Receive_product extends PS_Controller
 
             if( ! empty($details))
             {
-              foreach($details as $rs)
+              if($doc->status == 'C')
               {
-                if($sc === FALSE) { break; }
-
-                if( ! $this->stock_model->update_stock_zone($doc->zone_code, $rs->product_code, ($rs->receive_qty * -1)))
+                foreach($details as $rs)
                 {
-                  $sc = FALSE;
-                  $this->error = "ตัดสต็อกออกจากโซนไม่สำเร็จ";
+                  if($sc === FALSE) { break; }
+
+                  if( ! $this->stock_model->update_stock_zone($doc->zone_code, $rs->product_code, ($rs->receive_qty * -1)))
+                  {
+                    $sc = FALSE;
+                    $this->error = "ตัดสต็อกออกจากโซนไม่สำเร็จ : {$rs->product_code}";
+                  }
                 }
               }
 
@@ -649,7 +655,7 @@ class Receive_product extends PS_Controller
             if($sc === TRUE)
             {
               //--- set details to cancle
-              if( ! $this->receive_product_model->update_details($code, array('is_cancle' => 1)))
+              if( ! $this->receive_product_model->update_details($code, array('line_status' => 'D')))
               {
                 $sc = FALSE;
                 $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ";
@@ -659,15 +665,12 @@ class Receive_product extends PS_Controller
             if($sc === TRUE)
             {
               $arr = array(
-                'status' => 2,
-                'is_approve' => 0,
-                'approver' => NULL,
-                'is_complete' => 0,
-                'cancle_date' => now(),
-                'cancle_reason' => $reason,
-                'cancle_user' => $this->_user->uname
+                'status' => 'D',
+                'cancel_reason' => NULL,
+                'cancel_user' => $this->_user->uname,
+                'cancel_date' => now()
               );
-
+              
               if( ! $this->receive_product_model->update($doc->code, $arr))
               {
                 $sc = FALSE;

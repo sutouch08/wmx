@@ -6,7 +6,7 @@ use BarcodeBakery\Common\BCGDrawing;
 use BarcodeBakery\Common\BCGFontFile;
 use BarcodeBakery\Barcode\BCGcode93;
 
-/$size = isset($_GET['font_size']) ? intval($_GET['font_size']) : 18;
+$size = isset($_GET['font_size']) ? intval($_GET['font_size']) : 18;
 $text = isset($_GET['text']) ? $_GET['text'] : 'Nobarcode';
 
 // Loading Font

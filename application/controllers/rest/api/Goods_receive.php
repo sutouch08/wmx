@@ -49,7 +49,7 @@ class Goods_receive extends REST_Controller
     $json = file_get_contents("php://input");
     $ds = json_decode($json);
 
-    if(empty($ds) OR empty($ds->transferNote))
+    if(empty($ds) OR empty($ds->details))
     {
       $arr = array(
         'status' => FALSE,
@@ -77,9 +77,7 @@ class Goods_receive extends REST_Controller
         $this->response($arr, 400);
       }
 
-      $data = $ds->transferNote;
-
-      $sc = $this->verify_data($data);
+      $sc = $this->verify_data($ds);
 
       //---- if any error return
       if($sc === FALSE)
@@ -96,7 +94,7 @@ class Goods_receive extends REST_Controller
           'trans_id' => genUid(),
           'api_path' => $this->api_path,
           'type' => $this->type,
-          'code' => $data->externalRefId,
+          'code' => $ds->refCode,
           'action' => $action,
           'status' => 'failed',
           'message' => $this->error,
@@ -111,25 +109,25 @@ class Goods_receive extends REST_Controller
       }
 
 
-      if( ! empty($data->transferItems))
+      if( ! empty($ds->details))
       {
         $i = 0;
         $lineNum = 1;
 
-        foreach($data->transferItems as $rs)
+        foreach($ds->details as $rs)
         {
           if($sc === FALSE) { break; }
 
           if(empty($rs->itemCode))
           {
             $sc = FALSE;
-            $this->error = "Missing required parameter : transferItems[{$i}].itemCode";
+            $this->error = "Missing required parameter : details[{$i}].itemCode";
           }
 
           if(empty($rs->enterQuantity) OR $rs->enterQuantity <= 0)
           {
             $sc = FALSE;
-            $this->error = "Missing required parameter : transferItems[{$i}].enterQuantity OR enterQuantity <= 0";
+            $this->error = "Missing required parameter : details[{$i}].enterQuantity OR enterQuantity <= 0";
           }
 
           if($sc === TRUE)
@@ -172,7 +170,7 @@ class Goods_receive extends REST_Controller
           'trans_id' => genUid(),
           'api_path' => $this->api_path,
           'type' => $this->type,
-          'code' => $data->externalRefId,
+          'code' => $ds->refCode,
           'action' => $action,
           'status' => 'failed',
           'message' => $this->error,
@@ -190,7 +188,7 @@ class Goods_receive extends REST_Controller
 
       if($sc === TRUE)
       {
-        $doc = $this->receive_product_model->get_by_active_reference($data->externalRefId);
+        $doc = $this->receive_product_model->get_by_active_reference($ds->refCode);
 
         if( ! empty($doc))
         {
@@ -199,13 +197,13 @@ class Goods_receive extends REST_Controller
           if($sc === TRUE && $doc->status == 'C')
           {
             $sc = FALSE;
-            $this->error = "{$data->externalRefId} already closed cannot be change";
+            $this->error = "{$ds->refCode} already closed cannot be change";
           }
 
           if($sc === TRUE && $doc->status == 'O')
           {
             $sc = FALSE;
-            $this->error = "{$data->externalRefId} already in progress cannot be change";
+            $this->error = "{$ds->refCode} already in progress cannot be change";
           }
 
           if($sc === TRUE && $this->receive_product_model->is_received($doc->code))
@@ -230,7 +228,7 @@ class Goods_receive extends REST_Controller
             'trans_id' => genUid(),
             'api_path' => $this->api_path,
             'type' => $this->type,
-            'code' => $data->externalRefId,
+            'code' => $ds->refCode,
             'action' => $action,
             'status' => 'failed',
             'message' => $this->error,
@@ -246,7 +244,7 @@ class Goods_receive extends REST_Controller
 
         if($sc === TRUE)
         {
-          $doc_date = date('Y-m-d');
+          $doc_date = empty($ds->doc_date) ? date('Y-m-d') : $ds->doc_date;
 
           $this->db->trans_begin();
 
@@ -256,10 +254,10 @@ class Goods_receive extends REST_Controller
             //--- เตรียมข้อมูลสำหรับเพิ่มเอกสารใหม่
             $arr = array(
               'code' => $code,
-              'reference' => $data->externalRefId,
-              'fulfillment_code' => $data->fulfillmentNo,
-              'from_warehouse' => $data->fromLocation,
-              'warehouse_code' => $data->toLocation,
+              'reference' => $ds->refCode,
+              'fulfillment_code' => $ds->fulfillmentNumber,
+              'from_warehouse' => $ds->fromLocation,
+              'warehouse_code' => $ds->toLocation,
               'date_add' => $doc_date,
               'user' => $this->user
             );
@@ -276,7 +274,7 @@ class Goods_receive extends REST_Controller
             {
               $totalQty = 0;
 
-              foreach($data->transferItems as $rs)
+              foreach($ds->details as $rs)
               {
                 if($sc === FALSE) { break; }
 
@@ -287,6 +285,7 @@ class Goods_receive extends REST_Controller
                   'product_code' => trim($rs->sku),
                   'product_name' => trim($rs->description),
                   'unit_code' => trim($rs->unit),
+                  'cost' => empty($rs->CustomCost) ? 0 : floatval($rs->CustomCost),
                   'qty' => $rs->qty,
                   'receive_qty' => 0,
                   'line_status' => 'O',
@@ -319,8 +318,8 @@ class Goods_receive extends REST_Controller
             $code = $doc->code;
 
             $arr = array(
-              'from_warehouse' => $data->fromLocation,
-              'warehouse_code' => $data->toLocation,
+              'from_warehouse' => $ds->fromLocation,
+              'warehouse_code' => $ds->toLocation,
               'warehouse_name' => NULL,
               'zone_code' => NULL,
               'zone_name' => NULL,
@@ -349,7 +348,7 @@ class Goods_receive extends REST_Controller
               {
                 $totalQty = 0;
 
-                foreach($data->transferItems as $rs)
+                foreach($ds->details as $rs)
                 {
                   if($sc === FALSE) { break; }
 
@@ -413,7 +412,7 @@ class Goods_receive extends REST_Controller
               'trans_id' => genUid(),
               'api_path' => $this->api_path,
               'type' => $this->type,
-              'code' => $data->externalRefId,
+              'code' => $ds->refCode,
               'action' => $action,
               'status' => 'success',
               'message' => 'success',
@@ -440,7 +439,7 @@ class Goods_receive extends REST_Controller
             'trans_id' => genUid(),
             'api_path' => $this->api_path,
             'type' => $this->type,
-            'code' => $data->externalRefId,
+            'code' => $ds->refCode,
             'action' => $action,
             'status' => 'failed',
             'message' => $this->error,
@@ -483,59 +482,59 @@ class Goods_receive extends REST_Controller
 
 
 
-  public function verify_data($data)
+  public function verify_data($ds)
 	{
-    if(empty($data->externalRefId))
+    if(empty($ds->refCode))
     {
-      $this->error = "externalRefId is required";
+      $this->error = "refCode is required";
       return FALSE;
     }
 
-    if(empty($data->fulfillmentNo))
+    if(empty($ds->fulfillmentNumber))
     {
-      $this->error = "fulfillmentNo is required";
+      $this->error = "fulfillmentNumber is required";
       return FALSE;
     }
 
 
-    if(empty($data->fromLocation))
+    if(empty($ds->fromLocation))
     {
       $this->error = "fromLocation is required";
       return FALSE;
     }
 
-    if( ! empty($data->fromLocation))
+    if( ! empty($ds->fromLocation))
     {
-      if( ! $this->warehouse_model->is_exists($data->fromLocation))
+      if( ! $this->warehouse_model->is_exists($ds->fromLocation))
       {
-        $this->error = "Invalid Location : Location code '{$data->fromLocation}' does not exists";
+        $this->error = "Invalid Location : Location code '{$ds->fromLocation}' does not exists";
         return FALSE;
       }
     }
 
-    if(empty($data->toLocation))
+    if(empty($ds->toLocation))
     {
       $this->error = "toLocation is required";
       return FALSE;
     }
 
-    if( ! empty($data->toLocation))
+    if( ! empty($ds->toLocation))
     {
       $defaultWhs = getConfig('DEFAULT_WAREHOUSE');
 
-      if($data->toLocation != $defaultWhs)
+      if($ds->toLocation != $defaultWhs)
       {
         $this->error = "Invalid Location : To Location code must be '{$defaultWhs}'";
         return FALSE;
       }
     }
 
-    if( ! isset($data->transferItems))
+    if( ! isset($ds->details))
     {
       $this->error = "Items is required";
       return FALSE;
     }
-    else if( ! is_array($data->transferItems))
+    else if( ! is_array($ds->details))
     {
       $this->error = "Items must be array";
       return FALSE;

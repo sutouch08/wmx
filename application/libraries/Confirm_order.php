@@ -58,7 +58,7 @@ class Confirm_order
         $arr = array(
           'order_code' => $code,
           'state' => 8,
-          'update_user' => $this->ci->('uname')
+          'update_user' => $this->ci->_user->uname
         );
 
         $this->ci->order_state_model->add_state($arr);
@@ -363,7 +363,8 @@ class Confirm_order
       $sc = FALSE;
       $this->error = 'order code not found';
     }
+    return $sc;
   }
+} 
 
-  return $sc;
-} //--- end class
+?>
