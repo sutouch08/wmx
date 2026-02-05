@@ -5,18 +5,34 @@
   </div>
 	<div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">
 		<button type="button" class="btn btn-white btn-default top-btn" onclick="goBack()"><i class="fa fa-arrow-left"></i> Back</button>
-		<?php if(($po->status == 'O' OR $po->status == 'P') && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
-			<button type="button" class="btn btn-white btn-danger top-btn" onclick="closePO()"><i class="fa fa-lock"></i> Close PO</button>
-		<?php endif; ?>
-		<?php if(($po->status == 'P' OR $po->status == 'O') && $this->_SuperAdmin) : ?>
-			<button type="button" class="btn btn-white btn-warning top-btn" onclick="goEdit('<?php echo $po->code; ?>')"><i class="fa fa-pencil"></i> Edit</button>
-		<?php endif; ?>
-		<?php if($po->status == 'O' && $this->pm->can_delete) : ?>
-			<button type="button" class="btn btn-white btn-danger top-btn" onclick="goCancel('<?php echo $po->code; ?>')"><i class="fa fa-times"></i> Cancel</button>
-		<?php endif; ?>
-
-		<?php if($po->status != 'P' && $po->status != 'D') : ?>
-			<!-- <button type="button" class="btn btn-white btn-info top-btn btn-100" onclick="printPO()"><i class="fa fa-print"></i> พิมพ์</button> -->
+		<?php if($po->status != 'D') : ?>
+			<div class="btn-group">
+				<button data-toggle="dropdown" class="btn btn-primary btn-white dropdown-toggle margin-top-5" aria-expanded="false">
+					<i class="ace-icon fa fa-save icon-on-left"></i>
+					Action
+					<i class="ace-icon fa fa-angle-down icon-on-right"></i>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-right">
+					<?php if(($po->status == 'O' OR $po->status == 'P') && ($this->pm->can_add OR $this->pm->can_edit)) : ?>
+						<li class="warning">
+							<a href="javascript:closePo()"><i class="fa fa-lock"></i>&nbsp; Close PO</a>
+						</li>
+						<li class="primary">
+							<a href="javascript:createReceive('<?php echo $po->code; ?>')"><i class="fa fa-plus"></i>&nbsp; Receive Product</a>
+						</li>
+					<?php endif; ?>
+					<?php if(($po->status == 'P' OR $po->status == 'O') && $this->_SuperAdmin) : ?>
+						<li class="warning">
+							<a href="javascript:getEdit('<?php echo $po->code; ?>')"><i class="fa fa-pencil"></i>&nbsp; Edit</a>
+						</li>
+					<?php endif; ?>
+					<?php if($po->status == 'O' && $this->pm->can_delete) : ?>
+						<li class="danger">
+							<a href="javascript:goCancel('<?php echo $po->code; ?>')"><i class="fa fa-times"></i>&nbsp; Cancel</a>
+						</li>
+					<?php endif; ?>
+				</ul>
+			</div>
 		<?php endif; ?>
 	</div>
 </div><!-- End Row -->

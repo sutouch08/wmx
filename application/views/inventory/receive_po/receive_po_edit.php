@@ -9,9 +9,7 @@
 		<?php if($this->pm->can_edit && $doc->status == 0) : ?>
 			<button type="button" class="btn btn-white btn-danger top-btn" onclick="goDelete('<?php echo $doc->code; ?>')"><i class="fa fa-exclamation-triangle"></i> ยกเลิก</button>
 		<?php endif; ?>
-		<!-- <button type="button" class="btn btn-sm btn-purple top-btn hidden-xs" onclick="getSample()"><i class="fa fa-download"></i> ไฟล์ตัวอย่าง</button> -->
-		<!-- <button type="button" class="btn btn-sm btn-primary top-btn hidden-xs" onclick="getUploadFile()"><i class="fa fa-upload"></i> Import</button> -->
-		<?php if($this->pm->can_add) : ?>
+		<?php if($this->pm->can_add OR $this->pm->can_edit) : ?>
 			<div class="btn-group">
         <button data-toggle="dropdown" class="btn btn-success btn-white dropdown-toggle margin-top-5" aria-expanded="false">
           <i class="ace-icon fa fa-save icon-on-left"></i>
@@ -20,13 +18,13 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right">
           <li class="primary">
-            <a href="javascript:checkLimit(0)">บันทึกเป็นดราฟท์</a>
+            <a href="javascript:save('P')">บันทึกเป็นดราฟท์</a>
           </li>
 					<li class="success">
-            <a href="javascript:checkLimit(1)">บันทึกรับเข้าทันที</a>
+            <a href="javascript:save('C')">บันทึกรับเข้าทันที</a>
           </li>
 					<li class="purple">
-            <a href="javascript:checkLimit(3)">บันทึกรอรับ</a>
+            <a href="javascript:save('O')">บันทึกรอรับ</a>
           </li>
         </ul>
       </div>
@@ -109,8 +107,6 @@
 	</div>
 	<input type="hidden" name="receive_code" id="receive_code" value="<?php echo $doc->code; ?>" />
 	<input type="hidden" name="approver" id="approver" value="" />
-	<input type="hidden" id="allow_over_po" value="<?php echo $allow_over_po; ?>">
-	<input type="hidden" id="save-type" value="1" /> <!-- 1 = บันทึกรับทันที, 3 = บันทึกรอรับ -->
 </div>
 <hr class=""/>
 <div class="row" style="margin-left:-8px;">

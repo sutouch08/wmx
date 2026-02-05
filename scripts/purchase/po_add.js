@@ -380,3 +380,9 @@ function closePO(){
     }, 100);
   });
 }
+
+
+function createReceive(code) {
+  let target = BASE_URL + 'inventory/receive_po/add_new/'+code;
+  window.open(target, '_blank');
+}

@@ -71,6 +71,24 @@ class Po_model extends CI_Model
   }
 
 
+  //---- only line status O, P and open qty > 0
+  public function get_open_details($code)
+  {
+    $rs = $this->db
+    ->where('po_code', $code)
+    ->where_in('line_status', ['O', 'P'])
+    ->where('open_qty >', 0)
+    ->get($this->td);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
   public function get_detail($id)
   {
     $rs = $this->db->where('id', $id)->get($this->td);

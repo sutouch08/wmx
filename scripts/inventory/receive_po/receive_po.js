@@ -86,58 +86,6 @@ $('#cancle-modal').on('shown.bs.modal', function() {
 });
 
 
-function add(){
-	clearErrorByClass('e');
-
-  let date_add = $('#doc-date').val();
-  let remark = $('#remark').val().trim();
-
-  if( ! isDate(date_add)) {
-		$('#doc-date').addClass('has-error');
-    swal('วันที่ไม่ถูกต้อง');
-    return false;
-  }
-
-	load_in();
-
-	$.ajax({
-		url:HOME + 'add',
-		type:'POST',
-		cache:false,
-		data: {
-			'date_add' : date_add,
-			'remark' : remark
-		},
-		success:function(rs) {
-			load_out();
-
-			if(isJson(rs)) {
-				let ds = JSON.parse(rs);
-				if(ds.status == 'success') {
-					goEdit(ds.code);
-				}
-				else {
-					swal({
-						title:'Error!',
-						text:ds.message,
-						type:'error',
-						html:true
-					});
-				}
-			}
-			else {
-				swal({
-					title:'Error!',
-					text:rs,
-					type:'error',
-					html:true
-				});
-			}
-		}
-	})
-}
-
-
 function addNew(){
   window.location.href = HOME + 'add_new';
 }
