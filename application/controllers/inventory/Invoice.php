@@ -17,14 +17,14 @@ class Invoice extends PS_Controller
     $this->load->model('masters/customers_model');
     $this->load->model('inventory/delivery_order_model');
     $this->load->helper('order');
+    $this->load->helper('channels');
+    $this->load->helper('warehouse');
+    $this->load->helper('discount');
   }
 
 
   public function index()
   {
-    $this->load->helper('channels');
-    $this->load->helper('warehouse');
-
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
       'reference' => get_filter('reference', 'ic_reference', ''),
@@ -58,14 +58,9 @@ class Invoice extends PS_Controller
   }
 
 
-
   public function view_detail($code)
   {
     $this->load->model('inventory/qc_model');
-    $this->load->helper('order');
-    $this->load->helper('channels');
-    $this->load->helper('discount');
-
     $approve_view = isset($_GET['approve_view']) ? TRUE : NULL;
 
     $order = $this->orders_model->get($code);
@@ -74,9 +69,7 @@ class Invoice extends PS_Controller
 
     if($order->role == 'C' OR $order->role == 'N')
     {
-      $this->load->model('masters/zone_model');
-
-      $order->zone_name = $this->zone_model->get_name($order->zone_code);
+      $order->warehouse_name = warehouse_name($order->to_warehouse);
     }
 
     $details = $this->invoice_model->get_billed_detail($code);

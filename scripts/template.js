@@ -425,9 +425,17 @@ function goBack() {
 }
 
 
-function clearFilter() {
+function clearFilter(target) {
 	let url = HOME + 'clear_filter';
-	$.get(url, function(rs){ goBack(); });
+
+	$.get(url, function(rs) {
+    if(target == null || target == undefined || target == '') {
+      goBack();
+    }
+    else {
+      window.location.href = target;
+    }
+  });
 }
 
 
@@ -483,6 +491,14 @@ function clearErrorByClass(className) {
 function refresh() {
   load_in();
   window.location.reload();
+}
+
+function viewOrderDetail(code, role) {
+  let width = $(document).width() * 0.9;
+  var center = ($(document).width() - width)/2;
+  var prop = "width="+width+", height=900. left="+center+", scrollbars=yes";
+  var target = BASE_URL + 'orders/orders/edit_order/'+code+'?nomenu';
+  window.open(target, '_blank', prop);
 }
 
 

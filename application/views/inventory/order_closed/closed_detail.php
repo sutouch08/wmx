@@ -35,17 +35,17 @@
     </div>
 
     <?php if($order->role == 'C' OR $order->role == 'N') : ?>
-    <div class="col-lg-2 col-md-2 col-sm-2 col-xs-6 padding-5">
+    <div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-6 padding-5">
       <label>รหัสลูกค้า</label>
       <input type="text" class="width-100 text-center" value="<?php echo $order->customer_code; ?>" disabled />
     </div>
-    <div class="col-lg-4 col-md-4 col-sm-3-harf col-xs-12 padding-5">
+    <div class="col-lg-3-harf col-md-4 col-sm-3-harf col-xs-12 padding-5">
       <label>ลูกค้า</label>
       <input type="text" class="width-100" value="<?php echo $cust_name; ?>" disabled />
     </div>
-    <div class="col-lg-4 col-md-4 col-sm-4 col-xs-12 padding-5">
-      <label>โซน</label>
-      <input type="text" class="width-100" value="<?php echo $order->zone_name; ?>" disabled />
+    <div class="col-lg-3-harf col-md-4 col-sm-4 col-xs-12 padding-5">
+      <label>ปลายทาง</label>
+      <input type="text" class="width-100" value="<?php echo $order->to_warehouse; ?> | <?php echo $order->warehouse_name; ?>" disabled />
     </div>
     <div class="col-lg-2 col-md-2 col-sm-2 col-xs-4 padding-5">
       <label>พนักงาน</label>
@@ -373,7 +373,7 @@
     var prop = "width="+width+", height=900. left="+center+", scrollbars=yes";
 
     var target = BASE_URL + 'orders/orders/edit_order/'+code+'?nomenu';
-    
+
     window.open(target, '_blank', prop);
 
   }

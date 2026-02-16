@@ -37,20 +37,8 @@ li {
   min-width:1240px;
 }
 
-.table-listing > thead > tr > th , .table-listing > tbody > tr > td {
-  padding:3px !important;
-}
-
-.nav-title {
-  position: relative;
-  height: 45px;
-  padding:10px 5px;
-  font-size:16px;
-  text-align: center;
-  border-bottom: solid 1px #ccc;
-  background-color: white;
-  width: 100%;
-  z-index: 10
+.table-listing {
+  min-width:1040px;
 }
 
 @media (max-width:767px) {
@@ -96,29 +84,6 @@ li {
      right:0px;
   }
 
-  .extra-menu {
-    position: fixed;
-    bottom: 0px;
-    left: 0px;
-    width: 100vw;
-    height: 68px;
-    padding: 8px;
-    line-height: 20;
-    background-color: #438eb9;
-    opacity: 0.9;
-    z-index: 11;
-  }
-
-  .slide-out {
-    transition: bottom 0.3s ease-in-out;
-    bottom: 0px;
-  }
-
-  .slide-in {
-    transition: bottom 0.3s ease-in-out;
-    bottom: 68px;
-  }
-
   .no-border-xs {
     border:0px !important
   }
@@ -141,46 +106,6 @@ li {
 
   .table-process {
     min-width: 0px;
-  }
-
-  .move-list {
-    margin-left: -20px;
-    width: 100vw;
-    max-height: 100vh;
-    padding-bottom: 80px;
-    overflow: auto;
-    background-color: white;
-    z-index: 8;
-  }
-
-  .move-list-item {
-    position: relative;
-    height: 100px;
-    padding:10px 5px;
-    border-bottom: solid 1px #ccc;
-    background-color: #white;
-  }
-
-  .move-list-item:first-child {
-    border-top:solid 1px #ccc;
-  }
-
-  .move-list-link {
-    position: absolute;
-    top: 0;
-    right: 0px;
-    width: 50px;
-    height: 100px;
-    padding:25px 15px;
-    text-align: center;
-    vertical-align: middle;
-  }
-
-  p.move-list-line {
-    font-size: 11px;
-    margin-bottom: 3px;
-    white-space: nowrap;
-    overflow: hidden;
   }
 }
 </style>

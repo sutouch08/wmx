@@ -19,6 +19,9 @@ class Qc extends PS_Controller
     $this->load->model('orders/order_state_model');
     $this->load->helper('warehouse');
     $this->load->helper('channels');
+    $this->load->helper('package');
+    $this->load->helper('sender');
+    $this->load->helper('order');
   }
 
   public function index()
@@ -28,11 +31,14 @@ class Qc extends PS_Controller
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
-      'user' => get_filter('user', 'ic_user', ''),
+      'user' => get_filter('user', 'ic_user', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'channels'  => get_filter('channels', 'ic_channels', 'all'),
+      'shop_id' => get_filter('shop_id', 'ic_shop_id', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
-      'to_date' => get_filter('to_date', 'ic_to_date', '')
+      'to_date' => get_filter('to_date', 'ic_to_date', ''),
+      'is_cancled' => get_filter('is_cancled', 'ic_is_cancled', 'all'),
+      'id_sender' => get_filter('id_sender', 'ic_id_sender', 'all')
     );
 
     if($this->input->post('search'))
@@ -417,6 +423,312 @@ class Qc extends PS_Controller
   }
 
 
+  public function ship_order_porlor($code)
+  {
+    $sc = TRUE;
+    $shipment = NULL;
+    $this->wms = $this->load->database('wms', TRUE);
+    $this->load->model('address/address_model');
+    $this->load->library('porlor_api');
+    $order = $this->orders_model->get($code);
+
+    if( ! empty($order))
+    {      
+      $addr = $this->address_model->get_ship_to_address($code);
+
+      if( ! empty($addr))
+      {
+        $packages = [];
+
+        $boxes = $this->qc_model->get_box_list($order->code);
+
+        if( ! empty($boxes))
+        {
+          foreach($boxes as $box)
+          {
+            if($box-> qty > 0)
+            {
+              $packages[] = (object) array(
+                'order_code' => $box->order_code,
+                'box_code' => $box->code,
+                'box_id' => $box->id,
+                'package_name' => $box->name,
+                'package_width' => intval($box->width),
+                'package_length' => intval($box->length),
+                'package_height' => intval($box->height),
+                'package_size' => round($box->width + $box->length + $box->height),
+                'receiver' => $addr->name,
+                'address' => $addr->address,
+                'sub_district' => $addr->sub_district,
+                'district' => $addr->district,
+                'province' => $addr->province,
+                'postcode' => $addr->postcode,
+                'phone' => $addr->phone,
+              );
+            }
+          }
+
+          if( ! empty($packages))
+          {
+            $ds = $this->porlor_api->create_parcels($order->code, $packages);
+
+            if( ! empty($ds))
+            {
+              $tracking_no = NULL;
+
+              foreach($ds as $rs)
+              {
+                if( ! empty($rs->awb_code) && ! empty($rs->item_sku))
+                {
+                  $this->qc_model->update_box($rs->item_sku, ['tracking_no' => $rs->awb_code]);
+                  $tracking_no = $rs->awb_code;
+                }
+              }
+
+              if( ! empty($tracking_no))
+              {
+                $this->orders_model->update($order->code, ['shipping_code' => $tracking_no]);
+              }
+            }
+            else
+            {
+              $sc = FALSE;
+              $this->error = "Failed to create parcels : ".$this->porlor_api->error;
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "No package data found !";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "No packing package found !";
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "ไม่พบที่อยู่จัดส่ง";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Order {$code} not found";
+    }
+
+    $this->_response($sc);
+  }
+
+
+  public function ship_order_spx($code)
+  {
+    $sc = TRUE;
+    $shipment = NULL;
+    $this->wms = $this->load->database('wms', TRUE);
+    $this->load->model('address/address_model');
+    $this->load->library('wrx_spx_api');
+
+    $order = $this->orders_model->get($code);
+    $batch_no = NULL;
+    $shipment = NULL;
+
+    if( ! empty($order))
+    {
+      $batch = $this->qc_model->get_spx_batch($code);
+
+      if( ! empty($batch))
+      {
+        $batch_no = $batch->batch_no;
+      }
+      else
+      {
+        //$addr = $this->address_model->get_shipping_detail($order->id_address);
+        $addr = $this->address_model->get_ship_to_address($code);
+
+        if(empty($addr))
+        {
+          $sc = FALSE;
+          $this->error = "ไม่พบที่อยู่จัดส่ง";
+        }
+
+        if($sc === TRUE)
+        {
+          $addr->province = parseProvince($addr->province);
+          $addr->sub_district = parseSubDistrict($addr->sub_district, $addr->province);
+          $addr->district = parseDistrict($addr->district, $addr->province);
+          $addr->phone = parsePhoneNumber($addr->phone, 10);
+
+          $sender = (object) [
+            'name' => getConfig('SPX_SENDER_NAME'),
+            'phone' => getConfig('SPX_SENDER_PHONE'),
+            'address' => getConfig('SPX_SENDER_ADDRESS'),
+            'state' => getConfig('SPX_SENDER_STATE'),
+            'city' => getConfig('SPX_SENDER_CITY'),
+            'district' => getConfig('SPX_SENDER_DISTRICT'),
+            'postcode' => getConfig('SPX_SENDER_POST_CODE'),
+            'weight' => floatval(getConfig('SPX_DEFAULT_WEIGHT'))
+          ];
+        }
+
+        $packages = [];
+
+        if($sc === TRUE)
+        {
+          $boxes = $this->qc_model->get_box_list($order->code);
+
+          if(empty($boxes))
+          {
+            $sc = FALSE;
+            $sc = FALSE;
+            $this->error = "No packing package found !";
+          }
+          else
+          {
+            $no = 0;
+
+            foreach($boxes as $box)
+            {
+              if($box->qty > 0)
+              {
+                $cod = $order->role === 'S' ? ($order->payment_role == 4 ? 1 : 0) : 0;
+                $cod_amount = $cod === 1 ? ($order->cod_amount == 0 ? $order->doc_total : $order->cod_amount) : 0.00;
+                $packages[] = array(
+                  'order_id' => $box->order_code.(empty($no) ? "" : "-{$no}"),
+                  'sender_info' => [
+                    'sender_state' => $sender->state,
+                    'sender_city' => $sender->city,
+                    'sender_district' => $sender->district,
+                    'sender_post_code' => $sender->postcode,
+                    'sender_name' => $sender->name,
+                    'sender_phone' => $sender->phone,
+                    'sender_email' => "",
+                    'sender_detail_address' => $sender->address
+                  ],
+                  'fulfillment_info' => [
+                    'cod_collection' => $cod,
+                    'cod_amount' => intval($cod_amount),
+                    'collect_type' => 1
+                  ],
+                  'deliver_info' => [
+                    'deliver_state' => $addr->province,
+                    'deliver_city' => $addr->district,
+                    'deliver_district' => $addr->sub_district,
+                    'deliver_post_code' => $addr->postcode,
+                    'deliver_name' => $addr->name,
+                    'deliver_phone' => $addr->phone,
+                    'deliver_detail_address' => $addr->address
+                  ],
+                  'parcel_info' => [
+                    'parcel_weight' => $sender->weight,
+                    'parcel_length' => intval($box->length),
+                    'parcel_width' => intval($box->width),
+                    'parcel_height' => intval($box->height),
+                    'parcel_item_name' => 'เสื้อผ้า',
+                    'parcel_item_quantity' => intval($box->qty),
+                    'express_insured_value' => NULL
+                  ]
+                );
+
+                $no++;
+              }
+            } // end foreach boxes
+          }
+        }
+
+        if($sc === TRUE)
+        {
+          if(empty($packages))
+          {
+            $sc = FALSE;
+            $this->error = "No package data found !";
+          }
+          else
+          {
+            $ds = $this->wrx_spx_api->create_parcels($order->code, $packages);
+
+            if(empty($ds))
+            {
+              $sc = FALSE;
+              $this->error = "Failed to create parcels : ".$this->wrx_spx_api->error;
+            }
+            else
+            {
+              $batch_no = $ds->batch_no;
+
+              if( ! $this->qc_model->update_spx_batch_no($order->code, $ds->batch_no))
+              {
+                $sc = FALSE;
+                $this->error = "Failed to update spx batch no";
+              }
+              else
+              {
+                $tracking_no = NULL;
+
+                if( ! empty($ds->orders))
+                {
+                  foreach($ds->orders as $rs)
+                  {
+                    if( ! empty($rs->tracking_no) && ! empty($rs->order_id))
+                    {
+                      $this->qc_model->update_box($rs->order->id, ['tracking_no' => $rs->tracking_no]);
+                      $tracking_no = $rs->tracking_no;
+                    }
+                  }
+
+                  if( ! empty($tracking_no))
+                  {
+                    $this->orders_model->update($order->code, ['shipping_code' => $tracking_no]);
+                  }
+                }
+              }
+            }
+          }
+        } // $sc = TRUE; packages
+      } // ! empty batch_no
+
+      if($sc === TRUE)
+      {
+        if( ! empty($batch_no))
+        {
+          $res = $this->wrx_spx_api->get_shipping_label($code, $batch_no);
+
+          if( ! empty($res))
+          {
+            $shipment = $res;
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "Failed to download shipping label";
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $ths->error = "Cannot get spx order batch no";
+        }
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Order {$code} not found";
+    }
+
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? 'success' : $this->error,
+      'data' => $shipment
+    );
+
+    echo json_encode($arr);
+  }
+
+
   public function view_process()
   {
     $this->title = "รายการกำลังตรวจ";
@@ -424,12 +736,16 @@ class Qc extends PS_Controller
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
-      'user' => get_filter('user', 'ic_user', ''),
+      'user' => get_filter('user', 'ic_user', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'channels'  => get_filter('channels', 'ic_channels', 'all'),
+      'shop_id' => get_filter('shop_id', 'ic_shop_id', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
-      'to_date' => get_filter('to_date', 'ic_to_date', '')
+      'to_date' => get_filter('to_date', 'ic_to_date', ''),
+      'is_cancled' => get_filter('is_cancled', 'ic_is_cancled', 'all'),
+      'id_sender' => get_filter('id_sender', 'ic_id_sender', 'all')
     );
+
 
     if($this->input->post('search'))
     {
@@ -1014,18 +1330,20 @@ class Qc extends PS_Controller
   public function add_new_box()
   {
     $box_id = FALSE;
+    $package_id = getConfig('DEFAULT_PACKAGE');
     $box_no = 0;
     $order_code = $this->input->post('order_code');
     $code = $this->get_new_code();
     $box_no = $this->qc_model->get_last_box_no($order_code) + 1;
-    $box_id = $this->qc_model->add_new_box($order_code, $code, $box_no);
+    $box_id = $this->qc_model->add_new_box($order_code, $code, $box_no, $package_id);
 
     $arr = array(
       'status' => $box_id === FALSE ? 'failed' : 'success',
       'message' => $box_id === FALSE ? "เพิ่มกล่องไม่สำเร็จ" : 'success',
       'box_code' => $code,
       'box_id' => $box_id,
-      'box_no' => $box_no
+      'box_no' => $box_no,
+      'package_id' => get_null($package_id)
     );
 
     echo json_encode($arr);
@@ -1047,6 +1365,8 @@ class Qc extends PS_Controller
           'no' => $box->box_no,
           'code' => $box->code,
           'id_box' => $box->id,
+          'package_id' => $box->package_id,
+          'package' => select_active_package($box->package_id),
           'qty' => number($box->qty),
           'checked' => $box->id == $id ? 'checked' : '',
           'class' => $box->id == $id ? 'btn-success' : 'btn-default'
@@ -1062,6 +1382,22 @@ class Qc extends PS_Controller
     );
 
     echo json_encode($arr);
+  }
+
+
+  public function update_package_id()
+  {
+    $sc = TRUE;
+    $box_id = $this->input->post('box_id');
+    $package_id = $this->input->post('package_id');
+
+    if( ! $this->qc_model->update_box($box_id, ['package_id' => $package_id]))
+    {
+      $sc = FALSE;
+      $this->error = "Failed to update package id";
+    }
+
+    $this->_response($sc);
   }
 
 

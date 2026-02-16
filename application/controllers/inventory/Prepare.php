@@ -33,6 +33,8 @@ class Prepare extends PS_Controller
     $this->load->helper('channels');
     $this->load->helper('payment_method');
     $this->load->helper('warehouse');
+    $this->load->helper('zone');
+    $this->load->helper('sender');
 
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
@@ -41,16 +43,22 @@ class Prepare extends PS_Controller
       'fulfillment_code' => get_filter('fulfillment_code', 'id_fulfillment_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
       'channels' => get_filter('channels', 'ic_channels', 'all'),
+      'shop_id' => get_filter('shop_id', 'ic_shop_id', 'all'),
       'is_online' => get_filter('is_online', 'ic_is_online', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
       'to_date' => get_filter('to_date', 'ic_to_date', ''),
+      'from_due_date' => get_filter('from_due_date', 'ic_from_due_date', ''),
+      'to_due_date' => get_filter('to_due_date', 'ic_to_due_date', ''),
       'stated' => get_filter('stated', 'ic_stated', ''),
       'startTime' => get_filter('startTime', 'ic_startTime', ''),
       'endTime' => get_filter('endTime', 'ic_endTime', ''),
       'item_code' => get_filter('item_code', 'ic_item_code', ''),
       'payment' => get_filter('payment', 'ic_payment', 'all'),
-      'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all')
+      'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all'),
+      'is_backorder' => get_filter('is_backorder', 'ic_is_backorder', 'all'),
+      'is_cancled' => get_filter('is_cancled', 'ic_is_cancled', 'all'),
+      'id_sender' => get_filter('id_sender', 'ic_id_sender', 'all')
     );
 
     if($this->is_mobile)
@@ -85,6 +93,8 @@ class Prepare extends PS_Controller
     $this->load->helper('channels');
     $this->load->helper('payment_method');
     $this->load->helper('warehouse');
+    $this->load->helper('zone');
+    $this->load->helper('sender');
 
     $filter = array(
       'code' => get_filter('code', 'ic_code', ''),
@@ -93,16 +103,22 @@ class Prepare extends PS_Controller
       'fulfillment_code' => get_filter('fulfillment_code', 'id_fulfillment_code', ''),
       'customer' => get_filter('customer', 'ic_customer', ''),
       'channels' => get_filter('channels', 'ic_channels', 'all'),
+      'shop_id' => get_filter('shop_id', 'ic_shop_id', 'all'),
       'is_online' => get_filter('is_online', 'ic_is_online', 'all'),
       'role' => get_filter('role', 'ic_role', 'all'),
       'from_date' => get_filter('from_date', 'ic_from_date', ''),
       'to_date' => get_filter('to_date', 'ic_to_date', ''),
+      'from_due_date' => get_filter('from_due_date', 'ic_from_due_date', ''),
+      'to_due_date' => get_filter('to_due_date', 'ic_to_due_date', ''),
       'stated' => get_filter('stated', 'ic_stated', ''),
       'startTime' => get_filter('startTime', 'ic_startTime', ''),
       'endTime' => get_filter('endTime', 'ic_endTime', ''),
       'item_code' => get_filter('item_code', 'ic_item_code', ''),
       'payment' => get_filter('payment', 'ic_payment', 'all'),
-      'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all')
+      'warehouse' => get_filter('warehouse', 'ic_warehouse', 'all'),
+      'is_backorder' => get_filter('is_backorder', 'ic_is_backorder', 'all'),
+      'is_cancled' => get_filter('is_cancled', 'ic_is_cancled', 'all'),
+      'id_sender' => get_filter('id_sender', 'ic_id_sender', 'all')
     );
 
     if($this->is_mobile)
@@ -955,16 +971,22 @@ class Prepare extends PS_Controller
       'ic_customer',
       'ic_user',
       'ic_channels',
+      'ic_shop_id',
       'ic_is_online',
       'ic_role',
       'ic_from_date',
       'ic_to_date',
+      'ic_from_due_date',
+      'ic_to_due_date',
       'ic_stated',
       'ic_startTime',
       'ic_endTime',
       'ic_item_code',
       'ic_payment',
-      'ic_warehouse'
+      'ic_warehouse',
+      'ic_is_backorder',
+      'ic_is_cancled',
+      'ic_id_sender'
     );
 
     clear_filter($filter);

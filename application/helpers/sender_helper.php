@@ -137,5 +137,31 @@ function get_tracking($id_sender, $orderCode)
 	return $tracking;
 }
 
+function sender_name($id)
+{
+  $ci =& get_instance();
+  $ci->load->model('masters/sender_model');
+
+  return $ci->sender_model->get_name($id);
+}
+
+function sender_array()
+{
+  $ds = [];
+
+  $ci =& get_instance();
+  $ci->load->model('masters/sender_model');
+  $list = $ci->sender_model->get_all();
+
+  if( ! empty($list))
+  {
+    foreach($list as $rs)
+    {
+      $ds[$rs->id] = ['code' => $rs->code, 'name' => $rs->name];
+    }
+  }
+
+  return $ds;
+}
 
  ?>

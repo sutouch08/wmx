@@ -521,12 +521,14 @@ class Delivery_order extends PS_Controller
 		$this->load->model('masters/payment_methods_model');
     $this->load->helper('order');
     $this->load->helper('discount');
+    $this->load->helper('sender');
 
     $order = $this->orders_model->get($code);
     $order->customer_name = $this->customers_model->get_name($order->customer_code);
 		$order->warehouse_name = $this->warehouse_model->get_name($order->warehouse_code);
 		$order->channels_name = $this->channels_model->get_name($order->channels_code);
 		$order->payment_name = $this->payment_methods_model->get_name($order->payment_code);
+    $order->sender_name = sender_name($order->id_sender);
 
     if($order->role == 'C' OR $order->role == 'N' OR $order->role == 'L')
     {

@@ -60,6 +60,138 @@
       }
     })
   }
+
+
+  function shipOrderShopee(reference) {
+    load_in();
+
+    $.ajax({
+      url:BASE_URL + 'inventory/qc/ship_order_shopee/'+reference,
+      type:'POST',
+      cache:false,
+      success:function(rs) {
+        load_out();
+
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status === 'success') {
+            window.open(ds.data.fileUrl, "_blank");
+          }
+          else {
+            beep();
+            showError(ds.message);
+          }
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }
+
+  function shipOrderLazada(reference) {
+    load_in();
+
+    $.ajax({
+      url:BASE_URL + 'inventory/qc/ship_order_lazada/'+reference,
+      type:'POST',
+      cache:false,
+      success:function(rs) {
+        load_out();
+
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status === 'success') {
+            window.open(ds.data.fileUrl, "_blank");
+          }
+          else {
+            beep();
+            showError(ds.message);
+          }
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }
+
+  function shipOrderSPX(code) {
+    load_in();
+
+    $.ajax({
+      url:BASE_URL + 'inventory/qc/ship_order_spx/'+code,
+      type:'POST',
+      cache:false,
+      success:function(rs) {
+        load_out();
+
+        if(isJson(rs)) {
+          let ds = JSON.parse(rs);
+
+          if(ds.status == 'success') {
+            window.open(ds.data.awb_link, "_blank");
+          }
+          else {
+            beep();
+            showError(ds.message);
+          }
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }
+
+  function shipOrderPorlor(code) {
+    load_in();
+
+    $.ajax({
+      url:BASE_URL + 'inventory/qc/ship_order_porlor/'+code,
+      type:'POST',
+      cache:false,
+      success:function(rs) {
+        load_out();
+
+        if(rs.trim() === 'success') {
+          printPorlorLabel(code);
+        }
+        else {
+          beep();
+          showError(rs);
+        }
+      },
+      error:function(rs) {
+        beep();
+        showError(rs);
+      }
+    })
+  }
+
+  function printPorlorLabel(code) {
+    let center = ($(document).width() - 800)/2;
+    let prop = "width=800, height=1200. left="+center+", scrollbars=yes";
+    let target = BASE_URL + 'inventory/qc/print_porlor_label/'+code;
+    window.open(target, "_blank", prop);
+  }
 </script>
 
 <script src="<?php echo base_url(); ?>scripts/inventory/bill/bill.js?v=<?php echo date('Ymd'); ?>"></script>

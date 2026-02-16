@@ -60,7 +60,7 @@
 				<?php $this->load->view('setting/setting_porlor_api'); ?>
 			</div>
 			<div class="tab-pane fade <?php echo $tab8; ?>" id="spx">
-				<?php //$this->load->view('setting/setting_spx_api'); ?>
+				<?php $this->load->view('setting/setting_spx_api'); ?>
 			</div>
 		</div><!--/ tab-content-->
 	</div><!--/ col-sm-9  -->

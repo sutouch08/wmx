@@ -38,15 +38,7 @@
 			<input type="text" class="width-100 search" name="customer" value="<?php echo $customer; ?>" />
 		</div>
 
-		<div class="col-lg-3 col-md-5 col-sm-4-harf col-xs-12 padding-5">
-			<label>คลัง</label>
-			<select class="width-100 filter" name="warehouse" id="warehouse">
-				<option value="all">ทั้งหมด</option>
-				<?php echo select_sell_warehouse($warehouse); ?>
-			</select>
-		</div>
-
-		<div class="col-lg-1-harf col-md-3 col-sm-3 col-xs-12 padding-5">
+		<div class="col-lg-2-harf col-md-4 col-sm-4 col-xs-12 padding-5">
 			<label>ช่องทางขาย</label>
 			<select class="width-100 filter" name="channels" id="channels">
 				<option value="all">ทั้งหมด</option>
@@ -54,16 +46,24 @@
 			</select>
 		</div>
 
-		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-12 padding-5">
-			<label>Online</label>
-			<select class="width-100 filter" name="is_online">
+		<div class="col-lg-2 col-md-4 col-sm-4 col-xs-6 padding-5">
+			<label>Shop Name</label>
+			<select class="width-100 filter" name="shop_id" id="shop-id">
 				<option value="all">ทั้งหมด</option>
-				<option value="1" <?php echo is_selected($is_online, '1'); ?>>Online</option>
-				<option value="0" <?php echo is_selected($is_online, '0'); ?>>Offline</option>
+				<?php echo select_shop_name($shop_id); ?>
 			</select>
 		</div>
 
-		<div class="col-lg-1 col-md-2 col-sm-2-harf col-xs-12 padding-5">
+		<div class="col-lg-1 col-md-2 col-sm-2 col-xs-12 padding-5">
+			<label>ออนไลน์</label>
+			<select class="width-100 filter" name="is_online">
+				<option value="all">ทั้งหมด</option>
+				<option value="1" <?php echo is_selected($is_online, '1'); ?>>ออนไลน์</option>
+				<option value="0" <?php echo is_selected($is_online, '0'); ?>>ออฟไลน์</option>
+			</select>
+		</div>
+
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-12 padding-5">
 			<label>รูปแบบ</label>
 			<select class="width-100 filter" name="role" id="role">
 	      <option value="all">ทั้งหมด</option>
@@ -71,15 +71,25 @@
 	    </select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-3-harf col-sm-3-harf col-xs-12 padding-5">
-			<label>ช่องทางการชำระเงิน</label>
-			<select class="width-100 filter" name="payment">
-				<option value="">ทั้งหมด</option>
-				<?php echo select_payment_method($payment); ?>
+		<div class="col-lg-1-harf col-md-1-harf col-sm-1-harf col-xs-3 padding-5 fi">
+			<label>Backorder</label>
+			<select class="width-100 filter" name="is_backorder">
+				<option value="all">ทั้งหมด</option>
+				<option value="1" <?php echo is_selected('1', $is_backorder);?>>Yes</option>
+				<option value="0" <?php echo is_selected('0', $is_backorder); ?>>No</option>
 			</select>
 		</div>
 
-		<div class="col-lg-2 col-md-3-harf col-sm-3 col-xs-12 padding-5">
+		<div class="col-lg-1 col-md-1-harf col-sm-1-harf col-xs-3 padding-5">
+			<label>Canceled</label>
+			<select class="width-100 filter" name="is_cancled">
+				<option value="all">ทั้งหมด</option>
+				<option value="1" <?php echo is_selected('1', $is_cancled); ?>>Yes</option>
+				<option value="0" <?php echo is_selected('0', $is_cancled); ?>>No</option>
+			</select>
+		</div>
+
+		<div class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-12 padding-5">
 			<label>วันที่</label>
 			<div class="input-daterange input-group width-100">
 				<input type="text" class="form-control input-sm width-50 text-center from-date" name="from_date" id="fromDate" readonly value="<?php echo $from_date; ?>" />
@@ -87,7 +97,23 @@
 			</div>
 		</div>
 
-		<div class="col-lg-1 col-md-2 col-sm-2-harf col-xs-12 padding-5">
+		<div class="col-lg-2 col-md-2-harf col-sm-2-harf col-xs-6 padding-5 fi">
+			<label>Due Date</label>
+			<div class="input-daterange input-group width-100">
+				<input type="text" class="form-control input-sm width-50 text-center from-date" name="from_due_date" id="fromDueDate" readonly value="<?php echo $from_due_date; ?>" />
+				<input type="text" class="form-control input-sm width-50 text-center" name="to_due_date" id="toDueDate" readonly value="<?php echo $to_due_date; ?>" />
+			</div>
+		</div>
+
+		<div class="col-lg-3 col-md-4 col-sm-4 col-xs-12 padding-5">
+	    <label>การจัดส่ง</label>
+	    <select class="width-100 filter" name="id_sender" id="sender">
+				<option value="all">ทั้งหมด</option>
+				<?php echo select_sender($id_sender); ?>
+			</select>
+	  </div>
+
+		<div class="col-lg-1-harf col-md-2 col-sm-2 col-xs-12 padding-5">
 			<label>สถานะ</label>
 			<select class="width-100" name="stated">
 				<option value="">เลือกสถานะ</option>
@@ -113,7 +139,7 @@
 			</select>
 		</div>
 
-		<div class="col-lg-1-harf col-md-4 col-sm-4 col-xs-12 padding-5">
+		<div class="col-lg-2-harf col-md-4 col-sm-4 col-xs-12 padding-5">
 			<label>รหัสสินค้า</label>
 			<input type="text" class="form-control input-sm search" name="item_code" id="item_code" value="<?php echo $item_code; ?>" />
 		</div>
@@ -148,19 +174,22 @@
 <hr class="margin-top-15 hidden-xs">
 <div class="row hidden-xs">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive">
-		<table class="table table-hover border-1 no-border-xs table-listing" style="min-width:1250px;">
+		<table class="table table-hover border-1 no-border-xs table-listing" style="min-width:1680px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-60"></th>
 					<th class="fix-width-40 middle text-center">#</th>
 					<th class="fix-width-150 middle text-center">วันที่</th>
+					<th class="fix-width-80 middle text-center">Due date</th>
 					<th class="fix-width-120 middle">Order No.</th>
 					<th class="fix-width-100 middle">SO No.</th>
 					<th class="fix-width-100 middle">Fulfil No.</th>
 					<th class="fix-width-150 middle">MKP No.</th>
 					<th class="fix-width-150 middle">ช่องทาง</th>
+					<th class="fix-width-150 middle">การจัดส่ง</th>
 					<th class="fix-width-80 middle text-center">จำนวน</th>
-					<th class="min-width-300 middle">ลูกค้า/ผู้เบิก</th>
+					<th class="fix-width-200 middle">ลูกค้า/ผู้เบิก</th>
+					<th class="min-width-300 middle">คลังปลายทาง</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -182,19 +211,22 @@
               </td>
               <td class="middle text-center no"><?php echo $no; ?></td>
 							<td class="middle text-center"><?php echo thai_date($rs->date_add, TRUE,'/'); ?></td>
+							<td class="middle text-center"><?php echo empty($rs->due_date) ? "-" : thai_date($rs->due_date, FALSE,'/'); ?></td>
 							<td class="middle"><?php echo $rs->code . $cn_text; ?></td>
 							<td class="middle"><?php echo $rs->so_no; ?></td>
 							<td class="middle"><?php echo $rs->fulfillment_code; ?></td>
 							<td class="middle"><?php echo $rs->reference; ?></td>
 							<td class="middle"><?php echo $rs->channels_name; ?></td>
+							<td class="middle"><?php echo $rs->sender_name; ?></td>
 							<td class="middle text-center"><?php echo number($rs->qty); ?></td>
 							<td class="middle"><?php echo $customer_name; ?></td>
+							<td class="middle"><?php echo ! empty($rs->to_warehouse) ? $rs->to_warehouse.' | '.warehouse_name($rs->to_warehouse) : ''; ?></td>
             </tr>
             <?php $no++; ?>
           <?php endforeach; ?>
         <?php else : ?>
           <tr>
-            <td colspan="11" class="text-center">--- No Pending Orders ---</td>
+            <td colspan="13" class="text-center">--- No Pending Orders ---</td>
           </tr>
         <?php endif; ?>
 			</tbody>
@@ -209,8 +241,9 @@
 </div>
 
 <script>
-	$('#warehouse').select2();
+	$('#shop-id').select2();
 	$('#channels').select2();
+	$('#sender').select2();
 </script>
 <script src="<?php echo base_url(); ?>scripts/inventory/prepare/prepare.js?v=<?php echo date('YmdHis'); ?>"></script>
 <script src="<?php echo base_url(); ?>scripts/inventory/prepare/prepare_list.js?v=<?php echo date('YmdHis'); ?>"></script>

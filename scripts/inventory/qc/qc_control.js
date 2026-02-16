@@ -358,6 +358,31 @@ function confirmSaveBeforeAddBox() {
 }
 
 
+function updatePackageId(box_id) {
+  let package_id = $('#package-'+box_id).val();
+
+  $.ajax({
+    url:HOME + 'update_package_id',
+    type:'POST',
+    cache:false,
+    data:{
+      'box_id' : box_id,
+      'package_id' : package_id
+    },
+    success:function(rs) {
+      if(rs.trim() !== 'success') {
+        beep();
+        showError(rs);
+      }
+    },
+    error:function(rs) {
+      beep();
+      showError(rs);
+    }
+  })
+}
+
+
 function addBox() {
   let order_code = $('#order_code').val();
 

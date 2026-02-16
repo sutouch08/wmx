@@ -63,11 +63,9 @@ class Qc_model extends CI_Model
       ->group_end();
     }
 
-    //---- user name / display name
-    if( ! empty($ds['user']))
+    if( ! empty($ds['user']) && $ds['user'] != 'all')
     {
-      $users = user_in($ds['user']);
-      $this->db->where_in('user', $users);
+      $this->db->where('user', $ds['user']);
     }
 
     if( ! empty($ds['channels']) && $ds['channels'] != 'all')
@@ -75,9 +73,24 @@ class Qc_model extends CI_Model
       $this->db->where('channels_code', $ds['channels']);
     }
 
+    if(isset($ds['shop_id']) && $ds['shop_id'] != 'all')
+    {
+      $this->db->where('shop_id', $ds['shop_id']);
+    }
+
     if( ! empty($ds['role']) && $ds['role'] != 'all')
     {
       $this->db->where('role', $ds['role']);
+    }
+
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
+    {
+      $this->db->where('is_cancled', $ds['is_cancled']);
+    }
+
+    if(isset($ds['id_sender']) && $ds['id_sender'] != 'all')
+    {
+      $this->db->where('id_sender', $ds['id_sender']);
     }
 
     if( ! empty($ds['from_date']))
@@ -123,11 +136,9 @@ class Qc_model extends CI_Model
       ->group_end();
     }
 
-    //---- user name / display name
-    if( ! empty($ds['user']))
+    if( ! empty($ds['user']) && $ds['user'] != 'all')
     {
-      $users = user_in($ds['user']);
-      $this->db->where_in('user', $users);
+      $this->db->where('user', $ds['user']);
     }
 
     if( ! empty($ds['channels']) && $ds['channels'] != 'all')
@@ -135,9 +146,24 @@ class Qc_model extends CI_Model
       $this->db->where('channels_code', $ds['channels']);
     }
 
+    if(isset($ds['shop_id']) && $ds['shop_id'] != 'all')
+    {
+      $this->db->where('shop_id', $ds['shop_id']);
+    }
+
     if( ! empty($ds['role']) && $ds['role'] != 'all')
     {
       $this->db->where('role', $ds['role']);
+    }
+
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
+    {
+      $this->db->where('is_cancled', $ds['is_cancled']);
+    }
+
+    if(isset($ds['id_sender']) && $ds['id_sender'] != 'all')
+    {
+      $this->db->where('id_sender', $ds['id_sender']);
     }
 
     if( ! empty($ds['from_date']))
@@ -251,16 +277,18 @@ class Qc_model extends CI_Model
 
     return NULL;
   }
-  
+
 
   //--- รายการกล่องทั้งหมดที่ตรวจในออเดอร์ที่กำหนด
   public function get_box_list($order_code)
   {
     $rs = $this->db
-    ->select('b.id, b.code, b.box_no')
+    ->select('b.id, b.code, b.order_code, b.box_no, b.package_id, b.tracking_no')
+    ->select('p.name, p.type, p.width, p.length, p.height')
     ->select_sum('q.qty', 'qty')
     ->from('qc_box AS b')
     ->join('qc AS q', 'b.id = q.box_id AND b.order_code = q.order_code', 'left')
+    ->join('package AS p', 'b.package_id = p.id', 'left')
     ->where('b.order_code', $order_code)
     ->group_by('b.id')
     ->get();
@@ -314,18 +342,32 @@ class Qc_model extends CI_Model
   }
 
 
-  public function add_new_box($order_code, $barcode, $box_no)
+  public function add_new_box($order_code, $barcode, $box_no, $package_id = NULL)
   {
     $arr = array(
       'code' => $barcode,
       'order_code' => $order_code,
-      'box_no' => $box_no
+      'box_no' => $box_no,
+      'package_id' => $package_id
     );
 
     $rs = $this->db->insert('qc_box', $arr);
+
     if($rs)
     {
       return $this->db->insert_id();
+    }
+
+    return FALSE;
+  }
+
+
+
+  public function update_box($id, array $ds = array())
+  {
+    if( ! empty($ds))
+    {
+      return $this->db->where('id', $id)->update('qc_box', $ds);
     }
 
     return FALSE;
@@ -523,6 +565,44 @@ class Qc_model extends CI_Model
   {
     return $this->db->where('order_code', $code)->delete('qc');
   }
+
+
+  public function update_spx_batch_no($code, $batch_no)
+ {
+   if( ! empty($code) && ! empty($batch_no))
+   {
+     $ds = array(
+       'order_code' => $code,
+       'batch_no' => $batch_no
+     );
+
+     $batch = $this->get_spx_batch($code);
+
+     if( ! empty($batch))
+     {
+       return $this->db->where('id', $batch->id)->update('order_spx', $ds);
+     }
+     else
+     {
+       return $this->db->insert('order_spx', $ds);
+     }
+   }
+
+   return FALSE;
+ }
+
+
+ public function get_spx_batch($code)
+ {
+   $rs = $this->db->where('order_code', $code)->get('order_spx');
+
+   if($rs->num_rows() === 1)
+   {
+     return $rs->row();
+   }
+
+   return NULL;
+ }
 
 
   public function get_max_code($code)

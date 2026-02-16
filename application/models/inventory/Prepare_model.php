@@ -279,6 +279,21 @@ class Prepare_model extends CI_Model
       $this->db->where('role', $ds['role']);
     }
 
+    if(isset($ds['is_backorder']) && $ds['is_backorder'] != 'all')
+    {
+      $this->db->where('is_backorder', $ds['is_backorder']);
+    }
+
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
+    {
+      $this->db->where('is_cancled', $ds['is_cancled']);
+    }
+
+    if(isset($ds['id_sender']) && $ds['id_sender'] != 'all')
+    {
+      $this->db->where('o.id_sender', $ds['id_sender']);
+    }
+
     if( ! empty($ds['code']))
     {
       $this->db->like('o.code', $ds['code']);
@@ -332,6 +347,11 @@ class Prepare_model extends CI_Model
       $this->db->where('o.channels_code', $ds['channels']);
     }
 
+    if(isset($ds['shop_id']) && $ds['shop_id'] != 'all')
+    {
+      $this->db->where('o.shop_id', $ds['shop_id']);
+    }
+
     if( isset($ds['is_online']) && $ds['is_online'] != 'all')
     {
       if($ds['is_online'] == 1)
@@ -345,11 +365,6 @@ class Prepare_model extends CI_Model
         ->or_where('ch.is_online IS NULL', NULL, FALSE)
         ->group_end();
       }
-    }
-
-    if( ! empty($ds['payment']) && $ds['payment'] !== 'all')
-    {
-      $this->db->where('o.payment_code', $ds['payment']);
     }
 
     if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
@@ -366,6 +381,16 @@ class Prepare_model extends CI_Model
         $this->db->where('o.date_add >=', from_date($ds['from_date']));
         $this->db->where('o.date_add <=', to_date($ds['to_date']));
       }
+    }
+
+    if( ! empty($ds['from_due_date']))
+    {
+      $this->db->where('o.due_date >=', from_date($ds['from_due_date']));
+    }
+
+    if( ! empty($ds['to_due_date']))
+    {
+      $this->db->where('o.due_date <=', to_date($ds['to_due_date']));
     }
 
     return $this->db->count_all_results();
@@ -390,11 +415,13 @@ class Prepare_model extends CI_Model
     $this->db
 		->select('o.id, o.code, o.role, o.so_no, o.fulfillment_code, o.oracle_id')
     ->select('o.reference, o.customer_code, o.customer_name, o.customer_ref')
-    ->select('o.date_add, o.channels_code, o.is_cancled, o.is_backorder')
+    ->select('o.date_add, o.due_date, o.channels_code, o.is_cancled, o.is_backorder, o.shop_id')
     ->select('o.warehouse_code, o.to_warehouse, o.user, o.update_user')
     ->select('ch.code AS channels_code, ch.name AS channels_name')
+    ->select('s.name AS sender_name')
     ->from('orders AS o')
-    ->join('channels AS ch', 'o.channels_code = ch.code', 'left');
+    ->join('channels AS ch', 'o.channels_code = ch.code', 'left')
+    ->join('address_sender AS s', 'o.id_sender = s.id', 'left');
 
     if( ! empty($ds['item_code']))
     {
@@ -408,6 +435,21 @@ class Prepare_model extends CI_Model
     if(isset($ds['role']) && $ds['role'] != 'all')
     {
       $this->db->where('role', $ds['role']);
+    }
+
+    if(isset($ds['is_backorder']) && $ds['is_backorder'] != 'all')
+    {
+      $this->db->where('is_backorder', $ds['is_backorder']);
+    }
+
+    if(isset($ds['is_cancled']) && $ds['is_cancled'] != 'all')
+    {
+      $this->db->where('is_cancled', $ds['is_cancled']);
+    }
+
+    if(isset($ds['id_sender']) && $ds['id_sender'] != 'all')
+    {
+      $this->db->where('o.id_sender', $ds['id_sender']);
     }
 
     if( ! empty($ds['code']))
@@ -463,6 +505,11 @@ class Prepare_model extends CI_Model
       $this->db->where('o.channels_code', $ds['channels']);
     }
 
+    if(isset($ds['shop_id']) && $ds['shop_id'] != 'all')
+    {
+      $this->db->where('o.shop_id', $ds['shop_id']);
+    }
+
     if( isset($ds['is_online']) && $ds['is_online'] != 'all')
     {
       if($ds['is_online'] == 1)
@@ -476,11 +523,6 @@ class Prepare_model extends CI_Model
         ->or_where('ch.is_online IS NULL', NULL, FALSE)
         ->group_end();
       }
-    }
-
-    if( ! empty($ds['payment']) && $ds['payment'] !== 'all')
-    {
-      $this->db->where('o.payment_code', $ds['payment']);
     }
 
     if( ! empty($ds['from_date']) && ! empty($ds['to_date']))
@@ -497,6 +539,16 @@ class Prepare_model extends CI_Model
         $this->db->where('o.date_add >=', from_date($ds['from_date']));
         $this->db->where('o.date_add <=', to_date($ds['to_date']));
       }
+    }
+
+    if( ! empty($ds['from_due_date']))
+    {
+      $this->db->where('o.due_date >=', from_date($ds['from_due_date']));
+    }
+
+    if( ! empty($ds['to_due_date']))
+    {
+      $this->db->where('o.due_date <=', to_date($ds['to_due_date']));
     }
 
     $this->db->group_by('o.code');

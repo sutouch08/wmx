@@ -312,6 +312,38 @@ function getWrxApiConfig()
 	return NULL;
 }
 
+function getPorlorApiConfig()
+{
+	$fields = [
+		'PORLOR_API',
+		'PORLOR_API_ENDPOINT',
+		'PORLOR_API_TEST',
+		'PORLOR_CUSTOMER_CODE',
+		'PORLOR_CUSTOMER_NAME',
+		'PORLOR_CUSTOMER_ADDRESS',
+		'PORLOR_CUSTOMER_PROVINCE',
+		'PORLOR_CUSTOMER_PHONE',
+		'PORLOR_LOG_JSON'
+	];
+
+	$ci =& get_instance();
+	$rs = $ci->db->select('code, value')->where_in('code', $fields)->get('config');
+
+	if($rs->num_rows() >  0)
+	{
+		$ds = [];
+
+		foreach($rs->result() as $ro)
+		{
+			$ds[$ro->code] = $ro->value;
+		}
+
+		return $ds;
+	}
+
+	return NULL;
+}
+
 
 function get_vat_amount($amount, $vat = NULL, $type = 'I')
 {

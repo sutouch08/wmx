@@ -16,6 +16,22 @@ function goQc(code, view){
 }
 
 
+function goToProcess() {
+  let code = $('#order-code').val().trim();
+
+  if(code.length) {
+    goQc(code);
+  }
+}
+
+
+$('#order-code').keyup(function(e) {
+  if(e.keyCode === 13) {
+    goToProcess();
+  }
+});
+
+
 function viewProcess(){
   window.location.href = HOME + 'view_process';
 }
