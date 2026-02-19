@@ -17,7 +17,7 @@
             <th class="fix-width-200 fix-header">เลขที่</th>
             <th class="min-width-100 fix-header">
               <?php if($doc->status == 'P') : ?>
-                <button type="button" class="btn btn-sm btn-danger btn-100 pull-right" onclick="deleteOrders()">ลบออเดอร์</button>
+                <button type="button" class="btn btn-minier btn-danger btn-100 pull-right" onclick="deleteOrders()">ลบออเดอร์</button>
               <?php endif; ?>
             </th>
           </tr>

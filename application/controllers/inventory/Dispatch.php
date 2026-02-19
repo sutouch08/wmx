@@ -274,7 +274,7 @@ class Dispatch extends PS_Controller
 
     $this->_response($sc);
   }
-
+  
 
   public function close_dispatch()
   {
@@ -351,6 +351,62 @@ class Dispatch extends PS_Controller
   }
 
 
+  public function is_cancel($reference, $channels, $shop_id)
+  {
+    $is_cancel = FALSE;
+    $shopee = getConfig('SHOPEE_CHANNELS_CODE');
+    $tiktok = getConfig('TIKTOK_CHANNELS_CODE');
+    $lazada = getConfig('LAZADA_CHANNELS_CODE');
+
+    if($channels == $tiktok)
+    {
+      if(is_true(getConfig('WRX_TIKTOK_API')))
+      {
+        $this->load->library('wrx_tiktok_api');
+
+        $order_status = $this->wrx_tiktok_api->get_order_status($reference, $shop_id);
+
+        if($order_status == '140')
+        {
+          $is_cancel = TRUE;
+        }
+      }
+    }
+
+    if($channels == $shopee)
+    {
+      if(is_true(getConfig('WRX_SHOPEE_API')))
+      {
+        $this->load->library('wrx_shopee_api');
+
+        $order_status = $this->wrx_shopee_api->get_order_status($reference, $shop_id);
+
+        if($order_status == 'CANCELLED' OR $order_status == 'IN_CANCEL')
+        {
+          $is_cancel = TRUE;
+        }
+      }
+    }
+
+    if($channels == $lazada)
+    {
+      if(is_true(getConfig('WRX_LAZADA_API')))
+      {
+        $this->load->library('wrx_lazada_api');
+
+        $order_status = $this->wrx_lazada_api->get_order_status($reference, $shop_id);
+
+        if($order_status == 'canceled' OR $order_status == 'CANCELED' OR $order_status == 'Canceled')
+        {
+          $is_cancel = TRUE;
+        }
+      }
+    }
+
+    return $is_cancel;
+  }
+
+
   public function add_to_dispatch()
   {
     $sc = TRUE;
@@ -361,122 +417,181 @@ class Dispatch extends PS_Controller
     $order_code = $this->input->post('order_code');
     $row = [];
 
-    if( ! empty($order_code) && ! empty($code))
+    $doc = $this->dispatch_model->get($code);
+
+    if( ! empty($doc))
     {
-      $order = $this->orders_model->get_order_by_tracking($order_code);
-
-      if(empty($order))
+      if($doc->status != 'C' && $doc->status != 'D')
       {
-        $order = $this->orders_model->get_order_by_reference($order_code);
-      }
-
-      if(empty($order))
-      {
-        $order = $this->orders_model->get($order_code);
-      }
-
-      if( ! empty($order))
-      {
-        if($order->state == 8 OR ($order->channels_code == 'SHOPEE' && $order->state == 7))
+        if( ! empty($order_code) && ! empty($code))
         {
-
-          if( ! empty($channels_code))
+          $order = $this->orders_model->get_order_by_tracking($order_code);
+          
+          if(empty($order)) 
           {
-            if( ! empty($order->channels_code) && $order->channels_code != $channels_code)
+            $order = $this->orders_model->get_order_by_reference($order_code);
+          }
+          
+          if(empty($order))
+          {
+            $order = $this->orders_model->get($order_code);
+          }
+
+          if(empty($order))
+          {
+            $order = $this->orders_model->get_order_in_qc_box($order_code);
+          }
+
+          if( ! empty($order))
+          {
+            if( ! empty($doc->sender_code) && ($doc->sender_code != $order->id_sender))
             {
               $sc = FALSE;
-              $this->error = "ออเดอร์ไม่ตรงช่องทางขาย";
+              $this->error = "การจัดส่งไม่ตรงกับเอกสาร";
             }
-          }
 
-          if($this->orders_model->is_cancel_request($order->code))
-          {
-            $sc = FALSE;
-            $this->error = "{$order_code} : ออเดอร์นี้ถูกยกเลิกจาก platform";
-          }
-
-          $customer = $order->customer_code ." : ".(empty($order->customer_ref) ? $order->customer_name : $order->customer_ref);
-
-          if($sc === TRUE)
-          {
-            $row = array(
-              'dispatch_id' => $id,
-              'dispatch_code' => $code,
-              'order_code' => $order->code,
-              'reference' => get_null($order->reference),
-              'channels_code' => get_null($channels_code),
-              'channels_name' => get_null($channels_name),
-              'customer_code' => get_null($order->customer_code),
-              'customer_name' => empty($order->customer_ref) ? get_null($order->customer_name) : $order->customer_ref,
-              'user' => $this->_user->uname
-            );
-
-            $detail = $this->dispatch_model->get_detail_by_order($code, $order->code);
-
-            if(empty($detail))
+            if($sc === TRUE)
             {
-              $cartons = $this->dispatch_model->count_order_box($order->code);
-              $row['carton_qty'] = $cartons;
-              $row['carton_shipped'] = 1;
-
-              $dispatch_detail_id = $this->dispatch_model->add_detail($row);
-
-              if($dispatch_detail_id)
+              if($order->state == 8 OR $order->state == 7 )
               {
-                $this->dispatch_model->update_order($order->code, $id);
-                $row['id'] = $dispatch_detail_id;
-                $row['channels'] = $channels_name;
-                $row['customer'] = $customer;
-              }
-            }
-            else
-            {
-              $carton_shipped = $detail->carton_shipped + 1;
-
-              if($detail->carton_qty >= $carton_shipped)
-              {
-                $arr = array(
-                  'carton_shipped' => $carton_shipped
-                );
-
-                if( ! $this->dispatch_model->update_detail($detail->id, $arr))
+                if( ! empty($channels_code))
                 {
-                  $sc = FALSE;
-                  $this->error = "Failed to update carton shipped";
+                  if( ! empty($order->channels_code) && $order->channels_code != $channels_code )
+                  {
+                    $sc = FALSE;
+                    $this->error = "ออเดอร์ไม่ตรงช่องทางขาย";
+                  }
                 }
 
+                if(is_true(getConfig('WRX_API')))
+                {
+                  $shopee = getConfig('SHOPEE_CHANNELS_CODE');
+                  $shopee = empty($shopee) ? $shopee : "xxxxxxxxxxxx";
+                  $tiktok = getConfig('TIKTOK_CHANNELS_CODE');
+                  $tiktok = empty($tiktok) ? $tiktok : "xxxxxxxxxxxxx";
+                  $lazada = getConfig('LAZADA_CHANNELS_CODE');
+                  $lazada = empty($lazada) ? $lazada : "xxxxxxxxxxxxx";
+
+                  if( ! empty($order->reference) && ($order->channels_code == $tiktok OR $order->channels_code == $shopee OR $order->channels_code == $lazada))
+                  {
+                    if($this->is_cancel($order->reference, $order->channels_code, $order->shop_id))
+                    {
+                      $sc = FALSE;
+                      $this->error = "{$order->code} : ออเดอร์นี้ถูกยกเลิกจาก platform";
+                      $this->orders_model->update($order->code, ['is_cancled' => 1]);
+                    }
+                    else
+                    {
+                      if($order->is_cancled == 1)
+                      {
+                        $this->orders_model->update($order->code, ['is_cancled' => 0]);
+                      }
+                    }
+                  }
+                }
+                
                 if($sc === TRUE)
                 {
-                  $row['id'] = $detail->id;
-                  $row['carton_shipped'] = $carton_shipped;
-                  $row['channels'] = $channels_name;
-                  $row['customer'] = $customer;
+                  $customer = $order->customer_code ." : ".(empty($order->customer_ref) ? $order->customer_name : $order->customer_ref);
+
+                  $row = array(
+                    'dispatch_id' => $id,
+                    'dispatch_code' => $code,
+                    'order_code' => $order->code,
+                    'reference' => get_null($order->reference),
+                    'channels_code' => get_null($channels_code),
+                    'channels_name' => get_null($channels_name),
+                    'customer_code' => get_null($order->customer_code),
+                    'customer_name' => empty($order->customer_ref) ? get_null($order->customer_name) : $order->customer_ref,
+                    'user' => $this->_user->uname
+                  );
+
+                  $detail = $this->dispatch_model->get_detail_by_order($code, $order->code);
+
+                  if(empty($detail))
+                  {
+                    $cartons = $this->dispatch_model->count_order_box($order->code);
+                    $row['carton_qty'] = $cartons;
+                    $row['carton_shipped'] = 1;
+
+                    $dispatch_detail_id = $this->dispatch_model->add_detail($row);
+
+                    if($dispatch_detail_id)
+                    {
+                      $arr = array(
+                      'dispatch_id' => $id,
+                      'shipped_date' => empty($order->shipped_date) ? now() : $order->shipped_date,
+                      'real_shipped_date' => now()
+                      );
+
+                      $this->orders_model->update($order->code, $arr);
+                      
+                      $row['id'] = $dispatch_detail_id;
+                      $row['channels'] = $channels_name;
+                      $row['customer'] = $customer;
+                    }
+                  }
+                  else
+                  {
+                    $carton_shipped = $detail->carton_shipped + 1;
+
+                    if($detail->carton_qty >= $carton_shipped)
+                    {
+                      $arr = array(
+                        'carton_shipped' => $carton_shipped
+                      );
+
+                      if( ! $this->dispatch_model->update_detail($detail->id, $arr))
+                      {
+                        $sc = FALSE;
+                        $this->error = "Failed to update carton shipped";
+                      }
+
+                      if($sc === TRUE)
+                      {
+                        $row['id'] = $detail->id;
+                        $row['carton_shipped'] = $carton_shipped;
+                        $row['channels'] = $channels_name;
+                        $row['customer'] = $customer;
+                      }
+                    }
+                    else
+                    {
+                      $sc = FALSE;
+                      $this->error = "ออเดอร์ซ้ำ : {$order_code}";
+                    }
+                  }
                 }
               }
               else
               {
                 $sc = FALSE;
-                $this->error = "ออเดอร์ซ้ำ : {$order_code}";
+                $this->error = "Invalid order status";
               }
             }
+          }
+          else
+          {
+            $sc = FALSE;
+            $this->error = "Invalid order number";
           }
         }
         else
         {
           $sc = FALSE;
-          $this->error = "Invalid order status";
+          set_error('required');
         }
       }
-      else
+      else 
       {
         $sc = FALSE;
-        $this->error = "Invalid order number";
+        set_error('status');
       }
     }
-    else
+    else 
     {
       $sc = FALSE;
-      set_error('required');
+      set_error('notfound');
     }
 
     $arr = array(
@@ -485,7 +600,7 @@ class Dispatch extends PS_Controller
       'data' => $sc === TRUE ? $row : NULL
     );
 
-    echo json_encode($arr);
+    echo json_encode($arr);    
   }
 
 
@@ -536,16 +651,8 @@ class Dispatch extends PS_Controller
         'doc' => $doc,
         'orders' => $this->dispatch_model->get_peding_order_by_channels($doc->channels_code)
       );
-
-      if($this->agent->is_mobile())
-      {
-        $ds['title'] = "Pending Orders<br/>{$doc->code} | {$this->channels_model->get_name($doc->channels_code)}";
-        $this->load->view('inventory/dispatch/mobile/view_pending_mobile', $ds);
-      }
-      else
-      {
-        $this->load->view('inventory/dispatch/dispatch_view_pending', $ds);
-      }
+      
+      $this->load->view('inventory/dispatch/dispatch_view_pending', $ds);
     }
     else
     {

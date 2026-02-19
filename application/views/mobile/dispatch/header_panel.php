@@ -18,8 +18,8 @@
     <div class="col-xs-12 fi">
   		<label>ช่องทางขาย</label>
       <select class="form-control r e" id="channels" disabled>
-        <option value="">ไม่ระบุ</option>
-        <?php echo select_channels($doc->channels_code); ?>
+        <option value="" data-name="">ไม่ระบุ</option>
+        <?php echo select_dispatch_channels($doc->channels_code); ?>
       </select>
   	</div>
 

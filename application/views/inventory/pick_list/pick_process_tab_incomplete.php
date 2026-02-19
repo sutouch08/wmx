@@ -7,12 +7,12 @@
         </th>
         <th class="fix-width-100 fix-header">บาร์โค้ด</th>
         <th class="fix-width-200 fix-header">รหัส</th>
-        <th class="fix-width-250 fix-header">สินค้า</th>
+        <th class="min-width-250 fix-header">สินค้า</th>
         <th class="fix-width-100 text-center fix-header">Rel Qty</th>
         <th class="fix-width-100 text-center fix-header">จัดแล้ว</th>
         <th class="fix-width-100 text-center fix-header">คงเหลือ</th>
         <th class="fix-width-40 text-center fix-header">&nbsp;</th>
-        <th class="min-width-200 fix-header">Stock Zone</th>
+        <th class="fix-width-200 fix-header">Stock Zone</th>
       </tr>
     </thead>
     <tbody id="incomplete-table">

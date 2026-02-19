@@ -23,6 +23,7 @@ class Pick_list extends PS_Controller
     $this->load->model('stock/stock_model');
     $this->load->model('inventory/prepare_model');
 
+    $this->load->helper('sender');
     $this->load->helper('channels');
     $this->load->helper('warehouse');
     $this->load->helper('zone');
@@ -43,7 +44,8 @@ class Pick_list extends PS_Controller
       'status' => get_filter('status', 'pl_status', 'all'),
       'is_exported' => get_filter('is_exported', 'pl_is_exported', 'all'),
       'from_date' => get_filter('from_date', 'pl_from_date', ''),
-      'to_date' => get_filter('to_date', 'pl_to_date', '')
+      'to_date' => get_filter('to_date', 'pl_to_date', ''),
+      'sender_id' => get_filter('sender_id', 'pl_sender_id', 'all')
     );
 
     if($this->is_mobile)
@@ -459,7 +461,7 @@ class Pick_list extends PS_Controller
 
         if($qty > 0)
         {
-          $sc .= $i == 1 ? $rs->name.' : '.($qty) : ' | '.$rs->name.' : '.$qty;
+          $sc .= $i == 1 ? $rs->name.' : '.($qty) : ' <br/> '.$rs->name.' : '.$qty;
           $i++;
         }
       }
@@ -807,6 +809,7 @@ class Pick_list extends PS_Controller
           'date_add' => $date_add,
           'bookcode' => 'MV',
           'channels_code' => get_null($ds->channels_code),
+          'sender_id' => empty($ds->sender_id) ? 0 : $ds->sender_id,
           'warehouse_code' => $ds->warehouse_code,
           'zone_code' => $ds->zone_code,
           'user' => $this->_user->uname,
@@ -879,6 +882,7 @@ class Pick_list extends PS_Controller
         $arr = array(
           'date_add' => $date_add,
           'channels_code' => get_null($ds->channels_code),
+          'sender_id' => empty($ds->sender_id) ? 0 : $ds->sender_id,
           'warehouse_code' => $ds->warehouse_code,
           'zone_code' => $ds->zone_code,
           'user' => $this->_user->uname,
@@ -1305,6 +1309,34 @@ class Pick_list extends PS_Controller
   }
 
 
+  public function get_item_code()
+  {
+    $ds = [];
+
+    $txt = trim($_REQUEST['term']);
+
+    $rs = $this->db
+    ->select('code')
+    ->like('code', $txt)
+    ->order_by('code', 'ASC')
+    ->limit(100)->get('products');
+
+    if($rs->num_rows() > 0)
+    {
+      foreach($rs->result() as $rd)
+      {
+        $ds[] = $rd->code;
+      }
+    }
+    else
+    {
+      $ds[] = "not found";
+    }
+
+    echo json_encode($ds);
+  }
+
+
   public function get_order_list()
   {
     $sc = TRUE;
@@ -1315,12 +1347,21 @@ class Pick_list extends PS_Controller
     {
       $ds = array(
         'code' => $filter->order_code,
+        'item_code' => $filter->item_code,
         'channels' => $filter->channels,
+        'sender_id' => $filter->sender_id,
         'customer' => $filter->customer,
         'warehouse_code' => $filter->warehouse_code,
         'from_date' => $filter->from_date,
         'to_date' => $filter->to_date,
-        'is_pick_list' => $filter->is_pick_list
+        'due_from_date' => $filter->due_from_date,
+        'due_to_date' => $filter->due_to_date,
+        'start_time' => get_null($filter->start_time),
+        'end_time' => get_null($filter->end_time),
+        'is_pick_list' => $filter->is_pick_list,
+        'is_1_sku' => $filter->is_1_sku,
+        'is_backorder' => $filter->is_backorder,
+        'limit' => $filter->limit
       );
 
       $orders = $this->pick_list_model->get_order_list($ds);
@@ -1336,9 +1377,14 @@ class Pick_list extends PS_Controller
             'id' => $rs->id,
             'code' => $rs->code,
             'channels' => $rs->channels_name,
+            'sender' => $rs->sender_name,
             'customer' => $rs->customer_name,
             'date_add' => thai_date($rs->date_add, FALSE),
-            'pick_list_id' => $rs->pick_list_id
+            'date_upd' => thai_date($rs->date_upd, TRUE),
+            'due_date' => empty($rs->due_date) ? "-" : thai_date($rs->due_date, FALSE),
+            'pick_list_id' => $rs->pick_list_id,
+            'product_code' => empty($rs->product_code) ? NULL : $rs->product_code,
+            'backorder' => $rs->is_backorder ? 'backorder' : '' //-- css class backorder
           );
 
           $no++;
@@ -1520,6 +1566,7 @@ class Pick_list extends PS_Controller
       'pl_is_exported',
       'pl_from_date',
       'pl_to_date',
+      'pl_sender_id'
     );
 
     return clear_filter($filter);

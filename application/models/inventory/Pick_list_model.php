@@ -564,12 +564,40 @@ class Pick_list_model extends CI_Model
   public function get_order_list(array $ds = array())
   {
     $this->db
-    ->select('o.id, o.code, o.customer_code, o.customer_name, o.channels_code, o.pick_list_id, o.date_add, c.name AS channels_name')
     ->from('orders AS o')
+    ->select('o.id, o.code, o.customer_code, o.customer_name, o.channels_code')
+    ->select('o.id_sender, o.pick_list_id, o.is_backorder, o.date_add, o.date_upd, o.due_date, c.name AS channels_name')
+    ->select('s.name AS sender_name')
     ->join('channels AS c', 'o.channels_code = c.code', 'left')
+    ->join('address_sender AS s', 'o.id_sender = s.id', 'left');
+
+
+    if((isset($ds['is_1_sku']) && $ds['is_1_sku'] == '1') OR ! empty($ds['item_code']))
+    {
+      $this->db->select('d.product_code');
+      $this->db->join('order_details AS d', 'd.order_code = o.code', 'left');
+    }
+
+    if((isset($ds['is_1_sku']) && $ds['is_1_sku'] == '1'))
+    {
+      $this->db->where('o.total_sku', 1);
+    }
+
+    if( ! empty($ds['item_code']))
+    {
+      $this->db->like('d.product_code', $ds['item_code']);
+    }
+
+    $this->db
     ->where('o.state', 3)
     ->where('o.is_cancled', 0)
+    ->where('o.is_pre_order', 0)
     ->where('o.warehouse_code', $ds['warehouse_code']);
+
+    if(isset($ds['is_backorder']) && $ds['is_backorder'] != 'all')
+    {
+      $this->db->where('o.is_backorder', $ds['is_backorder']);
+    }
 
     if( ! empty($ds['from_date']))
     {
@@ -579,6 +607,24 @@ class Pick_list_model extends CI_Model
     if( ! empty($ds['to_date']))
     {
       $this->db->where('o.date_add <=', to_date($ds['to_date']));
+    }
+
+    if( ! empty($ds['start_time']) && ! empty($ds['end_time']))
+    {
+      $start = db_date($ds['from_date'], FALSE) .' '.$ds['start_time'];
+      $end = db_date($ds['to_date'], FALSE). ' '.$ds['end_time'];
+
+      $this->db->where('o.date_upd >=', $start)->where('o.date_upd <=', $end);
+    }
+
+    if( ! empty($ds['due_from_date']))
+    {
+      $this->db->where('o.due_date >=', from_date($ds['due_from_date']));
+    }
+
+    if( ! empty($ds['due_to_date']))
+    {
+      $this->db->where('o.due_date <=', to_date($ds['due_to_date']));
     }
 
     if( isset($ds['channels']) && $ds['channels'] != 'all')
@@ -598,6 +644,11 @@ class Pick_list_model extends CI_Model
       }
     }
 
+    if( ! empty($ds['sender_id']))
+    {
+      $this->db->where('o.id_sender', $ds['sender_id']);
+    }
+
     if( ! empty($ds['code']))
     {
       $this->db->like('o.code', $ds['code']);
@@ -612,7 +663,7 @@ class Pick_list_model extends CI_Model
       ->group_end();
     }
 
-    $rs = $this->db->order_by('o.id', 'ASC')->limit(100)->get();
+    $rs = $this->db->order_by('o.id', 'ASC')->limit($ds['limit'])->get();
 
     if($rs->num_rows() > 0)
     {
@@ -621,6 +672,67 @@ class Pick_list_model extends CI_Model
 
     return NULL;
   }
+
+  // public function get_order_list(array $ds = array())
+  // {
+  //   $this->db
+  //   ->select('o.id, o.code, o.customer_code, o.customer_name, o.channels_code, o.pick_list_id, o.date_add, c.name AS channels_name')
+  //   ->from('orders AS o')
+  //   ->join('channels AS c', 'o.channels_code = c.code', 'left')
+  //   ->where('o.state', 3)
+  //   ->where('o.is_cancled', 0)
+  //   ->where('o.warehouse_code', $ds['warehouse_code']);
+
+  //   if( ! empty($ds['from_date']))
+  //   {
+  //     $this->db->where('o.date_add >=', from_date($ds['from_date']));
+  //   }
+
+  //   if( ! empty($ds['to_date']))
+  //   {
+  //     $this->db->where('o.date_add <=', to_date($ds['to_date']));
+  //   }
+
+  //   if( isset($ds['channels']) && $ds['channels'] != 'all')
+  //   {
+  //     $this->db->where('o.channels_code', $ds['channels']);
+  //   }
+
+  //   if(isset($ds['is_pick_list']) && $ds['is_pick_list'] != 'all')
+  //   {
+  //     if($ds['is_pick_list'] == 1)
+  //     {
+  //       $this->db->where('o.pick_list_id IS NOT NULL', NULL, FALSE);
+  //     }
+  //     else
+  //     {
+  //       $this->db->where('o.pick_list_id IS NULL', NULL, FALSE);
+  //     }
+  //   }
+
+  //   if( ! empty($ds['code']))
+  //   {
+  //     $this->db->like('o.code', $ds['code']);
+  //   }
+
+  //   if( ! empty($ds['customer']))
+  //   {
+  //     $this->db
+  //     ->group_start()
+  //     ->like('o.customer_code', $ds['customer'])
+  //     ->or_like('o.customer_name', $ds['customer'])
+  //     ->group_end();
+  //   }
+
+  //   $rs = $this->db->order_by('o.id', 'ASC')->limit(100)->get();
+
+  //   if($rs->num_rows() > 0)
+  //   {
+  //     return $rs->result();
+  //   }
+
+  //   return NULL;
+  // }
 
 
   public function is_order_in_correct_state($order_code)
