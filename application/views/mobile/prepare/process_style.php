@@ -28,11 +28,22 @@
     margin-bottom: 10px;
   }
 
+  .incomplete-item:last-child {      
+    margin-bottom:50px !important;
+  }
+
   .stock-reload {
     position: absolute;
     bottom: 10px;
     right: 10px;
     color:blue;
+  }
+
+  .stock-pre {
+    width:100%;
+    white-space:nowrap;
+    overflow-x:scroll;
+    padding-right:30px;
   }
 
   .incomplete-item.heighlight {

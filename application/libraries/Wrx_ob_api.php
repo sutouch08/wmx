@@ -44,12 +44,25 @@ class Wrx_ob_api
 
     if( ! empty($order))
     {
+      $stateMap = [
+        '1' => 'Picked',
+        '2' => 'Picked',
+        '3' => 'Picked',
+        '4' => 'Packed',
+        '5' => 'Packed',
+        '6' => 'Packed',
+        '7' => 'Packed',
+        '8' => 'Shipped',
+        '9' => 'Canceled'
+      ];
+
       $sender = $this->ci->sender_model->get_code($order->id_sender);
+
       $playload = array(
         'Company' => $this->company,
         'HeaderInternalId' => intval($order->oracle_id),
         'Fulfillment' => $order->fulfillment_code,
-        'Status' => ($order->state == 9 ? 'Cancel' : ($order->state == 8 ? 'Shipped' : ($order->state > 3 ? 'Packed' : 'Picked'))),
+        'Status' => $stateMap[$order->state],
         'ShippingMethod' => empty($sender) ? "" :  $sender, //$this->ci->sender_model->get_code($order->id_sender),
         'TrackingNo'=> empty($order->shipping_code) ? "" : $order->shipping_code,
         'UpdateBy' => 'WMS API',
@@ -115,6 +128,11 @@ class Wrx_ob_api
             {
               $sc = FALSE;
               $this->error = $res->serviceMessage;
+            }
+            else
+            {
+              $arr = array('erp_status' => $stateMap[$order->state]);
+              $this->ci->orders_model->update($code, $arr);
             }
 
             if($this->logs_json)
