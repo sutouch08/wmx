@@ -709,7 +709,7 @@ class Qc extends PS_Controller
         else
         {
           $sc = FALSE;
-          $ths->error = "Cannot get spx order batch no";
+          $this->error = "Cannot get spx order batch no";
         }
       }
     }
@@ -1185,15 +1185,14 @@ class Qc extends PS_Controller
           'allow_input_qty' => getConfig('ALLOW_QC_INPUT_QTY') == 1 ? TRUE : FALSE
         );
 
-        if( ! empty($view))
+        if (getConfig('VIDEO_ON_PACK')) 
         {
-          $ds['title'] = $order->code;
-          $this->load->view('inventory/qc/qc_process_mobile', $ds);
-        }
-        else
+          $this->load->view('inventory/qc/qc_process_video', $ds);
+        } 
+        else 
         {
           $this->load->view('inventory/qc/qc_process', $ds);
-        }
+        }              
       }
       else
       {
