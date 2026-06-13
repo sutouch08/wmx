@@ -41,8 +41,7 @@ class Sales_consignment_report extends PS_Controller
     $warehouse = $this->input->get('warehouse');
 
     $allZone = $this->input->get('allZone');
-    $zoneCode = $this->input->get('zoneCode');
-    $zoneName = $this->input->get('zoneName');
+    $zoneCode = $this->input->get('zoneCode');    
 
     $fromDate = $this->input->get('fromDate');
     $toDate = $this->input->get('toDate');
@@ -107,8 +106,7 @@ class Sales_consignment_report extends PS_Controller
             'sell' => number($rs->sell, 2),
             'qty' => number($rs->qty),
             'total_discount' => number(($rs->discount_amount * $rs->qty), 2),
-            'total_amount' => number($rs->total_amount, 2),
-            'total_cost' => number($rs->total_cost, 2),
+            'total_amount' => number($rs->total_amount, 2),            
             'customer_code' => $rs->customer_code,
             'customer_name' => $rs->customer_name,
             'warehouse_code' => $rs->warehouse_code,
@@ -120,16 +118,14 @@ class Sales_consignment_report extends PS_Controller
           array_push($bs, $arr);
           $totalQty += $rs->qty;
           $totalDiscount += ($rs->qty * $rs->discount_amount);
-          $totalAmount += $rs->total_amount;
-          $totalCost += $rs->total_cost;
+          $totalAmount += $rs->total_amount;          
           $no++;
         }
 
         $arr = array(
           'totalQty' => number($totalQty),
           'totalDiscount' => number($totalDiscount, 2),
-          'totalAmount' => number($totalAmount, 2),
-          'totalCost' => number($totalCost, 2)
+          'totalAmount' => number($totalAmount, 2)
         );
 
         array_push($bs, $arr);

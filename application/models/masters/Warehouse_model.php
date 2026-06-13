@@ -329,6 +329,22 @@ class Warehouse_model extends CI_Model
   }
 
 
+  public function get_all_warehouse()
+  {
+    $rs = $this->db
+    ->where('active', 1)
+    ->order_by('code', 'ASC')
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
+
+
   public function get_all_warehouse_list()
   {
     $rs = $this->db

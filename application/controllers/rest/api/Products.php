@@ -8,7 +8,7 @@ class Products extends REST_Controller
   private $user;
 	private $api_path = "rest/api/products";
 	public $logs;
-	private $log_json = FALSE;
+	private $logs_json = FALSE;
 	private $api = FALSE;
 
   public function __construct()

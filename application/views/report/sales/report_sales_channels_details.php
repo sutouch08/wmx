@@ -104,5 +104,5 @@
 </div>
 
 
-<script src="<?php echo base_url(); ?>scripts/report/sales/sales_channels_details.js"></script>
+<script src="<?php echo base_url(); ?>scripts/report/sales/sales_channels_details.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

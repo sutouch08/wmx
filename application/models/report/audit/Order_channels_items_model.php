@@ -15,8 +15,10 @@ class Order_channels_items_model extends CI_Model
       ->select('o.*')
       ->select('od.product_code, od.price')
       ->select('od.qty, od.discount_amount, od.total_amount')
+      ->select('ad.name AS consignee, ad.address, ad.sub_district, ad.district, ad.province, ad.postcode, ad.phone')
       ->from('order_details AS od')
       ->join('orders AS o', 'od.order_code = o.code', 'left')
+      ->join('address_ship_to AS ad', 'o.code = ad.order_code', 'left')
       ->where('o.date_add >=', from_date($ds['fromDate']))
       ->where('o.date_add <=', to_date($ds['toDate']))
       ->where('o.role', 'S')
@@ -48,8 +50,6 @@ class Order_channels_items_model extends CI_Model
         ->where('od.product_code >=', $ds['pdFrom'])
         ->where('od.product_code <=', $ds['pdTo']);
       }
-
-
 
       $this->db->order_by('o.code', 'ASC')->order_by('od.product_code', 'ASC');
 

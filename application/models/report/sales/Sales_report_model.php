@@ -12,8 +12,9 @@ class Sales_report_model extends CI_Model
     {
       $this->db
       ->select('o.code AS code, o.date_add, o.reference')
-      ->select('o.shipping_code, o.shipping_fee, o.service_fee')
-      ->select('o.customer_ref, o.id_address, c.name AS channels')
+      ->select('o.shipping_code, o.customer_ref')
+      ->select('c.name AS channels')
+      ->select('a.name AS consignee, a.address, a.sub_district, a.district, a.province, a.postcode, a.phone')
       ->select('pm.name AS payment, st.name AS state')
       ->select('od.product_code, od.price')
       ->select('od.qty, od.discount_amount, od.total_amount')
@@ -23,6 +24,7 @@ class Sales_report_model extends CI_Model
       ->join('channels AS c', 'o.channels_code = c.code', 'left')
       ->join('payment_method AS pm', 'o.payment_code = pm.code', 'left')
       ->join('order_state AS st', 'o.state = st.state', 'left')
+      ->join('address_ship_to AS a', 'o.code = a.order_code', 'left')
       ->join('address_sender AS sd', 'o.id_sender = sd.id', 'left')
       ->join('order_tracking_details AS ot', 'od.order_code = ot.order_code AND od.product_code = ot.product_code', 'left')
       ->where('o.date_add >=', from_date($ds['from_date']))

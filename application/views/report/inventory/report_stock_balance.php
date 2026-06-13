@@ -46,13 +46,13 @@
 
 
 <div class="modal fade" id="wh-modal" tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
-	<div class='modal-dialog' id='modal' style="width:500px;">
+	<div class='modal-dialog' id='modal' style="width:500px; max-width:90vw;">
         <div class='modal-content'>
             <div class='modal-header'>
                 <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
                 <h4 class='title' id='modal_title'>เลือกคลัง</h4>
             </div>
-            <div class='modal-body' id='modal_body' style="padding:0px;">
+            <div class='modal-body' id='modal_body' style="padding:0px; max-height:75vh; overflow:auto;">
         <?php if(!empty($whList)) : ?>
           <?php foreach($whList as $rs) : ?>
             <div class="col-sm-12">

@@ -20,7 +20,6 @@ class Channels_model extends CI_Model
   }
 
 
-
   public function update($code, array $ds = array())
   {
     if(!empty($ds))
@@ -123,8 +122,6 @@ class Channels_model extends CI_Model
     return NULL;
   }
 
-
-
   public function get_default()
   {
     $rs = $this->db->where('is_default', 1)->get($this->tb);
@@ -218,7 +215,6 @@ class Channels_model extends CI_Model
 
 		return NULL;
 	}
-
 
   public function get_all()
   {

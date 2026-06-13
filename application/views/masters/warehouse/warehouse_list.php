@@ -5,7 +5,7 @@
   </div>
   <div class="col-lg-6 col-md-6 col-sm-6 col-xs-12 padding-5 text-right">		
 		<button type="button" class="btn btn-white btn-purple top-btn" onclick="exportFilter()"><i class="fa fa-file-excel-o"></i> Export</button>
-		<?php if($this->pm->can_add) : ?>
+		<?php if(getConfig('ALLOW_CREATE_WAREHOUSE') && $this->pm->can_add) : ?>
 			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
 		<?php endif; ?>
   </div>

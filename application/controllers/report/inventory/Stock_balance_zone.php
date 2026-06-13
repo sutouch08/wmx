@@ -19,7 +19,7 @@ class Stock_balance_zone extends PS_Controller
   public function index()
   {
     $this->load->model('masters/warehouse_model');
-    $whList = $this->warehouse_model->get_all_warehouse();
+    $whList = $this->warehouse_model->get_all_warehouse_list();
     $ds['whList'] = $whList;
     $this->load->view('report/inventory/report_stock_balance_zone', $ds);
   }
@@ -28,9 +28,7 @@ class Stock_balance_zone extends PS_Controller
   public function get_report()
   {
     ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)
-    ini_set('sqlsrv.ClientBufferMaxKBSize','524288'); // Setting to 512M
-    ini_set('pdo_sqlsrv.client_buffer_max_kb_size','524288'); // Setting to 512M - for pdo_sqlsrv
-    
+        
     $sc = TRUE;
     $allProduct = $this->input->get('allProduct');
     $pdFrom = $this->input->get('pdFrom');
@@ -84,7 +82,7 @@ class Stock_balance_zone extends PS_Controller
           $arr = array(
             'no' => number($no),
             'warehouse' => $rs->warehouse_code,
-            'zone' => $rs->zone_name,
+            'zone' => $rs->zone_code,
             'pdCode' => $rs->product_code,
             'pdName' => $rs->product_name,
             'price' => number($rs->price, 2),
@@ -115,16 +113,10 @@ class Stock_balance_zone extends PS_Controller
   }
 
 
-
-
-
   public function do_export()
   {
-    ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)
-    ini_set('sqlsrv.ClientBufferMaxKBSize','524288'); // Setting to 512M
-    ini_set('pdo_sqlsrv.client_buffer_max_kb_size','524288'); // Setting to 512M - for pdo_sqlsrv
-
-    $sc = TRUE;
+    ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)    
+    
     $allProduct = $this->input->post('allProduct');
     $pdFrom = $this->input->post('pdFrom');
     $pdTo = $this->input->post('pdTo');
@@ -154,9 +146,7 @@ class Stock_balance_zone extends PS_Controller
     $whList = $allWhouse == 1 ? 'ทั้งหมด' : $wh_list;
     $zoneList = $allZone == 1 ? 'ทั้งหมด' : $zoneCode." - ".$zoneName;
     $productList  = $allProduct == 1 ? 'ทั้งหมด' : '('.$pdFrom.') - ('.$pdTo.')';
-
-    $bs = array();
-
+    
     $result = $this->stock_balance_report_model->get_stock_balance_zone($allProduct, $pdFrom, $pdTo, $allWhouse, $warehouse, $allZone, $zoneCode);
 
     //--- load excel library
@@ -192,8 +182,7 @@ class Stock_balance_zone extends PS_Controller
     $row = 6;
     if(!empty($result))
     {
-      $no = 1;
-      $totalQty = 0;
+      $no = 1;      
       foreach($result as $rs)
       {
         $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
@@ -229,9 +218,7 @@ class Stock_balance_zone extends PS_Controller
 
   public function export_to_check()
   {
-    ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)
-    ini_set('sqlsrv.ClientBufferMaxKBSize','524288'); // Setting to 512M
-    ini_set('pdo_sqlsrv.client_buffer_max_kb_size','524288'); // Setting to 512M - for pdo_sqlsrv
+    ini_set('memory_limit','512M'); // This also needs to be increased in some cases. Can be changed to a higher value as per need)    
 
     $allProduct = 1;
     $pdFrom = NULL;

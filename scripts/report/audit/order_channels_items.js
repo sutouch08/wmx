@@ -1,5 +1,3 @@
-var HOME = BASE_URL + 'report/audit/order_channesl_items/';
-
 
 $('#pdFrom').autocomplete({
   source : BASE_URL + 'auto_complete/get_item_code',

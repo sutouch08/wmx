@@ -205,5 +205,5 @@
 </div>
 
 
-<script src="<?php echo base_url(); ?>scripts/report/audit/order_channels_items.js"></script>
+<script src="<?php echo base_url(); ?>scripts/report/audit/order_channels_items.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

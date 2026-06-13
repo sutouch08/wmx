@@ -14,9 +14,7 @@ class Sales_consignment_report_model extends CI_Model
       $this->db
       ->select('od.date_add, od.reference, od.product_code, od.product_name')
       ->select('od.cost, od.price, od.sell, od.qty, od.discount_label, od.discount_amount')
-      ->select('od.total_amount, od.total_cost')
-      ->select('od.customer_code, cs.name AS customer_name')
-      ->select('od.warehouse_code, wh.name AS warehouse_name')
+      ->select('od.total_amount, od.warehouse_code, wh.name AS warehouse_name')
       ->select('od.zone_code, zn.name AS zone_name')
       ->from('order_sold AS od')
       ->join('customers AS cs', 'od.customer_code = cs.code', 'left')

@@ -93,13 +93,13 @@
 
 
 <div class="modal fade" id="wh-modal" tabindex='-1' role='dialog' aria-labelledby='myModalLabel' aria-hidden='true'>
-	<div class='modal-dialog' id='modal' style="width:500px;">
+	<div class='modal-dialog' id='modal' style="width:500px; max-width:95vw;">
         <div class='modal-content'>
             <div class='modal-header'>
                 <button type='button' class='close' data-dismiss='modal' aria-hidden='true'>&times;</button>
                 <h4 class='title' id='modal_title'>เลือกคลัง</h4>
             </div>
-            <div class='modal-body' id='modal_body' style="padding:0px;">
+            <div class='modal-body' id='modal_body' style="padding:0px; max-height:75vh; overflow:auto;">
         <?php if(!empty($whList)) : ?>
           <?php foreach($whList as $rs) : ?>
             <div class="col-sm-12">
@@ -131,20 +131,18 @@
 <script id="template" type="text/x-handlebars-template">
   <table class="table table-bordered border-1" style="min-width:2420px;">
     <thead>
-      <tr>
+      <tr class="font-size-11">
         <th class="fix-width-40 text-center">#</th>
         <th class="fix-width-100 text-center">วันที่</th>
         <th class="fix-width-120 text-center">เลขที่</th>
         <th class="fix-width-150 text-center">รหัส</th>
-        <th class="fix-width-250 text-center">สินค้า</th>
-        <th class="fix-width-100 text-center">ต้นทุน</th>
+        <th class="fix-width-250 text-center">สินค้า</th>        
         <th class="fix-width-100 text-center">ราคา</th>
         <th class="fix-width-100 text-center">ส่วนลด</th>
-        <th class="fix-width-100 text-center">ราคาหลังส่วนลด</th>
+        <th class="fix-width-100 text-center">ราคาขาย</th>
         <th class="fix-width-100 text-center">จำนวน</th>
         <th class="fix-width-120 text-center">ส่วนลดรวม</th>
-        <th class="fix-width-120 text-center">มูลค่ารวม</th>
-        <th class="fix-width-120 text-center">ต้นทุนรวม</th>
+        <th class="fix-width-120 text-center">มูลค่ารวม</th>        
         <th class="fix-width-100 text-center">รหัสลูกค้า</th>
         <th class="fix-width-200 text-center">ลูกค้า</th>
         <th class="fix-width-100 text-center">รหัสคลัง</th>
@@ -155,13 +153,13 @@
     </thead>
 {{#each bs}}
   {{#if nodata}}
-    <tr>
-      <td colspan="15" align="center"><h4>-----  ไม่พบสินค้าคงเหลือตามเงื่อนไขที่กำหนด  -----</h4></td>
+    <tr class="font-size-11">
+      <td colspan="15" class="text-center"><h4>-----  ไม่พบสินค้าคงเหลือตามเงื่อนไขที่กำหนด  -----</h4></td>
     </tr>
   {{else}}
     {{#if @last}}
-    <tr class="font-size-14">
-      <td colspan="9" class="text-right">รวม</td>
+    <tr class="font-size-11">
+      <td colspan="8" class="text-right">รวม</td>
       <td class="text-right">{{ totalQty }}</td>
       <td class="text-right">{{ totalDiscount }}</td>
       <td class="text-right">{{ totalCost }}</td>
@@ -169,20 +167,18 @@
       <td colspan="2"></td>
     </tr>
     {{else}}
-    <tr class="font-size-12">
+    <tr class="font-size-11">
       <td class="fix-width-40 text-center">{{no}}</td>
       <td class="fix-width-100 text-center">{{date_add}}</td>
       <td class="fix-width-120 text-center">{{reference}}</td>
       <td class="fix-width-150">{{product_code}}</td>
-      <td class="fix-width-250">{{product_name}}</td>
-      <td class="fix-width-100 text-right">{{cost}}</td>
+      <td class="fix-width-250">{{product_name}}</td>      
       <td class="fix-width-100 text-right">{{price}}</td>
       <td class="fix-width-100 text-right">{{discount_label}}</td>
       <td class="fix-width-100 text-right">{{sell}}</td>
       <td class="fix-width-100 text-right">{{qty}}</td>
       <td class="fix-width-120 text-right">{{total_discount}}</td>
-      <td class="fix-width-120 text-right">{{total_amount}}</td>
-      <td class="fix-width-120 text-right">{{total_cost}}</td>
+      <td class="fix-width-120 text-right">{{total_amount}}</td>      
       <td class="fix-width-100 text-center">{{customer_code}}</td>
       <td class="fix-width-200">{{customer_name}}</td>
       <td class="fix-width-100 text-center">{{warehouse_code}}</td>

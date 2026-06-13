@@ -1,5 +1,3 @@
-var HOME = BASE_URL + 'report/sales/sales_channesl_details/';
-
 
 $('#pdFrom').autocomplete({
   source : BASE_URL + 'auto_complete/get_item_code',
@@ -84,5 +82,4 @@ function doExport(){
   var token = $('#token').val();
   get_download(token);
   $('#reportForm').submit();
-
 }

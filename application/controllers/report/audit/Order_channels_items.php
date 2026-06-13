@@ -22,8 +22,8 @@ class Order_channels_items extends PS_Controller
   public function index()
   {
     $ds = array(
-      'channels_list' => $this->channels_model->get_data(),
-      'payment_list' => $this->payment_methods_model->get_data(),
+      'channels_list' => $this->channels_model->get_all(),
+      'payment_list' => $this->payment_methods_model->get_all(),
       'warehouse_list' => $this->warehouse_model->get_sell_warehouse_list()
     );
 
@@ -33,17 +33,17 @@ class Order_channels_items extends PS_Controller
 
   public function do_export()
   {
-    $allProducts = $this->input->post('allProducts');
+    $allProducts = $this->input->post('allProducts') == 1 ? 1 : 0;
     $pdFrom = $this->input->post('pdFrom');
     $pdTo = $this->input->post('pdTo');
 
-    $allWarehouse = $this->input->post('allWarhouse');
+    $allWarehouse = $this->input->post('allWarehouse') == 1 ? 1 : 0;
     $warehouse = $this->input->post('warehouse');
 
-    $allChannels = $this->input->post('allChannels');
+    $allChannels = $this->input->post('allChannels') == 1 ? 1 : 0;
     $channels = $this->input->post('channels');
 
-    $allPayments = $this->input->post('allPayments');
+    $allPayments = $this->input->post('allPayments') == 1 ? 1 : 0;
     $payments = $this->input->post('payments');
 
     $fromDate = $this->input->post('fromDate');
@@ -82,10 +82,6 @@ class Order_channels_items extends PS_Controller
         }
       }
     }
-
-
-
-
 
     //---  Report title
     $report_title = "รายงานออเดอร์แยกตามช่องทางขายแสดงรายการสินค้า";
@@ -143,9 +139,9 @@ class Order_channels_items extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('D8', 'อ้างอิง');
     $this->excel->getActiveSheet()->setCellValue('E8', 'เลขที่จัดส่ง');
     $this->excel->getActiveSheet()->setCellValue('F8', 'ชื่อลูกค้า');
-    $this->excel->getActiveSheet()->setCellValue('G8', 'ที่อยู่บรรทัด 1');
-    $this->excel->getActiveSheet()->setCellValue('H8', 'ที่อยู่บรรทัด 2');
-    $this->excel->getActiveSheet()->setCellValue('I8', 'อำเภอ');
+    $this->excel->getActiveSheet()->setCellValue('G8', 'ที่อยู่');
+    $this->excel->getActiveSheet()->setCellValue('H8', 'ตำบล/แขวง');
+    $this->excel->getActiveSheet()->setCellValue('I8', 'อำเภอ/เขต');
     $this->excel->getActiveSheet()->setCellValue('J8', 'จังหวัด');
     $this->excel->getActiveSheet()->setCellValue('K8', 'รหัสไปรษณีย์');
     $this->excel->getActiveSheet()->setCellValue('L8', 'เบอร์โทรศัพท์');
@@ -155,11 +151,9 @@ class Order_channels_items extends PS_Controller
     $this->excel->getActiveSheet()->setCellValue('P8', 'ราคา');
     $this->excel->getActiveSheet()->setCellValue('Q8', 'จำนวน');
     $this->excel->getActiveSheet()->setCellValue('R8', 'ส่วนลด');
-    $this->excel->getActiveSheet()->setCellValue('S8', 'มูลค่า');
-    $this->excel->getActiveSheet()->setCellValue('T8', 'ค่าจัดส่ง');
-    $this->excel->getActiveSheet()->setCellValue('U8', 'ค่าบริการ');
-    $this->excel->getActiveSheet()->setCellValue('V8', 'สถานะ');
-    $this->excel->getActiveSheet()->setCellValue('W8', 'เหตุผลในการยกเลิก');
+    $this->excel->getActiveSheet()->setCellValue('S8', 'มูลค่า');    
+    $this->excel->getActiveSheet()->setCellValue('T8', 'สถานะ');
+    $this->excel->getActiveSheet()->setCellValue('U8', 'เหตุผลในการยกเลิก');
 
     //---- กำหนดความกว้างของคอลัมภ์
     $this->excel->getActiveSheet()->getColumnDimension('B')->setWidth(15);
@@ -177,51 +171,22 @@ class Order_channels_items extends PS_Controller
     $this->excel->getActiveSheet()->getColumnDimension('N')->setWidth(15);
     $this->excel->getActiveSheet()->getColumnDimension('O')->setWidth(25);
     $this->excel->getActiveSheet()->getColumnDimension('T')->setWidth(15);
-    $this->excel->getActiveSheet()->getColumnDimension('U')->setWidth(15);
-    $this->excel->getActiveSheet()->getColumnDimension('V')->setWidth(15);
-    $this->excel->getActiveSheet()->getColumnDimension('W')->setWidth(15);
+    $this->excel->getActiveSheet()->getColumnDimension('U')->setWidth(15);    
 
     $row = 9;
 
-
     if(!empty($result))
     {
-      $no = 1;
-      $prev_code = NULL;
-      $this->load->model('address/address_model');
-      $adr = NULL;
+      $no = 1;      
       foreach($result as $rs)
       {
-        $y		= date('Y', strtotime($rs->date_add));
-        $m		= date('m', strtotime($rs->date_add));
-        $d		= date('d', strtotime($rs->date_add));
+        $y = date('Y', strtotime($rs->date_add));
+        $m = date('m', strtotime($rs->date_add));
+        $d = date('d', strtotime($rs->date_add));
         $date = PHPExcel_Shared_Date::FormattedPHPToExcel($y, $m, $d);
-
-        if($prev_code != $rs->code)
-        {
-          if(!empty($rs->id_address))
-          {
-            $adr = $this->address_model->get_shipping_detail($rs->id_address);
-          }
-          else
-          {
-            $adr = $this->address_model->get_shipping_address_by_code($rs->customer_ref);
-          }
-        }
-
-        if(empty($adr))
-        {
-          $adr = new stdClass();
-          $adr->name = NULL;
-          $adr->address = NULL;
-          $adr->sub_district = NULL;
-          $adr->district = NULL;
-          $adr->province = NULL;
-          $adr->postcode = NULL;
-          $adr->phone = NULL;
-        }
-
-
+        $chName = empty($rs->channels_code) ? '' : $ch_name[$rs->channels_code];
+        $pmName = empty($rs->payment_code) ? '' : $pm_name[$rs->payment_code];
+                
         //--- ลำดับ
         $this->excel->getActiveSheet()->setCellValue('A'.$row, $no);
 
@@ -238,30 +203,30 @@ class Order_channels_items extends PS_Controller
         $this->excel->getActiveSheet()->setCellValueExplicit('E'.$row, $rs->shipping_code, PHPExcel_Cell_DataType::TYPE_STRING);
 
         //--- ชือผู้รับสินค้า
-        $this->excel->getActiveSheet()->setCellValue('F'.$row, $adr->name);
+        $this->excel->getActiveSheet()->setCellValue('F'.$row, $rs->consignee);
 
         //--- ที่อยู่บรรทัดที่ 1
-        $this->excel->getActiveSheet()->setCellValue('G'.$row, $adr->address);
+        $this->excel->getActiveSheet()->setCellValue('G'.$row, $rs->address);
 
         //--- ที่อยู่บรรทัดที่ 2
-        $this->excel->getActiveSheet()->setCellValue('H'.$row, $adr->sub_district);
+        $this->excel->getActiveSheet()->setCellValue('H'.$row, $rs->sub_district);
 
         //--- อำเภอ / เขต
-        $this->excel->getActiveSheet()->setCellValue('I'.$row, $adr->district);
+        $this->excel->getActiveSheet()->setCellValue('I'.$row, $rs->district);
 
         //--- จังหวัด
-        $this->excel->getActiveSheet()->setCellValue('J'.$row, $adr->province);
+        $this->excel->getActiveSheet()->setCellValue('J'.$row, $rs->province);
 
         //--- รหัรหัสไปรษณีย์
-        $this->excel->getActiveSheet()->setCellValueExplicit('K'.$row, $adr->postcode, PHPExcel_Cell_DataType::TYPE_STRING);
+        $this->excel->getActiveSheet()->setCellValueExplicit('K'.$row, $rs->postcode, PHPExcel_Cell_DataType::TYPE_STRING);
 
         //--- เบอร์โทรศัพท์
-        $this->excel->getActiveSheet()->setCellValueExplicit('L'.$row, $adr->phone, PHPExcel_Cell_DataType::TYPE_STRING);
+        $this->excel->getActiveSheet()->setCellValueExplicit('L'.$row, $rs->phone, PHPExcel_Cell_DataType::TYPE_STRING);
         //--- ช่องทางการขาย
-        $this->excel->getActiveSheet()->setCellValue('M'.$row, $ch_name[$rs->channels_code]);
+        $this->excel->getActiveSheet()->setCellValue('M'.$row, $chName);
 
         //--- ช่องทางการชำระเงิน
-        $this->excel->getActiveSheet()->setCellValue('N'.$row, $pm_name[$rs->payment_code]);
+        $this->excel->getActiveSheet()->setCellValue('N'.$row, $pmName);
 
         //--- รหัสสินค้า
         $this->excel->getActiveSheet()->setCellValue('O'.$row, $rs->product_code);
@@ -276,21 +241,15 @@ class Order_channels_items extends PS_Controller
         $this->excel->getActiveSheet()->setCellValue('R'.$row, $rs->discount_amount);
 
         //--- ยอดเงินรวม
-        $this->excel->getActiveSheet()->setCellValue('S'.$row, $rs->total_amount);
-
-        //--- ค่าจัดส่ง
-        $this->excel->getActiveSheet()->setCellValue('T'.$row, $rs->shipping_fee);
-
-        //--- ค่าบริการ
-        $this->excel->getActiveSheet()->setCellValue('U'.$row, $rs->service_fee);
+        $this->excel->getActiveSheet()->setCellValue('S'.$row, $rs->total_amount);       
 
         //--- สถานะออเดอร์
-        $this->excel->getActiveSheet()->setCellValue('V'.$row, $state_name[$rs->state]);
+        $this->excel->getActiveSheet()->setCellValue('T'.$row, $state_name[$rs->state]);
 
         //--- เหตุผลในการยกเลิก
         if($rs->state == 9)
         {
-          $this->excel->getActiveSheet()->setCellValue('W'.$row, $this->order_channels_items_model->cancel_reason($rs->code));
+          $this->excel->getActiveSheet()->setCellValue('U'.$row, $this->order_channels_items_model->cancel_reason($rs->code));
         }
 
         $no++;

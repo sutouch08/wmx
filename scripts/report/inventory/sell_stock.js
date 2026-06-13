@@ -302,7 +302,7 @@ function getData(option) {
             XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
 
             /* fix headers */
-            XLSX.utils.sheet_add_aoa(worksheet, [["ลำดับ", "รหัส", "รหัสเก่า", "สินค้า", "ทุน", "ในสต็อก", "ยอดจอง", "คงเหลือ", "มูลค่า"]], { origin:"A1"});
+            XLSX.utils.sheet_add_aoa(worksheet, [["ลำดับ", "รหัส", "สินค้า", "ทุน", "ในสต็อก", "ยอดจอง", "คงเหลือ", "มูลค่า"]], { origin:"A1"});
 
             XLSX.writeFile(workbook, "Stock_Report.xlsx", {compression:true});
 
