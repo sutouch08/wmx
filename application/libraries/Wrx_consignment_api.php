@@ -30,15 +30,12 @@ class Wrx_consignment_api
     $url = $this->api['WRX_API_HOST'];
     $url .= "ns/stock-sync";
     $api_path = $url;
-    $req_time = NULL;
-
+   
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
-
+    
     $method = 'POST';
 
     $playload = array(

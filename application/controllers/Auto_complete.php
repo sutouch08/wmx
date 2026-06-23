@@ -46,7 +46,7 @@ class Auto_complete extends CI_Controller
   }
 
 
-  public function get_vender_code_and_name()
+  public function get_vendor_code_and_name()
   {
     $sc = array();
     $this->db->select('code, name')->where('status', 1);

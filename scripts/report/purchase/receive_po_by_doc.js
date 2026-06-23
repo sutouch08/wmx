@@ -1,4 +1,3 @@
-var HOME = BASE_URL + 'report/purchase/receive_po_by_doc/';
 
 function toggleAllDocument(option){
   $('#allDoc').val(option);

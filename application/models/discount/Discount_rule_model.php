@@ -735,7 +735,7 @@ class Discount_rule_model extends CI_Model
   public function getRuleProductSportType($id)
   {
     $sc = array();
-    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_Sport_type');
+    $rs = $this->db->where('id_rule', $id)->get('discount_rule_product_sport_type');
     if($rs->num_rows() > 0)
     {
       foreach($rs->result() as $rd)

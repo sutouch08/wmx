@@ -150,5 +150,5 @@
   </table>
 </script>
 
-<script src="<?php echo base_url(); ?>scripts/report/purchase/receive_po_by_doc.js"></script>
+<script src="<?php echo base_url(); ?>scripts/report/purchase/receive_po_by_doc.js?v=<?php echo date('Ymd'); ?>"></script>
 <?php $this->load->view('include/footer'); ?>

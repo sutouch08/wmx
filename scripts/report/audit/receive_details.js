@@ -1,4 +1,3 @@
-var HOME = BASE_URL + 'report/audit/receive_details/';
 
 function toggleAllWarehouse(option){
   $('#allWarehouse').val(option);

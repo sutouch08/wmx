@@ -68,9 +68,9 @@ class Products extends REST_Controller
 			$offset = $ds->offset;
 
 			$rs = $this->db
-      ->select('id, code, name, barcode, style_code, cost, price')
+      ->select('id, code, name, barcode, model_code AS style_code, cost, price')
       ->select('color_code, size_code, group_code, main_group_code')
-      ->select('sub_group_code, category_code, kind_code, type_code')
+      ->select('segment_code AS sub_group_code, class_code AS category_code, kind_code, type_code')
       ->select('brand_code, year, unit_code, active')
       ->where('count_stock', 1)
       ->where('barcode IS NOT NULL', NULL, FALSE)

@@ -29,16 +29,13 @@ class Wrx_consign_api
     $type = "INT03";
     $url = $this->api['WRX_API_HOST'];
     $url .= "ns/check-stock";
-    $api_path = $url;
-    $req_time = NULL;
+    $api_path = $url;   
 
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
-
+    
     $method = 'POST';
 
     $playload = array(
@@ -193,14 +190,12 @@ class Wrx_consign_api
     $type = "INT23";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_CONSIGN_URL');
-    $api_path = $url;
-    $req_time = NULL;
+    $api_path = $url;    
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
+        
     $method = 'POST';
 
     $doc = $this->ci->consign_order_model->get($code);

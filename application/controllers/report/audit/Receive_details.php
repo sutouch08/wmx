@@ -17,11 +17,7 @@ class Receive_details extends PS_Controller
   }
 
   public function index()
-  {
-    $ds = array(
-      'warehouse_list' => $this->warehouse_model->get_all_warehouse_list()
-    );
-
+  {    
     $this->load->view('report/audit/report_receive_details', $ds);
   }
 
