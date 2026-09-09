@@ -1,7 +1,6 @@
 <?php
 class Wrx_transfer_api
-{
-  private $token;
+{  
   private $api;
   protected $ci;
   public $error;
@@ -14,10 +13,13 @@ class Wrx_transfer_api
   {
     $this->ci =& get_instance();
 		$this->ci->load->model('rest/api/api_logs_model');
+    $this->ci->load->library('netsuite_oauth');
 
     $this->api = getWrxApiConfig();
     $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
     $this->test = is_true($this->api['WRX_API_TEST']);
+    $this->company = $this->api['WRX_COMPANY_NAME'];
+    $this->api['WRX_API_CREDENTIAL'] = $this->netsuite_oauth->get_access_token();
   }
 
   public function export_transfer($code)
@@ -35,10 +37,8 @@ class Wrx_transfer_api
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
+    
     $method = 'POST';
-
     $doc = $this->ci->transfer_model->get($code);
 
     if( ! empty($doc))
@@ -63,9 +63,7 @@ class Wrx_transfer_api
         $details = $this->ci->transfer_model->get_details($code);
 
         if( ! empty($details))
-        {
-          $line = 1;
-
+        {          
           foreach($details as $rs)
           {
             $playload['line'][] = array(

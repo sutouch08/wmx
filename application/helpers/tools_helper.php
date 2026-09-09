@@ -293,7 +293,7 @@ function getConfig($code)
 
 function getWrxApiConfig()
 {
-	$fields = ['WRX_API', 'WRX_API_HOST', 'WRX_API_CREDENTIAL', 'WRX_API_TEST', 'WRX_LOG_JSON'];
+	$fields = ['WRX_API', 'WRX_API_HOST', 'WRX_API_CREDENTIAL', 'WRX_API_TEST', 'WRX_LOG_JSON', 'WRX_MAIN_COMPANY', 'WRX_CONSIGN_COMPANY'];
 	$ci =& get_instance();
 	$rs = $ci->db->select('code, value')->where_in('code', $fields)->get('config');
 

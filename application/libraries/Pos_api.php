@@ -1,7 +1,6 @@
 <?php
 class Pos_api
-{
-  private $web_url;
+{  
   private $token;
   protected $ci;
   public $error;

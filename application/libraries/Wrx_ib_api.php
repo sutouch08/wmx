@@ -1,7 +1,6 @@
 <?php
 class Wrx_ib_api
-{
-  private $token;
+{  
   private $api;
   protected $ci;
   public $error;
@@ -14,10 +13,13 @@ class Wrx_ib_api
   {
     $this->ci =& get_instance();
 		$this->ci->load->model('rest/api/api_logs_model');
+    $this->ci->load->library('Netsuite_oauth');
 
     $this->api = getWrxApiConfig();
     $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
     $this->test = is_true($this->api['WRX_API_TEST']);
+    $this->company = $this->api['WRX_MAIN_COMPANY'];
+    $this->api['WRX_API_CREDENTIAL'] = $this->ci->netsuite_oauth->get_access_token();
   }
 
 
@@ -32,14 +34,12 @@ class Wrx_ib_api
     $type = "INT16";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_GR_URL');
-    $api_path = $url;
-    $req_time = NULL;
+    $api_path = $url;    
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
+    
     $method = 'POST';
 
     $doc = $this->ci->receive_product_model->get($code);
@@ -233,14 +233,12 @@ class Wrx_ib_api
     $type = "ADD24";
     $url = $this->api['WRX_API_HOST'];
     $url .= getConfig('WRX_GRPO_URL');
-    $api_path = $url;
-    $req_time = NULL;
+    $api_path = $url;    
     $headers = array(
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
+    
     $method = 'POST';
 
     $doc = $this->ci->receive_po_model->get($code);

@@ -1,9 +1,7 @@
 <?php
 
 class Wrx_spx_api
-{
-  private $url;
-  private $token;
+{   
   private $api;
   protected $ci;
   public $error;
@@ -24,15 +22,12 @@ class Wrx_spx_api
   }
 
   public function get_pickup_time()
-  {
-    $action = "get_pickup_time";
+  {    
     $this->type = "SPX";
     $url = $this->api['WRX_API_HOST'];
-    $url .= "spx/pickup-time";
-    $api_path = $url;
+    $url .= "spx/pickup-time";    
 
-    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'GET';
 
     $curl = curl_init();
@@ -42,10 +37,8 @@ class Wrx_spx_api
     curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
 
-    $req_start = date('Y-m-d H:i:s');
     $response = curl_exec($curl);
-    curl_close($curl);
-    $req_end = date('Y-m-d H:i:s');
+    curl_close($curl);    
     $res = json_decode($response);
 
     if( ! empty($res) && ! empty($res->code))
@@ -80,8 +73,7 @@ class Wrx_spx_api
     $url .= "spx/order";
     $api_path = $url;
 
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'POST';
 
     if( ! empty($packages))
@@ -230,8 +222,7 @@ class Wrx_spx_api
     $url .= "spx/awb/{$batch_no}";
     $api_path = $url;
 
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'GET';
 
     $curl = curl_init();
@@ -296,8 +287,6 @@ class Wrx_spx_api
       $this->error = "Cannot get data from SPX api at this time";
       return FALSE;
     }
-
-    return FALSE;
   }
 } //-- end class
 

@@ -1,7 +1,6 @@
 <?php
 class Wrx_adjust_api
-{
-  private $token;
+{  
   private $api;
   protected $ci;
   public $error;
@@ -14,10 +13,13 @@ class Wrx_adjust_api
   {
     $this->ci =& get_instance();
 		$this->ci->load->model('rest/api/api_logs_model');
+    $this->ci->load->library('netsuite_oauth');
 
     $this->api = getWrxApiConfig();
     $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
     $this->test = is_true($this->api['WRX_API_TEST']);
+    $this->company = $this->api['WRX_MAIN_COMPANY'];
+    $this->api['WRX_API_CREDENTIAL'] = $this->netsuite_oauth->get_access_token();
   }
 
   public function export_adjust($code)
@@ -37,8 +39,7 @@ class Wrx_adjust_api
       "Content-Type: application/json",
       "Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}"
     );
-
-    $apiUrl = str_replace(" ","%20",$url);
+    
     $method = 'POST';
 
     $doc = $this->ci->adjust_model->get($code);

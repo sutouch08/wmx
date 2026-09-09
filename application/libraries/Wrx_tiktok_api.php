@@ -1,9 +1,7 @@
 <?php
 
 class Wrx_tiktok_api
-{
-  private $url;
-  private $token;
+{ 
   private $api;
   protected $ci;
   public $error;
@@ -27,15 +25,11 @@ class Wrx_tiktok_api
 
 
   public function get_order_detail($reference, $shop_id)
-  {
-    $action = "get_order_detail";
-    $type = "status";
+  {        
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/{$shop_id}/order/{$reference}";
-    $api_path = $url;
+    $url .= "tiktok/{$shop_id}/order/{$reference}";    
 
-    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'GET';
 
     $curl = curl_init();
@@ -73,21 +67,13 @@ class Wrx_tiktok_api
 
 
   public function ship_package($package_id, $shop_id)
-  {
-    $action = "ship-package";
-    $type = "Shipping";
+  {    
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/{$shop_id}/ship-package";
-    $api_path = $url;
+    $url .= "tiktok/{$shop_id}/ship-package";    
 
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'POST';
-
-    $json = '{"shipPackages":[{"packageID":"'.$package_id.'","handoverMethod":"PICKUP"}]}';
-
-    //$json = json_encode($req);
-    // echo $json;
+    $json = '{"shipPackages":[{"packageID":"'.$package_id.'","handoverMethod":"PICKUP"}]}';    
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_CUSTOMREQUEST, $method);
@@ -120,15 +106,11 @@ class Wrx_tiktok_api
 
 
   public function get_shipping_label($package_id, $shop_id)
-  {
-    $action = "get-ship-document";
-    $type = "Shipping";
+  {       
     $url = $this->api['WRX_API_HOST'];
-    $url .= "tiktok/{$shop_id}/ship-document";
-    $api_path = $url;
+    $url .= "tiktok/{$shop_id}/ship-document";    
 
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'POST';
 
     $req = array(
@@ -167,23 +149,16 @@ class Wrx_tiktok_api
     {
       $this->error = "Cannot get data from Tiktok api at this time";
       return FALSE;
-    }
-    // $this->error = $response;
-
-    return FALSE;
+    }    
   }
 
 
   public function get_order_status($reference, $shop_id)
   {
-    $action = "get_order_detail";
-    $type = "status";
     $url = $this->api['WRX_API_HOST'];
     $url .= "tiktok/{$shop_id}/order/{$reference}";
-    $api_path = $url;
-
-    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
+    
+    $headers = array("Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");    
     $method = 'GET';
 
     $curl = curl_init();

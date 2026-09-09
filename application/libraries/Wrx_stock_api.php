@@ -1,9 +1,7 @@
 <?php
 
 class Wrx_stock_api
-{
-  private $url;
-  private $token;
+{  
   private $api;
   protected $ci;
   public $error;
@@ -31,12 +29,9 @@ class Wrx_stock_api
     $type = "Stock";
     $url = $this->api['WRX_API_HOST'];
     $url .= "wms/updateStock";
-    $api_path = $url;
-
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
+    $api_path = $url;    
     $apiUrl = str_replace(" ","%20",$url);
-    $method = 'POST';
-
+    
     if( ! empty($items) && ! empty($warehouse_code))
     {
       $data = [];
@@ -144,16 +139,12 @@ class Wrx_stock_api
   //--- TEST
 
   public function test_update_available_stock(array $items = array(), $warehouse_code)
-  {
-    $action = "update stock";
+  {    
     $type = "Stock";
     $url = $this->api['WRX_API_HOST'];
     $url .= "wms/updateStock";
-    $api_path = $url;
-
-    $headers = array("Content-Type:application/json","Authorization:Bearer {$this->api['WRX_API_CREDENTIAL']}");
-    $apiUrl = str_replace(" ","%20",$url);
-    $method = 'POST';
+    $api_path = $url;    
+    $apiUrl = str_replace(" ","%20",$url);    
 
     if( ! empty($items) && ! empty($warehouse_code))
     {
