@@ -7,12 +7,29 @@ class Netsuite_test extends CI_Controller
   {
     parent::__construct();
   }
-
-  public function test()
+  
+  public function get_token()
   {
     $this->load->library('Netsuite_oauth');
-    $access_token = $this->netsuite_oauth->get_access_token();
-    echo "Access token: " . $access_token;
+    echo "Access Token: " . $this->netsuite_oauth->get_access_token();    
+  }
+
+  public function int03()
+  {
+    $this->load->library('wrx_consign_api');
+    $item = 'WA-PLAN15-AA-L';
+    $whs = 'AFG-0001';
+    $stock = $this->wrx_consign_api->get_onhand_stock($item, $whs);
+    echo $stock;
+  }
+
+  public function add16()
+  {
+    $this->load->library('wrx_consign_api');
+    $item = 'WA-PLAN15-AA-L';
+    $whs = 'AFG-0001';
+    $stock = $this->wrx_consign_api->confirm_transfer_in($item, $whs);
+    echo $stock;
   }
 
   public function call_restlet()

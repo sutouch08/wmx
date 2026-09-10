@@ -11,8 +11,8 @@
 		"source": "https://github.com/bcit-ci/CodeIgniter"
 	},
 	"require": {
-		"php": ">=7.4",
-		"firebase/php-jwt": "6.10.0"
+		"php": ">=7.4",		    
+    "phpseclib/phpseclib": "~3.0"
 	},
 	"suggest": {
 		"paragonie/random_compat": "Provides better randomness in PHP 5.x"
@@ -24,7 +24,17 @@
 	"config": {
     "audit": {
         "ignore": [
-            "PKSA-y2cr-5h3j-g3ys"
+            "PKSA-y2cr-5h3j-g3ys",
+						"PKSA-432p-hv1d-chf7",
+            "PKSA-smrh-yx37-92ws",
+            "PKSA-zh4j-by9m-7mz8",
+            "PKSA-km2b-zc3b-mjm3",
+            "PKSA-4p7m-np8m-fq35",
+            "PKSA-t5xz-td8w-f35v",
+            "PKSA-jsh4-f6tg-bwyq",
+            "PKSA-vpz8-6fv7-t3fd",
+            "PKSA-qrgb-4pgm-cz41",
+            "PKSA-mnsd-qtjt-pgcq"
         ]
     }
 	}

@@ -80,18 +80,18 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 table-responsive padding-5">
-		<table class="table table-striped border-1" style="min-width:1080px;">
+		<table class="table table-striped table-narrow border-1" style="min-width:1110px;">
 			<thead>
-				<tr class="font-size-11">
-					<th class="fix-width-50"></th>
+				<tr>
+					<th class="fix-width-40"></th>
 					<th class="fix-width-40 middle text-center">#</th>
-					<th class="fix-width-150 middle">วันที่</th>
-					<th class="fix-width-200 middle">เลขที่/รหัส</th>
+					<th class="fix-width-120 middle">วันที่</th>
+					<th class="fix-width-150 middle">เลขที่/รหัส</th>
 					<th class="fix-width-80 middle text-center">Type</th>
 					<th class="fix-width-80 middle text-center">Action</th>
-					<th class="fix-width-80 middle text-center">Status</th>
-					<th class="fix-width-250 middle">API Path</th>
-					<th class="min-width-150 middle">Message</th>
+					<th class="fix-width-50 middle text-center">Status</th>
+					<th class="min-width-300 middle">API Path</th>
+					<th class="fix-width-250 middle">Message</th>
 				</tr>
 			</thead>
 			<tbody>

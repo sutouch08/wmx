@@ -1,14 +1,20 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-use Firebase\JWT\JWT;
-use Firebase\JWT\Key;
+use phpseclib3\Crypt\RSA;
+use phpseclib3\Crypt\PublicKeyLoader;
 
-class Netsuite_oauth
-{
-
+class Netsuite_oauth {
+    // Add your class properties and methods here
   /** @var CI_Controller */
   protected $CI;
+  protected $token_url;
+  protected $client_id;
+  protected $certificate_id;
+  protected $private_key_pem;
+  protected $scope;
+  protected $token_ttl;
+  protected $alg;
 
   public function __construct()
   {
@@ -24,9 +30,6 @@ class Netsuite_oauth
     $this->alg = $this->CI->config->item('ns_alg');
   }
 
-  /**
-   * ดึง access token แบบมี cache
-   */
   public function get_access_token()
   {
     // ใช้ CI cache หรือเก็บในไฟล์/DB ก็ได้
@@ -56,13 +59,20 @@ class Netsuite_oauth
     return $access_token;
   }
 
-  /**
-   * สร้าง JWT (client assertion) ด้วย PS256 แล้วแลก token
-   */
   protected function request_new_token()
   {
+    // Implement the logic to request a new access token from Netsuite
+    // using the client_id, certificate_id, private_key_pem, scope, token_ttl, and alg
+    // Return the new access token
     $iat = time();
     $exp = $iat + $this->token_ttl;
+
+    // header (PS256 + kid)
+    $header = [
+      'alg' => $this->alg,
+      'typ' => 'JWT',
+      'kid' => $this->certificate_id,
+    ];
 
     // payload
     $payload = [
@@ -73,55 +83,43 @@ class Netsuite_oauth
       'exp' => $exp,
     ];
 
-    // header (PS256 + kid)
-    $header = [
-      'alg' => $this->alg,
-      'typ' => 'JWT',
-      'kid' => $this->certificate_id,
-    ];
+    $signingInput = self::b64url(json_encode($header, JSON_UNESCAPED_SLASHES))
+      . '.' . self::b64url(json_encode($payload, JSON_UNESCAPED_SLASHES));
 
-    // สร้าง JWT ด้วย PS256 (RSA-PSS SHA-256)
-    $jwt = JWT::encode(
-      $payload,
-      $this->private_key_pem,
-      $this->alg,
-      null,
-      $header
-    );
+    // PS256 = RSASSA-PSS, hash SHA-256, MGF1 SHA-256, salt length = 32 (ค่า default ของ phpseclib)
+    $key = PublicKeyLoader::loadPrivateKey($this->private_key_pem)
+      ->withPadding(RSA::SIGNATURE_PSS)
+      ->withHash('sha256')
+      ->withMGFHash('sha256');
 
-    // เรียก token endpoint
+    $signature = $key->sign($signingInput);
+
+    $jwt = $signingInput . '.' . self::b64url($signature);    
+
+    // เรียก token endpoint  
     $post_fields = http_build_query([
       'grant_type' => 'client_credentials',
       'client_assertion_type' => 'urn:ietf:params:oauth:client-assertion-type:jwt-bearer',
       'client_assertion' => $jwt,
     ]);
-   
+
     $ch = curl_init($this->token_url);
-    curl_setopt_array($ch, [
-      CURLOPT_CUSTOMREQUEST => 'POST',
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_POST => true,
-      CURLOPT_HTTPHEADER => [
-        'Content-Type: application/x-www-form-urlencoded',
-      ],
-      CURLOPT_POSTFIELDS => $post_fields,
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $post_fields);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+      'Content-Type: application/x-www-form-urlencoded',
     ]);
 
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
     if ($response === false)
     {
-      $error = curl_error($ch);
-      curl_close($ch);
+      $error = curl_error($ch);      
       throw new Exception('cURL error: ' . $error);
-    }
-
-    curl_close($ch);
+    }    
 
     $data = json_decode($response, true);
-
-    //echo $response.'<br/>';
 
     if ($http_code !== 200)
     {
@@ -129,11 +127,15 @@ class Netsuite_oauth
       throw new Exception('Token endpoint error: HTTP ' . $http_code . ' - ' . $response);
     }
 
-    if (!isset($data['access_token']))
-    {
-      throw new Exception('No access_token in response: ' . $response);
+    if (!isset($data['access_token'])) {
+      throw new Exception('Failed to obtain access token from Netsuite');
     }
 
     return $data['access_token'];
+  }
+
+  private static function b64url(string $data): string
+  {
+    return rtrim(strtr(base64_encode($data), '+/', '-_'), '=');
   }
 }

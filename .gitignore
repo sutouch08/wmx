@@ -9,3 +9,5 @@
 .htaccess
 index.php
 /application/config/*
+/application/cache/*
+

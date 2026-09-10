@@ -13,20 +13,21 @@ class Wrx_consign_api
   {
     $this->ci =& get_instance();
 		$this->ci->load->model('rest/api/api_logs_model');
-    $this->ci->load->library('netsuite_oauth');
+    // $this->ci->load->library('netsuite_oauth');
+    $this->ci->load->library('Netsuite_oauth');
 
     $this->api = getWrxApiConfig();
     $this->logs_json = is_true($this->api['WRX_LOG_JSON']);
     $this->test = is_true($this->api['WRX_API_TEST']);
     $this->company = $this->api['WRX_MAIN_COMPANY'];
-    $this->api['WRX_API_CREDENTIAL'] = $this->netsuite_oauth->get_access_token();
+    $this->api['WRX_API_CREDENTIAL'] = $this->ci->netsuite_oauth->get_access_token();
   }
 
 
   public function get_onhand_stock($code, $warehouse_code)
   {
     $sc = TRUE;
-    $qty = 1000;
+    $qty = 0;
     $action = "check stock";
     $type = "INT03";
     $url = $this->api['WRX_API_HOST'];
@@ -77,7 +78,7 @@ class Wrx_consign_api
             'type' => $type,
             'api_path' => $api_path,
             'code' => $code,
-            'action' => 'test',
+            'action' => $action,
             'status' => 'test',
             'message' => 'test',
             'request_json' => $json,
@@ -104,31 +105,18 @@ class Wrx_consign_api
         $res = json_decode($response);
         $req_end = date('Y-m-d H:i:s');
 
-        if( ! empty($res) && property_exists($res, 'status') && property_exists($res, 'data'))
+        if( ! empty($res) && property_exists($res, 'success') && property_exists($res, 'listItems'))
         {
-          if($res->status == 'success' && ! empty($res->data))
+          if($res->success && ! empty($res->listItems))
           {
-            $ds = $res->data;
+            $ds = $res->listItems[0];
 
-            if($ds->success && ! empty($ds->listItems))
+            if( ! empty($ds->listLocations))
             {
-              $qty = $ds->listItems[0]->listLocations[0]->onhandQty;
-            }
-            else
-            {
-              if( empty($ds->data))
-              {
-                $sc = FALSE;
-                $this->error = "Response data is empty";
-              }
-            }
+              $qty = $ds->listLocations[0]->onhandQty;
+            }            
           }
-          else
-          {
-            $sc = FALSE;
-            $this->error = $res->serviceMessage;
-          }
-
+          
           if($this->logs_json)
           {
             $logs = array(
@@ -138,7 +126,7 @@ class Wrx_consign_api
               'code' => $code,
               'action' => $action,
               'status' => $sc === TRUE ? 'success' : 'failed',
-              'message' => $res->serviceMessage,
+              'message' => NULL,
               'request_json' => $json,
               'response_json' => $response,
               'req_start' => $req_start,
@@ -151,7 +139,8 @@ class Wrx_consign_api
         else
         {
           $sc = FALSE;
-          $this->error = "No response from ERP";
+          $errCode = isset($res->ErrorCode) ? $res->ErrorCode : "";
+          $this->error = isset($res->Message) ? $errCode .' : '. $res->Message : "No response from ERP";
           $resp = array(
             'status' => 'failed',
             'message' => $this->error
@@ -166,7 +155,7 @@ class Wrx_consign_api
               'code' => $code,
               'action' => $action,
               'status' => 'failed',
-              'message' => 'No response',
+              'message' => $this->error,
               'request_json' => $json,
               'response_json' => json_encode($resp),
               'req_start' => $req_start,

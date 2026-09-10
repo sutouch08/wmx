@@ -1901,6 +1901,11 @@ input[type=number]::-webkit-outer-spin-button {
 	padding: 3px !important;
 }
 
+.table-narrow tr th, .table-narrow tr td {
+	font-size: 11px;
+  padding: 3px !important;
+}
+
 .fix-header {
 	z-index: 2;
 }
