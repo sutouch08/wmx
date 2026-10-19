@@ -412,12 +412,12 @@ class Prepare extends PS_Controller
           }
         }
 
-        if(is_true(getConfig('WRX_OB_INTERFACE')))
+        if(is_true(getConfig('NS_OB_INTERFACE')))
         {
           if($order->erp_status != 'Packed')
           {
-            $this->load->library('wrx_ob_api');
-            $this->wrx_ob_api->update_status($code);
+            $this->load->library('ns_ob_api');
+            $this->ns_ob_api->update_status($code);
           }
         }
 

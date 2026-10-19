@@ -118,6 +118,7 @@
 <?php $this->load->view('include/barcode_reader'); ?>
 <?php $this->load->view('mobile/consignment_order/item_search'); ?>
 <?php $this->load->view('cancel_modal'); ?>
+<?php $this->load->view('mobile/cameras_modal'); ?>
 
 <div class="pg-footer">
 	<div class="pg-footer-inner">

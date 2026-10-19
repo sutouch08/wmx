@@ -21,6 +21,7 @@ class Api_logs extends PS_Controller
   {
     $filter = array(
       'code' => get_filter('code', 'logs_code', ''),
+			'reference' => get_filter('reference', 'logs_reference', ''),
 			'api_path' => get_filter('api_path', 'logs_path', 'all'),
       'status' => get_filter('status', 'logs_status', 'all'),
 			'type' => get_filter('type', 'logs_type', 'all'),
@@ -37,15 +38,12 @@ class Api_logs extends PS_Controller
 		{
 			//--- แสดงผลกี่รายการต่อหน้า
 			$perpage = get_rows();
-
 			$segment  = 5; //-- url segment
-			$rows     = $this->api_logs_model->count_rows($filter);
-			//--- ส่งตัวแปรเข้าไป 4 ตัว base_url ,  total_row , perpage = 20, segment = 3
-			$init	    = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
-			$logs   = $this->api_logs_model->get_list($filter, $perpage, $this->uri->segment($segment));
+			$rows = $this->api_logs_model->count_rows($filter);			
+			$init = pagination_config($this->home.'/index/', $rows, $perpage, $segment);
+			$logs = $this->api_logs_model->get_list($filter, $perpage, $this->uri->segment($segment));
 
-			$filter['logs'] = $logs;			
-
+			$filter['logs'] = $logs;
 			$this->pagination->initialize($init);
 			$this->load->view('rest/api/api_logs_view', $filter);
 		}
@@ -63,6 +61,7 @@ class Api_logs extends PS_Controller
 	{
 		$filter = array(
 			'logs_code',
+			'logs_reference',
 			'logs_path',
 			'logs_status',
 			'logs_type',

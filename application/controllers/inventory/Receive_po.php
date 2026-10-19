@@ -768,15 +768,15 @@ class Receive_po extends PS_Controller
 
           if($sc === TRUE)
           {
-            if(is_true(getConfig('WRX_GRPO_INTERFACE')))
+            if(is_true(getConfig('NS_GRPO_INTERFACE')))
             {
-              $this->load->library('wrx_ib_api');
+              $this->load->library('ns_ib_api');
 
-              if( ! $this->wrx_ib_api->export_receive_po($doc->code))
+              if( ! $this->ns_ib_api->export_receive_po($doc->code))
               {
                 $sc = FALSE;
                 $ex = 1;
-                $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+                $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->ns_ib_api->error}";
               }
             }
           }
@@ -816,7 +816,7 @@ class Receive_po extends PS_Controller
 
     if( ! empty($code))
     {
-      if(is_true(getConfig('WRX_GRPO_INTERFACE')))
+      if(is_true(getConfig('NS_GRPO_INTERFACE')))
       {
         $doc = $this->receive_po_model->get($code);
 
@@ -824,12 +824,12 @@ class Receive_po extends PS_Controller
         {
           if($doc->status == 'C')
           {
-            $this->load->library('wrx_ib_api');
+            $this->load->library('ns_ib_api');
 
-            if( ! $this->wrx_ib_api->export_receive_po($doc->code))
+            if( ! $this->ns_ib_api->export_receive_po($doc->code))
             {
               $sc = FALSE;
-              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_ib_api->error}";
+              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->ns_ib_api->error}";
             }
           }
           else
@@ -1138,14 +1138,14 @@ class Receive_po extends PS_Controller
               {
                 if($ds->save_type == '1')
                 {
-                  if(is_true(getConfig('WRX_GRPO_INTERFACE')))
+                  if(is_true(getConfig('NS_GRPO_INTERFACE')))
                   {
-                    $this->load->library('wrx_ib_api');
+                    $this->load->library('ns_ib_api');
 
-                    if( ! $this->wrx_ib_api->export_receive_po($ds->code))
+                    if( ! $this->ns_ib_api->export_receive_po($ds->code))
                     {
                       $sc = FALSE;
-                      $this->error = $this->wrx_ib_api->error;
+                      $this->error = $this->ns_ib_api->error;
                     }
                   }
                 }
@@ -1892,14 +1892,14 @@ class Receive_po extends PS_Controller
       {
         if($ds->save_type == 'C')
         {
-          if(is_true(getConfig('WRX_GRPO_INTERFACE')))
+          if(is_true(getConfig('NS_GRPO_INTERFACE')))
           {
-            $this->load->library('wrx_ib_api');
+            $this->load->library('ns_ib_api');
 
-            if( ! $this->wrx_ib_api->export_receive_po($code))
+            if( ! $this->ns_ib_api->export_receive_po($code))
             {
               $ex = 1;
-              $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ".$this->wrx_ib_api->error;
+              $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ".$this->ns_ib_api->error;
             }
           }
         }

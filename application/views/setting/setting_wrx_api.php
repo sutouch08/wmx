@@ -1,7 +1,7 @@
 <form id="wrxForm" method="post" action="<?php echo $this->home; ?>/update_config">
 	<div class="row">
 		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Netsuite API</span>
+			<span class="form-control left-label">WRX API</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
@@ -13,28 +13,19 @@
 		<div class="divider-hidden"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Netsuite api endpoint</span>
+			<span class="form-control left-label">WRX API Endpoint</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">
 			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_API_HOST" value="<?php echo $WRX_API_HOST; ?>" />
 		</div>
-		<div class="divider-hidden"></div>
-
+		<div class="divider-hidden"></div>		
 		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Netsuite Main Company</span>
+			<span class="form-control left-label">WRX API Credential</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_MAIN_COMPANY" value="<?php echo $WRX_MAIN_COMPANY; ?>" />
+			<textarea class="form-control input-sm" rows="3" name="WRX_API_CREDENTIAL"><?php echo $WRX_API_CREDENTIAL; ?></textarea>
 		</div>
 		<div class="divider-hidden"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Netsuite Consign Company</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm input-xxlarge" name="WRX_CONSIGN_COMPANY" value="<?php echo $WRX_CONSIGN_COMPANY; ?>" />
-		</div>
-		<div class="divider"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
 			<span class="form-control left-label">Shopee API</span>
@@ -49,7 +40,7 @@
 		<div class="divider"></div>
 
 		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Titok API</span>
+			<span class="form-control left-label">Tiktok API</span>
 		</div>
 		<div class="col-lg-8 col-md-8 col-sm-8">
 			<label style="padding-top:5px; margin-bottom:0px;">
@@ -71,189 +62,7 @@
 			<input type="hidden" name="WRX_LAZADA_API" value="<?php echo $WRX_LAZADA_API; ?>" />
 		</div>
 		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Outbound Interface (INT21)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_OB_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_OB_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_OB_INTERFACE" value="<?php echo $WRX_OB_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Outbound api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_OB_URL" value="<?php echo $WRX_OB_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">GRPO Interface (ADD24)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_GRPO_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_GRPO_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_GRPO_INTERFACE" value="<?php echo $WRX_GRPO_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">GRPO api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_GRPO_URL" value="<?php echo $WRX_GRPO_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Goods Receive Interface (INT16)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_GR_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_GR_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_GR_INTERFACE" value="<?php echo $WRX_GR_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Goods Receive api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_GR_URL" value="<?php echo $WRX_GR_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Return Interface (ADD91)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_RETURN_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_RETURN_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_RETURN_INTERFACE" value="<?php echo $WRX_RETURN_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Return api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_RETURN_URL" value="<?php echo $WRX_RETURN_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Transfer Interface (ADD40)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_TR_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_TR_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_TR_INTERFACE" value="<?php echo $WRX_TR_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Transfer api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_TR_URL" value="<?php echo $WRX_TR_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Adjust Interface (INT17)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_ADJ_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_ADJ_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_ADJ_INTERFACE" value="<?php echo $WRX_ADJ_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Adjust api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_ADJ_URL" value="<?php echo $WRX_ADJ_URL; ?>" />
-		</div>
-		<div class="divider-hidden"></div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Adjust Sale Channel</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_ADJ_CHANNEL" value="<?php echo $WRX_ADJ_CHANNEL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consignment Interface (INT17.1)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_CONSIGNMENT_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_CONSIGNMENT_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_CONSIGNMENT_INTERFACE" value="<?php echo $WRX_CONSIGNMENT_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consignment api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_CONSIGNMENT_URL" value="<?php echo $WRX_CONSIGNMENT_URL; ?>" />
-		</div>
-		<div class="divider-hidden"></div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consignment Sale Channel</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_CONSIGNMENT_CHANNEL" value="<?php echo $WRX_CONSIGNMENT_CHANNEL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consign Interface (INT23)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<label style="padding-top:5px; margin-bottom:0px;">
-				<input class="ace ace-switch ace-switch-7" data-name="WRX_CONSIGN_INTERFACE" type="checkbox" value="1" <?php echo is_checked($WRX_CONSIGN_INTERFACE, '1'); ?> onchange="toggleOption($(this))" />
-				<span class="lbl margin-left-0" data-lbl="OFF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ON"></span>
-			</label>
-			<input type="hidden" name="WRX_CONSIGN_INTERFACE" value="<?php echo $WRX_CONSIGN_INTERFACE; ?>" />
-		</div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consign api endpoint</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_CONSIGN_URL" value="<?php echo $WRX_CONSIGN_URL; ?>" />
-		</div>
-		<div class="divider-hidden"></div>
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Consign Sale Channel</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_CONSIGN_CHANNEL" value="<?php echo $WRX_CONSIGN_CHANNEL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Check Stock Endpoint (INT03)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_CHECK_STOCK_URL" value="<?php echo $WRX_CHECK_STOCK_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
-		<div class="col-lg-4 col-md-4 col-sm-4">
-			<span class="form-control left-label">Check Stock Endpoint (ADD16)</span>
-		</div>
-		<div class="col-lg-8 col-md-8 col-sm-8">
-			<input type="text" class="form-control input-sm" name="WRX_GET_STOCK_URL" value="<?php echo $WRX_GET_STOCK_URL; ?>" />
-		</div>
-		<div class="divider"></div>
-
+				
 		<div class="col-lg-4 col-md-4 col-sm-4">
 			<span class="form-control left-label">Logs Json</span>
 		</div>

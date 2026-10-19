@@ -251,9 +251,9 @@ class Consignment_order extends PS_Controller
 			$this->error = "Item row not found !";
 		}
 
-    $this->load->library('wrx_consignment_api');
+    $this->load->library('ns_consignment_api');
 		$detail->barcode = $this->products_model->get_barcode($detail->product_code);
-    $detail->stock = $detail->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($detail->product_code, $warehouse_code) : 100000;
+    $detail->stock = $detail->count_stock == 1 ? $this->ns_consignment_api->get_onhand_stock($detail->product_code, $warehouse_code) : 100000;
 
 		$arr = array(
 			'status' => $sc === TRUE ? 'success' : 'failed',
@@ -296,9 +296,9 @@ class Consignment_order extends PS_Controller
 
       if($sc === TRUE)
       {
-        $this->load->library('wrx_consignment_api');
+        $this->load->library('ns_consignment_api');
 
-        $stock = $item->count_stock ? $this->wrx_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $stock = $item->count_stock ? $this->ns_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
         $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
@@ -361,9 +361,9 @@ class Consignment_order extends PS_Controller
 
       if($sc === TRUE)
       {
-        $this->load->library('wrx_consignment_api');
+        $this->load->library('ns_consignment_api');
 
-        $stock = $item->count_stock ? $this->wrx_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
+        $stock = $item->count_stock ? $this->ns_consignment_api->get_onhand_stock($item->code, $warehouse->code) : 100000;
         $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $warehouse->code) : 0;
         $available = $stock - $commit;
 
@@ -423,9 +423,9 @@ class Consignment_order extends PS_Controller
 
           if($sc === TRUE)
           {
-            $this->load->library('wrx_consignment_api');
+            $this->load->library('ns_consignment_api');
             $input_type = 1;
-            $stock = $item->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
+            $stock = $item->count_stock == 1 ? $this->ns_consignment_api->get_onhand_stock($item->code, $doc->warehouse_code) : 100000;
             $commit = $item->count_stock ? $this->consignment_order_model->get_commit_qty($item->code, $doc->warehouse_code) : 0;
             $available = $stock - $commit;
 
@@ -571,10 +571,10 @@ class Consignment_order extends PS_Controller
 
           if( ! empty($rs))
           {
-            $this->load->library('wrx_consignment_api');
+            $this->load->library('ns_consignment_api');
             $input_type = 1;
 
-            $stock = $rs->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 100000;
+            $stock = $rs->count_stock == 1 ? $this->ns_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 100000;
             $c_qty = $rs->count_stock == 1 ? $this->consignment_order_model->get_unsave_qty($doc->code, $rs->product_code, $ds->price, $ds->disc) : 0;
             $c_qty = $c_qty - $rs->qty;
             $sum_qty = $ds->qty + $c_qty;
@@ -831,7 +831,7 @@ class Consignment_order extends PS_Controller
   public function save()
   {
     $sc = TRUE;
-    $this->load->library('wrx_consignment_api');
+    $this->load->library('ns_consignment_api');
     $code = $this->input->post('code');
     $doc = $this->consignment_order_model->get($code);
 
@@ -848,7 +848,7 @@ class Consignment_order extends PS_Controller
             $items[$row->product_code] = (object) array(
               'code' => $row->product_code,
               'qty' => $row->qty,
-              'stock' => $row->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($row->product_code, $doc->warehouse_code) : 1000000
+              'stock' => $row->count_stock == 1 ? $this->ns_consignment_api->get_onhand_stock($row->product_code, $doc->warehouse_code) : 1000000
             );
           }
           else
@@ -928,7 +928,7 @@ class Consignment_order extends PS_Controller
         {
           if($doc->status == 'A')
           {
-            $this->load->library('wrx_consignment_api');
+            $this->load->library('ns_consignment_api');
             $details = $this->consignment_order_model->get_details($code);
 
             if( ! empty($details))
@@ -937,7 +937,7 @@ class Consignment_order extends PS_Controller
               {
                 if($sc === FALSE) { break; }
 
-                $stock = $rs->count_stock == 1 ? $this->wrx_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
+                $stock = $rs->count_stock == 1 ? $this->ns_consignment_api->get_onhand_stock($rs->product_code, $doc->warehouse_code) : 1000000;
                 $all_qty = $this->consignment_order_model->get_sum_order_qty($doc->code, $rs->product_code);
 
                 if($all_qty > $stock)
@@ -991,10 +991,10 @@ class Consignment_order extends PS_Controller
 
               if($sc === TRUE)
               {
-                if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGNMENT_INTERFACE')))
+                if(is_true(getConfig('NS_API')) && is_true(getConfig('NS_CONSIGNMENT_INTERFACE')))
                 {
                   // INT12
-                  if( ! $this->wrx_consignment_api->export_consignment($code))
+                  if( ! $this->ns_consignment_api->export_consignment($code))
                   {
                     $ex = 1;
                     $this->error = "อนุมัติเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ <br/> กรุณากดส่งข้อมูลไป ERP ใหม่อีกครั้งภายหลัง";
@@ -1050,14 +1050,14 @@ class Consignment_order extends PS_Controller
       {
         if($doc->status == 'C')
         {
-          if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_CONSIGNMENT_INTERFACE')))
+          if(is_true(getConfig('NS_API')) && is_true(getConfig('NS_CONSIGNMENT_INTERFACE')))
           {
-            $this->load->library('wrx_consignment_api');
+            $this->load->library('ns_consignment_api');
 
-            if( ! $this->wrx_consignment_api->export_consignment($code))
+            if( ! $this->ns_consignment_api->export_consignment($code))
             {
               $sc = FALSE;
-              $this->error = "Send data to ERP failed : {$this->wrx_consignment_api->error}";
+              $this->error = "Send data to ERP failed : {$this->ns_consignment_api->error}";
             }
           }
           else

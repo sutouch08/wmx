@@ -24,6 +24,11 @@ class Api_logs_model extends CI_Model
 			$this->logs->like('code', $ds['code'], 'after');
 		}
 
+		if( ! empty($ds['reference']))
+		{
+			$this->logs->like('reference', $ds['reference'], 'after');
+		}
+
 		if( ! empty($ds['status']) && $ds['status'] !== 'all')
 		{
 			$this->logs->where('status', $ds['status']);
@@ -64,6 +69,11 @@ class Api_logs_model extends CI_Model
 		if( ! empty($ds['code']))
 		{
 			$this->logs->like('code', $ds['code'], 'after');
+		}
+
+		if( ! empty($ds['reference']))
+		{
+			$this->logs->like('reference', $ds['reference'], 'after');
 		}
 
 		if( ! empty($ds['status']) && $ds['status'] !== 'all')

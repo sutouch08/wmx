@@ -42,7 +42,7 @@
   .stock-pre {
     width:100%;
     white-space:nowrap;
-    overflow-x:scroll;
+    overflow-x:auto;
     padding-right:30px;
   }
 
@@ -57,6 +57,7 @@
 
   #complete-list {
     position: absolute;
+    width: 100%;
     top: 45px;
     left: 0px;
     height: calc(100vh - 120px);

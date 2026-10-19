@@ -671,14 +671,14 @@ class Adjust extends PS_Controller
             $this->db->trans_rollback();
           }
 
-          if($sc === TRUE && is_true(getConfig('WRX_ADJUST_API')))
+          if($sc === TRUE && is_true(getConfig('NS_ADJUST_API')))
           {
-            $this->load->library('wrx_adjust_api');
+            $this->load->library('ns_adjust_api');
 
-            if( ! $this->wrx_adjust_api->export_adjust($doc->code))
+            if( ! $this->ns_adjust_api->export_adjust($doc->code))
             {
               $sc = FALSE;
-              $this->error = "บันทีกสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_adjust_api->error}";
+              $this->error = "บันทีกสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->ns_adjust_api->error}";
             }
           }
         }
@@ -873,7 +873,7 @@ class Adjust extends PS_Controller
 
     if( ! empty($code))
     {
-      if(is_true(getConfig('WRX_ADJ_INTERFACE')))
+      if(is_true(getConfig('NS_ADJ_INTERFACE')))
       {
         $doc = $this->adjust_model->get($code);
 
@@ -881,12 +881,12 @@ class Adjust extends PS_Controller
         {
           if($doc->status == 'C')
           {
-            $this->load->library('wrx_adjust_api');
+            $this->load->library('ns_adjust_api');
 
-            if( ! $this->wrx_adjust_api->export_adjust($doc->code))
+            if( ! $this->ns_adjust_api->export_adjust($doc->code))
             {
               $sc = FALSE;
-              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->wrx_adjust_api->error}";
+              $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : {$this->ns_adjust_api->error}";
             }
           }
           else

@@ -379,16 +379,7 @@ class Orders_model extends CI_Model
   public function get_order_details($code)
   {
     $rs = $this->db->where('order_code', $code)->get($this->td);
-    // $rs = $this->db
-    // ->select('order_details.*, products.unit_code')
-    // ->from('order_details')
-    // ->join('products', 'order_details.product_code = products.code', 'left')
-    // ->where('order_code', $code)
-    // ->order_by('products.model_code', 'ASC')
-    // ->order_by('products.color_code', 'ASC')
-    // ->order_by('products.size_code', 'ASC')
-    // ->get();
-
+    
     if($rs->num_rows() > 0)
     {
       return $rs->result();
@@ -554,6 +545,22 @@ class Orders_model extends CI_Model
     $rs = $this->db
     ->where('oracle_id IS NOT NULL', NULL, FALSE)
     ->where('oracle_id', $oracle_id)
+    ->get($this->tb);
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->row();
+    }
+
+    return NULL;
+  }
+
+
+  public function get_order_by_fulfillment_code($fulfillment_code)
+  {
+    $rs = $this->db
+    ->where('fulfillment_code IS NOT NULL', NULL, FALSE)
+    ->where('fulfillment_code', $fulfillment_code)
     ->get($this->tb);
 
     if($rs->num_rows() > 0)

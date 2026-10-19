@@ -578,13 +578,13 @@ class Transfer extends PS_Controller
 
             if($sc === TRUE)
             {
-              if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_TR_INTERFACE')))
+              if(is_true(getConfig('NS_API')) && is_true(getConfig('NS_TR_INTERFACE')))
               {
-                $this->load->library('wrx_transfer_api');
+                $this->load->library('ns_transfer_api');
 
-                if( ! $this->wrx_transfer_api->export_transfer($doc->code))
+                if( ! $this->ns_transfer_api->export_transfer($doc->code))
                 {
-                  $this->error = $this->wrx_transfer_api->error;
+                  $this->error = $this->ns_transfer_api->error;
                   $ex = 0;
                 }
               }
@@ -752,14 +752,14 @@ class Transfer extends PS_Controller
       {
         if($doc->status == 'C')
         {
-          if(is_true(getConfig('WRX_API')) && is_true(getConfig('WRX_TR_INTERFACE')))
+          if(is_true(getConfig('NS_API')) && is_true(getConfig('NS_TR_INTERFACE')))
           {
-            $this->load->library('wrx_transfer_api');
+            $this->load->library('ns_transfer_api');
 
-            if( ! $this->wrx_transfer_api->export_transfer($doc->code))
+            if( ! $this->ns_transfer_api->export_transfer($doc->code))
             {
               $sc = FALSE;
-              $this->error = "Export failed : ".$this->wrx_transfer_api->error;
+              $this->error = "Export failed : ".$this->ns_transfer_api->error;
             }
           }
           else

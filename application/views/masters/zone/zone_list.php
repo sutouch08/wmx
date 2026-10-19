@@ -11,6 +11,9 @@
 			<i class="fa fa-file-excel-o"></i> Export
 		</button> -->
 		<button type="button" class="btn btn-white btn-primary top-btn" onclick="generateQrcode()"><i class="fa fa-qrcode"></i> Generate QR</button>
+		<?php if($this->_SuperAdmin) : ?>
+			<button type="button" class="btn btn-white btn-purple top-btn" onclick="syncIXZones()"><i class="fa fa-refresh"></i> Sync Zones</button>
+		<?php endif; ?>
   </div>
 </div><!-- End Row -->
 <hr/>
@@ -148,6 +151,7 @@
 <script>
 	$('#warehouse').select2();
 </script>
-<script src="<?php echo base_url(); ?>scripts/masters/zone.js?v=<?php echo date('YmdH'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/zone.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/ix_zone.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

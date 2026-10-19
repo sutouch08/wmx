@@ -102,8 +102,7 @@
 
 	<div class="row margin-top-10">
 		<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5">
-			<button type="button" id="btn-state-1" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_1']; ?>" onclick="toggleState(1)">รอดำเนินการ</button>
-			<button type="button" id="btn-state-2" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_2']; ?>" onclick="toggleState(2)">รอชำระเงิน</button>
+			<button type="button" id="btn-state-1" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_1']; ?>" onclick="toggleState(1)">รอดำเนินการ</button>			
 			<button type="button" id="btn-state-3" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_3']; ?>" onclick="toggleState(3)">รอจัด</button>
 			<button type="button" id="btn-state-4" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_4']; ?>" onclick="toggleState(4)">กำลังจัด</button>
 			<button type="button" id="btn-state-5" class="btn btn-sm margin-bottom-5 <?php echo $btn['state_5']; ?>" onclick="toggleState(5)">รอตรวจ</button>
@@ -114,8 +113,7 @@
 		</div>
 	</div>
 
-	<input type="hidden" name="state_1" id="state_1" value="<?php echo $state[1]; ?>" />
-	<input type="hidden" name="state_2" id="state_2" value="<?php echo $state[2]; ?>" />
+	<input type="hidden" name="state_1" id="state_1" value="<?php echo $state[1]; ?>" />	
 	<input type="hidden" name="state_3" id="state_3" value="<?php echo $state[3]; ?>" />
 	<input type="hidden" name="state_4" id="state_4" value="<?php echo $state[4]; ?>" />
 	<input type="hidden" name="state_5" id="state_5" value="<?php echo $state[5]; ?>" />
@@ -129,16 +127,16 @@
 <?php echo $this->pagination->create_links(); ?>
 <div class="row">
 	<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-5 table-responsive" id="order-table" style="overflow:auto;">
-		<table class="table tableFixHead" style="min-width:1380px; margin-bottom:20px;">
+		<table class="table tableFixHead" style="min-width:1420px; margin-bottom:20px;">
 			<thead>
 				<tr class="font-size-11">
 					<th class="fix-width-40 middle text-center fix-header">ลำดับ</th>
 					<th class="fix-width-80 middle text-center fix-header">วันที่</th>
-					<th class="fix-width-100 middle fix-header">Order No.</th>
+					<th class="fix-width-140 middle fix-header">Order No.</th>
 					<th class="fix-width-120 middle fix-header">SO No.</th>
 					<th class="fix-width-120 middle fix-header">Fulfillment No.</th>
 					<th class="fix-width-120 middle fix-header">MKP No.</th>
-					<th class="fix-width-250 middle fix-header">ลูกค้า</th>
+					<th class="min-width-250 middle fix-header">ลูกค้า</th>
 					<th class="fix-width-100 middle text-right fix-header">ยอดเงิน</th>
 					<th class="fix-width-150 middle fix-header">ช่องทางขาย</th>
 					<th class="fix-width-150 middle fix-header">การชำระเงิน</th>

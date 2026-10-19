@@ -202,9 +202,16 @@ class Prepare extends PS_Controller
     $this->load->model('masters/channels_model');
     $this->load->helper('warehouse');
     $wrx_api = is_true(getConfig('WRX_API'));
+    $ns_api = is_true(getConfig('NS_API'));    
     $lazada_code = getConfig('LAZADA_CHANNELS_CODE');
     $shopee_code = getConfig('SHOPEE_CHANNELS_CODE');
     $tiktok_code = getConfig('TIKTOK_CHANNELS_CODE');
+
+    $mkpChannels = [
+      $lazada_code,
+      $shopee_code,
+      $tiktok_code
+    ];
 
     $is_cancel = FALSE;
 
@@ -219,7 +226,7 @@ class Prepare extends PS_Controller
       {
         if( ! $is_cancel && ! empty($order->reference))
         {
-          if($order->channels_code == $tiktok_code OR $order->channels_code == $shopee_code OR $order->channels_code == $lazada_code)
+          if(in_array($order->channels_code, $mkpChannels))
           {
             $is_cancel = $this->is_cancel($order->reference, $order->channels_code, $order->shop_id);
           }
@@ -293,12 +300,12 @@ class Prepare extends PS_Controller
           }
         }
 
-        if(is_true(getConfig('WRX_OB_INTERFACE')))
+        if($ns_api && is_true(getConfig('NS_OB_INTERFACE')))
         {
           if($order->erp_status != 'Packed')
           {
-            $this->load->library('wrx_ob_api');
-            $this->wrx_ob_api->update_status($code);
+            $this->load->library('ns_ob_api');
+            $this->ns_ob_api->update_status($code);
           }
         }
 

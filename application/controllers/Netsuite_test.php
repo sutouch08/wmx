@@ -7,69 +7,65 @@ class Netsuite_test extends CI_Controller
   {
     parent::__construct();
   }
-  
-  public function get_token()
-  {
-    $this->load->library('Netsuite_oauth');
-    echo "Access Token: " . $this->netsuite_oauth->get_access_token();    
-  }
-
+    
   public function int03()
   {
-    $this->load->library('wrx_consign_api');
+    $this->load->library('ns_consign_api');
     $item = 'WA-PLAN15-AA-L';
     $whs = 'AFG-0001';
-    $stock = $this->wrx_consign_api->get_onhand_stock($item, $whs);
+    $stock = $this->ns_consign_api->get_onhand_stock($item, $whs);
     echo $stock;
   }
 
   public function add16()
   {
-    $this->load->library('wrx_consign_api');
-    $item = 'WA-PLAN15-AA-L';
+    $this->load->library('ns_consignment_api');
+    $item = 'WA-PLAN15-AA-Lx';
     $whs = 'AFG-0001';
-    $stock = $this->wrx_consign_api->confirm_transfer_in($item, $whs);
+    $stock = $this->ns_consignment_api->get_onhand_stock($item, $whs);
     echo $stock;
   }
 
-  public function call_restlet()
+  public function export_consignment(string $code)
   {
-    $this->load->library('Netsuite_oauth');
-
-    // ดึง access token (มี cache)
-    $access_token = $this->netsuite_oauth->get_access_token();
-
-    $restlet_url = 'https://9724922-sb2.suitetalk.api.netsuite.com/services/rest/record/v1/some-endpoint'; // เปลี่ยนตามจริง
-
-    $ch = curl_init($restlet_url);
-    curl_setopt_array($ch, [
-      CURLOPT_RETURNTRANSFER => true,
-      CURLOPT_HTTPHEADER     => [
-        'Authorization: Bearer ' . $access_token,
-        'Content-Type: application/json',
-      ],
-    ]);
-
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-    if ($response === false)
-    {
-      $error = curl_error($ch);
-      curl_close($ch);
-      show_error('cURL error: ' . $error);
-    }
-
-    curl_close($ch);
-
-    if ($http_code === 401)
-    {
-      // INVALID_LOGIN → ตรวจ kid/iss/aud/alg และ Login Audit Trail บน SB2
-      log_message('error', 'NetSuite RESTlet 401 INVALID_LOGIN: ' . $response);
-    }
-
-    // ดูผลลัพธ์
-    header('Content-Type: application/json');
-    echo $response;
+    $this->load->library('ns_consignment_api');
+    $sc = $this->ns_consignment_api->export_consignment($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_consignment_api->error;
   }
+
+  public function export_consign(string $code)
+  {
+    $this->load->library('ns_consign_api');
+    $sc = $this->ns_consign_api->export_consign($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_consign_api->error;
+  }
+
+  public function export_adjust(string $code)
+  {
+    $this->load->library('ns_adjust_api');
+    $sc = $this->ns_adjust_api->export_adjust($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_adjust_api->error;
+  }
+
+  public function export_receive(string $code)
+  {
+    $this->load->library('ns_ib_api');
+    $sc = $this->ns_ib_api->export_receive($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_ib_api->error;
+  }
+
+  public function export_receive_po(string $code)
+  {
+    $this->load->library('ns_ib_api');
+    $sc = $this->ns_ib_api->export_receive_po($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_ib_api->error;
+  }
+
+  public function export_return(string $code)
+  {
+    $this->load->library('ns_ib_api');
+    $sc = $this->ns_ib_api->export_return($code);
+    echo $sc ? 'Export successful' : 'Export failed: ' . $this->ns_ib_api->error;
+  }
+
 }

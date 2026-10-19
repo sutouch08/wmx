@@ -11,8 +11,6 @@ function thai_date($date, $time = FALSE, $sp = '-')
   return date($format, strtotime($date));
 }
 
-
-
 function thai_short_text_date($date, $time = FALSE)
 {
 	$Y 	= date('Y', strtotime($date));
@@ -41,20 +39,16 @@ function thai_short_text_date($date, $time = FALSE)
 	return $newDate;
 }
 
-
-
-function now()
+function now($millisec = FALSE)
 {
-  return date('Y-m-d H:i:s');
+  $date = new DateTime();
+  return $millisec === TRUE ? $date->format('Y-m-d H:i:s.u') : $date->format('Y-m-d H:i:s');
 }
-
-
 
 function today()
 {
   return date('Y-m-d');
 }
-
 
 function db_date($date, $time = FALSE, $sp = '-')
 {
@@ -75,12 +69,8 @@ function db_date($date, $time = FALSE, $sp = '-')
   return date('Y-m-d', strtotime($date));
 }
 
-
-
 function sap_date($date="", $time = FALSE)
 {
-  //$date = empty($date) ? date('Y-m-d H:i:s') : $date;
-
   if($time === TRUE)
   {
     $c_time = date('H:i:s', strtotime($date));
@@ -89,10 +79,8 @@ function sap_date($date="", $time = FALSE)
     return $date .' '.$c_time;
   }
 
-
   return date('Y-m-d', strtotime($date));
 }
-
 
 function from_date($date = '')
 {
@@ -106,8 +94,6 @@ function from_date($date = '')
   }
 }
 
-
-
 function to_date($date = '')
 {
   if($date === '')
@@ -119,7 +105,6 @@ function to_date($date = '')
     return date('Y-m-d 23:59:59', strtotime($date));
   }
 }
-
 
 function select_years($se = '')
 {
@@ -139,8 +124,6 @@ function select_years($se = '')
 	return $sc;
 }
 
-
-
 function selectHour($se = '')
 {
 	$sc	= '';
@@ -151,9 +134,6 @@ function selectHour($se = '')
 	}
 	return $sc;
 }
-
-
-
 
 function selectMin($se = '' )
 {
@@ -168,8 +148,6 @@ function selectMin($se = '' )
 	}
 	return $sc;
 }
-
-
 
 function selectTime($time='')
 {
@@ -188,7 +166,6 @@ function selectTime($time='')
 	}
 	return $sc;
 }
-
 
 function is_valid_date($date)
 {
@@ -229,4 +206,4 @@ function is_valid_date($date)
 
   return TRUE;
 }
- ?>
+

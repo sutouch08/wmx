@@ -469,14 +469,14 @@ class Delivery_order extends PS_Controller
         {
           $this->db->trans_commit();
 
-          if(is_true(getConfig('WRX_OB_INTERFACE')))
+          if(is_true(getConfig('NS_OB_INTERFACE')))
           {
-            $this->load->library('wrx_ob_api');
+            $this->load->library('ns_ob_api');
 
-            if( ! $this->wrx_ob_api->update_status($code))
+            if( ! $this->ns_ob_api->update_status($code))
             {
               $sc = FALSE;
-              $this->error = "บันทึกขายสำเร็จแต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->wrx_ob_api->error;
+              $this->error = "บันทึกขายสำเร็จแต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->ns_ob_api->error;
 
               $arr = array(
                 'is_exported' => 3

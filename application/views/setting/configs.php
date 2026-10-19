@@ -24,6 +24,7 @@
 		$tab6 = $tab == 'wrx' ? 'active in' : '';
 		$tab7 = $tab == 'porlor' ? 'active in' : '';
 		$tab8 = $tab == 'spx' ? 'active in' : '';
+		$tab9 = $tab == 'netsuite' ? 'active in' : '';
 		?>
 		<ul id="myTab1" class="setting-tabs" style="margin-left:0;">
 			<li class="li-block <?php echo $tab1; ?>" onclick="changeURL('general')"><a href="#general" data-toggle="tab">ทั่วไป</a></li>
@@ -34,6 +35,7 @@
 			<li class="li-block <?php echo $tab6; ?>" onclick="changeURL('wrx')"><a href="#wrx" data-toggle="tab">WRX API</a></li>
 			<li class="li-block <?php echo $tab7; ?>" onclick="changeURL('porlor')"><a href="#porlor" data-toggle="tab">PORLOR API</a></li>
 			<li class="li-block <?php echo $tab8; ?>" onclick="changeURL('spx')"><a href="#spx" data-toggle="tab">SPX API</a></li>
+			<li class="li-block <?php echo $tab9; ?>" onclick="changeURL('netsuite')"><a href="#netsuite" data-toggle="tab">NetSuite API</a></li>
 		</ul>
 	</div>
 	<div class="col-lg-10 col-md-10 col-sm-10 border-1" style="padding-top:15px; border-top:0px !important; height:600px; overflow:auto;">
@@ -61,6 +63,9 @@
 			</div>
 			<div class="tab-pane fade <?php echo $tab8; ?>" id="spx">
 				<?php $this->load->view('setting/setting_spx_api'); ?>
+			</div>
+			<div class="tab-pane fade <?php echo $tab9; ?>" id="netsuite">
+				<?php $this->load->view('setting/setting_netsuite_api'); ?>
 			</div>
 		</div><!--/ tab-content-->
 	</div><!--/ col-sm-9  -->

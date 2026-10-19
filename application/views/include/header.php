@@ -1,51 +1,52 @@
-
 <!DOCTYPE html>
 <html lang="th">
-	<head>
-		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-		<meta charset="utf-8" />
 
-		<title><?php echo $this->title; ?></title>
-		<meta name="description" content="" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-		<link rel="shortcut icon" href="<?php echo base_url(); ?>assets/img/favicon.ico">
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/chosen.css">
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/select2.css">
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
-    <link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery-ui-1.10.4.custom.min.css " />
-		<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css?v=<?php echo date('Ymd'); ?>"/>
-		<!-- ace settings handler -->
-		<script src="<?php echo base_url(); ?>assets/js/ace-extra.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
-  	<script src="<?php echo base_url(); ?>assets/js/jquery-ui-1.10.4.custom.min.js"></script>
-	  <script src="<?php echo base_url(); ?>assets/js/bootstrap.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/ace/ace.js"></script>
-		<script src="<?php echo base_url(); ?>assets/js/ace-elements.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/ace/elements.fileinput.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/sweet-alert.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/handlebars-v3.js"></script>
-		<script src="<?php echo base_url(); ?>assets/js/select2.js"></script>
-    <script src="<?php echo base_url(); ?>assets/js/chosen.jquery.js"></script>
-	  <link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/sweet-alert.css">
-	</head>
-	<body class="no-skin">
-		<div id="loader">
-        <div class="loader"></div>
-		</div>
-		<div id="loader-backdrop" style="position: fixed; width:100vw; height:100vh; background-color:white; opacity:0.3; display:none; z-index:9;">
-		</div>
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+	<meta charset="utf-8" />
 
-		<!-- #section:basics/navbar.layout -->
-		<div id="navbar" class="navbar navbar-default">
-			<script type="text/javascript">
-				var BASE_URL = '<?php echo base_url(); ?>';
-				var HOME = '<?php echo $this->home.'/'; ?>';
-			</script>
-			<div class="navbar-container" id="navbar-container">
-				<?php if(! isset($_GET['nomenu'])) : ?>
+	<title><?php echo $this->title; ?></title>
+	<meta name="description" content="" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+	<link rel="shortcut icon" href="<?php echo base_url(); ?>assets/img/favicon.ico">
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/chosen.css">
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/select2.css">
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/bootstrap.css" />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/font-awesome.css" />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace-fonts.css" />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/ace.css" class="ace-main-stylesheet" id="main-ace-style" />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/jquery-ui-1.10.4.custom.min.css " />
+	<link rel="stylesheet" href="<?php echo base_url(); ?>assets/css/template.css?v=<?php echo date('Ymd'); ?>" />
+	<!-- ace settings handler -->
+	<script src="<?php echo base_url(); ?>assets/js/ace-extra.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/jquery.min.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/jquery-ui-1.10.4.custom.min.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/bootstrap.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/ace/ace.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/ace-elements.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/ace/elements.fileinput.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/sweet-alert.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/handlebars-v3.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/select2.js"></script>
+	<script src="<?php echo base_url(); ?>assets/js/chosen.jquery.js"></script>
+	<link rel="stylesheet" type="text/css" href="<?php echo base_url(); ?>assets/css/sweet-alert.css">
+</head>
+
+<body class="no-skin">	
+	<div id="loader" class="hide">
+		<div class="loader"></div>
+		<div class="loader-text">กำลังทำงาน ...</div>
+	</div>
+	<div id="loader-backdrop" class="hide" style="position:fixed; top:0px; left:0px; width:100vw; height:100vh; background-color:white; opacity:0.3; z-index:9;"></div>
+
+	<!-- #section:basics/navbar.layout -->
+	<div id="navbar" class="navbar navbar-default">
+		<script type="text/javascript">
+			var BASE_URL = '<?php echo base_url(); ?>';
+			var HOME = '<?php echo $this->home . '/'; ?>';
+		</script>
+		<div class="navbar-container" id="navbar-container">
+			<?php if (! isset($_GET['nomenu'])) : ?>
 				<!-- #section:basics/sidebar.mobile.toggle -->
 				<button type="button" class="navbar-toggle menu-toggler pull-left" id="menu-toggler" data-target="#sidebar">
 					<span class="sr-only">Toggle sidebar</span>
@@ -53,14 +54,14 @@
 					<span class="icon-bar"></span>
 					<span class="icon-bar"></span>
 				</button>
-				<?php endif; ?>
-				<div class="navbar-header pull-left">
-					<a href="<?php echo ( ! isset($_GET['nomenu']) ? base_url() : '#'); ?>" class="navbar-brand">
-						<small><?php echo getConfig('COMPANY_NAME'); ?></small>
-					</a>
-				</div>
-				<?php if( ! isset($_GET['nomenu'])) : ?>
-					<?php	$this->load->view('include/top_menu'); ?>
+			<?php endif; ?>
+			<div class="navbar-header pull-left">
+				<a href="<?php echo (! isset($_GET['nomenu']) ? base_url() : '#'); ?>" class="navbar-brand">
+					<small><?php echo getConfig('COMPANY_NAME'); ?></small>
+				</a>
+			</div>
+			<?php if (! isset($_GET['nomenu'])) : ?>
+				<?php $this->load->view('include/top_menu'); ?>
 
 				<div class="navbar-buttons navbar-header pull-right" role="navigation">
 					<ul class="nav ace-nav">
@@ -100,24 +101,28 @@
 						</li>
 					</ul>
 				</div>
-				<?php endif; ?>
+			<?php endif; ?>
 
-				<!-- /section:basics/navbar.dropdown -->
-			</div><!-- /.navbar-container -->
-		</div>
+			<!-- /section:basics/navbar.dropdown -->
+		</div><!-- /.navbar-container -->
+	</div>
 
-		<!-- /section:basics/navbar.layout -->
-		<div class="main-container" id="main-container">
-			<script type="text/javascript">
-				try{ace.settings.check('main-container' , 'fixed')}catch(e){}
-			</script>
-			<?php if(! isset($_GET['nomenu'])) : ?>
+	<!-- /section:basics/navbar.layout -->
+	<div class="main-container" id="main-container">
+		<script type="text/javascript">
+			try {
+				ace.settings.check('main-container', 'fixed')
+			} catch (e) {}
+		</script>
+		<?php if (! isset($_GET['nomenu'])) : ?>
 			<!-- #section:basics/sidebar -->
 			<div id="sidebar" class="sidebar responsive <?php echo get_cookie('sidebar_layout'); ?>" data-sidebar="true" data-sidebar-scoll="true" data-sidebar-hover="true">
 				<script type="text/javascript">
-					try{ace.settings.check('sidebar' , 'fixed')}catch(e){}
+					try {
+						ace.settings.check('sidebar', 'fixed')
+					} catch (e) {}
 				</script>
-						<!--- side menu  ------>
+				<!--- side menu  ------>
 				<?php $this->load->view("include/side_menu"); ?>
 
 				<!-- #section:basics/sidebar.layout.minimize -->
@@ -126,17 +131,17 @@
 				</div>
 
 			</div>
-			<?php endif; ?>
-			<!-- /section:basics/sidebar -->
-			<div class="main-content">
-				<div class="main-content-inner">
-					<div class="page-content">
-								<!-- PAGE CONTENT BEGINS -->
+		<?php endif; ?>
+		<!-- /section:basics/sidebar -->
+		<div class="main-content">
+			<div class="main-content-inner">
+				<div class="page-content">
+					<!-- PAGE CONTENT BEGINS -->
 
-						<?php
-						//--- if user don't have permission to access this page then deny_page;
-							if($this->pm->can_view == 0)
-							{
-								$this->load->view('deny_page');
-							}
-						?>
+					<?php
+					//--- if user don't have permission to access this page then deny_page;
+					if ($this->pm->can_view == 0)
+					{
+						$this->load->view('deny_page');
+					}
+					?>

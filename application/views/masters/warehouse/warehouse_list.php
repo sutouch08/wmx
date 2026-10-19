@@ -8,6 +8,9 @@
 		<?php if(getConfig('ALLOW_CREATE_WAREHOUSE') && $this->pm->can_add) : ?>
 			<button type="button" class="btn btn-white btn-success top-btn" onclick="addNew()"><i class="fa fa-plus"></i> Add New</button>
 		<?php endif; ?>
+		<?php if($this->_SuperAdmin) : ?>
+			<button type="button" class="btn btn-white btn-danger top-btn" onclick="syncIXWarehouse()"><i class="fa fa-refresh"></i> Sync IX Warehouse</button>
+		<?php endif; ?>
   </div>
 </div><!-- End Row -->
 <hr/>
@@ -153,5 +156,6 @@
 </div>
 
 <script src="<?php echo base_url(); ?>scripts/masters/warehouse.js?v=<?php echo date('Ymd'); ?>"></script>
+<script src="<?php echo base_url(); ?>scripts/masters/ix_warehouse.js?v=<?php echo date('Ymd'); ?>"></script>
 
 <?php $this->load->view('include/footer'); ?>

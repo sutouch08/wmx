@@ -110,13 +110,13 @@ class Invoice extends PS_Controller
   {
     $sc = TRUE;
 
-    if(is_true(getConfig('WRX_OB_INTERFACE')))
+    if(is_true(getConfig('NS_OB_INTERFACE')))
     {
-      $this->load->library('wrx_ob_api');
-      if( ! $this->wrx_ob_api->update_status($code))
+      $this->load->library('ns_ob_api');
+      if( ! $this->ns_ob_api->update_status($code))
       {
         $sc = FALSE;
-        $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : Error - ".$this->wrx_ob_api->error;
+        $this->error = "ส่งข้อมูลไป ERP ไม่สำเร็จ : Error - ".$this->ns_ob_api->error;
 
         $arr = array(
           'is_exported' => 3

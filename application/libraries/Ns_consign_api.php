@@ -1,0 +1,359 @@
+<?php
+class Ns_consign_api
+{  
+  private $api = [];
+  protected \CI_Controller $ci;
+  public $error = "";
+  public $logs_json = FALSE;
+  public $test = FALSE;
+  public $url = "";
+  public $company = "WARRIX SPORT PUBLIC COMPANY LIMITED";
+
+  public function __construct()
+  {
+    $this->ci =& get_instance();
+		$this->ci->load->model('rest/api/api_logs_model');    
+    $this->ci->load->library('netsuite_client');
+
+    $this->api = getNetsuiteApiConfig();
+    $this->logs_json = is_true($this->api['NS_LOG_JSON']);
+    $this->test = is_true($this->api['NS_API_TEST']);
+    $this->company = $this->api['NS_MAIN_COMPANY'];    
+  }
+
+
+  public function get_onhand_stock(string $code, string $warehouse_code)
+  {
+    $sc = TRUE;
+    $qty = 0;
+    $action = "get";
+    $type = "INT03";
+    $scriptId = getConfig('NS_CHECK_STOCK_URL');    
+    $method = 'POST';
+
+    $playload = array(
+      "company" => $this->company,
+      "item" => $code,
+      "productCode" => "",
+      "segment" => "",
+      "className" => "",
+      "family" => "",
+      "type" => "",
+      "kind" => "",
+      "gender" => "",
+      "sportsType" => "",
+      "clubCollection" => "",
+      "brand" => "",
+      "mainGroup" => "",
+      "subGroup" => "",
+      "mainColor" => "",
+      "subColor" => "",
+      "size" => "",
+      "location" => $warehouse_code,
+      "bin" => "",
+      "limit" => 1,
+      "offset" => 0
+    );
+
+    if( ! empty($playload))
+    {      
+      if($this->test)
+      {
+        if($this->logs_json)
+        {
+          $logs = array(
+            'trans_id' => genUid(),
+            'type' => $type,            
+            'api_path' => $scriptId,
+            'code' => $code,
+            'action' => $action,
+            'status' => 'test',
+            'message' => 'test',
+            'request_json' => json_encode($playload),
+            'response_json' => NULL
+          );
+
+          $this->ci->api_logs_model->add_logs($logs);
+        }
+      }
+      else
+      {
+        $req_start = date('Y-m-d H:i:s');
+        [$status, $res, $json] = $this->ci->netsuite_client->callRestlet($scriptId, $playload, $method);      
+        $req_end = date('Y-m-d H:i:s');
+       
+        if($status !== 200)
+        {
+          $sc = FALSE;          
+          $errCode = isset($res->ErrorCode) ? $res->ErrorCode : (isset($res->errorCode) ? $res->errorCode : 'Error');
+          $message = isset($res->Message) ? $res->Message : (isset($res->message) ? $res->message : 'Unknown error');
+          $this->error = $errCode . ' : ' . $message;
+        }
+        
+        if($sc === TRUE)
+        {
+          // Check if the response contains the expected properties
+          if(property_exists($res, 'success') && property_exists($res, 'listItems'))
+          {
+            if($res->success && ! empty($res->listItems))
+            {
+              $ds = $res->listItems[0];
+
+              if( ! empty($ds->listLocations))
+              {
+                $qty = $ds->listLocations[0]->onhandQty;
+              }            
+            }
+            else 
+            {
+              $sc = FALSE;
+              $this->error = ! empty($res->errorCode) ? $res->errorCode.' : '.$res->message : 'Unknown error';
+            }
+          }
+          else
+          {
+            $sc = FALSE;
+            $$errCode = isset($res->ErrorCode) ? $res->ErrorCode : "";
+            $this->error = isset($res->Message) ? $errCode . ' : ' . $res->Message : "No response from ERP";
+          }
+        }
+
+        if ($this->logs_json)
+        {
+          $logs = array(
+            'trans_id' => genUid(),
+            'type' => $type,            
+            'api_path' => $scriptId,
+            'code' => $code,
+            'action' => $action,
+            'status' => $sc === TRUE ? 'success' : 'failed',
+            'message' => $this->error,
+            'request_json' => json_encode($playload),
+            'response_json' => $json,
+            'req_start' => $req_start,
+            'req_end' => $req_end
+          );
+
+          $this->ci->api_logs_model->add_logs($logs);
+        }        
+      }
+    }
+
+    return $sc === TRUE ? $qty : 0;
+  }
+
+
+  public function export_consign(string $code)
+  {
+    $sc = TRUE;
+    $this->ci->load->model('account/consign_order_model');
+
+    $action = "create";
+    $type = "INT23";    
+    $scriptId = getConfig('NS_CONSIGN_URL');
+    $api_path = $scriptId;            
+    $method = 'POST';
+
+    $doc = $this->ci->consign_order_model->get($code);
+
+    $playload = [];
+
+    if( ! empty($doc))
+    {
+      if($doc->status == 'C')
+      {
+        $playload = [
+          "source" => "IX",
+          "company" => $this->company,
+          "referenceId" => $doc->code,
+          "salesorderNumber" => "",
+          "customerNumber" => $doc->customer_code,
+          "onetimeCustName" => "",
+          "customerNameOnline" => "",
+          "onetimeBranchCode" => "",
+          "onetimeCustAddress" => "",
+          "onetimeTel" => "",
+          "onetimeEmail" => "",
+          "onetimeTaxId" => "",
+          "shipToAttention" => "",
+          "shipToAddressee" => "",
+          "shipToPhone" => "",
+          "shippingMethod" => "SPX Express",
+          "mfgStatus" => "",
+          "billToCode" => "",
+          "shipToCode" => "",
+          "orderStatus" => "Pending Fulfillment",
+          "salesPerson" => "",
+          "salesChannel" => getConfig('NS_CONSIGN_CHANNEL'),
+          "salesType" => "Collection",
+          "department" => "",
+          "orderDate" => db_date($doc->shipped_date, FALSE),
+          "paymentOption" => "Credit",
+          "primaryCurrency" => "THB",
+          "memoHeader" => $doc->remark,
+          "attachslip" => "No",
+          "headerAttachFile" => "",
+          "depositAttachFile" => "",
+          "deposit" => "No",
+          "depositfundAmt" => 0,
+          "depositAccount" => "",
+          "depositDate" => now(),
+          "depositMemo" => "",
+          "depositPaymentOption" => "Cash",
+          "discountHeaderAmt" => 0,
+          "discountHeaderPct" => 0,
+          "discountItem" => "",
+          "refer1Order" => $doc->code,
+          "refer2Order" => "",
+          "autoFulfill" => "Yes",
+          "cod" => "No",
+          "codAmount" => 0,
+          "preOrder" => "No",
+          "headerAction" => "A",
+          "line" => []
+        ];
+
+        $details = $this->ci->consign_order_model->get_details($code);
+
+        if( ! empty($details))
+        {
+          $line = 1;
+          $rate = getConfig('SALE_VAT_RATE');
+          $rate = ($rate == "" OR $rate == NULL) ? 7.00 : $rate;
+
+          foreach($details as $rs)
+          {
+            $playload['line'][] = array(
+              "orderLine" => $line,
+              "itemNumber" => $rs->product_code,
+              "itemDescription" => $rs->product_name,
+              "orderQty" => intval($rs->qty),
+              "uom" => $rs->unit_code,
+              "unitPriceBfVAT" => round(floatval(remove_vat($rs->sell_price, $rate)), 2),
+              "unitPriceIncVAT" => round(floatval($rs->sell_price), 2),
+              "unitPriceTag" => round(floatval($rs->price), 2),
+              "discountUnitPrice" => round(floatval($rs->price - $rs->sell_price), 2),
+              "amountBfVAT" => round(floatval(remove_vat($rs->amount, $rate)), 2),
+              "taxAmount" => round(floatval(get_vat_amount($rs->amount, $rate)), 2),
+              "grossAmount" => round(floatval($rs->amount), 2),
+              "priceTagAmount" => round(floatval($rs->price * $rs->qty), 2),
+              "discountLineAmt" => round(floatval($rs->discount_amount), 2),
+              "discountLinePct" => $rs->discount_amount > 0 ? round(floatval(($rs->discount_amount / ($rs->qty * $rs->price))), 2) * 100 : 0,
+              "shipDate" => db_date($doc->shipped_date, FALSE),
+              "location" => $doc->warehouse_code,
+              "memoLine" => "",
+              "lineAttachFile" => "",
+              "ref1OrderLine" => "",
+              "ref2OrderLine" => "",
+              "lineAction" => "A"
+            );
+
+            $line++;
+          }
+        }        
+
+        if( ! empty($playload['line']))
+        {
+          if($this->test)
+          {
+            if($this->logs_json)
+            {
+              $logs = array(
+                'trans_id' => genUid(),
+                'type' => $type,
+                'api_path' => $api_path,
+                'code' => $code,
+                'action' => $action,
+                'status' => 'test',
+                'message' => 'test',
+                'request_json' => json_encode($playload),
+                'response_json' => NULL
+              );
+
+              $this->ci->api_logs_model->add_logs($logs);
+            }
+          }
+          else
+          {
+            $req_start = date('Y-m-d H:i:s');
+            [$status, $res, $json] = $this->ci->netsuite_client->callRestlet($scrptId, $playload, $method);            
+            $req_end = date('Y-m-d H:i:s');
+
+            if(is_array($res))
+            {
+              $res = $res[0];
+            }
+            
+            if($status !== 200)
+            {
+              $sc = FALSE;
+              $this->error = ($res->errorCode ?? 'Error') . ' : ' . ($res->message ?? 'Unknown error');              
+            }
+
+            if($sc === TRUE)
+            {
+              if(property_exists($res, 'fulfillment'))
+              {
+                $docNum = ($res->fulfillment->salesorderNumber ?? NULL);
+                $arr = array(
+                  'DocNum' => $docNum,
+                  'is_exported' => 'Y'
+                );
+
+                if( ! $this->ci->consign_order_model->update($code, $arr))
+                {
+                  $sc = FALSE;
+                  $this->error = "Export data success but update document failed";
+                }
+              }
+              else 
+              {
+                $sc = FALSE;
+                $this->error = "Fulfillment data is missing";
+              }
+            }
+
+            if($this->logs_json)
+            {
+              $logs = array(
+                'trans_id' => genUid(),
+                'type' => $type,
+                'api_path' => $api_path,
+                'code' => $code,
+                'action' => $action,
+                'status' => $sc === TRUE ? 'success' : 'failed',
+                'message' => $this->error,
+                'request_json' => json_encode($playload),
+                'response_json' => $json,
+                'req_start' => $req_start,
+                'req_end' => $req_end
+              );
+
+              $this->ci->api_logs_model->add_logs($logs);            
+            }            
+          }
+        }
+        else
+        {
+          $sc = FALSE;
+          $this->error = "No receipt items";
+        }
+      }
+      else
+      {
+        $sc = FALSE;
+        $this->error = "Invalid document status";
+      }
+    }
+    else
+    {
+      $sc = FALSE;
+      $this->error = "Invalid document number";
+    }
+
+    return $sc;
+  }
+
+} //-- end class
+
+ ?>

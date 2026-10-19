@@ -290,6 +290,26 @@ function getConfig($code)
 	return NULL;
 }
 
+function getNetsuiteApiConfig()
+{
+	$fields = ['NS_API', 'NS_API_TEST', 'NS_LOG_JSON', 'NS_MAIN_COMPANY', 'NS_CONSIGN_COMPANY'];
+	$ci =& get_instance();
+	$rs = $ci->db->select('code, value')->where_in('code', $fields)->get('config');
+
+	if($rs->num_rows() >  0)
+	{
+		$ds = [];
+
+		foreach($rs->result() as $ro)
+		{
+			$ds[$ro->code] = $ro->value;
+		}
+
+		return $ds;
+	}
+
+	return NULL;
+}
 
 function getWrxApiConfig()
 {
@@ -470,16 +490,30 @@ function set_message($message)
 
 
 //--- return null if blank value
-function get_null($value)
+function get_null($value = '')
 {
 	return $value === '' ? NULL : $value;
 }
 
 
 //--- return TRUE if value ==  1 else return FALSE;
-function is_true($value)
+function is_true($value = '')
 {
-	if($value === 1 OR $value === '1' OR $value === 'Y' OR $value === TRUE OR $value === 'TRUE' OR $value === 'true')
+	$value = strtolower($value);
+
+	if($value === 1 OR $value === '1' OR $value === 'y' OR $value === TRUE OR $value === 'true')
+	{
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+function is_success($value = '')
+{	
+	$value = strtolower($value);
+
+	if($value === 'success' || $value === 'true' || $value === '1' || $value === 'y')
 	{
 		return TRUE;
 	}

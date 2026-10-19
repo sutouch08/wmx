@@ -1,0 +1,110 @@
+/* INT20 response */
+
+//-- status 200 with success message
+
+{
+  "code" : 200,
+  "status" : "success",
+  "message" : "success",
+  "order_code" : "WO-260900001"
+}
+
+//--- status 200 with error message
+
+{
+  "code" : 200,
+  "status" : "error",
+  "message" : "error",
+  "retry" : true     //----  should retry the request or not
+}
+
+//--- status 401 unauthorized
+
+{
+  "code" : 401,
+  "status" : "error",
+  "message" : "unauthorized"
+}
+
+//--- status 400 bad request
+{
+  "code" : 400,
+  "status" : "error",
+  "message" : "bad request"
+}
+//--- status 404 not found
+
+{
+  "code" : 404,
+  "status" : "error",
+  "message" : "not found"
+}
+
+//--- status 500 internal server error
+
+{
+  "code" : 500,
+  "status" : "error",
+  "message" : "internal server error",
+  "retry" : false     //----  should retry the request or not
+}
+
+//--- status 503 service unavailable
+
+{
+  "code" : 503,
+  "status" : "error",
+  "message" : "service unavailable"
+}
+
+
+{
+  "order_number": "WO251200002", 
+  "order_type": "WO",
+  "reference" : "",
+  "headerInternalId" : 103,
+  "fulfillment" : "GI125030198",
+  "prev_fulfillment" : "GI125030197", 
+  "customer_code": "", 
+  "customer_name": "", 
+  "customer_ref": "", 
+  "channel": "", 
+  "shop_id" : "32706050", 
+  "payment_method": "", 
+  "doc_date" : "2025-05-21", 
+  "due_date" : "2025-05-25",
+  "shipping": "", 
+  "tracking_no": "",     
+  "cod_amount" : 0, 
+  "from_warehouse_code" : "AFG-1112", 
+  "to_warehouse_code" : "CC-0119",   
+  "remark" : "test remark",
+  "ship_to": { 
+    "name": "l3alona", 
+    "address": "247 ถนน วารีราชเดช ตำบลในเมือง อำเภอเมืองยโสธร จังหวัดยโสธร 35000",
+    "sub_district": null,
+    "district": "อำเภอเมืองยโสธร",
+    "province": "จังหวัดยโสธร",
+    "postcode": "35000",
+    "phone": "******66"
+  },
+  "details": [
+    {
+      "line_item_id" : 1,
+      "item": "WA-PLAN15-AA-XL",
+      "qty": 10,
+      "price": 590.00,
+      "discount": 900,
+      "amount": 5000
+    },
+    {
+      "line_item_id": 2,
+      "item": "WA-PLAN15-RR-XL",
+      "qty": 1,
+      "price": 590.00,
+      "discount": 0,
+      "amount": 590
+    }
+  ]
+}
+

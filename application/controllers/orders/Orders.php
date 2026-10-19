@@ -1028,10 +1028,10 @@ class Orders extends PS_Controller
           {
             $this->db->trans_commit();
 
-            if(is_true(getConfig('WRX_OB_INTERFACE')))
+            if(is_true(getConfig('NS_OB_INTERFACE')))
             {
-              $this->load->library('wrx_ob_api');
-              $this->wrx_ob_api->update_status($code);
+              $this->load->library('ns_ob_api');
+              $this->ns_ob_api->update_status($code);
             }
           }
           else
@@ -1558,10 +1558,10 @@ class Orders extends PS_Controller
           {
             $this->db->trans_commit();
 
-            if(is_true(getConfig('WRX_OB_INTERFACE')))
+            if(is_true(getConfig('NS_OB_INTERFACE')))
             {
-              $this->load->library('wrx_ob_api');
-              $this->wrx_ob_api->update_status($code);
+              $this->load->library('ns_ob_api');
+              $this->ns_ob_api->update_status($code);
             }
           }
           else

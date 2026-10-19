@@ -297,16 +297,16 @@ class Receive_product extends PS_Controller
             $this->db->trans_rollback();
           }
 
-          if($sc === TRUE && is_true(getConfig('WRX_API')))
+          if($sc === TRUE && is_true(getConfig('NS_API')))
           {
-            if(is_true(getConfig('WRX_GR_INTERFACE')))
+            if(is_true(getConfig('NS_GR_INTERFACE')))
             {
-              $this->load->library('wrx_ib_api');
+              $this->load->library('ns_ib_api');
 
-              if( ! $this->wrx_ib_api->export_receive($doc->code))
+              if( ! $this->ns_ib_api->export_receive($doc->code))
               {
                 $sc = FALSE;
-                $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->wrx_ib_api->error;
+                $this->error = "บันทึกเอกสารสำเร็จ แต่ส่งข้อมูลไป ERP ไม่สำเร็จ : ERP Error - ".$this->ns_ib_api->error;
 
                 $arr = array(
                   'is_exported' => 3,
@@ -444,9 +444,9 @@ class Receive_product extends PS_Controller
 
     if( ! empty($code))
     {
-      if(is_true(getConfig('WRX_API')))
+      if(is_true(getConfig('NS_API')))
       {
-        if(is_true(getConfig('WRX_GR_INTERFACE')))
+        if(is_true(getConfig('NS_GR_INTERFACE')))
         {
           $doc = $this->receive_product_model->get($code);
 
@@ -454,12 +454,12 @@ class Receive_product extends PS_Controller
           {
             if($doc->status == 'C')
             {
-              $this->load->library('wrx_ib_api');
+              $this->load->library('ns_ib_api');
 
-              if( ! $this->wrx_ib_api->export_receive($code))
+              if( ! $this->ns_ib_api->export_receive($code))
               {
                 $sc = FALSE;
-                $this->error = "Send data failed : ERP Error - ".$this->wrx_ib_api->error;
+                $this->error = "Send data failed : ERP Error - ".$this->ns_ib_api->error;
 
                 if($doc->is_exported != 1)
                 {
