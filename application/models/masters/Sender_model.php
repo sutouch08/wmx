@@ -29,13 +29,20 @@ class Sender_model extends CI_Model
     return FALSE;
   }
 
+	public function update_by_id($id, array $ds = array())
+	{
+		if(!empty($ds))
+		{
+			return $this->db->where('id', $id)->update($this->tb, $ds);
+		}
 
+		return FALSE;
+	}
 
   public function delete($id)
   {
     return $this->db->where('id', $id)->delete($this->tb);
   }
-
 
   public function get($id)
   {
@@ -47,7 +54,6 @@ class Sender_model extends CI_Model
 
     return NULL;
   }
-
 
 	public function get_id($code)
 	{
@@ -61,7 +67,6 @@ class Sender_model extends CI_Model
 		return NULL;
 	}
 
-
   public function get_all()
   {
     $rs = $this->db->get($this->tb);
@@ -73,7 +78,6 @@ class Sender_model extends CI_Model
 
     return NULL;
   }
-
 
 	public function get_common_list($list =  array())
 	{
@@ -95,8 +99,6 @@ class Sender_model extends CI_Model
 		return NULL;
 	}
 
-
-
 	public function get_customer_sender_list($customer_code)
 	{
 		$rs = $this->db->where('customer_code', $customer_code)->get('address_transport');
@@ -108,8 +110,6 @@ class Sender_model extends CI_Model
 
 		return NULL;
 	}
-
-
 
 	public function get_sender_in($arr)
 	{
@@ -134,7 +134,6 @@ class Sender_model extends CI_Model
     return FALSE;
   }
 
-
   public function get_code($id)
   {
     if( ! empty($id))
@@ -150,7 +149,6 @@ class Sender_model extends CI_Model
     return NULL;
   }
 
-
   public function get_name($id)
   {
     $rs = $this->db->where('id', $id)->get($this->tb);
@@ -161,9 +159,6 @@ class Sender_model extends CI_Model
 
     return NULL;
   }
-
-
-
 
 	public function is_exists_code($code, $id = NULL)
 	{
@@ -183,7 +178,6 @@ class Sender_model extends CI_Model
 		return FALSE;
 	}
 
-
 	public function is_exists_name($name, $id = NULL)
 	{
 		$this->db->where('name', $name);
@@ -201,8 +195,6 @@ class Sender_model extends CI_Model
 
 		return FALSE;
 	}
-
-
 
   public function is_exists($name, $id = NULL)
   {
@@ -223,8 +215,6 @@ class Sender_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function count_rows(array $ds = array())
   {
 		if(!empty($ds['code']))
@@ -237,7 +227,7 @@ class Sender_model extends CI_Model
 			$this->db->like('name', $ds['name']);
 		}
 
-		if(!empty($addr))
+		if(!empty($ds['addr']))
 		{
 			$this->db->group_start();
 			$this->db->like('address1', $ds['addr'])->or_like('address2', $ds['addr']);
@@ -255,7 +245,6 @@ class Sender_model extends CI_Model
 		}
 
 		return $this->db->count_all_results($this->tb);
-
   }
 
 
@@ -263,7 +252,6 @@ class Sender_model extends CI_Model
   {
     if(!empty($ds))
     {
-
 			if(!empty($ds['code']))
 			{
 				$this->db->like('code', $ds['code']);
@@ -274,7 +262,7 @@ class Sender_model extends CI_Model
 				$this->db->like('name', $ds['name']);
 			}
 
-			if(!empty($addr))
+			if(!empty($ds['addr']))
 			{
 				$this->db->group_start();
 				$this->db->like('address1', $ds['addr'])->or_like('address2', $ds['addr']);
@@ -299,17 +287,14 @@ class Sender_model extends CI_Model
       {
         return $rs->result();
       }
-
     }
 
     return FALSE;
   }
 
-
-
   public function search($txt)
   {
-    $qr = "SELECT id FROM address_sender WHERE name LIKE '%".$txt."%'";
+    $qr = "SELECT id FROM {$this->tb} WHERE name LIKE '%".$txt."%'";
     $rs = $this->db->query($qr);
     if($rs->num_rows() > 0)
     {
@@ -319,7 +304,6 @@ class Sender_model extends CI_Model
     {
       return array();
     }
-
   }
 
 
@@ -335,4 +319,4 @@ class Sender_model extends CI_Model
 	}
 
 }
- ?>
+

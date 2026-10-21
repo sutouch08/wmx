@@ -53,7 +53,8 @@ class Orders extends REST_Controller
 
   public function create_post()
   {
-    $start_date = now(TRUE);
+    $req_start = now(TRUE);
+    $trans_id = genUid();
     $sc = TRUE;
     $action = 'create';
     $this->api_path = $this->api_path . "/create";
@@ -66,6 +67,7 @@ class Orders extends REST_Controller
       $this->error = "Empty request data";
 
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -75,7 +77,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => NULL,
@@ -84,7 +86,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -106,6 +108,7 @@ class Orders extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -115,7 +118,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->order_number,
@@ -125,7 +128,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -141,6 +144,7 @@ class Orders extends REST_Controller
       $this->error = "Items not found";
 
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -150,7 +154,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->order_number,
@@ -160,7 +164,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -194,6 +198,7 @@ class Orders extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -203,7 +208,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->order_number,
@@ -213,7 +218,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -257,6 +262,7 @@ class Orders extends REST_Controller
       $this->error = "Invalid order type - order type must be [WO, WC, WT, WQ, WV, WW, WS, WU]";
 
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -266,7 +272,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->order_number,
@@ -276,7 +282,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -711,6 +717,7 @@ class Orders extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -721,7 +728,7 @@ class Orders extends REST_Controller
     if ($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'code' => $data->order_number,
@@ -731,7 +738,7 @@ class Orders extends REST_Controller
         'message' => $sc === TRUE ? 'success' : $this->error,
         'request_json' => $json,
         'response_json' => json_encode($arr),
-        'req_start' => $start_date,
+        'req_start' => $req_start,
         'req_end' => now(TRUE)
       );
 
@@ -774,7 +781,8 @@ class Orders extends REST_Controller
 
   public function cancel_post()
   {
-    $start_date = now(TRUE);
+    $req_start = now(TRUE);
+    $trans_id = genUid();
     $sc = TRUE;
     $retry = FALSE;
     $action = 'cancel';
@@ -785,6 +793,7 @@ class Orders extends REST_Controller
     if (empty($data))
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'error' => 'Empty request data',
@@ -794,7 +803,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => NULL,
@@ -803,7 +812,7 @@ class Orders extends REST_Controller
           'message' => 'Invalid JSON or missing fulfillment_code',
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -829,8 +838,9 @@ class Orders extends REST_Controller
     if($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
-        'status' => 'failed',
+        'status' => 'error',
         'message' => $this->error,
         'retry' => $retry
       );
@@ -838,7 +848,7 @@ class Orders extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => NULL,
@@ -847,7 +857,7 @@ class Orders extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_start,
           'req_end' => now(TRUE)
         );
 
@@ -895,6 +905,7 @@ class Orders extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -905,7 +916,7 @@ class Orders extends REST_Controller
     if ($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'code' => $data->fulfillment_code,
@@ -914,7 +925,7 @@ class Orders extends REST_Controller
         'message' => $sc === TRUE ? 'success' : $this->error,
         'request_json' => $json,
         'response_json' => json_encode($arr),
-        'req_start' => $start_date,
+        'req_start' => $req_start,
         'req_end' => now(TRUE)
       );
 

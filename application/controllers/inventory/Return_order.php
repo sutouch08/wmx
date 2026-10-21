@@ -68,6 +68,7 @@ class Return_order extends PS_Controller
         if($doc->status == 'O' OR $doc->status == 'P')
         {
           $arr = array(
+            'status' => 'P',
             'zone_code' => NULL,
             'zone_name' => NULL,
             'warehouse_code' => NULL,
@@ -85,6 +86,7 @@ class Return_order extends PS_Controller
             }
 
             $arr = array(
+              'status' => 'P',
               'zone_code' => $zone->code,
               'zone_name' => $zone->name,
               'warehouse_code' => $zone->warehouse_code,

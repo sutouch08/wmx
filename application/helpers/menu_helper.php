@@ -31,4 +31,34 @@ function side_menu($menu_code, $code, $url, $name)
   return $menu;
 }
 
+function select_menu_group($menu_groups, $se = '')
+{
+  $html = '';
+  if(!empty($menu_groups))
+  {
+    foreach($menu_groups as $mg)
+    {
+      $selected = $se === $mg->code ? 'selected' : '';
+      $html .= '<option value="'.$mg->code.'" '.$selected.'>'.$mg->name.'</option>';
+    }
+  }
+
+  return $html;
+}
+
+function select_menu_sub_group($menu_sub_groups, $se = '')
+{
+  $html = '';
+  if(!empty($menu_sub_groups))
+  {
+    foreach($menu_sub_groups as $sg)
+    {
+      $selected = $se === $sg->code ? 'selected' : '';
+      $html .= '<option value="'.$sg->code.'" '.$selected.'>'.$sg->name.'</option>';
+    }
+  }
+
+  return $html;
+}
+
  ?>

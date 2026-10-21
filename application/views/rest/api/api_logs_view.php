@@ -23,6 +23,7 @@
 				<option value="all">All</option>
 				<option value="success" <?php echo is_selected('success', $status); ?>>Success</option>
 				<option value="failed" <?php echo is_selected('failed', $status); ?>>Failed</option>
+				<option value="partial" <?php echo is_selected('partial', $status); ?>>Partial</option>
 				<option value="test" <?php echo is_selected('test', $status); ?>>Test</option>
 			</select>
 		</div>
@@ -39,6 +40,8 @@
 				<option value="ADD91" <?php echo is_selected('ADD91', $type); ?>>ADD91 | (Confirm Return Receipt)</option>
 				<option value="ADD122" <?php echo is_selected('ADD122', $type); ?>>ADD122 | (Customer Master)</option>
 				<option value="ADD123" <?php echo is_selected('ADD123', $type); ?>>ADD123 | (Warehouse Master)</option>
+				<option value="ADD124" <?php echo is_selected('ADD124', $type); ?>>ADD124 | (Sales Channel Master)</option>
+				<option value="ADD125" <?php echo is_selected('ADD125', $type); ?>>ADD125 | (Sender Master)</option>
 				<option value="INT03" <?php echo is_selected('INT03', $type); ?>>INT03 | (Check Stock)</option>
 				<option value="INT10" <?php echo is_selected('INT10', $type); ?>>INT10 | (Products Master)</option>
 				<option value="INT11" <?php echo is_selected('INT11', $type); ?>>INT11 | (Price List)</option>

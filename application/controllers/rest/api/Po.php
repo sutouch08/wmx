@@ -41,6 +41,7 @@ class Po extends REST_Controller
   public function create_post()
   {
     $req_start = now(TRUE);
+    $trans_id = genUid();
     $retry = FALSE;
     $action = 'create';
     $this->api_path = $this->api_path . "/create";
@@ -50,6 +51,7 @@ class Po extends REST_Controller
     if (empty($data))
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => 'Empty request data',
@@ -59,7 +61,7 @@ class Po extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => NULL,
@@ -84,6 +86,7 @@ class Po extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -93,7 +96,7 @@ class Po extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->po_no,
@@ -156,6 +159,7 @@ class Po extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -165,7 +169,7 @@ class Po extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->po_no,
@@ -504,6 +508,7 @@ class Po extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -514,7 +519,7 @@ class Po extends REST_Controller
     if($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'code' => $data->po_no,
@@ -537,18 +542,20 @@ class Po extends REST_Controller
   public function cancel_post()
   {
     $req_start = now(TRUE);
+    $trans_id = genUid();
     $sc = TRUE;
     $action = 'cancel';
     $code = NULL;
     $retry = FALSE;
     $this->api_path = $this->api_path . '/cancel';
     $json = file_get_contents('php://input');
-    $data = json_decode($json);
+    $data = json_decode($json);    
 
     if (empty($data) || empty($data->po_no))
     {
       $this->error = "Empty request data";
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -558,7 +565,7 @@ class Po extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => empty($data->po_no) ? '' : $data->po_no,
@@ -581,6 +588,7 @@ class Po extends REST_Controller
     {
       $this->error = "cancel_reason and cancel_user are required";
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -590,7 +598,7 @@ class Po extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => empty($data->po_no) ? '' : $data->po_no,
@@ -681,6 +689,7 @@ class Po extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -691,7 +700,7 @@ class Po extends REST_Controller
     if ($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'action' => $action,

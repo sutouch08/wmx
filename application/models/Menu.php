@@ -26,47 +26,94 @@ class Menu extends CI_Model{
     return $rs->result();
   }
 
-
-
-  public function get_menus_sub_group($group_code)
+  public function get_sub_groups($group_code = NULL)
   {
-    $rs = $this->db
-    ->where('group_code', $group_code)
-    ->where('active', 1)
-    ->order_by('position', 'ASC')
-    ->get('menu_sub_group');
+    if($group_code !== NULL)
+    {
+      $this->db->where('group_code', $group_code);
+    }
+
+    $rs = $this->db->order_by('group_code', 'ASC')->order_by('position', 'ASC')->get('menu_sub_group');
+
     if($rs->num_rows() > 0)
     {
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
+  }  
+
+  public function get_menus_sub_group($group_code, $all = FALSE)
+  {
+    $this->db->where('group_code', $group_code);
+
+    if(! $all)
+    {
+      $this->db->where('active', 1);
+    }
+
+    $this->db->order_by('position', 'ASC');
+
+    $rs = $this->db->get('menu_sub_group');
+
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
   }
 
 
-  public function get_menus_by_sub_group($sub_group_code, $group_code)
+  public function get_menus_by_sub_group(string $sub_group_code, string $group_code, $all = FALSE)
   {
-    $rs = $this->db
+    $this->db
     ->where('group_code', $group_code)
-    ->where('sub_group', $sub_group_code)
-    ->where('active', 1)
-    ->where('url IS NOT NULL')
+    ->where('sub_group', $sub_group_code);
+    if(! $all)
+    {
+      $this->db->where('active', 1);
+    }
+
+    $rs = $this->db->where('url IS NOT NULL')
     ->order_by('position', 'ASC')
     ->get('menu');
+
     if($rs->num_rows() > 0)
     {
       return $rs->result();
     }
 
-    return FALSE;
+    return NULL;
   }
 
+  public function get_menus_non_sub_group($group_code, $all = FALSE)
+  {
+    $this->db
+    ->where('group_code', $group_code)
+    ->where('sub_group IS NULL', NULL, FALSE);
+
+    if(! $all)
+    {
+      $this->db->where('active', 1);
+    }
+
+    $this->db->order_by('position', 'ASC');
+    $rs = $this->db->get('menu');
+    if($rs->num_rows() > 0)
+    {
+      return $rs->result();
+    }
+
+    return NULL;
+  }
 
   public function get_menus_by_group($group_code, $all = TRUE)
   {
     $this->db
     ->where('group_code', $group_code)
     ->where('active', 1);
+
     if($all === FALSE)
     {
       $this->db->where('sub_group IS NULL', NULL, FALSE)
@@ -79,8 +126,8 @@ class Menu extends CI_Model{
     {
       return $rs->result();
     }
-    return FALSE;
 
+    return NULL;
   }
 
 

@@ -43,7 +43,7 @@ class Configs extends PS_Controller
            $ds[$rd->code] = $this->config_model->get($rd->code);
          }
        }
-    }
+    }    
 
     $ds['cando'] = $cando;
     $ds['tab'] = $tab;

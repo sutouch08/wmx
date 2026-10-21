@@ -40,7 +40,8 @@ class Goods_receive extends REST_Controller
 
   public function create_post()
   {
-    $start_date = now(TRUE);
+    $req_date = now(TRUE);
+    $trans_id = genUid();
     $action = 'create';
     $code = NULL;
     $retry = FALSE;
@@ -52,6 +53,7 @@ class Goods_receive extends REST_Controller
     {
       $this->error = "Empty request data";
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -61,7 +63,7 @@ class Goods_receive extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => NULL,
@@ -70,7 +72,7 @@ class Goods_receive extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_date,
           'req_end' => now(TRUE)
         );
 
@@ -86,6 +88,7 @@ class Goods_receive extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -95,7 +98,7 @@ class Goods_receive extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->refCode,
@@ -105,7 +108,7 @@ class Goods_receive extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_date,
           'req_end' => now(TRUE)
         );
 
@@ -179,6 +182,7 @@ class Goods_receive extends REST_Controller
     if ($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -188,7 +192,7 @@ class Goods_receive extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => $data->refCode,
@@ -198,7 +202,7 @@ class Goods_receive extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_date,
           'req_end' => now(TRUE)
         );
 
@@ -237,6 +241,7 @@ class Goods_receive extends REST_Controller
       if ($sc === FALSE)
       {
         $arr = array(
+          'trans_id' => $trans_id,
           'code' => 200,
           'status' => 'failed',
           'message' => $this->error,
@@ -246,7 +251,7 @@ class Goods_receive extends REST_Controller
         if ($this->logs_json)
         {
           $logs = array(
-            'trans_id' => genUid(),
+            'trans_id' => $trans_id,
             'api_path' => $this->api_path,
             'type' => $this->type,
             'code' => $data->refCode,
@@ -256,7 +261,7 @@ class Goods_receive extends REST_Controller
             'message' => $this->error,
             'request_json' => $json,
             'response_json' => json_encode($arr),
-            'req_start' => $start_date,
+            'req_start' => $req_date,
             'req_end' => now(TRUE)
           );
 
@@ -432,6 +437,7 @@ class Goods_receive extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -442,7 +448,7 @@ class Goods_receive extends REST_Controller
     if ($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'code' => $data->refCode,
@@ -452,7 +458,7 @@ class Goods_receive extends REST_Controller
         'message' => $sc === TRUE ? 'success' : $this->error,
         'request_json' => $json,
         'response_json' => json_encode($arr),
-        'req_start' => $start_date,
+        'req_start' => $req_date,
         'req_end' => now(TRUE)
       );
 
@@ -464,7 +470,8 @@ class Goods_receive extends REST_Controller
 
   public function cancel_post()
   {
-    $start_date = now(TRUE);
+    $req_date = now(TRUE);
+    $trans_id = genUid();
     $sc = TRUE;
     $code = NULL;
     $retry = FALSE;
@@ -498,6 +505,7 @@ class Goods_receive extends REST_Controller
     if($sc === FALSE)
     {
       $arr = array(
+        'trans_id' => $trans_id,
         'code' => 400,
         'status' => 'error',
         'message' => $this->error,
@@ -507,7 +515,7 @@ class Goods_receive extends REST_Controller
       if ($this->logs_json)
       {
         $logs = array(
-          'trans_id' => genUid(),
+          'trans_id' => $trans_id,
           'api_path' => $this->api_path,
           'type' => $this->type,
           'code' => isset($data->refCode) ? $data->refCode : NULL,
@@ -517,7 +525,7 @@ class Goods_receive extends REST_Controller
           'message' => $this->error,
           'request_json' => $json,
           'response_json' => json_encode($arr),
-          'req_start' => $start_date,
+          'req_start' => $req_date,
           'req_end' => now(TRUE)
         );
 
@@ -599,6 +607,7 @@ class Goods_receive extends REST_Controller
         if ($sc === FALSE)
         {
           $arr = array(
+            'trans_id' => $trans_id,
             'code' => 200,
             'status' => 'failed',
             'message' => $this->error,
@@ -608,7 +617,7 @@ class Goods_receive extends REST_Controller
           if ($this->logs_json)
           {
             $logs = array(
-              'trans_id' => genUid(),
+              'trans_id' => $trans_id,
               'api_path' => $this->api_path,
               'type' => $this->type,
               'code' => $data->refCode,
@@ -618,7 +627,7 @@ class Goods_receive extends REST_Controller
               'message' => $this->error,
               'request_json' => $json,
               'response_json' => json_encode($arr),
-              'req_start' => $start_date,
+              'req_start' => $req_date,
               'req_end' => now(TRUE)
             );
 
@@ -631,6 +640,7 @@ class Goods_receive extends REST_Controller
     }
 
     $arr = array(
+      'trans_id' => $trans_id,
       'code' => 200,
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? 'success' : $this->error,
@@ -641,7 +651,7 @@ class Goods_receive extends REST_Controller
     if($this->logs_json)
     {
       $logs = array(
-        'trans_id' => genUid(),
+        'trans_id' => $trans_id,
         'api_path' => $this->api_path,
         'type' => $this->type,
         'code' => $data->refCode,
@@ -651,7 +661,7 @@ class Goods_receive extends REST_Controller
         'message' => $sc === TRUE ? 'success' : $this->error,
         'request_json' => $json,
         'response_json' => json_encode($arr),
-        'req_start' => $start_date,
+        'req_start' => $req_date,
         'req_end' => now(TRUE)
       );
 
@@ -713,22 +723,7 @@ class Goods_receive extends REST_Controller
         return FALSE;
       }      
     }
-
-    // if (empty($data->fromLocation))
-    // {
-    //   $this->error = "fromLocation is required";
-    //   return FALSE;
-    // }
-
-    // if (! empty($data->fromLocation))
-    // {
-    //   if (! $this->warehouse_model->is_exists($data->fromLocation))
-    //   {
-    //     $this->error = "Invalid Location : Location code '{$data->fromLocation}' does not exists";
-    //     return FALSE;
-    //   }
-    // }
-
+    
     if (empty($data->toLocation))
     {
       $this->error = "toLocation is required";

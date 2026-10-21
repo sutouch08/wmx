@@ -6,9 +6,6 @@ class Product_barcode_model extends CI_Model
     parent::__construct();
   }
 
-
-
-
   public function addEan13(array $ds = array())
   {
     if(!empty($ds))
@@ -19,8 +16,6 @@ class Product_barcode_model extends CI_Model
     return FALSE;
   }
 
-
-
   public function addLocal(array $ds = array())
   {
     if(!empty($ds))
@@ -30,10 +25,6 @@ class Product_barcode_model extends CI_Model
 
     return FALSE;
   }
-
-
-
-
 
   public function is_exists($barcode, $id = NULL)
   {
@@ -47,22 +38,16 @@ class Product_barcode_model extends CI_Model
     return $count > 0 ? TRUE : FALSE;
   }
 
-
-
   public function get_last_barcode()
   {
     $rs = $this->db->select_max('barcode')->get('barcode_local');
     return $rs->row()->barcode;
   }
 
-
   public function get_last_ean_barcode()
   {
     $rs = $this->db->select_max('running')->get('barcode_ean13');
     return $rs->row()->running;
   }
-
-
-
 }
-?>
+

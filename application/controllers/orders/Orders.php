@@ -36,8 +36,7 @@ class Orders extends PS_Controller
     $this->load->helper('payment_method');
     $this->load->helper('customer');
     $this->load->helper('users');
-    $this->load->helper('state');
-    $this->load->helper('product_images');
+    $this->load->helper('state');    
     $this->load->helper('discount');
     $this->load->helper('warehouse');
 
@@ -132,10 +131,8 @@ class Orders extends PS_Controller
 
   public function edit_order($code)
   {
-    $this->load->model('address/address_model');
-    $this->load->model('masters/bank_model');
-    $this->load->model('orders/order_payment_model');
-    $this->load->helper('bank');
+    $this->load->model('address/address_model');    
+    $this->load->model('orders/order_payment_model');    
 		$this->load->helper('sender');
 
     $ds = array();
@@ -150,7 +147,7 @@ class Orders extends PS_Controller
       $rs->total_amount = $rs->doc_total <= 0 ? $this->orders_model->get_order_total_amount($rs->code) : $rs->doc_total;
       $rs->user = $this->user_model->get_name($rs->user);
       $rs->state_name = get_state_name($rs->state);
-      $rs->has_payment = $this->order_payment_model->is_exists($code);
+      $rs->has_payment = FALSE;
 
 			$state = $this->order_state_model->get_order_state($code);
 
@@ -165,8 +162,7 @@ class Orders extends PS_Controller
 	    }
 
 	    $details = $this->orders_model->get_order_details($code);
-	    $ship_to = $this->address_model->get_ship_to_address($code);
-      $tracking = $this->orders_model->get_order_tracking($code);
+	    $ship_to = $this->address_model->get_ship_to_address($code);      
       $backlogs = $rs->is_backorder == 1 ? $this->orders_model->get_backlogs_details($rs->code) : NULL;
 
       if(empty($ship_to))
@@ -189,8 +185,7 @@ class Orders extends PS_Controller
 	    $ds['state'] = $ost;
 	    $ds['order'] = $rs;
 	    $ds['details'] = $details;
-	    $ds['ship_to']  = $ship_to;
-      $ds['tracking'] = $tracking;
+	    $ds['ship_to']  = $ship_to;      
       $ds['backlogs'] = $backlogs;
 			$ds['cancle_reason'] = ($rs->state == 9 ? $this->orders_model->get_cancel_reason($code) : NULL);
 	    $this->load->view('orders/order_edit', $ds);
