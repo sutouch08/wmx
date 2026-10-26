@@ -1179,7 +1179,7 @@ class Orders extends REST_Controller
               'update_user' => $this->user
             );
 
-            if (! $this->orders_model->add_state($arr))
+            if (! $this->order_state_model->add_state($arr))
             {
               $sc = FALSE;
               $this->error = "Failed to add order state change";
