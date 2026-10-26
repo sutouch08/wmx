@@ -1158,7 +1158,7 @@ class Orders extends REST_Controller
             $arr = array(
               'state' => 9,
               'status' => 2,
-              'is_backourder' => 0,
+              'is_backorder' => 0,
               'DocNum' => NULL,
               'is_exported' => 0
             );
@@ -1187,7 +1187,7 @@ class Orders extends REST_Controller
           }
 
           //-- remove backorder details 
-          if ($sc === TRUE && $order->is_backourder)
+          if ($sc === TRUE && $order->is_backorder)
           {
             $this->orders_model->drop_backorder_details($order->code);
           }
