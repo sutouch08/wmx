@@ -1189,7 +1189,7 @@ class Orders extends REST_Controller
           //-- remove backorder details 
           if ($sc === TRUE && $order->is_backorder)
           {
-            $this->orders_model->drop_backorder_details($order->code);
+            $this->orders_model->drop_backlogs_list($order->code);
           }
         } //--- state <= 3
         else
