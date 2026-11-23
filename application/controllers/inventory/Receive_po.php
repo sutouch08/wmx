@@ -1850,7 +1850,7 @@ class Receive_po extends PS_Controller
               if($sc === TRUE)
               {
                 $arr = array(
-                  'reference' => $ds->code,
+                  'reference' => $code,
                   'warehouse_code' => $zone->warehouse_code,
                   'zone_code' => $zone->code,
                   'product_code' => $rs->product_code,

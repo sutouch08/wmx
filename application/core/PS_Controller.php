@@ -19,6 +19,11 @@ class PS_Controller extends CI_Controller
     //--- check is user has logged in ?
     if(empty($uid) OR ! $this->user_model->verify_uid($uid))
     {
+      if($this->input->is_ajax_request()) {
+        echo "Session expired. Please login again.";
+        exit;
+      }
+
       if($this->uri->segment(1) == 'mobile')
       {
         redirect(base_url().'mobile/authentication');
@@ -27,7 +32,8 @@ class PS_Controller extends CI_Controller
       {
         redirect(base_url().'users/authentication');
       }
-      exit();
+
+      exit;
     }
     else
     {
