@@ -1030,7 +1030,7 @@ class Receive_po extends PS_Controller
                       if( ! empty($po_detail))
                       {                        
                         $de = array(
-                          'receive_code' => $code,
+                          'receive_code' => $ds->code,
                           'po_code' => $rs->po_code,
                           'po_ref' => $ds->po_ref,
                           'po_detail_id' => $rs->po_detail_id,
