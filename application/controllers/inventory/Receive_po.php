@@ -958,6 +958,7 @@ class Receive_po extends PS_Controller
   public function save()
   {
     $sc = TRUE;
+    $ex = 0;
     $ds = json_decode($this->input->post('data'));
 
     if( ! empty($ds))
@@ -1055,7 +1056,7 @@ class Receive_po extends PS_Controller
 
                         if($sc === TRUE)
                         {
-                          if($ds->save_type == '1')
+                          if($ds->save_type == 'C')
                           {
                             //--- update stock
                             if( ! $this->stock_model->update_stock_zone($zone->code, $rs->product_code, $rs->qty))
@@ -1134,7 +1135,7 @@ class Receive_po extends PS_Controller
 
               if($sc === TRUE)
               {
-                if($ds->save_type == '1')
+                if($ds->save_type == 'C')
                 {
                   if(is_true(getConfig('NS_GRPO_INTERFACE')))
                   {
@@ -1142,7 +1143,7 @@ class Receive_po extends PS_Controller
 
                     if( ! $this->ns_ib_api->export_receive_po($ds->code))
                     {
-                      $sc = FALSE;
+                      $ex = 1;
                       $this->error = $this->ns_ib_api->error;
                     }
                   }
@@ -1174,7 +1175,14 @@ class Receive_po extends PS_Controller
       set_error('required');
     }
 
-    $this->_response($sc);
+    $arr = array(
+      'status' => $sc === TRUE ? 'success' : 'failed',
+      'message' => $sc === TRUE ? ($ex == 1 ? $this->error : 'success') : $this->error,
+      'code' => $sc === TRUE ? $code : NULL,
+      'ex' => $ex
+    );
+
+    echo json_encode($arr);
   }
 
 
@@ -1911,7 +1919,7 @@ class Receive_po extends PS_Controller
 
     $arr = array(
       'status' => $sc === TRUE ? 'success' : 'failed',
-      'message' => $sc === TRUE ? 'success' : $this->error,
+      'message' => $sc === TRUE ? ($ex == 1 ? $this->error : 'success') : $this->error,
       'code' => $sc === TRUE ? $code : NULL,
       'ex' => $ex
     );
