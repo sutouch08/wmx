@@ -984,9 +984,7 @@ class Receive_po extends PS_Controller
             $remark = get_null(trim($ds->remark));
 
             if($sc === TRUE)
-            {
-              $approver = get_null($ds->approver);
-
+            {              
               $arr = array(
                 'date_add' => $date_add,
                 'shipped_date' => $movement_date,
@@ -997,9 +995,9 @@ class Receive_po extends PS_Controller
                 'invoice_code' => $ds->invoice,
                 'zone_code' => $zone->code,
                 'warehouse_code' => $zone->warehouse_code,
-                'update_user' => $this->_user->uname,
-                'approver' => $ds->approver,
-                'status' => $ds->save_type == '0' ? 'P' : ($ds->save_type == '3' ? 'O' : 'C')
+                'update_user' => $this->_user->uname,               
+                'status' => $ds->save_type,
+                'remark' => $remark
               );
 
               $this->db->trans_begin();
@@ -1030,9 +1028,9 @@ class Receive_po extends PS_Controller
                       $po_detail = $this->po_model->get_detail($rs->po_detail_id);
 
                       if( ! empty($po_detail))
-                      {
+                      {                        
                         $de = array(
-                          'receive_code' => $ds->code,
+                          'receive_code' => $code,
                           'po_code' => $rs->po_code,
                           'po_ref' => $ds->po_ref,
                           'po_detail_id' => $rs->po_detail_id,
@@ -1042,9 +1040,9 @@ class Receive_po extends PS_Controller
                           'product_name' => $rs->product_name,
                           'unit' => $rs->unit,
                           'qty' => $rs->qty,
-                          'receive_qty' => $ds->save_type == '1' ? $rs->qty : 0,
-                          'valid' => $ds->save_type == '1' ? 1 : 0,
-                          'line_status' => $ds->save_type == '1' ? 'C' : 'O',
+                          'receive_qty' => $ds->save_type == 'C' ? $rs->qty : 0,
+                          'valid' => $ds->save_type == 'C' ? 1 : 0,
+                          'line_status' => $ds->save_type == 'C' ? 'C' : 'O',
                           'update_user' => $this->_user->uname
                         );
 
