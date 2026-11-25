@@ -655,7 +655,7 @@ class Return_order extends PS_Controller
             if($sc === TRUE)
             {
               //--- set details to cancle
-              if( ! $this->return_order_model->update_details($code, array('is_cancle' => 1)))
+              if( ! $this->return_order_model->update_details($code, array('line_status' => 'D')))
               {
                 $sc = FALSE;
                 $this->error = "เปลี่ยนสถานะรายการไม่สำเร็จ";
@@ -665,7 +665,7 @@ class Return_order extends PS_Controller
             if($sc === TRUE)
             {
               $arr = array(
-                'status' => 2,
+                'status' => 'D',
                 'is_approve' => 0,
                 'approver' => NULL,
                 'is_complete' => 0,

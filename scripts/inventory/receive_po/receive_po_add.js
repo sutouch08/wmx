@@ -292,7 +292,7 @@ function save(type) {
 		load_in();
 
 		$.ajax({
-			url:HOME + 'add',
+			url:HOME + 'save',
 			type:'POST',
 			cache:false,
 			data:{
