@@ -602,7 +602,7 @@ class Return_order extends PS_Controller
 
 			if( ! empty($doc))
 			{
-				if($doc->status != 2)
+				if($doc->status != 'D')
 				{
           $this->load->model('stock/stock_model');
           $this->load->model('inventory/movement_model');
