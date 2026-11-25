@@ -1178,7 +1178,7 @@ class Receive_po extends PS_Controller
     $arr = array(
       'status' => $sc === TRUE ? 'success' : 'failed',
       'message' => $sc === TRUE ? ($ex == 1 ? $this->error : 'success') : $this->error,
-      'code' => $sc === TRUE ? $code : NULL,
+      'code' => $sc === TRUE ? $ds->code : NULL,
       'ex' => $ex
     );
 
